@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using TMPro;
-//using Newtonsoft.Json;
 using System.Collections.Generic;
 
 
@@ -26,6 +25,8 @@ public class MainScene : MonoBehaviour
 
     public ViewActorAction _viewActorAction;
 
+    public HomePlayerInput _homePlayerInput;
+
 
     void Start()
     {
@@ -36,12 +37,14 @@ public class MainScene : MonoBehaviour
         Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
         Debug.Assert(_viewDungeonController != null, "_viewDungeonController is null");
         Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
+        Debug.Assert(_homePlayerInput != null, "_homePlayerInput is null");
 
         // 启动的时候，第一次显示内容。
         UpdatePlayerControlText();
 
         // 先关了
         _viewDungeonController.gameObject.SetActive(false);
+        _homePlayerInput.gameObject.SetActive(false);
     }
 
     private void UpdatePlayerControlText()
@@ -94,6 +97,12 @@ public class MainScene : MonoBehaviour
     {
         Debug.Log("OnClickViewActor");
         StartCoroutine(ExecuteViewActor());
+    }
+
+    public void OnClickOpenHomePlayerInput()
+    {
+        Debug.Log("OnClickOpenHomePlayerInput");
+        _homePlayerInput.OnClickOpen();
     }
 
     IEnumerator ReturnToLoginScene()

@@ -7,6 +7,5 @@ public class GameConfig : ScriptableObject
     public string GameName;
     public string ActorName;
     public string apiEndPoints;
-
-   
+    public string AllyName;
 }

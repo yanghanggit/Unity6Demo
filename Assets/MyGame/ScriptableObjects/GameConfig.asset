@@ -16,3 +16,4 @@ MonoBehaviour:
   GameName: Game1
   ActorName: "\u89D2\u8272.\u6218\u58EB.\u5361\u6069"
   apiEndPoints: http://127.0.0.1:8000/api_endpoints/v1/
+  AllyName: "\u89D2\u8272.\u6CD5\u5E08.\u5965\u9732\u5A1C"
