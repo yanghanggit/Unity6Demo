@@ -86,11 +86,18 @@ public class StartResponse
  * Player request/response classes.
  */
 [System.Serializable]
+public class HomeGamePlayUserInput
+{
+    public string tag = "";
+    public Dictionary<string, string> data = new Dictionary<string, string>();
+}
+
+[System.Serializable]
 public class HomeGamePlayRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public string user_input = "";
+    public HomeGamePlayUserInput user_input = new HomeGamePlayUserInput();
 }
 
 
@@ -136,9 +143,6 @@ public class DungeonTransHomeResponse
     public int error = 0;
     public string message = "";
 }
-
-
-
 
 /**
 * Dungeon run request/response classes.

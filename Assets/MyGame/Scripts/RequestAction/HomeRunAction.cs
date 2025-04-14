@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 public class HomeRunAction : RequestAction
 {
@@ -14,7 +15,7 @@ public class HomeRunAction : RequestAction
 
     }
 
-    public IEnumerator Request(string url, string user, string game, string userInput)
+    public IEnumerator Request(string url, string user, string game, string userInputTag, Dictionary<string, string> data)
     {
         Debug.Log("HomeRunAction url= " + url);
 
@@ -22,7 +23,7 @@ public class HomeRunAction : RequestAction
         Reset();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new HomeGamePlayRequest { user_name = user, game_name = game, user_input = userInput });
+        var jsonData = JsonConvert.SerializeObject(new HomeGamePlayRequest { user_name = user, game_name = game, user_input = new HomeGamePlayUserInput { tag = userInputTag, data = data } });
         yield return PostRequest(url, jsonData);
 
         var response = JsonConvert.DeserializeObject<HomeGamePlayResponse>(DownloadHandlerResponseText);

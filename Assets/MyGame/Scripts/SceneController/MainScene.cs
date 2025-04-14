@@ -75,7 +75,7 @@ public class MainScene : MonoBehaviour
         Debug.Log("OnClickHomeRun");
         _mainText.text = "服务器正在运行，请等待！";
         GameContext.Instance.AgentEventLogs.Clear();
-        StartCoroutine(ExecuteHomeAction());
+        StartCoroutine(ExecuteHomeGameplayAdvancing());
     }
 
     public void OnClickViewDungeon()
@@ -116,14 +116,9 @@ public class MainScene : MonoBehaviour
         SceneManager.LoadScene(_preScene);
     }
 
-    IEnumerator ExecuteHomeAction()
+    IEnumerator ExecuteHomeGameplayAdvancing()
     {
-        if (_homeRunAction == null)
-        {
-            Debug.LogError("RunHomeAction is null");
-            yield break;
-        }
-        yield return StartCoroutine(_homeRunAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "hello world"));
+        yield return StartCoroutine(_homeRunAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/advancing", new Dictionary<string, string>()));
         if (!_homeRunAction.Success)
         {
             Debug.LogError("RunHomeAction request failed");
