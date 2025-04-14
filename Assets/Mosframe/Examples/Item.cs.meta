@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 2c4e7f2281b324cf8a299ca3463d6426
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 101107
+  packageName: Dynamic ScrollView
+  packageVersion: 1.4
+  assetPath: Assets/Mosframe/Examples/Item.cs
+  uploadId: 291430

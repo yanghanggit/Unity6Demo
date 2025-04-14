@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5b82c66d5c9db90489bbf92d146c4b36
+timeCreated: 1507980306
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 101107
+  packageName: Dynamic ScrollView
+  packageVersion: 1.4
+  assetPath: Assets/Mosframe/Readme.txt
+  uploadId: 291430

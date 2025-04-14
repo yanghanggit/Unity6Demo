@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 564c083b4509d3849b81504543720043
+timeCreated: 1506410941
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 101107
+  packageName: Dynamic ScrollView
+  packageVersion: 1.4
+  assetPath: Assets/Mosframe/Extensions/RectTransformEx.cs
+  uploadId: 291430
