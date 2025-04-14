@@ -187,6 +187,7 @@ public class DungeonScene : MonoBehaviour
 
         Debug.Log("ExecuteAdvanceNextDungeon request success");
         UpdateTextFromAgentLogs();
+        _mainText.text = _mainText.text + "\n" + _dungeonRunAction._message;
     }
 
     private IEnumerator ExecuteBackHome()
