@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 public class DungeonRunAction : RequestAction
 {
@@ -16,7 +17,7 @@ public class DungeonRunAction : RequestAction
 
     }
 
-    public IEnumerator Request(string url, string user, string game, string userInputTag)
+    public IEnumerator Request(string url, string user, string game, string userInputTag, Dictionary<string, string> data)
     {
         Debug.Log("DungeonRunAction url= " + url);
 
@@ -24,7 +25,7 @@ public class DungeonRunAction : RequestAction
         Reset();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new DungeonGamePlayRequest { user_name = user, game_name = game, user_input = new DungeonGamePlayUserInput { tag = userInputTag } });
+        var jsonData = JsonConvert.SerializeObject(new DungeonGamePlayRequest { user_name = user, game_name = game, user_input = new DungeonGamePlayUserInput { tag = userInputTag, data = data } });
         yield return PostRequest(url, jsonData);
 
         var response = JsonConvert.DeserializeObject<DungeonGamePlayResponse>(DownloadHandlerResponseText);

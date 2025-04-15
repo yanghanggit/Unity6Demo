@@ -4,6 +4,7 @@ using System.Collections;
 //using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using Unity.Android.Gradle.Manifest;
 
 public class DungeonScene : MonoBehaviour
 {
@@ -19,6 +20,8 @@ public class DungeonScene : MonoBehaviour
 
     public TransHomeAction _transHomeAction;
 
+    public XCardPlayer _XCardPlayer;
+
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
@@ -26,6 +29,7 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
         Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
+        Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         StartCoroutine(ExecuteViewDungeon());
     }
 
@@ -83,9 +87,16 @@ public class DungeonScene : MonoBehaviour
         StartCoroutine(ExecuteBackHome());
     }
 
+
+    public void OnClickXCard()
+    {
+        Debug.Log("OnClickXCard");
+        StartCoroutine(ExecuteXCard());
+    }
+
     private IEnumerator ExecuteDungeonCombatKickOff()
     {
-        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "dungeon_combat_kick_off"));
+        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "dungeon_combat_kick_off", new Dictionary<string, string>()));
         if (!_dungeonRunAction.Success)
         {
             Debug.LogError("DungeonAction request failed");
@@ -98,7 +109,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteDungeonCombatNewRound()
     {
-        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "new_round"));
+        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "new_round", new Dictionary<string, string>()));
         if (!_dungeonRunAction.Success)
         {
             Debug.LogError("ExecuteDungeonCombatNewRound request failed");
@@ -111,7 +122,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteDrawCards()
     {
-        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "draw_cards"));
+        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "draw_cards", new Dictionary<string, string>()));
         if (!_dungeonRunAction.Success)
         {
             Debug.LogError("ExecuteDrawCards request failed");
@@ -135,7 +146,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecutePlayCards()
     {
-        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "play_cards"));
+        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "play_cards", new Dictionary<string, string>()));
         if (!_dungeonRunAction.Success)
         {
             Debug.LogError("ExecutePlayCards request failed");
@@ -144,6 +155,24 @@ public class DungeonScene : MonoBehaviour
 
         Debug.Log("ExecutePlayCards request success");
         UpdateTextFromAgentLogs();
+    }
+
+    private IEnumerator ExecuteXCard()
+    {
+        Dictionary<string, string> data = new Dictionary<string, string>();
+        data["name"] = _XCardPlayer.Name;
+        data["description"] = _XCardPlayer.Description;
+        data["effect"] = _XCardPlayer.Effect;
+
+
+        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "x_card", data));
+        if (!_dungeonRunAction.Success)
+        {
+            Debug.LogError("ExecuteXCard request failed");
+            yield break;
+        }
+
+        Debug.Log("ExecuteXCard request success");
     }
 
     private IEnumerator ExecuteViewDungeon()
@@ -178,7 +207,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteAdvanceNextDungeon()
     {
-        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "advance_next_dungeon"));
+        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "advance_next_dungeon", new Dictionary<string, string>()));
         if (!_dungeonRunAction.Success)
         {
             Debug.LogError("ExecuteAdvanceNextDungeon request failed");
@@ -201,7 +230,7 @@ public class DungeonScene : MonoBehaviour
         }
         Debug.Log("TransHomeAction request success");
         yield return new WaitForSeconds(0);
-        SceneManager.LoadScene(_preScene); 
+        SceneManager.LoadScene(_preScene);
     }
 
     private void UpdateActorDisplay(HashSet<string> includedComponentNames = null)

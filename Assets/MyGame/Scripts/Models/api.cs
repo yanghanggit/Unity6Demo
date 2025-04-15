@@ -152,6 +152,8 @@ public class DungeonTransHomeResponse
 public class DungeonGamePlayUserInput
 {
     public string tag = "";
+
+    public Dictionary<string, string> data = new Dictionary<string, string>();
 }
 
 
