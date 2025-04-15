@@ -1,10 +1,8 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
-//using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using Unity.Android.Gradle.Manifest;
 
 public class DungeonScene : MonoBehaviour
 {
@@ -92,6 +90,12 @@ public class DungeonScene : MonoBehaviour
     {
         Debug.Log("OnClickXCard");
         StartCoroutine(ExecuteXCard());
+    }
+
+    public void OnClickCombatComplete()
+    {
+        Debug.Log("OnClickCombatComplete");
+        StartCoroutine(ExecuteCombatComplete());
     }
 
     private IEnumerator ExecuteDungeonCombatKickOff()
@@ -231,6 +235,20 @@ public class DungeonScene : MonoBehaviour
         Debug.Log("TransHomeAction request success");
         yield return new WaitForSeconds(0);
         SceneManager.LoadScene(_preScene);
+    }
+
+
+    private IEnumerator ExecuteCombatComplete()
+    {
+        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "dungeon_combat_complete", new Dictionary<string, string>()));
+        if (!_dungeonRunAction.Success)
+        {
+            Debug.LogError("ExecuteCombatComplete request failed");
+            yield break;
+        }
+
+        Debug.Log("ExecuteCombatComplete request success");
+        UpdateTextFromAgentLogs();
     }
 
     private void UpdateActorDisplay(HashSet<string> includedComponentNames = null)
