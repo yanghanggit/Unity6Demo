@@ -539,7 +539,7 @@ GameObject:
   - component: {fileID: 120688033}
   - component: {fileID: 120688032}
   m_Layer: 5
-  m_Name: Button3
+  m_Name: Button4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1735,7 +1735,7 @@ GameObject:
   - component: {fileID: 503199526}
   - component: {fileID: 503199525}
   m_Layer: 5
-  m_Name: Button4
+  m_Name: Button3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2018,6 +2018,7 @@ MonoBehaviour:
   _inputField: {fileID: 728547886}
   _homeRunAction: {fileID: 536992871}
   _gameConfig: {fileID: 11400000, guid: 54707035bd7b4439aa2c9b6d574b5a61, type: 2}
+  _mainSceneController: {fileID: 399892901}
 --- !u!114 &536992871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2286,7 +2287,7 @@ GameObject:
   - component: {fileID: 706660468}
   - component: {fileID: 706660467}
   m_Layer: 5
-  m_Name: Button6
+  m_Name: Button5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3517,7 +3518,7 @@ GameObject:
   - component: {fileID: 1265797233}
   - component: {fileID: 1265797232}
   m_Layer: 5
-  m_Name: Button5
+  m_Name: Button6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5149,10 +5150,10 @@ RectTransform:
   m_Children:
   - {fileID: 402107906}
   - {fileID: 2001131517}
-  - {fileID: 120688031}
   - {fileID: 503199524}
-  - {fileID: 1265797231}
+  - {fileID: 120688031}
   - {fileID: 706660466}
+  - {fileID: 1265797231}
   m_Father: {fileID: 1989299722}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

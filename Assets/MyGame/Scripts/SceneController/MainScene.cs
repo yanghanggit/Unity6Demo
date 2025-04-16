@@ -52,7 +52,7 @@ public class MainScene : MonoBehaviour
         _mainText.text = "玩家控制角色: " + GameContext.Instance.ActorName + "\n";
     }
 
-    private void UpdateTextFromAgentLogs()
+    public void UpdateTextFromAgentLogs()
     {
         _mainText.text = MyUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
     }
@@ -77,7 +77,6 @@ public class MainScene : MonoBehaviour
     {
         Debug.Log("OnClickHomeRun");
         _mainText.text = "服务器正在运行，请等待！";
-        GameContext.Instance.AgentEventLogs.Clear();
         StartCoroutine(ExecuteHomeGameplayAdvancing());
     }
 

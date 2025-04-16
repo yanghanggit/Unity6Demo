@@ -13,12 +13,15 @@ public class HomePlayerInput : MonoBehaviour
 
     public GameConfig _gameConfig;
 
+    public MainScene _mainSceneController;
+
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_inputField != null, "_inputField is null");
         Debug.Assert(_homeRunAction != null, "_homeRunAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
+        Debug.Assert(_mainSceneController != null, "_mainSceneController is null");
     }
 
     void Update()
@@ -78,7 +81,6 @@ public class HomePlayerInput : MonoBehaviour
     {
         Debug.Log("OnClickHomeGameplayAdvancing");
         _mainText.text = "服务器正在运行，请等待！";
-        GameContext.Instance.AgentEventLogs.Clear();
         StartCoroutine(ExecuteHomeGameplayAdvancing());
     }
 
@@ -114,5 +116,9 @@ public class HomePlayerInput : MonoBehaviour
     private void UpdateTextFromAgentLogs()
     {
         _mainText.text = MyUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
+        if (_mainSceneController != null)
+        {
+            _mainSceneController.UpdateTextFromAgentLogs();
+        }
     }
 }
