@@ -13,10 +13,20 @@ using System.Collections.Generic;
 // # play_card
 // # draw_card
 [System.Serializable]
+public class HandDetail
+{
+    public string skill = "";
+    public List<string> targets = new List<string>();
+    public string reason = "";
+    public string dialogue = "";
+}
+
+[System.Serializable]
 public class HandComponent
 {
     public string name = "";
     public List<Skill> skills = new List<Skill>();
+    public List<HandDetail> details = new List<HandDetail>();
 }
 
 /**
@@ -29,4 +39,3 @@ public class RPGCharacterProfileComponent
     public RPGCharacterProfile rpg_character_profile = new RPGCharacterProfile();
     public List<StatusEffect> status_effects = new List<StatusEffect>();
 }
-    

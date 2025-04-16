@@ -122,7 +122,7 @@ public static class MyUtils
             else if (component.name == typeof(HandComponent).Name)
             {
                 var handComponent = JsonConvert.DeserializeObject<HandComponent>(JsonConvert.SerializeObject(component.data));
-                var handCompText = $"{actorSnapshot.name} = Hand: ";
+                var handCompText = $"{actorSnapshot.name} Hand: ";
                 for (int j = 0; j < handComponent.skills.Count; j++)
                 {
                     var skill = handComponent.skills[j];
@@ -131,6 +131,12 @@ public static class MyUtils
                     {
                         handCompText += ", ";
                     }
+                }
+                handCompText += "\n";
+                for (int j = 0; j < handComponent.details.Count; j++)
+                {
+                    var detail = handComponent.details[j];
+                    handCompText += $"Skill: {detail.skill}, Targets: {string.Join(", ", detail.targets)}\n";
                 }
                 ret += handCompText + "\n";
             }
