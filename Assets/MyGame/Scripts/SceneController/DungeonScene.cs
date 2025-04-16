@@ -58,7 +58,7 @@ public class DungeonScene : MonoBehaviour
     public void OnClickNewRound()
     {
         Debug.Log("OnClickNewRound");
-        StartCoroutine(ExecuteDungeonCombatNewRound());
+        //StartCoroutine(ExecuteDungeonCombatNewRound());
     }
 
     public void OnClickDrawCards()
@@ -111,18 +111,18 @@ public class DungeonScene : MonoBehaviour
         UpdateTextFromAgentLogs();
     }
 
-    private IEnumerator ExecuteDungeonCombatNewRound()
-    {
-        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "new_round", new Dictionary<string, string>()));
-        if (!_dungeonRunAction.Success)
-        {
-            Debug.LogError("ExecuteDungeonCombatNewRound request failed");
-            yield break;
-        }
+    // private IEnumerator ExecuteDungeonCombatNewRound()
+    // {
+    //     yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "new_round", new Dictionary<string, string>()));
+    //     if (!_dungeonRunAction.Success)
+    //     {
+    //         Debug.LogError("ExecuteDungeonCombatNewRound request failed");
+    //         yield break;
+    //     }
 
-        Debug.Log("ExecuteDungeonCombatNewRound request success");
-        _mainText.text = _dungeonRunAction._message;
-    }
+    //     Debug.Log("ExecuteDungeonCombatNewRound request success");
+    //     _mainText.text = _dungeonRunAction._message;
+    // }
 
     private IEnumerator ExecuteDrawCards()
     {
