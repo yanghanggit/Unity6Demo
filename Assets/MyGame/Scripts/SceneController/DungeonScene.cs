@@ -20,6 +20,8 @@ public class DungeonScene : MonoBehaviour
 
     public XCardPlayer _XCardPlayer;
 
+    public XCardEditor _XCardEditor;
+
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
@@ -28,6 +30,9 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
+        Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
+
+        _XCardEditor.gameObject.SetActive(false);
         StartCoroutine(ExecuteViewDungeon());
     }
 
@@ -53,12 +58,6 @@ public class DungeonScene : MonoBehaviour
     {
         Debug.Log("OnClickViewActor");
         StartCoroutine(ExecuteViewActor());
-    }
-
-    public void OnClickNewRound()
-    {
-        Debug.Log("OnClickNewRound");
-        //StartCoroutine(ExecuteDungeonCombatNewRound());
     }
 
     public void OnClickDrawCards()
@@ -89,7 +88,7 @@ public class DungeonScene : MonoBehaviour
     public void OnClickXCard()
     {
         Debug.Log("OnClickXCard");
-        StartCoroutine(ExecuteXCard());
+        _XCardEditor.gameObject.SetActive(true);
     }
 
     public void OnClickCombatComplete()
@@ -110,19 +109,6 @@ public class DungeonScene : MonoBehaviour
         Debug.Log("DungeonAction request success");
         UpdateTextFromAgentLogs();
     }
-
-    // private IEnumerator ExecuteDungeonCombatNewRound()
-    // {
-    //     yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "new_round", new Dictionary<string, string>()));
-    //     if (!_dungeonRunAction.Success)
-    //     {
-    //         Debug.LogError("ExecuteDungeonCombatNewRound request failed");
-    //         yield break;
-    //     }
-
-    //     Debug.Log("ExecuteDungeonCombatNewRound request success");
-    //     _mainText.text = _dungeonRunAction._message;
-    // }
 
     private IEnumerator ExecuteDrawCards()
     {
@@ -159,24 +145,6 @@ public class DungeonScene : MonoBehaviour
 
         Debug.Log("ExecutePlayCards request success");
         UpdateTextFromAgentLogs();
-    }
-
-    private IEnumerator ExecuteXCard()
-    {
-        Dictionary<string, string> data = new Dictionary<string, string>();
-        data["name"] = _XCardPlayer.Name;
-        data["description"] = _XCardPlayer.Description;
-        data["effect"] = _XCardPlayer.Effect;
-
-
-        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "x_card", data));
-        if (!_dungeonRunAction.Success)
-        {
-            Debug.LogError("ExecuteXCard request failed");
-            yield break;
-        }
-
-        Debug.Log("ExecuteXCard request success");
     }
 
     private IEnumerator ExecuteViewDungeon()
