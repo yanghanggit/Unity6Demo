@@ -1258,7 +1258,7 @@ MonoBehaviour:
   _nextScene: DungeonScene
   _mainText: {fileID: 129710570}
   _logoutAction: {fileID: 399892902}
-  _homeRunAction: {fileID: 399892903}
+  _homeGamePlayAction: {fileID: 399892903}
   _viewHomeAction: {fileID: 399892907}
   _viewDungeonAction: {fileID: 399892906}
   _viewDungeonController: {fileID: 636120975}
@@ -2016,7 +2016,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _mainText: {fileID: 1879918502}
   _inputField: {fileID: 728547886}
-  _homeRunAction: {fileID: 536992871}
+  _homeGamePlayAction: {fileID: 536992871}
   _gameConfig: {fileID: 11400000, guid: 54707035bd7b4439aa2c9b6d574b5a61, type: 2}
   _mainSceneController: {fileID: 399892901}
 --- !u!114 &536992871

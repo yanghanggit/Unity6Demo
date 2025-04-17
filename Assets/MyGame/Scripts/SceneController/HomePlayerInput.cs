@@ -9,7 +9,7 @@ public class HomePlayerInput : MonoBehaviour
 
     public TMP_InputField _inputField;
 
-    public HomeRunAction _homeRunAction;
+    public HomeGamePlayAction _homeGamePlayAction;
 
     public GameConfig _gameConfig;
 
@@ -19,7 +19,7 @@ public class HomePlayerInput : MonoBehaviour
     {
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_inputField != null, "_inputField is null");
-        Debug.Assert(_homeRunAction != null, "_homeRunAction is null");
+        Debug.Assert(_homeGamePlayAction != null, "_homeRunAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
         Debug.Assert(_mainSceneController != null, "_mainSceneController is null");
     }
@@ -91,8 +91,8 @@ public class HomePlayerInput : MonoBehaviour
         player_input_data["target"] = target;
         player_input_data["content"] = content;
 
-        yield return StartCoroutine(_homeRunAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/speak", player_input_data));
-        if (!_homeRunAction.Success)
+        yield return StartCoroutine(_homeGamePlayAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/speak", player_input_data));
+        if (!_homeGamePlayAction.Success)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
@@ -103,8 +103,8 @@ public class HomePlayerInput : MonoBehaviour
 
     private IEnumerator ExecuteHomeGameplayAdvancing()
     {
-        yield return StartCoroutine(_homeRunAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/advancing", new Dictionary<string, string>()));
-        if (!_homeRunAction.Success)
+        yield return StartCoroutine(_homeGamePlayAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/advancing", new Dictionary<string, string>()));
+        if (!_homeGamePlayAction.Success)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;

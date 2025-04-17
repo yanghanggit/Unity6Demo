@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using Newtonsoft.Json;
 
-public class BootAction : RequestAction
+public class ApiEndpointConfigurationAction : RequestAction
 {
     void Start()
     {

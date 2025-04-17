@@ -1329,7 +1329,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _preScene: MainScene
   _mainText: {fileID: 129710570}
-  _dungeonRunAction: {fileID: 399892903}
+  _dungeonGamePlayAction: {fileID: 399892903}
   _viewDungeonAction: {fileID: 399892904}
   _viewActorAction: {fileID: 399892905}
   _transHomeAction: {fileID: 399892906}
@@ -2912,7 +2912,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 141f82a27395e4be89d8830df5cfa7e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dungeonRunAction: {fileID: 1254172619}
+  _dungeonGamePlayAction: {fileID: 1254172619}
   _xCardPlayer: {fileID: 11400000, guid: 3199971a30b1d4064a76867ed8c535f4, type: 2}
   _editNameInputField: {fileID: 1567492659}
   _editDescriptionInputField: {fileID: 1985376720}

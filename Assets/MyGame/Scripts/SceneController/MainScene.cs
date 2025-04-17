@@ -15,7 +15,7 @@ public class MainScene : MonoBehaviour
 
     public LogoutAction _logoutAction;
 
-    public HomeRunAction _homeRunAction;
+    public HomeGamePlayAction _homeGamePlayAction;
 
     public ViewHomeAction _viewHomeAction;
 
@@ -32,7 +32,7 @@ public class MainScene : MonoBehaviour
     {
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_logoutAction != null, "_logoutAction is null");
-        Debug.Assert(_homeRunAction != null, "_homeAction is null");
+        Debug.Assert(_homeGamePlayAction != null, "_homeAction is null");
         Debug.Assert(_viewHomeAction != null, "_viewHomeAction is null");
         Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
         Debug.Assert(_viewDungeonController != null, "_viewDungeonController is null");
@@ -126,8 +126,8 @@ public class MainScene : MonoBehaviour
 
     IEnumerator ExecuteHomeGameplayAdvancing()
     {
-        yield return StartCoroutine(_homeRunAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/advancing", new Dictionary<string, string>()));
-        if (!_homeRunAction.Success)
+        yield return StartCoroutine(_homeGamePlayAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/advancing", new Dictionary<string, string>()));
+        if (!_homeGamePlayAction.Success)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;

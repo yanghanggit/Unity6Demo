@@ -379,7 +379,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _nextScene: LoginScene
-  _bootAction: {fileID: 399892902}
+  _apiEndpointConfigurationAction: {fileID: 399892902}
   _gameConfig: {fileID: 11400000, guid: 54707035bd7b4439aa2c9b6d574b5a61, type: 2}
   _mainText: {fileID: 469717806}
 --- !u!114 &399892902

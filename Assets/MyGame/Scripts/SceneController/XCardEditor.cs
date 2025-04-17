@@ -10,7 +10,7 @@ using System.Collections;
 
 public class XCardEditor : MonoBehaviour
 {
-    public DungeonRunAction _dungeonRunAction;
+    public DungeonGamePlayAction _dungeonGamePlayAction;
     public XCardPlayer _xCardPlayer;
     public TMP_InputField _editNameInputField;
     public TMP_InputField _editDescriptionInputField;
@@ -22,7 +22,7 @@ public class XCardEditor : MonoBehaviour
         Debug.Assert(_editNameInputField != null, "_editNameInputField is null");
         Debug.Assert(_editDescriptionInputField != null, "_editDescriptionInputField is null");
         Debug.Assert(_editEffectInputField != null, "_editEffectInputField is null");
-        Debug.Assert(_dungeonRunAction != null, "_dungeonRunAction is null");
+        Debug.Assert(_dungeonGamePlayAction != null, "_dungeonRunAction is null");
     }
 
     void OnEnable()
@@ -71,8 +71,8 @@ public class XCardEditor : MonoBehaviour
         data["name"] = skillName;
         data["description"] = skillDescription;
         data["effect"] = skillEffect;
-        yield return StartCoroutine(_dungeonRunAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "x_card", data));
-        if (!_dungeonRunAction.Success)
+        yield return StartCoroutine(_dungeonGamePlayAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "x_card", data));
+        if (!_dungeonGamePlayAction.Success)
         {
             Debug.LogError("ExecuteXCard request failed");
             yield break;

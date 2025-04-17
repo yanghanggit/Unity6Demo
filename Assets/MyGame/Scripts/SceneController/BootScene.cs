@@ -8,7 +8,7 @@ public class BootScene : MonoBehaviour
 {
     public string _nextScene = "LoginScene";
 
-    public BootAction _bootAction;
+    public ApiEndpointConfigurationAction _apiEndpointConfigurationAction;
 
     public GameConfig _gameConfig;
 
@@ -18,10 +18,10 @@ public class BootScene : MonoBehaviour
 
     void Start()
     {
-        Debug.Assert(_bootAction != null, "_bootAction is null");
+        Debug.Assert(_apiEndpointConfigurationAction != null, "_bootAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
         Debug.Assert(_mainText != null, "_mainText is null");
-        StartCoroutine(InitializeAndLoadAPIRoutes());
+        StartCoroutine(ConfigureAndLoadApiEndpoints());
     }
 
     void Update()
@@ -30,28 +30,28 @@ public class BootScene : MonoBehaviour
 
     public void OnClickStartGame()
     {
-        Debug.Log("OnClickStartGame");
+        //Debug.Log("OnClickStartGame");
         if (!_isInitialized)
         {
             Debug.LogError("Game is not initialized");
             return;
         }
-        Debug.Log("Game is initialized");
+        //Debug.Log("Game is initialized");
         StartCoroutine(NextScene());
     }
 
-    private IEnumerator InitializeAndLoadAPIRoutes()
+    private IEnumerator ConfigureAndLoadApiEndpoints()
     {
-        yield return StartCoroutine(_bootAction.Request(_gameConfig.LocalNet));
-        if (_bootAction.Success)
+        yield return StartCoroutine(_apiEndpointConfigurationAction.Request(_gameConfig.LocalNet));
+        if (_apiEndpointConfigurationAction.Success)
         {
             _isInitialized = true;
             _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);
             yield break;
         }
 
-        yield return StartCoroutine(_bootAction.Request(_gameConfig.LocalHost));
-        if (_bootAction.Success)
+        yield return StartCoroutine(_apiEndpointConfigurationAction.Request(_gameConfig.LocalHost));
+        if (_apiEndpointConfigurationAction.Success)
         {
             _isInitialized = true;
             _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);
