@@ -5,41 +5,36 @@ using System.Collections.Generic;
 
 public class ViewActorAction : RequestAction
 {
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
-    }
-
     public IEnumerator Request(string url, string user, string game, List<string> actors)
     {
-        Debug.Log("ViewActorAction url= " + url);
+        // 重置请求状态。
+        ResetStatus();
 
-        Reset();
-
+        // 创建请求数据。
         var jsonData = JsonConvert.SerializeObject(new ViewActorRequest { user_name = user, game_name = game, actors = actors });
         yield return PostRequest(url, jsonData);
 
+        // 解析响应数据。
         var response = JsonConvert.DeserializeObject<ViewActorResponse>(DownloadHandlerResponseText);
         if (response == null)
         {
-            Debug.LogError("response is null");
+            Debug.LogError("ViewActorAction response is null");
             yield break;
         }
 
         if (response.error != 0)
         {
-            Debug.Log("response.error = " + response.error);
-            Debug.Log("response.message = " + response.message);
+            Debug.LogError("ViewActorAction.error = " + response.error);
+            Debug.LogError("ViewActorAction.message = " + response.message);
             yield break;
         }
 
+        Debug.Log("ViewActorAction.message = " + response.message);
+
         // 标记成功。
-        OnSuccess();
+        MarkRequestAsSuccessful();
+
+        // 更新游戏上下文中的角色快照。
         GameContext.Instance.ActorSnapshots = response.actor_snapshots;
     }
 }

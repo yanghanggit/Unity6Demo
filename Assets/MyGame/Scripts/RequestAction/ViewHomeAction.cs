@@ -5,42 +5,37 @@ using Newtonsoft.Json;
 public class ViewHomeAction : RequestAction
 {
 
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
-    }
-
     public IEnumerator Request(string url, string user, string game)
     {
-        Debug.Log("url= " + url);
-        Reset();
+        // 重置请求状态。
+        ResetStatus();
 
+        // 创建请求数据。
         var jsonData = JsonConvert.SerializeObject(new ViewHomeRequest { user_name = user, game_name = game });
         yield return PostRequest(url, jsonData);
 
+        // 解析响应数据。
         var response = JsonConvert.DeserializeObject<ViewHomeResponse>(DownloadHandlerResponseText);
         if (response == null)
         {
-            Debug.LogError("response is null");
+            Debug.LogError("ViewHomeAction response is null");
             yield break;
         }
 
+        // 检查响应数据。
         if (response.error != 0)
         {
-            Debug.Log("response.error = " + response.error);
-            Debug.Log("response.message = " + response.message);
+            Debug.LogError("ViewHomeAction.error = " + response.error);
+            Debug.LogError("ViewHomeAction.message = " + response.message);
             yield break;
         }
 
+        Debug.Log("ViewHomeAction.message = " + response.message);
+
         // 标记成功。
-        OnSuccess();
-        Debug.Log("ViewHomeAction is success!!!! = " + response.message);
+        MarkRequestAsSuccessful();
+
+        // 设置游戏上下文。
         GameContext.Instance.Mapping = response.mapping;
-        Debug.Log("ViewHomeAction mapping is success!!!! = " + JsonConvert.SerializeObject(GameContext.Instance.Mapping));
     }
 }

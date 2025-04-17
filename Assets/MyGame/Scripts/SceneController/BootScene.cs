@@ -43,7 +43,7 @@ public class BootScene : MonoBehaviour
     private IEnumerator ConfigureAndLoadApiEndpoints()
     {
         yield return StartCoroutine(_apiEndpointConfigurationAction.Request(_gameConfig.LocalNet));
-        if (_apiEndpointConfigurationAction.Success)
+        if (_apiEndpointConfigurationAction.RequestSuccess)
         {
             _isInitialized = true;
             _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);
@@ -51,7 +51,7 @@ public class BootScene : MonoBehaviour
         }
 
         yield return StartCoroutine(_apiEndpointConfigurationAction.Request(_gameConfig.LocalHost));
-        if (_apiEndpointConfigurationAction.Success)
+        if (_apiEndpointConfigurationAction.RequestSuccess)
         {
             _isInitialized = true;
             _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);

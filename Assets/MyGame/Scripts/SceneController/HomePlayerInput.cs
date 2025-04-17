@@ -92,7 +92,7 @@ public class HomePlayerInput : MonoBehaviour
         player_input_data["content"] = content;
 
         yield return StartCoroutine(_homeGamePlayAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/speak", player_input_data));
-        if (!_homeGamePlayAction.Success)
+        if (!_homeGamePlayAction.RequestSuccess)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
@@ -104,7 +104,7 @@ public class HomePlayerInput : MonoBehaviour
     private IEnumerator ExecuteHomeGameplayAdvancing()
     {
         yield return StartCoroutine(_homeGamePlayAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/advancing", new Dictionary<string, string>()));
-        if (!_homeGamePlayAction.Success)
+        if (!_homeGamePlayAction.RequestSuccess)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;

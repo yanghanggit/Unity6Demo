@@ -4,45 +4,38 @@ using Newtonsoft.Json;
 
 public class ApiEndpointConfigurationAction : RequestAction
 {
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
-    }
-
     public IEnumerator Request(string url)
     {
-        Debug.Log("BootAction url= " + url);
-
         // 重置请求状态。
-        Reset();
+        ResetStatus();
 
         // 创建请求数据。
         var jsonData = JsonConvert.SerializeObject(new APIEndpointConfigurationRequest());
         yield return PostRequest(url, jsonData);
 
-        Debug.Log("request.downloadHandler.text = " + DownloadHandlerResponseText);
+        // 解析响应数据。
         var response = JsonConvert.DeserializeObject<APIEndpointConfigurationResponse>(DownloadHandlerResponseText);
         if (response == null)
         {
-            Debug.LogError("routesConfigurationResponse is null");
+            Debug.LogError("ApiEndpointConfigurationAction:Request response is null");
             yield break;
         }
 
+        // 检查响应数据。
         if (response.error != 0)
         {
-            Debug.Log("loginResponse.error = " + response.error);
-            Debug.Log("loginResponse.message = " + response.message);
+            Debug.LogError("ApiEndpointConfigurationAction.error = " + response.error);
+            Debug.LogError("ApiEndpointConfigurationAction.message = " + response.message);
             yield break;
         }
 
+        //
+        Debug.Log("ApiEndpointConfigurationAction.message = " + response.message);
+
         // 标记成功。
-        OnSuccess();
+        MarkRequestAsSuccessful();
+
+        // 设置 API 端点配置。
         GameContext.Instance.ApiEndpointConfiguration = response.api_endpoints;
-        Debug.Log("APIEndpointConfiguration = " + JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration));
     }
 }

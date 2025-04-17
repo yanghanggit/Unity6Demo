@@ -55,7 +55,7 @@ public class ViewDungeon : MonoBehaviour
             yield break;
         }
         yield return StartCoroutine(_transDungeonAction.Request(GameContext.Instance.HOME_TRANS_DUNGEON_URL, GameContext.Instance.UserName, GameContext.Instance.GameName));
-        if (!_transDungeonAction.Success)
+        if (!_transDungeonAction.RequestSuccess)
         {
             Debug.LogError("TransDungeonAction request failed");
             yield break;

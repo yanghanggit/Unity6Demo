@@ -4,45 +4,37 @@ using Newtonsoft.Json;
 
 public class LogoutAction : RequestAction
 {
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
-    }
-
     public IEnumerator Request(string url, string user, string game)
     {
-        Debug.Log("LogoutAction url= " + url);
-
         // 重置请求状态。
-        Reset();
+        ResetStatus();
 
         // 创建请求数据。
         var jsonData = JsonConvert.SerializeObject(new LogoutRequest { user_name = user, game_name = game });
         yield return PostRequest(url, jsonData);
 
+        // 解析响应数据。
         var response = JsonConvert.DeserializeObject<LogoutResponse>(DownloadHandlerResponseText);
         if (response == null)
         {
-            Debug.LogError("logoutResponse is null");
+            Debug.LogError("LogoutAction response is null");
             yield break;
         }
 
-        Debug.Log("request.downloadHandler.text = " + DownloadHandlerResponseText);
+        // 检查响应数据。
         if (response.error != 0)
         {
-            Debug.Log("logoutResponse.error = " + response.error);
-            Debug.Log("logoutResponse.message = " + response.message);
+            Debug.LogError("LogoutAction.error = " + response.error);
+            Debug.LogError("LogoutAction.message = " + response.message);
             yield break;
         }
 
+        Debug.Log("LogoutAction.message = " + response.message);
+
         // 标记成功。
-        Debug.Log("LogoutResponse is success!!!! = " + response.message + " user_name = " + user + " game_name = " + game);
-        OnSuccess();
+        MarkRequestAsSuccessful();
+
+        // 清除登录信息。
         GameContext.Instance.UserName = "";
         GameContext.Instance.GameName = "";
         GameContext.Instance.ActorName = "";

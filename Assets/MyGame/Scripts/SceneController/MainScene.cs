@@ -115,7 +115,7 @@ public class MainScene : MonoBehaviour
 
         yield return StartCoroutine(_logoutAction.Request(GameContext.Instance.LOGOUT_URL, GameContext.Instance.UserName, GameContext.Instance.GameName));
 
-        if (!_logoutAction.Success)
+        if (!_logoutAction.RequestSuccess)
         {
             Debug.LogError("LogoutAction request failed");
             yield break;
@@ -127,7 +127,7 @@ public class MainScene : MonoBehaviour
     IEnumerator ExecuteHomeGameplayAdvancing()
     {
         yield return StartCoroutine(_homeGamePlayAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/advancing", new Dictionary<string, string>()));
-        if (!_homeGamePlayAction.Success)
+        if (!_homeGamePlayAction.RequestSuccess)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
@@ -144,7 +144,7 @@ public class MainScene : MonoBehaviour
             yield break;
         }
         yield return StartCoroutine(_viewDungeonAction.Request(GameContext.Instance.VIEW_DUNGEON_URL, GameContext.Instance.UserName, GameContext.Instance.GameName));
-        if (!_viewDungeonAction.Success)
+        if (!_viewDungeonAction.RequestSuccess)
         {
             Debug.LogError("ViewDungeonAction request failed");
             yield break;
@@ -162,7 +162,7 @@ public class MainScene : MonoBehaviour
             yield break;
         }
         yield return StartCoroutine(_viewHomeAction.Request(GameContext.Instance.VIEW_HOME_URL, GameContext.Instance.UserName, GameContext.Instance.GameName));
-        if (!_viewHomeAction.Success)
+        if (!_viewHomeAction.RequestSuccess)
         {
             Debug.LogError("ViewHomeAction request failed");
             yield break;
@@ -179,7 +179,7 @@ public class MainScene : MonoBehaviour
             GameContext.Instance.GameName,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
 
-        if (!_viewActorAction.Success)
+        if (!_viewActorAction.RequestSuccess)
         {
             Debug.LogError("ViewActorAction request failed");
             yield break;

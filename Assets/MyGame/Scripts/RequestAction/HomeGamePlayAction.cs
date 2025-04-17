@@ -5,43 +5,37 @@ using System.Collections.Generic;
 
 public class HomeGamePlayAction : RequestAction
 {
-    void Start()
-    {
-
-    }
-
-    void Update()
-    {
-
-    }
 
     public IEnumerator Request(string url, string user, string game, string userInputTag, Dictionary<string, string> data)
     {
-        Debug.Log("HomeRunAction url= " + url);
-
         // 重置请求状态。
-        Reset();
+        ResetStatus();
 
         // 创建请求数据。
         var jsonData = JsonConvert.SerializeObject(new HomeGamePlayRequest { user_name = user, game_name = game, user_input = new HomeGamePlayUserInput { tag = userInputTag, data = data } });
         yield return PostRequest(url, jsonData);
 
+        // 解析响应数据。
         var response = JsonConvert.DeserializeObject<HomeGamePlayResponse>(DownloadHandlerResponseText);
         if (response == null)
         {
-            Debug.LogError("HomeRunAction response is null");
+            Debug.LogError("HomeGamePlayAction response is null");
             yield break;
         }
 
         if (response.error != 0)
         {
-            Debug.Log("HomeRunAction.error = " + response.error);
-            Debug.Log("HomeRunAction.message = " + response.message);
+            Debug.LogError("HomeGamePlayAction.error = " + response.error);
+            Debug.LogError("HomeGamePlayAction.message = " + response.message);
             yield break;
         }
+
+        Debug.Log("HomeGamePlayAction.message = " + response.message);
+
         // 标记成功。
-        Debug.Log("HomeRunAction is success!!!! = " + response.message);
-        OnSuccess();
+        MarkRequestAsSuccessful();
+
+        // 设置游戏状态。
         GameContext.Instance.ProcessClientMessages(response.client_messages);
     }
 }
