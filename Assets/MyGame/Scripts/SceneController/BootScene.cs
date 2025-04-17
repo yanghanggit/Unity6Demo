@@ -42,15 +42,24 @@ public class BootScene : MonoBehaviour
 
     private IEnumerator InitializeAndLoadAPIRoutes()
     {
-        yield return StartCoroutine(_bootAction.Request(_gameConfig.apiEndPoints));
-        if (!_bootAction.Success)
+        yield return StartCoroutine(_bootAction.Request(_gameConfig.LocalNet));
+        if (_bootAction.Success)
         {
-            Debug.LogError("BootAction request failed");
+            _isInitialized = true;
+            _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);
             yield break;
         }
 
-        _isInitialized = true;
-        _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);
+        yield return StartCoroutine(_bootAction.Request(_gameConfig.LocalHost));
+        if (_bootAction.Success)
+        {
+            _isInitialized = true;
+            _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);
+            yield break;
+        }
+
+        Debug.LogError("Failed to load API routes");
+        _mainText.text = "Failed to load API routes";
     }
 
     private IEnumerator NextScene()
