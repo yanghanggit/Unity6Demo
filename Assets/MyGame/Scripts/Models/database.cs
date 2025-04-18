@@ -6,7 +6,7 @@ using System.Collections.Generic;
  * 
  */
 [System.Serializable]
-public class ActorPrototype
+public class ActorCharacterSheet
 {
     public string name = "";
     public string type = "";
@@ -18,7 +18,7 @@ public class ActorPrototype
  * 
  */
 [System.Serializable]
-public class StagePrototype
+public class StageCharacterSheet
 {
     public string name = "";
     public string type = "";
@@ -31,6 +31,6 @@ public class StagePrototype
 [System.Serializable]
 public class DataBase
 {
-    public Dictionary<string, ActorPrototype> actors = new Dictionary<string, ActorPrototype>();
-    public Dictionary<string, StagePrototype> stages = new Dictionary<string, StagePrototype>();
+    public Dictionary<string, ActorCharacterSheet> actors = new Dictionary<string, ActorCharacterSheet>();
+    public Dictionary<string, StageCharacterSheet> stages = new Dictionary<string, StageCharacterSheet>();
 }

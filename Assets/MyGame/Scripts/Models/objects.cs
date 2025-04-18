@@ -72,7 +72,7 @@ public class RPGCharacterProfile
 public class Actor
 {
     public string name = "";
-    public ActorPrototype prototype = new ActorPrototype();
+    public ActorCharacterSheet character_sheet = new ActorCharacterSheet();
     public string system_message = "";
     public string kick_off_message = "";
     public RPGCharacterProfile rpg_character_profile = new RPGCharacterProfile();
@@ -84,7 +84,7 @@ public class Actor
 public class Stage
 {
     public string name = "";
-    public StagePrototype prototype = new StagePrototype();
+    public StageCharacterSheet character_sheet = new StageCharacterSheet();
     public string system_message = "";
     public string kick_off_message = "";
     public List<Actor> actors = new List<Actor>();
