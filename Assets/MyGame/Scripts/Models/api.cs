@@ -171,14 +171,6 @@ public class DungeonGamePlayResponse
 /** * 
 Dungeon view request/response classes.
  */
-
-[System.Serializable]
-public class ViewDungeonRequest
-{
-    public string user_name = "";
-    public string game_name = "";
-}
-
 [System.Serializable]
 public class ViewDungeonResponse
 {
@@ -191,13 +183,6 @@ public class ViewDungeonResponse
 /**
  * Home view request/response classes.
  */
-[System.Serializable]
-public class ViewHomeRequest
-{
-    public string user_name = "";
-    public string game_name = "";
-}
-
 [System.Serializable]
 public class ViewHomeResponse
 {

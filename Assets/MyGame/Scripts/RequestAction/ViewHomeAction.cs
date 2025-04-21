@@ -11,8 +11,7 @@ public class ViewHomeAction : RequestAction
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new ViewHomeRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName });
-        yield return PostRequest(GameContext.Instance.VIEW_HOME_URL, jsonData);
+        yield return GetRequest(GameContext.Instance.VIEW_HOME_URL, "");
 
         // 解析响应数据。
         var response = JsonConvert.DeserializeObject<ViewHomeResponse>(DownloadHandlerResponseText);

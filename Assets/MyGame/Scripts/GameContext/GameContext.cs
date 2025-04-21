@@ -89,7 +89,7 @@ public partial class GameContext
     {
         get
         {
-            return _apiEndpointConfiguration.VIEW_HOME_URL;
+            return $"{_apiEndpointConfiguration.VIEW_HOME_URL}{UserName}/{GameName}";
         }
     }
 
@@ -97,7 +97,7 @@ public partial class GameContext
     {
         get
         {
-            return _apiEndpointConfiguration.VIEW_DUNGEON_URL;
+            return $"{_apiEndpointConfiguration.VIEW_DUNGEON_URL}{UserName}/{GameName}";
         }
     }
 
