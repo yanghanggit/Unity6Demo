@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Text;
 using System.Collections;
+using System.Collections.Generic;
 
 /* * RequestAction.cs
  * 
@@ -85,12 +86,9 @@ public class RequestAction : MonoBehaviour
      * @param jsonData JSON 数据。
      * @return UnityWebRequest 对象。
      */
-    private UnityWebRequest CreateGETRequest(string uri, string jsonData)
+    private UnityWebRequest CreateGETRequest(string fullUrl)
     {
-        UnityWebRequest request = new UnityWebRequest(uri, "GET");
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
+        UnityWebRequest request = UnityWebRequest.Get(fullUrl);
         request.SetRequestHeader("Content-Type", "application/json");
         return request;
     }
@@ -118,20 +116,48 @@ public class RequestAction : MonoBehaviour
         Debug.Log(this.GetType().Name + ":PostResponse = " + _downloadHandlerResponseText);
     }
 
-    public IEnumerator GetRequest(string url, string jsonData)
+    public IEnumerator GetRequest(string fullUrl)
     {
-        Debug.Log(this.GetType().Name + ":GetRequest = " + url + ", jsonData= " + jsonData);
+        Debug.Log(this.GetType().Name + ":GetRequest fullUrl = " + fullUrl);
 
-        UnityWebRequest request = CreateGETRequest(url, jsonData);
+        UnityWebRequest request = CreateGETRequest(fullUrl);
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             Debug.LogError(request.error);
+            Debug.LogError(request.responseCode);
             yield break;
         }
 
         _downloadHandlerResponseText = request.downloadHandler.text;
         Debug.Log(this.GetType().Name + ":GetResponse = " + _downloadHandlerResponseText);
+    }
+
+
+    public string BuildUrlWithQueryParams(string baseUrl, List<KeyValuePair<string, string>> parameters)
+    {
+        var uriBuilder = new StringBuilder(baseUrl);
+
+        if (parameters.Count > 0)
+        {
+            uriBuilder.Append("?");
+
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                var param = parameters[i];
+                string encodedKey = UnityWebRequest.EscapeURL(param.Key);
+                string encodedValue = UnityWebRequest.EscapeURL(param.Value);
+
+                uriBuilder.Append($"{encodedKey}={encodedValue}");
+
+                if (i < parameters.Count - 1)
+                {
+                    uriBuilder.Append("&");
+                }
+            }
+        }
+
+        return uriBuilder.ToString();
     }
 }

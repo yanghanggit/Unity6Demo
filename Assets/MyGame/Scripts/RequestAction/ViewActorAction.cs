@@ -15,9 +15,25 @@ public class ViewActorAction : RequestAction
         // 重置请求状态。
         ResetStatus();
 
+        // 1. 构建请求参数。
+        var parameters = new List<KeyValuePair<string, string>>();
+        if (actors.Count == 0)
+        {
+            parameters.Add(new KeyValuePair<string, string>("actors", ""));
+        }
+        else
+        {
+            for (int i = 0; i < actors.Count; i++)
+            {
+                parameters.Add(new KeyValuePair<string, string>("actors", actors[i]));
+            }
+        }
+
+        // 2. 构建完整URL
+        string fullUrl = BuildUrlWithQueryParams(GameContext.Instance.VIEW_ACTOR_URL, parameters);
+
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new ViewActorRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName, actors = actors });
-        yield return PostRequest(GameContext.Instance.VIEW_ACTOR_URL, jsonData);
+        yield return GetRequest(fullUrl);
 
         // 解析响应数据。
         var response = JsonConvert.DeserializeObject<ViewActorResponse>(DownloadHandlerResponseText);

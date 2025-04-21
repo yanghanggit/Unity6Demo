@@ -10,7 +10,7 @@ public class ApiEndpointConfigurationAction : RequestAction
         ResetStatus();
 
         // 创建请求数据。
-        yield return GetRequest(apiEndpointUrl, "");
+        yield return GetRequest(apiEndpointUrl);
 
         // 解析响应数据。
         var response = JsonConvert.DeserializeObject<APIEndpointConfigurationResponse>(DownloadHandlerResponseText);

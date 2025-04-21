@@ -101,6 +101,14 @@ public partial class GameContext
         }
     }
 
+    public string VIEW_ACTOR_URL
+    {
+        get
+        {
+            return $"{_apiEndpointConfiguration.VIEW_ACTOR_URL}{UserName}/{GameName}";
+        }
+    }
+
     public string START_URL
     {
         get
@@ -133,12 +141,5 @@ public partial class GameContext
         }
     }
 
-    public string VIEW_ACTOR_URL
-    {
-        get
-        {
-            return _apiEndpointConfiguration.VIEW_ACTOR_URL;
-        }
-    }
 
 }

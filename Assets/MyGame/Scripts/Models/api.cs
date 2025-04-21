@@ -194,13 +194,6 @@ public class ViewHomeResponse
 /**
  * Actor view request/response classes.
  */
-[System.Serializable]
-public class ViewActorRequest
-{
-    public string user_name = "";
-    public string game_name = "";
-    public List<string> actors = new List<string>();
-}
 
 [System.Serializable]
 public class ViewActorResponse
