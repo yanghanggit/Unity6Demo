@@ -5,14 +5,14 @@ using Newtonsoft.Json;
 public class ViewDungeonAction : RequestAction
 {
 
-    public IEnumerator Request(string url, string user, string game)
+    public IEnumerator Request()
     {
         // 重置请求状态。
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new ViewDungeonRequest { user_name = user, game_name = game });
-        yield return PostRequest(url, jsonData);
+        var jsonData = JsonConvert.SerializeObject(new ViewDungeonRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName });
+        yield return PostRequest(GameContext.Instance.VIEW_DUNGEON_URL, jsonData);
 
         // 解析响应数据。
         var response = JsonConvert.DeserializeObject<ViewDungeonResponse>(DownloadHandlerResponseText);

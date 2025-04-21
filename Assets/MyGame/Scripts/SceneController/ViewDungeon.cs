@@ -54,7 +54,7 @@ public class ViewDungeon : MonoBehaviour
             Debug.LogError("TransDungeonAction is null");
             yield break;
         }
-        yield return StartCoroutine(_transDungeonAction.Request(GameContext.Instance.HOME_TRANS_DUNGEON_URL, GameContext.Instance.UserName, GameContext.Instance.GameName));
+        yield return StartCoroutine(_transDungeonAction.Request());
         if (!_transDungeonAction.RequestSuccess)
         {
             Debug.LogError("TransDungeonAction request failed");

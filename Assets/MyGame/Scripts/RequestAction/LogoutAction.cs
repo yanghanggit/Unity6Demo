@@ -4,14 +4,14 @@ using Newtonsoft.Json;
 
 public class LogoutAction : RequestAction
 {
-    public IEnumerator Request(string url, string user, string game)
+    public IEnumerator Request()
     {
         // 重置请求状态。
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new LogoutRequest { user_name = user, game_name = game });
-        yield return PostRequest(url, jsonData);
+        var jsonData = JsonConvert.SerializeObject(new LogoutRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName });
+        yield return PostRequest(GameContext.Instance.LOGOUT_URL, jsonData);
 
         // 解析响应数据。
         var response = JsonConvert.DeserializeObject<LogoutResponse>(DownloadHandlerResponseText);

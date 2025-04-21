@@ -4,14 +4,14 @@ using Newtonsoft.Json;
 
 public class StartAction : RequestAction
 {
-    public IEnumerator Request(string url, string user, string game, string actor)
+    public IEnumerator Request()
     {
         // 重置请求状态。
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new StartRequest { user_name = user, game_name = game, actor_name = actor });
-        yield return PostRequest(url, jsonData);
+        var jsonData = JsonConvert.SerializeObject(new StartRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName, actor_name = GameContext.Instance.ActorName });
+        yield return PostRequest(GameContext.Instance.START_URL, jsonData);
 
         // 解析响应数据。
         var response = JsonConvert.DeserializeObject<StartResponse>(DownloadHandlerResponseText);

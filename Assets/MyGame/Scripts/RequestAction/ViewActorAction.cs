@@ -5,14 +5,19 @@ using System.Collections.Generic;
 
 public class ViewActorAction : RequestAction
 {
-    public IEnumerator Request(string url, string user, string game, List<string> actors)
+    public IEnumerator Request(List<string> actors = null)
     {
+        if (actors == null)
+        {
+            actors = new List<string>();
+        }
+
         // 重置请求状态。
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new ViewActorRequest { user_name = user, game_name = game, actors = actors });
-        yield return PostRequest(url, jsonData);
+        var jsonData = JsonConvert.SerializeObject(new ViewActorRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName, actors = actors });
+        yield return PostRequest(GameContext.Instance.VIEW_ACTOR_URL, jsonData);
 
         // 解析响应数据。
         var response = JsonConvert.DeserializeObject<ViewActorResponse>(DownloadHandlerResponseText);

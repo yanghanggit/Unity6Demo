@@ -113,7 +113,7 @@ public class MainScene : MonoBehaviour
             yield break;
         }
 
-        yield return StartCoroutine(_logoutAction.Request(GameContext.Instance.LOGOUT_URL, GameContext.Instance.UserName, GameContext.Instance.GameName));
+        yield return StartCoroutine(_logoutAction.Request());
 
         if (!_logoutAction.RequestSuccess)
         {
@@ -126,7 +126,7 @@ public class MainScene : MonoBehaviour
 
     IEnumerator ExecuteHomeGameplayAdvancing()
     {
-        yield return StartCoroutine(_homeGamePlayAction.Request(GameContext.Instance.HOME_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "/advancing", new Dictionary<string, string>()));
+        yield return StartCoroutine(_homeGamePlayAction.Request("/advancing"));
         if (!_homeGamePlayAction.RequestSuccess)
         {
             Debug.LogError("RunHomeAction request failed");
@@ -143,7 +143,7 @@ public class MainScene : MonoBehaviour
             Debug.LogError("ViewDungeonAction is null");
             yield break;
         }
-        yield return StartCoroutine(_viewDungeonAction.Request(GameContext.Instance.VIEW_DUNGEON_URL, GameContext.Instance.UserName, GameContext.Instance.GameName));
+        yield return StartCoroutine(_viewDungeonAction.Request());
         if (!_viewDungeonAction.RequestSuccess)
         {
             Debug.LogError("ViewDungeonAction request failed");
@@ -161,7 +161,7 @@ public class MainScene : MonoBehaviour
             Debug.LogError("ViewHomeAction is null");
             yield break;
         }
-        yield return StartCoroutine(_viewHomeAction.Request(GameContext.Instance.VIEW_HOME_URL, GameContext.Instance.UserName, GameContext.Instance.GameName));
+        yield return StartCoroutine(_viewHomeAction.Request());
         if (!_viewHomeAction.RequestSuccess)
         {
             Debug.LogError("ViewHomeAction request failed");
@@ -174,9 +174,7 @@ public class MainScene : MonoBehaviour
 
     private IEnumerator ExecuteViewActor()
     {
-        yield return StartCoroutine(_viewActorAction.Request(GameContext.Instance.VIEW_ACTOR_URL,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
+        yield return StartCoroutine(_viewActorAction.Request(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
 
         if (!_viewActorAction.RequestSuccess)

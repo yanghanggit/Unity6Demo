@@ -26,15 +26,19 @@ public class DungeonGamePlayAction : RequestAction
         }
     }
 
-    public IEnumerator Request(string url, string user, string game, string userInputTag, Dictionary<string, string> data)
+    public IEnumerator Request(string userInputTag, Dictionary<string, string> data = null)
     {
+        if (data == null)
+        {
+            data = new Dictionary<string, string>();
+        }
 
         // 重置请求状态。
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new DungeonGamePlayRequest { user_name = user, game_name = game, user_input = new DungeonGamePlayUserInput { tag = userInputTag, data = data } });
-        yield return PostRequest(url, jsonData);
+        var jsonData = JsonConvert.SerializeObject(new DungeonGamePlayRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName, user_input = new DungeonGamePlayUserInput { tag = userInputTag, data = data } });
+        yield return PostRequest(GameContext.Instance.DUNGEON_GAMEPLAY_URL, jsonData);
 
         // 解析响应数据。
         _response = JsonConvert.DeserializeObject<DungeonGamePlayResponse>(DownloadHandlerResponseText);

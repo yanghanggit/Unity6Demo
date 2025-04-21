@@ -71,7 +71,7 @@ public class XCardEditor : MonoBehaviour
         data["name"] = skillName;
         data["description"] = skillDescription;
         data["effect"] = skillEffect;
-        yield return StartCoroutine(_dungeonGamePlayAction.Request(GameContext.Instance.DUNGEON_GAMEPLAY_URL, GameContext.Instance.UserName, GameContext.Instance.GameName, "x_card", data));
+        yield return StartCoroutine(_dungeonGamePlayAction.Request("x_card", data));
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
             Debug.LogError("ExecuteXCard request failed");
