@@ -113,7 +113,7 @@ public class MainScene : MonoBehaviour
             yield break;
         }
 
-        yield return StartCoroutine(_logoutAction.Request());
+        yield return StartCoroutine(_logoutAction.Call());
 
         if (!_logoutAction.RequestSuccess)
         {
@@ -126,7 +126,7 @@ public class MainScene : MonoBehaviour
 
     IEnumerator ExecuteHomeGameplayAdvancing()
     {
-        yield return StartCoroutine(_homeGamePlayAction.Request("/advancing"));
+        yield return StartCoroutine(_homeGamePlayAction.Call("/advancing"));
         if (!_homeGamePlayAction.RequestSuccess)
         {
             Debug.LogError("RunHomeAction request failed");
@@ -143,7 +143,7 @@ public class MainScene : MonoBehaviour
             Debug.LogError("ViewDungeonAction is null");
             yield break;
         }
-        yield return StartCoroutine(_viewDungeonAction.Request());
+        yield return StartCoroutine(_viewDungeonAction.Call());
         if (!_viewDungeonAction.RequestSuccess)
         {
             Debug.LogError("ViewDungeonAction request failed");
@@ -161,7 +161,7 @@ public class MainScene : MonoBehaviour
             Debug.LogError("ViewHomeAction is null");
             yield break;
         }
-        yield return StartCoroutine(_viewHomeAction.Request());
+        yield return StartCoroutine(_viewHomeAction.Call());
         if (!_viewHomeAction.RequestSuccess)
         {
             Debug.LogError("ViewHomeAction request failed");
@@ -174,7 +174,7 @@ public class MainScene : MonoBehaviour
 
     private IEnumerator ExecuteViewActor()
     {
-        yield return StartCoroutine(_viewActorAction.Request(
+        yield return StartCoroutine(_viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
 
         if (!_viewActorAction.RequestSuccess)

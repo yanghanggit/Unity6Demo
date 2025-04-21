@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 public class LogoutAction : RequestAction
 {
-    public IEnumerator Request()
+    public IEnumerator Call()
     {
         // 重置请求状态。
         ResetStatus();

@@ -4,11 +4,6 @@ using System.Collections.Generic;
  * GameContext class to manage game state and API endpoint configuration.
  */
 [System.Serializable]
-public class APIEndpointConfigurationRequest
-{
-}
-
-[System.Serializable]
 public class APIEndpointConfiguration
 {
     public string TEST_URL = "";

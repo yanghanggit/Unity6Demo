@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class ViewActorAction : RequestAction
 {
-    public IEnumerator Request(List<string> actors = null)
+    public IEnumerator Call(List<string> actors = null)
     {
         if (actors == null)
         {

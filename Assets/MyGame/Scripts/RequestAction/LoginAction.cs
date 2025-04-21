@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 public class LoginAction : RequestAction
 {
 
-    public IEnumerator Request(string user, string game, string actor)
+    public IEnumerator Call(string user, string game, string actor)
     {
         // 重置请求状态。
         ResetStatus();

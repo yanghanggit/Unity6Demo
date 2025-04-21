@@ -46,14 +46,14 @@ public class LoginScene : MonoBehaviour
 
     private IEnumerator ExecuteLoginAndStartGame()
     {
-        yield return StartCoroutine(_loginAction.Request(_gameConfig.UserName, _gameConfig.GameName, _gameConfig.ActorName));
+        yield return StartCoroutine(_loginAction.Call(_gameConfig.UserName, _gameConfig.GameName, _gameConfig.ActorName));
         if (!_loginAction.RequestSuccess)
         {
             Debug.LogError("LoginAction request failed");
             yield break;
         }
 
-        yield return StartCoroutine(_startAction.Request());
+        yield return StartCoroutine(_startAction.Call());
         if (!_startAction.RequestSuccess)
         {
             Debug.LogError("StartAction request failed");

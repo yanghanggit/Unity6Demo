@@ -54,7 +54,7 @@ public class ViewDungeon : MonoBehaviour
             Debug.LogError("TransDungeonAction is null");
             yield break;
         }
-        yield return StartCoroutine(_transDungeonAction.Request());
+        yield return StartCoroutine(_transDungeonAction.Call());
         if (!_transDungeonAction.RequestSuccess)
         {
             Debug.LogError("TransDungeonAction request failed");

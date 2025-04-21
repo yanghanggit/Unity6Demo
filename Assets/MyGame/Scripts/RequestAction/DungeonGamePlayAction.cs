@@ -26,7 +26,7 @@ public class DungeonGamePlayAction : RequestAction
         }
     }
 
-    public IEnumerator Request(string userInputTag, Dictionary<string, string> data = null)
+    public IEnumerator Call(string userInputTag, Dictionary<string, string> data = null)
     {
         if (data == null)
         {

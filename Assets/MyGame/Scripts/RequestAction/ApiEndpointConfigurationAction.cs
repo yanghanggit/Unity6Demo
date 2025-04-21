@@ -4,14 +4,13 @@ using Newtonsoft.Json;
 
 public class ApiEndpointConfigurationAction : RequestAction
 {
-    public IEnumerator Request(string apiEndpointUrl)
+    public IEnumerator Call(string apiEndpointUrl)
     {
         // 重置请求状态。
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new APIEndpointConfigurationRequest());
-        yield return PostRequest(apiEndpointUrl, jsonData);
+        yield return GetRequest(apiEndpointUrl, "");
 
         // 解析响应数据。
         var response = JsonConvert.DeserializeObject<APIEndpointConfigurationResponse>(DownloadHandlerResponseText);

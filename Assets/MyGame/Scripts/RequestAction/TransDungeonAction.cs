@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 public class TransDungeonAction : RequestAction
 {
 
-    public IEnumerator Request()
+    public IEnumerator Call()
     {
         // 重置请求状态。
         ResetStatus();

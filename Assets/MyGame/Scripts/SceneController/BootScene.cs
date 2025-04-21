@@ -42,7 +42,7 @@ public class BootScene : MonoBehaviour
 
     private IEnumerator ConfigureAndLoadApiEndpoints()
     {
-        yield return StartCoroutine(_apiEndpointConfigurationAction.Request(_gameConfig.LocalNet));
+        yield return StartCoroutine(_apiEndpointConfigurationAction.Call(_gameConfig.LocalNet));
         if (_apiEndpointConfigurationAction.RequestSuccess)
         {
             _isInitialized = true;
@@ -50,7 +50,7 @@ public class BootScene : MonoBehaviour
             yield break;
         }
 
-        yield return StartCoroutine(_apiEndpointConfigurationAction.Request(_gameConfig.LocalHost));
+        yield return StartCoroutine(_apiEndpointConfigurationAction.Call(_gameConfig.LocalHost));
         if (_apiEndpointConfigurationAction.RequestSuccess)
         {
             _isInitialized = true;

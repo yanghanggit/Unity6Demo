@@ -99,7 +99,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteDungeonCombatKickOff()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Request("dungeon_combat_kick_off"));
+        yield return StartCoroutine(_dungeonGamePlayAction.Call("dungeon_combat_kick_off"));
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
             Debug.LogError("DungeonAction request failed");
@@ -112,14 +112,14 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteDrawCards()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Request("draw_cards"));
+        yield return StartCoroutine(_dungeonGamePlayAction.Call("draw_cards"));
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
             Debug.LogError("ExecuteDrawCards request failed");
             yield break;
         }
 
-        yield return StartCoroutine(_viewActorAction.Request(
+        yield return StartCoroutine(_viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
 
         if (!_viewActorAction.RequestSuccess)
@@ -134,7 +134,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecutePlayCards()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Request("play_cards"));
+        yield return StartCoroutine(_dungeonGamePlayAction.Call("play_cards"));
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
             Debug.LogError("ExecutePlayCards request failed");
@@ -147,7 +147,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteViewDungeon()
     {
-        yield return StartCoroutine(_viewDungeonAction.Request());
+        yield return StartCoroutine(_viewDungeonAction.Call());
         if (!_viewDungeonAction.RequestSuccess)
         {
             Debug.LogError("ViewDungeonAction request failed");
@@ -160,7 +160,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteViewActor()
     {
-        yield return StartCoroutine(_viewActorAction.Request(
+        yield return StartCoroutine(_viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
 
         if (!_viewActorAction.RequestSuccess)
@@ -175,7 +175,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteAdvanceNextDungeon()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Request("advance_next_dungeon"));
+        yield return StartCoroutine(_dungeonGamePlayAction.Call("advance_next_dungeon"));
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
             Debug.LogError("ExecuteAdvanceNextDungeon request failed");
@@ -190,7 +190,7 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteBackHome()
     {
         Debug.Log("ExecuteBackHome");
-        yield return StartCoroutine(_transHomeAction.Request());
+        yield return StartCoroutine(_transHomeAction.Call());
         if (!_transHomeAction.RequestSuccess)
         {
             Debug.LogError("TransHomeAction request failed");
@@ -204,7 +204,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteCombatComplete()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Request("dungeon_combat_complete"));
+        yield return StartCoroutine(_dungeonGamePlayAction.Call("dungeon_combat_complete"));
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
             Debug.LogError("ExecuteCombatComplete request failed");

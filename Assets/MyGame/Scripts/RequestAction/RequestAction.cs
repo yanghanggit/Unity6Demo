@@ -80,6 +80,22 @@ public class RequestAction : MonoBehaviour
     }
 
     /**
+     * 创建 GET 请求。
+     * @param uri 请求的 URI。
+     * @param jsonData JSON 数据。
+     * @return UnityWebRequest 对象。
+     */
+    private UnityWebRequest CreateGETRequest(string uri, string jsonData)
+    {
+        UnityWebRequest request = new UnityWebRequest(uri, "GET");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        return request;
+    }
+
+    /**
      * 发送 POST 请求。
      * @param url 请求的 URL。
      * @param jsonData JSON 数据。
@@ -100,5 +116,22 @@ public class RequestAction : MonoBehaviour
 
         _downloadHandlerResponseText = request.downloadHandler.text;
         Debug.Log(this.GetType().Name + ":PostResponse = " + _downloadHandlerResponseText);
+    }
+
+    public IEnumerator GetRequest(string url, string jsonData)
+    {
+        Debug.Log(this.GetType().Name + ":GetRequest = " + url + ", jsonData= " + jsonData);
+
+        UnityWebRequest request = CreateGETRequest(url, jsonData);
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
+        {
+            Debug.LogError(request.error);
+            yield break;
+        }
+
+        _downloadHandlerResponseText = request.downloadHandler.text;
+        Debug.Log(this.GetType().Name + ":GetResponse = " + _downloadHandlerResponseText);
     }
 }
