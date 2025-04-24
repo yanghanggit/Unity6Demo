@@ -35,7 +35,6 @@ public class LoginRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public string actor_name = "";
 }
 
 [System.Serializable]

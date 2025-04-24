@@ -4,13 +4,13 @@ using Newtonsoft.Json;
 
 public class StartAction : RequestAction
 {
-    public IEnumerator Call()
+    public IEnumerator Call(string actorName)
     {
         // 重置请求状态。
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new StartRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName, actor_name = GameContext.Instance.ActorName });
+        var jsonData = JsonConvert.SerializeObject(new StartRequest { user_name = GameContext.Instance.UserName, game_name = GameContext.Instance.GameName, actor_name = actorName });
         yield return PostRequest(GameContext.Instance.START_URL, jsonData);
 
         // 解析响应数据。
@@ -33,5 +33,8 @@ public class StartAction : RequestAction
 
         // 标记成功。
         MarkRequestAsSuccessful();
+
+        //
+        GameContext.Instance.ActorName = actorName;
     }
 }

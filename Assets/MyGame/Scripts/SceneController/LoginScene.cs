@@ -14,6 +14,7 @@ public class LoginScene : MonoBehaviour
     public StartAction _startAction;
     public GameConfig _gameConfig;
     public XCardPlayer _XCardPlayer;
+    private bool _loginSuccess = false;
 
     void Start()
     {
@@ -26,41 +27,71 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_textDefaultXCardName != null, "_XCardPlayer._defaultXCard is null");
 
-        _textUserName.text = _gameConfig.UserName;
-        _textGameName.text = _gameConfig.GameName;
-        _textActorName.text = _gameConfig.ActorName;
-        _textDefaultXCardName.text = $"{_XCardPlayer.Name}\n{_XCardPlayer.Description}\n{_XCardPlayer.Effect}";
-
-    }
-
-    void Update()
-    {
-
+        _textUserName.text = "登录后显示用户名";
+        _textGameName.text = "登录后显示游戏名";
+        _textActorName.text = "启动游戏后显示角色名";
+        _textDefaultXCardName.text = "启动游戏后显示默认X-Card名";
     }
 
     public void OnClickLogin()
     {
         Debug.Log("OnClickLogin");
-        StartCoroutine(ExecuteLoginAndStartGame());
+        StartCoroutine(ExecuteLogin());
     }
 
-    private IEnumerator ExecuteLoginAndStartGame()
+    public void OnClickNewGame()
     {
-        yield return StartCoroutine(_loginAction.Call(_gameConfig.UserName, _gameConfig.GameName, _gameConfig.ActorName));
+        Debug.Log("OnClickNewGame");
+        if (!_loginSuccess)
+        {
+            Debug.LogError("_loginSuccess is false");
+            return;
+        }
+        StartCoroutine(ExecuteNewGame(_gameConfig.ActorName));
+    }
+
+    public void OnClickContinueGame()
+    {
+        Debug.Log("OnClickContinueGame");
+        if (!_loginSuccess)
+        {
+            Debug.LogError("_loginSuccess is false");
+            return;
+        }
+    }
+
+    private IEnumerator ExecuteLogin()
+    {
+        yield return StartCoroutine(_loginAction.Call(_gameConfig.UserName, _gameConfig.GameName));
         if (!_loginAction.RequestSuccess)
         {
-            Debug.LogError("LoginAction request failed");
             yield break;
         }
 
-        yield return StartCoroutine(_startAction.Call());
+        _loginSuccess = true;
+
+        _textUserName.text = GameContext.Instance.UserName;
+        _textGameName.text = GameContext.Instance.GameName;
+    }
+
+    private IEnumerator ExecuteNewGame(string actorName)
+    {
+        yield return StartCoroutine(_startAction.Call(actorName));
         if (!_startAction.RequestSuccess)
         {
-            Debug.LogError("StartAction request failed");
             yield break;
         }
 
-        yield return new WaitForSeconds(0);
+        //
+        Debug.Assert(GameContext.Instance.ActorName == actorName, "GameContext.Instance.ActorName != actorName");
+        Debug.Assert(GameContext.Instance.UserName == _gameConfig.UserName, "GameContext.Instance.UserName != _gameConfig.UserName");
+        Debug.Assert(GameContext.Instance.GameName == _gameConfig.GameName, "GameContext.Instance.GameName != _gameConfig.GameName");
+
+        //
+        _textActorName.text = GameContext.Instance.ActorName;
+        _textDefaultXCardName.text = $"{_XCardPlayer.Name}\n{_XCardPlayer.Description}\n{_XCardPlayer.Effect}";
+
+        yield return new WaitForSeconds(2.0f);
         SceneManager.LoadScene(_nextScene);
     }
 }

@@ -21,26 +21,20 @@ public class BootScene : MonoBehaviour
         Debug.Assert(_apiEndpointConfigurationAction != null, "_bootAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
         Debug.Assert(_mainText != null, "_mainText is null");
-        StartCoroutine(ConfigureAndLoadApiEndpoints());
+        StartCoroutine(InitializeApiEndpoints());
     }
 
-    void Update()
+    public void OnClickNextSceneLogin()
     {
-    }
-
-    public void OnClickStartGame()
-    {
-        //Debug.Log("OnClickStartGame");
         if (!_isInitialized)
         {
             Debug.LogError("Game is not initialized");
             return;
         }
-        //Debug.Log("Game is initialized");
-        StartCoroutine(NextScene());
+        StartCoroutine(LoadNextScene());
     }
 
-    private IEnumerator ConfigureAndLoadApiEndpoints()
+    private IEnumerator InitializeApiEndpoints()
     {
         yield return StartCoroutine(_apiEndpointConfigurationAction.Call(_gameConfig.LocalNet));
         if (_apiEndpointConfigurationAction.RequestSuccess)
@@ -58,13 +52,11 @@ public class BootScene : MonoBehaviour
             yield break;
         }
 
-        Debug.LogError("Failed to load API routes");
         _mainText.text = "Failed to load API routes";
     }
 
-    private IEnumerator NextScene()
+    private IEnumerator LoadNextScene()
     {
-        Debug.Log("NextScene");
         yield return new WaitForSeconds(0.0f);
         SceneManager.LoadScene(_nextScene);
     }

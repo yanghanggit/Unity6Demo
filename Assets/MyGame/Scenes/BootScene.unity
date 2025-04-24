@@ -684,7 +684,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 399892901}
         m_TargetAssemblyTypeName: BootScene, Assembly-CSharp
-        m_MethodName: OnClickStartGame
+        m_MethodName: OnClickNextSceneLogin
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

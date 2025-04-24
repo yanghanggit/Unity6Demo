@@ -5,13 +5,13 @@ using Newtonsoft.Json;
 public class LoginAction : RequestAction
 {
 
-    public IEnumerator Call(string user, string game, string actor)
+    public IEnumerator Call(string user, string game)
     {
         // 重置请求状态。
         ResetStatus();
 
         // 创建请求数据。
-        var jsonData = JsonConvert.SerializeObject(new LoginRequest { user_name = user, game_name = game, actor_name = actor });
+        var jsonData = JsonConvert.SerializeObject(new LoginRequest { user_name = user, game_name = game });
         yield return PostRequest(GameContext.Instance.LOGIN_URL, jsonData);
 
         // 解析响应数据。
@@ -37,6 +37,6 @@ public class LoginAction : RequestAction
         // 设置登录信息。
         GameContext.Instance.UserName = user;
         GameContext.Instance.GameName = game;
-        GameContext.Instance.ActorName = actor;
+        GameContext.Instance.ActorName = "";
     }
 }
