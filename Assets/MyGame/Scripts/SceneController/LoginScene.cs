@@ -14,7 +14,6 @@ public class LoginScene : MonoBehaviour
     public StartAction _startAction;
     public GameConfig _gameConfig;
     public XCardPlayer _XCardPlayer;
-    private bool _loginSuccess = false;
 
     void Start()
     {
@@ -42,22 +41,12 @@ public class LoginScene : MonoBehaviour
     public void OnClickNewGame()
     {
         Debug.Log("OnClickNewGame");
-        if (!_loginSuccess)
-        {
-            Debug.LogError("_loginSuccess is false");
-            return;
-        }
         StartCoroutine(ExecuteNewGame(_gameConfig.ActorName));
     }
 
     public void OnClickContinueGame()
     {
         Debug.Log("OnClickContinueGame");
-        if (!_loginSuccess)
-        {
-            Debug.LogError("_loginSuccess is false");
-            return;
-        }
     }
 
     private IEnumerator ExecuteLogin()
@@ -67,8 +56,6 @@ public class LoginScene : MonoBehaviour
         {
             yield break;
         }
-
-        _loginSuccess = true;
 
         _textUserName.text = GameContext.Instance.UserName;
         _textGameName.text = GameContext.Instance.GameName;
