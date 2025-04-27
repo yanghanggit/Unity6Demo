@@ -5,7 +5,7 @@
 // using UnityEngine;
 public partial class GameContext
 {
-    private static GameContext instance;
+    private static GameContext _instance;
 
     public static GameContext Instance
     {
@@ -13,11 +13,11 @@ public partial class GameContext
         {
             lock (lockObj)
             {
-                if (instance == null)
+                if (_instance == null)
                 {
-                    instance = new GameContext();
+                    _instance = new GameContext();
                 }
-                return instance;
+                return _instance;
             }
         }
     }
@@ -28,12 +28,49 @@ public partial class GameContext
 
     private static readonly object lockObj = new object();
 
-    public string UserName = "";
-    public string GameName = "";
-    public string ActorName = "";
+    private string _userName = "";
+
+    private string _gameName = "";
+
+    private string _actorName = "";
 
     private APIEndpointConfiguration _apiEndpointConfiguration = new APIEndpointConfiguration();
 
+    public string UserName
+    {
+        get
+        {
+            return _userName;
+        }
+        set
+        {
+            _userName = value;
+        }
+    }
+
+    public string GameName
+    {
+        get
+        {
+            return _gameName;
+        }
+        set
+        {
+            _gameName = value;
+        }
+    }
+
+    public string ActorName
+    {
+        get
+        {
+            return _actorName;
+        }
+        set
+        {
+            _actorName = value;
+        }
+    }
 
     public APIEndpointConfiguration ApiEndpointConfiguration
     {
@@ -140,6 +177,4 @@ public partial class GameContext
             return _apiEndpointConfiguration.DUNGEON_TRANS_HOME_URL;
         }
     }
-
-
 }

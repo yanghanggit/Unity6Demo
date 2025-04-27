@@ -17,4 +17,4 @@ MonoBehaviour:
   ActorName: "\u89D2\u8272.\u6218\u58EB.\u5361\u6069"
   AllyName: "\u89D2\u8272.\u6CD5\u5E08.\u5965\u9732\u5A1C"
   LocalHost: http://127.0.0.1:8000/api_endpoints/v1/
-  LocalNet: http://192.168.192.109:8000/api_endpoints/v1/
+  LocalNet: http://192.168.192.104:8000/api_endpoints/v1/

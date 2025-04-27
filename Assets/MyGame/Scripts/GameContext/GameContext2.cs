@@ -3,14 +3,30 @@ using Newtonsoft.Json;
 
 public partial class GameContext
 {
-    public Dictionary<string, List<string>> _mapping = new Dictionary<string, List<string>>();
+    private List<string> _agentEventLogs = new List<string>();
+    
+    private Dictionary<string, List<string>> _mapping = new Dictionary<string, List<string>>();
+    
+    private List<EntitySnapshot> _actorSnapshots = new List<EntitySnapshot>();
 
-    public List<string> AgentEventLogs = new List<string>();
+    private Dungeon _dungeon = new Dungeon();
 
-    public List<EntitySnapshot> _actor_snapshots = new List<EntitySnapshot>();
-
-    public Dungeon _dungeon = new Dungeon();
-
+    public List<string> AgentEventLogs
+    {
+        get
+        {
+            return _agentEventLogs;
+        }
+        set
+        {
+            if (value == null)
+            {
+                UnityEngine.Debug.LogError("AgentEventLogs is null");
+                return;
+            }
+            _agentEventLogs = value;
+        }
+    }
 
     public Dictionary<string, List<string>> Mapping
     {
@@ -29,7 +45,7 @@ public partial class GameContext
             _mapping = value;
         }
     }
-    
+
     public Dungeon Dungeon
     {
         get
@@ -52,7 +68,7 @@ public partial class GameContext
     {
         get
         {
-            return _actor_snapshots;
+            return _actorSnapshots;
         }
         set
         {
@@ -61,7 +77,7 @@ public partial class GameContext
                 UnityEngine.Debug.LogError("ActorSnapshots is null");
                 return;
             }
-            _actor_snapshots = value;
+            _actorSnapshots = value;
         }
     }
 
@@ -128,7 +144,7 @@ public partial class GameContext
                 UnityEngine.Debug.Log($"COMBAT_KICK_OFF_EVENT: {combatKickOffEvent.actor} => {combatKickOffEvent.description}");
                 AgentEventLogs.Add($"{combatKickOffEvent.actor} => {combatKickOffEvent.description}");
                 break;
-            
+
             case AgentEventHead.COMBAT_COMPLETE_EVENT:
                 CombatCompleteEvent combatCompleteEvent = JsonConvert.DeserializeObject<CombatCompleteEvent>(body);
                 UnityEngine.Debug.Log($"COMBAT_COMPLETE_EVENT: {combatCompleteEvent.actor} => {combatCompleteEvent.summary}");
