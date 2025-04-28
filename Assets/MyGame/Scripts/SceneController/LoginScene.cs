@@ -14,6 +14,7 @@ public class LoginScene : MonoBehaviour
     public StartAction _startAction;
     public GameConfig _gameConfig;
     public XCardPlayer _XCardPlayer;
+    public TMP_InputField _UserNameInputField;
 
     void Start()
     {
@@ -25,17 +26,31 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_textDefaultXCardName != null, "_XCardPlayer._defaultXCard is null");
+        Debug.Assert(_UserNameInputField != null, "_UserNameInputField is null");
 
         _textUserName.text = "登录后显示用户名";
         _textGameName.text = "登录后显示游戏名";
         _textActorName.text = "启动游戏后显示角色名";
         _textDefaultXCardName.text = "启动游戏后显示默认X-Card名";
+
+
+        //结合当前的时间，生成一个随机的用户名
+        System.DateTime now = System.DateTime.Now;
+        string timestamp = now.ToString("yyyyMMddHHmmss");
+        string randomUserName = "Player" + timestamp + Random.Range(100, 999).ToString();
+        _UserNameInputField.text = randomUserName;
     }
 
     public void OnClickLogin()
     {
         Debug.Log("OnClickLogin");
-        StartCoroutine(ExecuteLogin());
+        if (_UserNameInputField.text == "")
+        {
+            Debug.LogError("Input field is empty");
+            return;
+        }
+    
+        StartCoroutine(ExecuteLogin(_UserNameInputField.text, _gameConfig.GameName));
     }
 
     public void OnClickNewGame()
@@ -49,15 +64,15 @@ public class LoginScene : MonoBehaviour
         Debug.Log("OnClickContinueGame");
     }
 
-    private IEnumerator ExecuteLogin()
+    private IEnumerator ExecuteLogin(string userName, string gameName)
     {
-        yield return StartCoroutine(_loginAction.Call(_gameConfig.UserName, _gameConfig.GameName));
+        yield return StartCoroutine(_loginAction.Call(userName, gameName));
         if (!_loginAction.RequestSuccess)
         {
             yield break;
         }
 
-        _textUserName.text = GameContext.Instance.UserName;
+        _textUserName.text = userName;
         _textGameName.text = GameContext.Instance.GameName;
     }
 
@@ -68,11 +83,6 @@ public class LoginScene : MonoBehaviour
         {
             yield break;
         }
-
-        //
-        Debug.Assert(GameContext.Instance.ActorName == actorName, "GameContext.Instance.ActorName != actorName");
-        Debug.Assert(GameContext.Instance.UserName == _gameConfig.UserName, "GameContext.Instance.UserName != _gameConfig.UserName");
-        Debug.Assert(GameContext.Instance.GameName == _gameConfig.GameName, "GameContext.Instance.GameName != _gameConfig.GameName");
 
         //
         _textActorName.text = GameContext.Instance.ActorName;

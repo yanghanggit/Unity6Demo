@@ -57,5 +57,6 @@ public class ViewActorAction : RequestAction
 
         // 更新游戏上下文中的角色快照。
         GameContext.Instance.ActorSnapshots = response.actor_snapshots;
+        GameContext.Instance.AgentShortTermMemories = response.agent_short_term_memories;
     }
 }

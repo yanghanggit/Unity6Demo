@@ -9,6 +9,8 @@ public partial class GameContext
     
     private List<EntitySnapshot> _actorSnapshots = new List<EntitySnapshot>();
 
+    private List<AgentShortTermMemory> _agentShortTermMemories = new List<AgentShortTermMemory>();
+
     private Dungeon _dungeon = new Dungeon();
 
     public List<string> AgentEventLogs
@@ -78,6 +80,23 @@ public partial class GameContext
                 return;
             }
             _actorSnapshots = value;
+        }
+    }
+
+    public List<AgentShortTermMemory> AgentShortTermMemories
+    {
+        get
+        {
+            return _agentShortTermMemories;
+        }
+        set
+        {
+            if (value == null)
+            {
+                UnityEngine.Debug.LogError("AgentShortTermMemories is null");
+                return;
+            }
+            _agentShortTermMemories = value;
         }
     }
 

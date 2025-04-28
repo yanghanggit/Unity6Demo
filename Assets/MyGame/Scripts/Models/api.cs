@@ -198,6 +198,10 @@ public class ViewHomeResponse
 public class ViewActorResponse
 {
     public List<EntitySnapshot> actor_snapshots = new List<EntitySnapshot>();
+
+    public List<AgentShortTermMemory> agent_short_term_memories = new List<AgentShortTermMemory>();
+
     public int error = 0;
+
     public string message = "";
 }
