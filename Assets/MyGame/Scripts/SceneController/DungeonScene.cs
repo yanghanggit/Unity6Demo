@@ -22,6 +22,10 @@ public class DungeonScene : MonoBehaviour
 
     public XCardEditor _XCardEditor;
 
+    public GameObject _imageGoblin;
+
+    public GameObject _imageOrc;
+
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
@@ -31,15 +35,13 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
+        Debug.Assert(_imageGoblin != null, "_imageGoblin is null");
+        Debug.Assert(_imageOrc != null, "_imageOrc is null");
 
         _XCardEditor.gameObject.SetActive(false);
+        _imageGoblin.SetActive(false);
+        _imageOrc.SetActive(false);
         StartCoroutine(ExecuteViewDungeon());
-    }
-
-
-    void Update()
-    {
-
     }
 
     public void OnClickDungeonCombatKickOff()
@@ -99,28 +101,26 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteDungeonCombatKickOff()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Call("dungeon_combat_kick_off"));
+        yield return _dungeonGamePlayAction.Call("dungeon_combat_kick_off");
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
-            Debug.LogError("DungeonAction request failed");
             yield break;
         }
 
-        Debug.Log("DungeonAction request success");
         UpdateTextFromAgentLogs();
     }
 
     private IEnumerator ExecuteDrawCards()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Call("draw_cards"));
+        yield return _dungeonGamePlayAction.Call("draw_cards");
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
             Debug.LogError("ExecuteDrawCards request failed");
             yield break;
         }
 
-        yield return StartCoroutine(_viewActorAction.Call(
-            MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
+        yield return _viewActorAction.Call(
+            MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
         if (!_viewActorAction.RequestSuccess)
         {
@@ -134,7 +134,7 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecutePlayCards()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Call("play_cards"));
+        yield return _dungeonGamePlayAction.Call("play_cards");
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
             Debug.LogError("ExecutePlayCards request failed");
@@ -147,50 +147,54 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteViewDungeon()
     {
-        yield return StartCoroutine(_viewDungeonAction.Call());
+        yield return _viewDungeonAction.Call();
         if (!_viewDungeonAction.RequestSuccess)
         {
-            Debug.LogError("ViewDungeonAction request failed");
             yield break;
         }
 
-        Debug.Log("ExecuteViewDungeon request success!!!!!!");
+        yield return _viewActorAction.Call(
+            MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
+
+        if (!_viewActorAction.RequestSuccess)
+        {
+            yield break;
+        }
+
         UpdateDungeonDisplay();
     }
 
     private IEnumerator ExecuteViewActor()
     {
-        yield return StartCoroutine(_viewActorAction.Call(
-            MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
+        yield return _viewActorAction.Call(
+            MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
         if (!_viewActorAction.RequestSuccess)
         {
-            Debug.LogError("ViewActorAction request failed");
             yield break;
         }
 
-        Debug.Log("ExecuteViewActor request success!!!!!!");
         UpdateActorDisplay(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
     }
 
     private IEnumerator ExecuteAdvanceNextDungeon()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Call("advance_next_dungeon"));
+        yield return _dungeonGamePlayAction.Call("advance_next_dungeon");
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
-            Debug.LogError("ExecuteAdvanceNextDungeon request failed");
             yield break;
         }
 
-        Debug.Log("ExecuteAdvanceNextDungeon request success");
         UpdateTextFromAgentLogs();
         _mainText.text = _mainText.text + "\n" + _dungeonGamePlayAction.ResponseMessage;
+
+        yield return ExecuteViewDungeon();
     }
 
     private IEnumerator ExecuteBackHome()
     {
         Debug.Log("ExecuteBackHome");
-        yield return StartCoroutine(_transHomeAction.Call());
+        yield return _transHomeAction.Call();
         if (!_transHomeAction.RequestSuccess)
         {
             Debug.LogError("TransHomeAction request failed");
@@ -201,17 +205,14 @@ public class DungeonScene : MonoBehaviour
         SceneManager.LoadScene(_preScene);
     }
 
-
     private IEnumerator ExecuteCombatComplete()
     {
-        yield return StartCoroutine(_dungeonGamePlayAction.Call("dungeon_combat_complete"));
+        yield return _dungeonGamePlayAction.Call("dungeon_combat_complete");
         if (!_dungeonGamePlayAction.RequestSuccess)
         {
-            Debug.LogError("ExecuteCombatComplete request failed");
             yield break;
         }
 
-        Debug.Log("ExecuteCombatComplete request success");
         UpdateTextFromAgentLogs();
     }
 
@@ -236,8 +237,42 @@ public class DungeonScene : MonoBehaviour
 
     private void UpdateDungeonDisplay()
     {
-        _mainText.text = MyUtils.MappingDisplayText( GameContext.Instance.Mapping) + "\n" + MyUtils.DungeonDisplayText(GameContext.Instance.Dungeon);
-        //MyUtils.DungeonDisplayRuntimeText(GameContext.Instance.Dungeon, GameContext.Instance.Mapping); ;
+        _mainText.text = MyUtils.MappingDisplayText(CurrentMapping()) + "\n" + MyUtils.DungeonCombatDisplayText(GameContext.Instance.Dungeon);
+        UpdateMonsterImage();
     }
 
+    private Dictionary<string, List<string>> CurrentMapping()
+    {
+        Dictionary<string, List<string>> currentMapping = new Dictionary<string, List<string>>();
+
+        var currentActorStage = MyUtils.GetActorLocation(GameContext.Instance.ActorName, GameContext.Instance.Mapping);
+        currentMapping[currentActorStage] = GameContext.Instance.Mapping[currentActorStage];
+
+        return currentMapping;
+    }
+
+
+    private void UpdateMonsterImage()
+    {
+        _imageOrc.SetActive(false);
+        _imageGoblin.SetActive(false);
+
+        var actors = MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping);
+        for (int i = 0; i < actors.Count; i++)
+        {
+            // TODO, 先这么招吧，无所谓的事。
+            if (actors[i].Contains("哥布林"))
+            {
+                _imageGoblin.SetActive(true);
+                _imageOrc.SetActive(false);
+                return;
+            }
+            else if (actors[i].Contains("兽人"))
+            {
+                _imageGoblin.SetActive(false);
+                _imageOrc.SetActive(true);
+                return;
+            }
+        }
+    }
 }

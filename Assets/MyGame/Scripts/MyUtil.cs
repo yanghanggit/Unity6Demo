@@ -24,16 +24,22 @@ public static class MyUtils
         return mapping_text;
     }
 
-    public static string DungeonDisplayText(Dungeon dungeon)
+    public static string DungeonOverviewDisplayText(Dungeon dungeon)
     {
         var dungeon_text = "";
-        dungeon_text += "Dungeon: " + dungeon.name + "\n";
+        dungeon_text += "地下城 = " + dungeon.name + "\n";
         for (int i = 0; i < dungeon.levels.Count; i++)
         {
-            dungeon_text += "Level " + (i + 1) + ": " + dungeon.levels[i].name + "\n";
-            dungeon_text += "Actors: " + string.Join(", ", dungeon.levels[i].actors.Select(a => a.name)) + "\n";
+            dungeon_text += "第" + (i + 1) + "关 = " + dungeon.levels[i].name + "\n";
+            dungeon_text += "怪物 = " + string.Join(", ", dungeon.levels[i].actors.Select(a => a.name)) + "\n";
         }
 
+        return dungeon_text;
+    }
+
+    public static string DungeonCombatDisplayText(Dungeon dungeon)
+    {
+        var dungeon_text = "";
         if (dungeon.engagement.combats.Count > 0)
         {
             var last_combat = dungeon.engagement.combats[dungeon.engagement.combats.Count - 1];

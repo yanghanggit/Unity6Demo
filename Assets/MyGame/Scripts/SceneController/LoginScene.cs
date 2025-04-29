@@ -53,14 +53,14 @@ public class LoginScene : MonoBehaviour
 
     private IEnumerator LoginThenStartNewGame(string userName, string gameName, string actorName)
     {
-        yield return StartCoroutine(_loginAction.Call(userName, gameName));
+        yield return _loginAction.Call(userName, gameName);
         if (!_loginAction.RequestSuccess)
         {
             Debug.LogError("Login failed");
             yield break;
         }
 
-        yield return StartCoroutine(_startAction.Call(actorName));
+        yield return _startAction.Call(actorName);
         if (!_startAction.RequestSuccess)
         {
             Debug.LogError("Start new game failed");

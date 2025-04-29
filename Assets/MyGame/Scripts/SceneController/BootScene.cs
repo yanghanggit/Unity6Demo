@@ -30,14 +30,14 @@ public class BootScene : MonoBehaviour
 
     private IEnumerator InitializeApiEndpoints()
     {
-        yield return StartCoroutine(_apiEndpointConfigurationAction.Call(_gameConfig.LocalNet));
+        yield return _apiEndpointConfigurationAction.Call(_gameConfig.LocalNet);
         if (_apiEndpointConfigurationAction.RequestSuccess)
         {
             _nextButton.gameObject.SetActive(true);
             yield break;
         }
 
-        yield return StartCoroutine(_apiEndpointConfigurationAction.Call(_gameConfig.LocalHost));
+        yield return _apiEndpointConfigurationAction.Call(_gameConfig.LocalHost);
         if (_apiEndpointConfigurationAction.RequestSuccess)
         {
             _nextButton.gameObject.SetActive(true);

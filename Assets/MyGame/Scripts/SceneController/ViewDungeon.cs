@@ -26,7 +26,7 @@ public class ViewDungeon : MonoBehaviour
 
     public void UpdateDungeonDisplay()
     {
-        _mainText.text = MyUtils.DungeonDisplayText(GameContext.Instance.Dungeon);
+        _mainText.text = MyUtils.DungeonOverviewDisplayText(GameContext.Instance.Dungeon);
     }
 
     public void OnClickTransDungeon()
@@ -41,7 +41,7 @@ public class ViewDungeon : MonoBehaviour
         {
             yield break;
         }
-        yield return StartCoroutine(_transDungeonAction.Call());
+        yield return _transDungeonAction.Call();
         if (!_transDungeonAction.RequestSuccess)
         {
             yield break;
