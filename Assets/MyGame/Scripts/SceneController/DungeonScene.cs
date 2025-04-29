@@ -236,7 +236,8 @@ public class DungeonScene : MonoBehaviour
 
     private void UpdateDungeonDisplay()
     {
-        _mainText.text = MyUtils.DungeonDisplayText(GameContext.Instance.Dungeon, GameContext.Instance.Mapping); ;
+        _mainText.text = MyUtils.MappingDisplayText( GameContext.Instance.Mapping) + "\n" + MyUtils.DungeonDisplayText(GameContext.Instance.Dungeon);
+        //MyUtils.DungeonDisplayRuntimeText(GameContext.Instance.Dungeon, GameContext.Instance.Mapping); ;
     }
 
 }

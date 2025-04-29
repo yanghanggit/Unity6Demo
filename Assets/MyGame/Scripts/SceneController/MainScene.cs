@@ -136,20 +136,21 @@ public class MainScene : MonoBehaviour
 
     IEnumerator ExecuteViewDungeon()
     {
-        if (_viewDungeonAction == null)
-        {
-            Debug.LogError("ViewDungeonAction is null");
-            yield break;
-        }
+        // if (_viewDungeonAction == null)
+        // {
+        //     Debug.LogError("ViewDungeonAction is null");
+        //     yield break;
+        // }
         yield return StartCoroutine(_viewDungeonAction.Call());
         if (!_viewDungeonAction.RequestSuccess)
         {
-            Debug.LogError("ViewDungeonAction request failed");
+            //Debug.LogError("ViewDungeonAction request failed");
             yield break;
         }
 
-        Debug.Log("ExecuteViewDungeon request success!!!!!!");
-        _viewDungeonController.OnClickOpen();
+        //Debug.Log("ExecuteViewDungeon request success!!!!!!");
+        _viewDungeonController.gameObject.SetActive(true);
+        _viewDungeonController.UpdateDungeonDisplay();
     }
 
     // IEnumerator ExecuteViewHome()

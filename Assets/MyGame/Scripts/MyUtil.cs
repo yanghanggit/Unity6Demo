@@ -24,7 +24,7 @@ public static class MyUtils
         return mapping_text;
     }
 
-    public static string DungeonDisplayText(Dungeon dungeon, Dictionary<string, List<string>> mapping)
+    public static string DungeonDisplayText(Dungeon dungeon)
     {
         var dungeon_text = "";
         dungeon_text += "Dungeon: " + dungeon.name + "\n";
@@ -50,7 +50,7 @@ public static class MyUtils
             }
         }
 
-        return MappingDisplayText(mapping) + "\n" + dungeon_text;
+        return dungeon_text;
     }
 
     public static string GetActorLocation(string actor, Dictionary<string, List<string>> mapping)
@@ -106,17 +106,21 @@ public static class MyUtils
                         $" Magic Attack:{rpgCharacterProfile.magic_attack}," +
                         $" Magic Defense:{rpgCharacterProfile.magic_defense}\n";
 
-                rpgCharacterProfileText += "Status Effects: ";
-                for (int j = 0; j < rpgCharacterProfileComponent.status_effects.Count; j++)
+                if (rpgCharacterProfileComponent.status_effects.Count > 0)
                 {
-                    var statusEffect = rpgCharacterProfileComponent.status_effects[j];
-                    rpgCharacterProfileText += $"{statusEffect.name} ({statusEffect.description}, {statusEffect.rounds})";
-                    if (j < rpgCharacterProfileComponent.status_effects.Count - 1)
+                    rpgCharacterProfileText += "Status Effects: ";
+                    for (int j = 0; j < rpgCharacterProfileComponent.status_effects.Count; j++)
                     {
-                        rpgCharacterProfileText += ", ";
+                        var statusEffect = rpgCharacterProfileComponent.status_effects[j];
+                        rpgCharacterProfileText += $"{statusEffect.name} ({statusEffect.description}, {statusEffect.rounds})";
+                        if (j < rpgCharacterProfileComponent.status_effects.Count - 1)
+                        {
+                            rpgCharacterProfileText += ", ";
+                        }
                     }
+                    rpgCharacterProfileText += "\n";
                 }
-                rpgCharacterProfileText += "\n";
+            
                 ret += rpgCharacterProfileText;
             }
             else if (component.name == typeof(HandComponent).Name)
