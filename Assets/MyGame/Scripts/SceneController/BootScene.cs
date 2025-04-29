@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
-using TMPro;
-using Newtonsoft.Json;
+using UnityEngine.UI;
 
 public class BootScene : MonoBehaviour
 {
@@ -12,25 +11,20 @@ public class BootScene : MonoBehaviour
 
     public GameConfig _gameConfig;
 
-    public TMP_Text _mainText;
-
-    private bool _isInitialized = false;
+    public Button _nextButton;
 
     void Start()
     {
         Debug.Assert(_apiEndpointConfigurationAction != null, "_bootAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
-        Debug.Assert(_mainText != null, "_mainText is null");
+        Debug.Assert(_nextButton != null, "_nextButton is null");
+
+        _nextButton.gameObject.SetActive(false);
         StartCoroutine(InitializeApiEndpoints());
     }
 
     public void OnClickNextSceneLogin()
     {
-        if (!_isInitialized)
-        {
-            Debug.LogError("Game is not initialized");
-            return;
-        }
         StartCoroutine(LoadNextScene());
     }
 
@@ -39,20 +33,16 @@ public class BootScene : MonoBehaviour
         yield return StartCoroutine(_apiEndpointConfigurationAction.Call(_gameConfig.LocalNet));
         if (_apiEndpointConfigurationAction.RequestSuccess)
         {
-            _isInitialized = true;
-            _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);
+            _nextButton.gameObject.SetActive(true);
             yield break;
         }
 
         yield return StartCoroutine(_apiEndpointConfigurationAction.Call(_gameConfig.LocalHost));
         if (_apiEndpointConfigurationAction.RequestSuccess)
         {
-            _isInitialized = true;
-            _mainText.text = JsonConvert.SerializeObject(GameContext.Instance.ApiEndpointConfiguration);
+            _nextButton.gameObject.SetActive(true);
             yield break;
         }
-
-        _mainText.text = "Failed to load API routes";
     }
 
     private IEnumerator LoadNextScene()
