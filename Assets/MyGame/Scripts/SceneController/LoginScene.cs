@@ -19,6 +19,8 @@ public class LoginScene : MonoBehaviour
 
     public GameConfig _gameConfig;
 
+    private string _playerIdentifier;
+
 
     void Start()
     {
@@ -29,10 +31,10 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_startAction != null, "_startAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
 
-
-        _textUserName.text = CreateRandomPlayerIdentifier();
-        _textGameName.text = _gameConfig.GameName;
-        _textActorName.text = _gameConfig.ActorName;
+        _playerIdentifier = CreateRandomPlayerIdentifier();
+        _textUserName.text = "ID = " + _playerIdentifier;
+        _textGameName.text = "测试的游戏 = " + _gameConfig.GameName;
+        _textActorName.text = "扮演角色 = " + _gameConfig.ActorName;
     }
 
     private string CreateRandomPlayerIdentifier()
@@ -46,7 +48,7 @@ public class LoginScene : MonoBehaviour
     public void OnClickLoginThenStartNewGame()
     {
         Debug.Log("OnClickLoginThenStartNewGame");
-        StartCoroutine(LoginThenStartNewGame(_textUserName.text, _textGameName.text, _textActorName.text));
+        StartCoroutine(LoginThenStartNewGame(_playerIdentifier, _gameConfig.GameName, _gameConfig.ActorName));
     }
 
     private IEnumerator LoginThenStartNewGame(string userName, string gameName, string actorName)

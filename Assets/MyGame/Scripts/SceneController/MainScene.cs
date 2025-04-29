@@ -40,32 +40,30 @@ public class MainScene : MonoBehaviour
         Debug.Assert(_homePlayerInput != null, "_homePlayerInput is null");
 
         // 启动的时候，第一次显示内容。
-        UpdatePlayerControlText();
+        //UpdatePlayerControlText();
 
         // 先关了
         _viewDungeonController.gameObject.SetActive(false);
         _homePlayerInput.gameObject.SetActive(false);
+
+
+        StartCoroutine(ExecuteViewHomeAndActors());
     }
 
-    private void UpdatePlayerControlText()
-    {
-        _mainText.text = "玩家控制角色: " + GameContext.Instance.ActorName + "\n";
-    }
+    // private void UpdatePlayerControlText()
+    // {
+    //     _mainText.text = "玩家控制角色: " + GameContext.Instance.ActorName + "\n";
+    // }
 
     public void UpdateTextFromAgentLogs()
     {
         _mainText.text = MyUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
     }
 
-    private void UpdateMappingInfoText()
-    {
-        _mainText.text = MyUtils.MappingDisplayText(GameContext.Instance.Mapping);
-    }
-
-    void Update()
-    {
-
-    }
+    // private void UpdateMappingInfoText()
+    // {
+    //     _mainText.text = MyUtils.MappingDisplayText(GameContext.Instance.Mapping);
+    // }
 
     public void OnClickBack()
     {
@@ -89,14 +87,14 @@ public class MainScene : MonoBehaviour
     public void OnClickViewHome()
     {
         Debug.Log("OnClickViewHome");
-        StartCoroutine(ExecuteViewHome());
+        StartCoroutine(ExecuteViewHomeAndActors());
     }
 
-    public void OnClickViewActor()
-    {
-        Debug.Log("OnClickViewActor");
-        StartCoroutine(ExecuteViewActor());
-    }
+    // public void OnClickViewActor()
+    // {
+    //     Debug.Log("OnClickViewActor");
+    //     StartCoroutine(ExecuteViewActor());
+    // }
 
     public void OnClickOpenHomePlayerInput()
     {
@@ -154,40 +152,73 @@ public class MainScene : MonoBehaviour
         _viewDungeonController.OnClickOpen();
     }
 
-    IEnumerator ExecuteViewHome()
+    // IEnumerator ExecuteViewHome()
+    // {
+    //     yield return StartCoroutine(_viewHomeAction.Call());
+    //     if (!_viewHomeAction.RequestSuccess)
+    //     {
+    //         Debug.LogError("ViewHomeAction request failed");
+    //         yield break;
+    //     }
+
+    //     Debug.Log("ExecuteViewHome request success!!!!!!");
+    //     UpdateMappingInfoText();
+    // }
+
+    // private IEnumerator ExecuteViewActor()
+    // {
+    //     yield return StartCoroutine(_viewActorAction.Call(
+    //         MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
+
+    //     if (!_viewActorAction.RequestSuccess)
+    //     {
+    //         Debug.LogError("ViewActorAction request failed");
+    //         yield break;
+    //     }
+
+    //     Debug.Log("ExecuteViewActor request success!!!!!!");
+    //     //UpdateActorDisplay(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
+    //      _mainText.text = ActorDisplayString(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
+    // }
+
+    private IEnumerator ExecuteViewHomeAndActors()
     {
-        if (_viewHomeAction == null)
-        {
-            Debug.LogError("ViewHomeAction is null");
-            yield break;
-        }
         yield return StartCoroutine(_viewHomeAction.Call());
         if (!_viewHomeAction.RequestSuccess)
         {
-            Debug.LogError("ViewHomeAction request failed");
             yield break;
         }
 
-        Debug.Log("ExecuteViewHome request success!!!!!!");
-        UpdateMappingInfoText();
-    }
-
-    private IEnumerator ExecuteViewActor()
-    {
         yield return StartCoroutine(_viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping)));
 
         if (!_viewActorAction.RequestSuccess)
         {
-            Debug.LogError("ViewActorAction request failed");
             yield break;
         }
 
-        Debug.Log("ExecuteViewActor request success!!!!!!");
-        UpdateActorDisplay(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
+        Debug.Log("ExecuteViewHomeAndActors request success!!!!!!");
+        var text0 = "你 = " + GameContext.Instance.ActorName;
+        var text1 = MyUtils.MappingDisplayText(GameContext.Instance.Mapping);
+        var text2 = ComposeActorInfoString(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
+        _mainText.text = text0 + "\n" + text1 + "\n" + text2;
     }
 
-    private void UpdateActorDisplay(HashSet<string> includedComponentNames = null)
+    // private void UpdateActorDisplay(HashSet<string> includedComponentNames = null)
+    // {
+    //     var text = "";
+
+    //     var actorSnapshots = GameContext.Instance.ActorSnapshots;
+    //     for (int i = 0; i < actorSnapshots.Count; i++)
+    //     {
+    //         var actorSnapshot = actorSnapshots[i];
+    //         text += MyUtils.ActorDisplayText(actorSnapshot, includedComponentNames);
+    //         text += "\n";
+    //     }
+    //     _mainText.text = ActorDisplayString(includedComponentNames);
+    // }
+
+    private string ComposeActorInfoString(HashSet<string> includedComponentNames = null)
     {
         var text = "";
 
@@ -198,6 +229,6 @@ public class MainScene : MonoBehaviour
             text += MyUtils.ActorDisplayText(actorSnapshot, includedComponentNames);
             text += "\n";
         }
-        _mainText.text = text;
+        return text;
     }
 }
