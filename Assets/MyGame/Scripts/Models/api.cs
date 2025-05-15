@@ -1,30 +1,15 @@
 using System.Collections.Generic;
 
 /**
- * GameContext class to manage game state and API endpoint configuration.
+ * URL configuration request/response classes.
  */
 [System.Serializable]
-public class APIEndpointConfiguration
+public class URLConfigurationResponse
 {
-    public string TEST_URL = "";
-    public string LOGIN_URL = "";
-    public string LOGOUT_URL = "";
-    public string START_URL = "";
-    public string HOME_GAMEPLAY_URL = "";
-    public string HOME_TRANS_DUNGEON_URL = "";
-    public string DUNGEON_GAMEPLAY_URL = "";
-    public string DUNGEON_TRANS_HOME_URL = "";
-    public string VIEW_HOME_URL = "";
-    public string VIEW_DUNGEON_URL = "";
-    public string VIEW_ACTOR_URL = "";
-}
-
-[System.Serializable]
-public class APIEndpointConfigurationResponse
-{
-    public APIEndpointConfiguration api_endpoints = new APIEndpointConfiguration();
-    public int error = 0;
-    public string message = "";
+    public string api_version = "";
+    public Dictionary<string, string> endpoints = new Dictionary<string, string>();
+    public bool deprecated = false;
+    public string notice = "";
 }
 
 /**

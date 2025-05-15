@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 815172f9b24e240dda66c3d65ce0cb4e, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
-  UserName: yanghang
   GameName: Game1
   ActorName: "\u89D2\u8272.\u6218\u58EB.\u5361\u6069"
   AllyName: "\u89D2\u8272.\u6CD5\u5E08.\u5965\u9732\u5A1C"
-  LocalHost: http://127.0.0.1:8000/api_endpoints/v1/
-  LocalNet: http://192.168.192.104:8000/api_endpoints/v1/
+  LocalHost: http://127.0.0.1:8000/config
+  LocalNet: http://192.168.192.100:8000/config

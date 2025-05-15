@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using Newtonsoft.Json;
 
-public class ApiEndpointConfigurationAction : RequestAction
+public class GetURLConfigurationAction : RequestAction
 {
     public IEnumerator Call(string apiEndpointUrl)
     {
@@ -13,7 +13,7 @@ public class ApiEndpointConfigurationAction : RequestAction
         yield return GetRequest(apiEndpointUrl);
 
         // 解析响应数据。
-        var response = JsonConvert.DeserializeObject<APIEndpointConfigurationResponse>(DownloadHandlerResponseText);
+        var response = JsonConvert.DeserializeObject<URLConfigurationResponse>(DownloadHandlerResponseText);
         if (response == null)
         {
             Debug.LogError("ApiEndpointConfigurationAction:Request response is null");
@@ -21,20 +21,18 @@ public class ApiEndpointConfigurationAction : RequestAction
         }
 
         // 检查响应数据。
-        if (response.error != 0)
+        if (response.api_version == "")
         {
-            Debug.LogError("ApiEndpointConfigurationAction.error = " + response.error);
-            Debug.LogError("ApiEndpointConfigurationAction.message = " + response.message);
             yield break;
         }
 
         //
-        Debug.Log("ApiEndpointConfigurationAction.message = " + response.message);
+        Debug.Log("URLConfiguration = " + DownloadHandlerResponseText);
 
         // 标记成功。
         MarkRequestAsSuccessful();
 
         // 设置 API 端点配置。
-        GameContext.Instance.ApiEndpointConfiguration = response.api_endpoints;
+        GameContext.Instance.URLConfiguration = response;
     }
 }
