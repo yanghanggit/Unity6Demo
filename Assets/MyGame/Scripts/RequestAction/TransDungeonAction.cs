@@ -184,15 +184,7 @@ public class TransDungeonAction : BaseRequestAction
                 Debug.LogError("TransDungeonAction response is null");
                 return false;
             }
-
-            // 检查响应数据
-            if (response.error != 0)
-            {
-                Debug.LogError($"TransDungeonAction.error = {response.error}");
-                Debug.LogError($"TransDungeonAction.message = {response.message}");
-                return false;
-            }
-
+            
             Debug.Log($"TransDungeonAction.message = {response.message}");
             
             return true;

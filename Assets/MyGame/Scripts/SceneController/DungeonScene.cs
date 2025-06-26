@@ -186,7 +186,7 @@ public class DungeonScene : MonoBehaviour
         }
 
         UpdateTextFromAgentLogs();
-        _mainText.text = _mainText.text + "\n" + _dungeonGamePlayAction.ResponseMessage;
+        _mainText.text = _mainText.text + "\n" + "已进入下一个地下城";
 
         yield return ExecuteViewDungeon();
     }

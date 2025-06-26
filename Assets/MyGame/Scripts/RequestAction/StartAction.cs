@@ -187,14 +187,6 @@ public class StartAction : BaseRequestAction
                 return false;
             }
 
-            // 检查响应数据
-            if (response.error != 0)
-            {
-                Debug.LogError($"StartAction.error = {response.error}");
-                Debug.LogError($"StartAction.message = {response.message}");
-                return false;
-            }
-
             Debug.Log($"StartAction.message = {response.message}");
 
             // 设置角色名称

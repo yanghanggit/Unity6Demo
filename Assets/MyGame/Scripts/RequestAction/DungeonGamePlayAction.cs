@@ -17,17 +17,6 @@ public class DungeonGamePlayAction : BaseRequestAction
     
     public bool LastRequestSuccess => _lastRequestSuccess;
     
-    public string ResponseMessage
-    {
-        get
-        {
-            if (_response == null)
-            {
-                return "";
-            }
-            return _response.message;
-        }
-    }
 
     public void ResetStatus()
     {
@@ -219,16 +208,6 @@ public class DungeonGamePlayAction : BaseRequestAction
                 Debug.LogError("DungeonGamePlayAction response is null");
                 return false;
             }
-
-            // 检查响应数据
-            if (_response.error != 0)
-            {
-                Debug.LogError($"DungeonGamePlayAction.error = {_response.error}");
-                Debug.LogError($"DungeonGamePlayAction.message = {_response.message}");
-                return false;
-            }
-
-            Debug.Log($"DungeonGamePlayAction.message = {_response.message}");
 
             // 设置游戏状态
             GameContext.Instance.ProcessClientMessages(_response.client_messages);

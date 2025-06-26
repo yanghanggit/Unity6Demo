@@ -169,16 +169,6 @@ public class ViewDungeonAction : BaseRequestAction
                 return false;
             }
 
-            // 检查响应数据
-            if (response.error != 0)
-            {
-                Debug.LogError($"ViewDungeonAction.error = {response.error}");
-                Debug.LogError($"ViewDungeonAction.message = {response.message}");
-                return false;
-            }
-
-            Debug.Log($"ViewDungeonAction.message = {response.message}");
-
             // 设置游戏上下文
             GameContext.Instance.Mapping = response.mapping;
             GameContext.Instance.Dungeon = response.dungeon;

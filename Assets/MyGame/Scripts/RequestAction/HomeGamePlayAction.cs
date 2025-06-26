@@ -198,15 +198,6 @@ public class HomeGamePlayAction : BaseRequestAction
                 return false;
             }
 
-            if (response.error != 0)
-            {
-                Debug.LogError($"HomeGamePlayAction.error = {response.error}");
-                Debug.LogError($"HomeGamePlayAction.message = {response.message}");
-                return false;
-            }
-
-            Debug.Log($"HomeGamePlayAction.message = {response.message}");
-
             // 设置游戏状态
             GameContext.Instance.ProcessClientMessages(response.client_messages);
             

@@ -176,14 +176,7 @@ public class LoginAction : BaseRequestAction
                 Debug.LogError("LoginAction response is null");
                 return false;
             }
-
-            if (response.error != 0)
-            {
-                Debug.LogError($"LoginAction.error = {response.error}");
-                Debug.LogError($"LoginAction.message = {response.message}");
-                return false;
-            }
-
+            
             Debug.Log($"LoginAction.message = {response.message}");
 
             // 设置登录信息

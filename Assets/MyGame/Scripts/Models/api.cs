@@ -18,29 +18,27 @@ public class URLConfigurationResponse
 [System.Serializable]
 public class LoginRequest
 {
-    public string user_name = "";
-    public string game_name = "";
+    public string user_name;
+    public string game_name;
 }
 
 [System.Serializable]
 public class LoginResponse
 {
-    public int error = 0;
-    public string message = "";
+    public string message;
 }
 
 [System.Serializable]
 public class LogoutRequest
 {
-    public string user_name = "";
-    public string game_name = "";
+    public string user_name;
+    public string game_name;
 }
 
 [System.Serializable]
 public class LogoutResponse
 {
-    public int error = 0;
-    public string message = "";
+    public string message;
 }
 
 /**
@@ -49,16 +47,15 @@ public class LogoutResponse
 [System.Serializable]
 public class StartRequest
 {
-    public string user_name = "";
-    public string game_name = "";
-    public string actor_name = "";
+    public string user_name;
+    public string game_name;
+    public string actor_name;
 }
 
 [System.Serializable]
 public class StartResponse
 {
-    public int error = 0;
-    public string message = "";
+    public string message;
 }
 
 /**
@@ -67,25 +64,23 @@ public class StartResponse
 [System.Serializable]
 public class HomeGamePlayUserInput
 {
-    public string tag = "";
-    public Dictionary<string, string> data = new Dictionary<string, string>();
+    public string tag;
+    public Dictionary<string, string> data;
 }
 
 [System.Serializable]
 public class HomeGamePlayRequest
 {
-    public string user_name = "";
-    public string game_name = "";
-    public HomeGamePlayUserInput user_input = new HomeGamePlayUserInput();
+    public string user_name;
+    public string game_name;
+    public HomeGamePlayUserInput user_input;
 }
 
 
 [System.Serializable]
 public class HomeGamePlayResponse
 {
-    public List<ClientMessage> client_messages = new List<ClientMessage>();
-    public int error = 0;
-    public string message = "";
+    public List<ClientMessage> client_messages;
 }
 
 /**
@@ -94,15 +89,14 @@ public class HomeGamePlayResponse
 [System.Serializable]
 public class HomeTransDungeonRequest
 {
-    public string user_name = "";
-    public string game_name = "";
+    public string user_name;
+    public string game_name;
 }
 
 [System.Serializable]
 public class HomeTransDungeonResponse
 {
-    public int error = 0;
-    public string message = "";
+    public string message;
 }
 
 /**
@@ -110,8 +104,8 @@ public class HomeTransDungeonResponse
 [System.Serializable]
 public class DungeonTransHomeRequest
 {
-    public string user_name = "";
-    public string game_name = "";
+    public string user_name;
+    public string game_name;
 }
 
 /**
@@ -119,8 +113,7 @@ public class DungeonTransHomeRequest
 [System.Serializable]
 public class DungeonTransHomeResponse
 {
-    public int error = 0;
-    public string message = "";
+    public string message;
 }
 
 /**
@@ -130,26 +123,24 @@ public class DungeonTransHomeResponse
 [System.Serializable]
 public class DungeonGamePlayUserInput
 {
-    public string tag = "";
+    public string tag;
 
-    public Dictionary<string, string> data = new Dictionary<string, string>();
+    public Dictionary<string, string> data;
 }
 
 
 [System.Serializable]
 public class DungeonGamePlayRequest
 {
-    public string user_name = "";
-    public string game_name = "";
-    public DungeonGamePlayUserInput user_input = new DungeonGamePlayUserInput();
+    public string user_name;
+    public string game_name;
+    public DungeonGamePlayUserInput user_input;
 }
 
 [System.Serializable]
 public class DungeonGamePlayResponse
 {
-    public List<ClientMessage> client_messages = new List<ClientMessage>();
-    public int error = 0;
-    public string message = "";
+    public List<ClientMessage> client_messages;
 }
 
 /** * 
@@ -158,10 +149,8 @@ Dungeon view request/response classes.
 [System.Serializable]
 public class ViewDungeonResponse
 {
-    public Dictionary<string, List<string>> mapping = new Dictionary<string, List<string>>();
-    public Dungeon dungeon = new Dungeon();
-    public int error = 0;
-    public string message = "";
+    public Dictionary<string, List<string>> mapping;
+    public Dungeon dungeon;
 }
 
 /**
@@ -170,9 +159,7 @@ public class ViewDungeonResponse
 [System.Serializable]
 public class ViewHomeResponse
 {
-    public Dictionary<string, List<string>> mapping = new Dictionary<string, List<string>>();
-    public int error = 0;
-    public string message = "";
+    public Dictionary<string, List<string>> mapping;
 }
 
 /**
@@ -182,11 +169,7 @@ public class ViewHomeResponse
 [System.Serializable]
 public class ViewActorResponse
 {
-    public List<EntitySnapshot> actor_snapshots = new List<EntitySnapshot>();
+    public List<EntitySnapshot> actor_snapshots;
 
-    public List<AgentShortTermMemory> agent_short_term_memories = new List<AgentShortTermMemory>();
-
-    public int error = 0;
-
-    public string message = "";
+    public List<AgentShortTermMemory> agent_short_term_memories;
 }

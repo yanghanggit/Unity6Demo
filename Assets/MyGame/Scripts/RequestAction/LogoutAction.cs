@@ -185,14 +185,6 @@ public class LogoutAction : BaseRequestAction
                 return false;
             }
 
-            // 检查响应数据
-            if (response.error != 0)
-            {
-                Debug.LogError($"LogoutAction.error = {response.error}");
-                Debug.LogError($"LogoutAction.message = {response.message}");
-                return false;
-            }
-
             Debug.Log($"LogoutAction.message = {response.message}");
 
             // 清除登录信息

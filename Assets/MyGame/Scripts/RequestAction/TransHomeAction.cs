@@ -185,14 +185,6 @@ public class TransHomeAction : BaseRequestAction
                 return false;
             }
 
-            // 检查响应数据
-            if (response.error != 0)
-            {
-                Debug.LogError($"TransHomeAction.error = {response.error}");
-                Debug.LogError($"TransHomeAction.message = {response.message}");
-                return false;
-            }
-
             Debug.Log($"TransHomeAction.message = {response.message}");
             
             return true;

@@ -200,15 +200,6 @@ public class ViewActorAction : BaseRequestAction
                 return false;
             }
 
-            if (response.error != 0)
-            {
-                Debug.LogError($"ViewActorAction.error = {response.error}");
-                Debug.LogError($"ViewActorAction.message = {response.message}");
-                return false;
-            }
-
-            Debug.Log($"ViewActorAction.message = {response.message}");
-
             // 更新游戏上下文中的角色快照
             GameContext.Instance.ActorSnapshots = response.actor_snapshots;
             GameContext.Instance.AgentShortTermMemories = response.agent_short_term_memories;
