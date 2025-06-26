@@ -7,7 +7,7 @@ public class BootScene : MonoBehaviour
 {
     public string _nextScene = "LoginScene";
 
-    public ImprovedGetURLConfigurationAction _getUrlConfigurationAction;
+    public GetURLConfigurationAction _getUrlConfigurationAction;
 
     public GameConfig _gameConfig;
 

@@ -19,7 +19,7 @@ using System.Threading.Tasks;
  * - 支持 async/await（Unity 6+）
  * - WebGL 兼容性
  */
-public class ImprovedRequestAction : MonoBehaviour
+public class BaseRequestAction : MonoBehaviour
 {
     [Header("配置")]
     [SerializeField] private float requestTimeout = 30f; // 请求超时时间（秒）
