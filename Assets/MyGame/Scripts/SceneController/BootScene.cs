@@ -7,7 +7,7 @@ public class BootScene : MonoBehaviour
 {
     public string _nextScene = "LoginScene";
 
-    public GetURLConfigurationAction _apiEndpointConfigurationAction;
+    public ImprovedGetURLConfigurationAction _getUrlConfigurationAction;
 
     public GameConfig _gameConfig;
 
@@ -15,7 +15,7 @@ public class BootScene : MonoBehaviour
 
     void Start()
     {
-        Debug.Assert(_apiEndpointConfigurationAction != null, "_bootAction is null");
+        Debug.Assert(_getUrlConfigurationAction != null, "_bootAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
         Debug.Assert(_nextButton != null, "_nextButton is null");
 
@@ -30,15 +30,15 @@ public class BootScene : MonoBehaviour
 
     private IEnumerator InitializeApiEndpoints()
     {
-        yield return _apiEndpointConfigurationAction.Call(_gameConfig.LocalNet);
-        if (_apiEndpointConfigurationAction.RequestSuccess)
+        yield return _getUrlConfigurationAction.Call(_gameConfig.LocalNet);
+        if (_getUrlConfigurationAction.LastRequestSuccess)
         {
             _nextButton.gameObject.SetActive(true);
             yield break;
         }
 
-        yield return _apiEndpointConfigurationAction.Call(_gameConfig.LocalHost);
-        if (_apiEndpointConfigurationAction.RequestSuccess)
+        yield return _getUrlConfigurationAction.Call(_gameConfig.LocalHost);
+        if (_getUrlConfigurationAction.LastRequestSuccess)
         {
             _nextButton.gameObject.SetActive(true);
             yield break;

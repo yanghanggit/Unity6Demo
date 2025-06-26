@@ -480,6 +480,7 @@ GameObject:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
   - component: {fileID: 399892902}
+  - component: {fileID: 399892903}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -515,7 +516,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _nextScene: LoginScene
-  _apiEndpointConfigurationAction: {fileID: 399892902}
+  _getUrlConfigurationAction: {fileID: 399892903}
   _gameConfig: {fileID: 11400000, guid: 54707035bd7b4439aa2c9b6d574b5a61, type: 2}
   _nextButton: {fileID: 1202936521}
 --- !u!114 &399892902
@@ -530,6 +531,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aafa339ef753149bf9eec49e6caf93ba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _requestSuccess: 0
+  _downloadHandlerResponseText: 
+--- !u!114 &399892903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a7b5dd5509e64e62b643ddf639ea270, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!1 &524838950
 GameObject:
   m_ObjectHideFlags: 0
