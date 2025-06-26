@@ -92,7 +92,7 @@ public class HomePlayerInput : MonoBehaviour
         player_input_data["content"] = content;
 
         yield return _homeGamePlayAction.Call("/speak", player_input_data);
-        if (!_homeGamePlayAction.RequestSuccess)
+        if (!_homeGamePlayAction.LastRequestSuccess)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
@@ -104,7 +104,7 @@ public class HomePlayerInput : MonoBehaviour
     private IEnumerator ExecuteHomeGameplayAdvancing()
     {
         yield return _homeGamePlayAction.Call("/advancing");
-        if (!_homeGamePlayAction.RequestSuccess)
+        if (!_homeGamePlayAction.LastRequestSuccess)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;

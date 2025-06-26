@@ -72,7 +72,7 @@ public class XCardEditor : MonoBehaviour
         data["description"] = skillDescription;
         data["effect"] = skillEffect;
         yield return _dungeonGamePlayAction.Call("x_card", data);
-        if (!_dungeonGamePlayAction.RequestSuccess)
+        if (!_dungeonGamePlayAction.LastRequestSuccess)
         {
             Debug.LogError("ExecuteXCard request failed");
             yield break;

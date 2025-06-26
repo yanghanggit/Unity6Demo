@@ -290,7 +290,7 @@ public class BaseRequestAction : MonoBehaviour
     /// <summary>
     /// 构建带查询参数的 URL
     /// </summary>
-    public static string BuildUrlWithQueryParams(string baseUrl, Dictionary<string, string> parameters)
+    public static string BuildUrlWithQueryParams(string baseUrl, List<KeyValuePair<string, string>> parameters)
     {
         if (parameters == null || parameters.Count == 0)
             return baseUrl;

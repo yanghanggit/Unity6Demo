@@ -42,7 +42,7 @@ public class ViewDungeon : MonoBehaviour
             yield break;
         }
         yield return _transDungeonAction.Call();
-        if (!_transDungeonAction.RequestSuccess)
+        if (!_transDungeonAction.LastRequestSuccess)
         {
             yield break;
         }

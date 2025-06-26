@@ -87,7 +87,7 @@ public class MainScene : MonoBehaviour
     {
         yield return _logoutAction.Call();
 
-        if (!_logoutAction.RequestSuccess)
+        if (!_logoutAction.LastRequestSuccess)
         {
             Debug.LogError("LogoutAction request failed");
             yield break;
@@ -99,7 +99,7 @@ public class MainScene : MonoBehaviour
     IEnumerator ExecuteHomeGameplayAdvancing()
     {
         yield return _homeGamePlayAction.Call("/advancing");
-        if (!_homeGamePlayAction.RequestSuccess)
+        if (!_homeGamePlayAction.LastRequestSuccess)
         {
             yield break;
         }
@@ -110,7 +110,7 @@ public class MainScene : MonoBehaviour
     IEnumerator ExecuteViewDungeon()
     {
         yield return _viewDungeonAction.Call();
-        if (!_viewDungeonAction.RequestSuccess)
+        if (!_viewDungeonAction.LastRequestSuccess)
         {
             yield break;
         }
@@ -121,7 +121,7 @@ public class MainScene : MonoBehaviour
     private IEnumerator ExecuteViewHomeAndActors()
     {
         yield return _viewHomeAction.Call();
-        if (!_viewHomeAction.RequestSuccess)
+        if (!_viewHomeAction.LastRequestSuccess)
         {
             yield break;
         }
@@ -129,7 +129,7 @@ public class MainScene : MonoBehaviour
         yield return _viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (!_viewActorAction.RequestSuccess)
+        if (!_viewActorAction.LastRequestSuccess)
         {
             yield break;
         }

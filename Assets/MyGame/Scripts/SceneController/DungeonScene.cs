@@ -102,7 +102,7 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteDungeonCombatKickOff()
     {
         yield return _dungeonGamePlayAction.Call("dungeon_combat_kick_off");
-        if (!_dungeonGamePlayAction.RequestSuccess)
+        if (!_dungeonGamePlayAction.LastRequestSuccess)
         {
             yield break;
         }
@@ -113,7 +113,7 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteDrawCards()
     {
         yield return _dungeonGamePlayAction.Call("draw_cards");
-        if (!_dungeonGamePlayAction.RequestSuccess)
+        if (!_dungeonGamePlayAction.LastRequestSuccess)
         {
             Debug.LogError("ExecuteDrawCards request failed");
             yield break;
@@ -122,7 +122,7 @@ public class DungeonScene : MonoBehaviour
         yield return _viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (!_viewActorAction.RequestSuccess)
+        if (!_viewActorAction.LastRequestSuccess)
         {
             Debug.LogError("ViewActorAction request failed");
             yield break;
@@ -135,7 +135,7 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecutePlayCards()
     {
         yield return _dungeonGamePlayAction.Call("play_cards");
-        if (!_dungeonGamePlayAction.RequestSuccess)
+        if (!_dungeonGamePlayAction.LastRequestSuccess)
         {
             Debug.LogError("ExecutePlayCards request failed");
             yield break;
@@ -148,7 +148,7 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteViewDungeon()
     {
         yield return _viewDungeonAction.Call();
-        if (!_viewDungeonAction.RequestSuccess)
+        if (!_viewDungeonAction.LastRequestSuccess)
         {
             yield break;
         }
@@ -156,7 +156,7 @@ public class DungeonScene : MonoBehaviour
         yield return _viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (!_viewActorAction.RequestSuccess)
+        if (!_viewActorAction.LastRequestSuccess)
         {
             yield break;
         }
@@ -169,7 +169,7 @@ public class DungeonScene : MonoBehaviour
         yield return _viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (!_viewActorAction.RequestSuccess)
+        if (!_viewActorAction.LastRequestSuccess)
         {
             yield break;
         }
@@ -180,7 +180,7 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteAdvanceNextDungeon()
     {
         yield return _dungeonGamePlayAction.Call("advance_next_dungeon");
-        if (!_dungeonGamePlayAction.RequestSuccess)
+        if (!_dungeonGamePlayAction.LastRequestSuccess)
         {
             yield break;
         }
@@ -195,7 +195,7 @@ public class DungeonScene : MonoBehaviour
     {
         Debug.Log("ExecuteBackHome");
         yield return _transHomeAction.Call();
-        if (!_transHomeAction.RequestSuccess)
+        if (!_transHomeAction.LastRequestSuccess)
         {
             Debug.LogError("TransHomeAction request failed");
             yield break;
@@ -208,7 +208,7 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteCombatComplete()
     {
         yield return _dungeonGamePlayAction.Call("dungeon_combat_complete");
-        if (!_dungeonGamePlayAction.RequestSuccess)
+        if (!_dungeonGamePlayAction.LastRequestSuccess)
         {
             yield break;
         }
