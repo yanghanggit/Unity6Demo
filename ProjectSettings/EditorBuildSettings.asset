@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/MyGame/Scenes/RemoteImageLoadScene.unity
+    guid: 172a85f1299fd4e088bd3fb1836719e3
+  - enabled: 1
     path: Assets/MyGame/Scenes/BootScene.unity
     guid: 1da0a22f461f045ebae25a418a239716
   - enabled: 1
