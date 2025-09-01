@@ -522,16 +522,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9be7965c3a5c45b3bbf61ed1904efb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetImage: {fileID: 0}
-  imageUrl: 
-  _startButton: {fileID: 0}
-  _generateSingleButton: {fileID: 0}
-  _generateBatchButton: {fileID: 0}
-  _loadTextureAction: {fileID: 0}
-  _generateImageAction: {fileID: 0}
-  defaultPrompt: a beautiful landscape
-  batchPrompts: []
-  customModelName: ideogram-v3-turbo
+  _loadTextureAction: {fileID: 731050567}
+  _generateImageAction: {fileID: 731050566}
 --- !u!114 &731050566
 MonoBehaviour:
   m_ObjectHideFlags: 0

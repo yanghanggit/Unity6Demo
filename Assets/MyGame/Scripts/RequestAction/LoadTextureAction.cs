@@ -3,6 +3,8 @@ using UnityEngine.Networking;
 using System.Collections;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 /**
  * LoadTextureAction.cs
@@ -10,6 +12,7 @@ using System;
  * 专门用于加载远程纹理的 MonoBehaviour
  * 基于 BaseRequestAction 的设计模式
  * 支持协程和 async/await 两种方式
+ * 包含内存缓存功能，避免重复下载相同URL的纹理
  */
 public class LoadTextureAction : MonoBehaviour
 {
@@ -20,9 +23,34 @@ public class LoadTextureAction : MonoBehaviour
     [SerializeField] private TextureWrapMode wrapMode = TextureWrapMode.Clamp;
     [SerializeField] private FilterMode filterMode = FilterMode.Bilinear;
 
+    // 静态缓存系统 - 所有实例共享
+    private static Dictionary<string, CachedTexture> _textureCache = new Dictionary<string, CachedTexture>();
+
     // 加载结果
     private Texture2D _currentTexture;
     public Texture2D CurrentTexture => _currentTexture;
+
+    // 缓存项结构
+    [Serializable]
+    private class CachedTexture
+    {
+        public Texture2D texture;
+        public DateTime lastAccessTime;
+        public int accessCount;
+
+        public CachedTexture(Texture2D tex)
+        {
+            texture = tex;
+            lastAccessTime = DateTime.Now;
+            accessCount = 1;
+        }
+
+        public void UpdateAccess()
+        {
+            lastAccessTime = DateTime.Now;
+            accessCount++;
+        }
+    }
 
     // 纹理加载结果结构
     [Serializable]
@@ -49,6 +77,14 @@ public class LoadTextureAction : MonoBehaviour
     /// </summary>
     public IEnumerator LoadAndApply(string url)
     {
+        // 检查缓存
+        if (TryGetFromCache(url, out Texture2D cachedTexture))
+        {
+            // 缓存命中，直接使用
+            ApplyTexture(cachedTexture, url, true);
+            yield break;
+        }
+
         TextureLoadResult result = null;
 
         yield return StartCoroutine(LoadTextureCoroutine(url, (loadResult) =>
@@ -58,15 +94,11 @@ public class LoadTextureAction : MonoBehaviour
 
         if (result != null && result.isSuccess)
         {
-            // 清理之前的纹理
-            ClearCurrentTexture();
+            // 加入缓存
+            AddToCache(url, result.texture);
 
-            // 设置新纹理
-            _currentTexture = result.texture;
-            _currentTexture.wrapMode = wrapMode;
-            _currentTexture.filterMode = filterMode;
-
-            Debug.Log($"Texture loaded successfully: {url} ({_currentTexture.width}x{_currentTexture.height})");
+            // 应用纹理
+            ApplyTexture(result.texture, url, false);
         }
         else
         {
@@ -125,19 +157,23 @@ public class LoadTextureAction : MonoBehaviour
     /// </summary>
     public async Task<bool> LoadAndApplyAsync(string url)
     {
+        // 检查缓存
+        if (TryGetFromCache(url, out Texture2D cachedTexture))
+        {
+            // 缓存命中，直接使用
+            ApplyTexture(cachedTexture, url, true);
+            return true;
+        }
+
         var result = await LoadTextureAsync(url);
 
         if (result.isSuccess)
         {
-            // 清理之前的纹理
-            ClearCurrentTexture();
+            // 加入缓存
+            AddToCache(url, result.texture);
 
-            // 设置新纹理
-            _currentTexture = result.texture;
-            _currentTexture.wrapMode = wrapMode;
-            _currentTexture.filterMode = filterMode;
-
-            Debug.Log($"Texture loaded successfully: {url} ({_currentTexture.width}x{_currentTexture.height})");
+            // 应用纹理
+            ApplyTexture(result.texture, url, false);
             return true;
         }
         else
@@ -191,6 +227,90 @@ public class LoadTextureAction : MonoBehaviour
     #endregion
 
     #region 私有辅助方法
+
+    /// <summary>
+    /// 尝试从缓存获取纹理
+    /// </summary>
+    private bool TryGetFromCache(string url, out Texture2D texture)
+    {
+        texture = null;
+
+        if (string.IsNullOrEmpty(url))
+            return false;
+
+        if (_textureCache.TryGetValue(url, out CachedTexture cachedItem))
+        {
+            // 检查纹理是否仍然有效
+            if (cachedItem.texture != null)
+            {
+                cachedItem.UpdateAccess();
+                texture = cachedItem.texture;
+                return true;
+            }
+            else
+            {
+                // 纹理已被销毁，从缓存中移除
+                _textureCache.Remove(url);
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 添加纹理到缓存
+    /// </summary>
+    private void AddToCache(string url, Texture2D texture)
+    {
+        if (string.IsNullOrEmpty(url) || texture == null)
+            return;
+
+        // 添加到缓存
+        if (_textureCache.ContainsKey(url))
+        {
+            // 更新现有缓存
+            _textureCache[url].texture = texture;
+            _textureCache[url].UpdateAccess();
+        }
+        else
+        {
+            // 添加新缓存项
+            _textureCache[url] = new CachedTexture(texture);
+        }
+    }
+
+    /// <summary>
+    /// 应用纹理到当前对象
+    /// </summary>
+    private void ApplyTexture(Texture2D texture, string url, bool fromCache)
+    {
+        // 清理之前的纹理（但不要销毁缓存中的纹理）
+        if (_currentTexture != null && !IsTextureInCache(_currentTexture))
+        {
+            Destroy(_currentTexture);
+        }
+
+        // 设置新纹理
+        _currentTexture = texture;
+        _currentTexture.wrapMode = wrapMode;
+        _currentTexture.filterMode = filterMode;
+
+        string source = fromCache ? "cache" : "network";
+        Debug.Log($"Texture applied from {source}: {url} ({_currentTexture.width}x{_currentTexture.height})");
+    }
+
+    /// <summary>
+    /// 检查纹理是否在缓存中
+    /// </summary>
+    private bool IsTextureInCache(Texture2D texture)
+    {
+        foreach (var cachedItem in _textureCache.Values)
+        {
+            if (cachedItem.texture == texture)
+                return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// 设置通用请求头
@@ -267,7 +387,11 @@ public class LoadTextureAction : MonoBehaviour
     {
         if (_currentTexture != null)
         {
-            Destroy(_currentTexture);
+            // 只有当纹理不在缓存中时才销毁
+            if (!IsTextureInCache(_currentTexture))
+            {
+                Destroy(_currentTexture);
+            }
             _currentTexture = null;
         }
     }
@@ -315,6 +439,66 @@ public class LoadTextureAction : MonoBehaviour
                $"FilterMode: {_currentTexture.filterMode}";
     }
 
+    /// <summary>
+    /// 获取缓存统计信息
+    /// </summary>
+    public string GetCacheStats()
+    {
+        int totalAccessCount = _textureCache.Values.Sum(item => item.accessCount);
+        return $"Cache: {_textureCache.Count} items, Total access: {totalAccessCount}";
+    }
+
+    /// <summary>
+    /// 清理所有缓存
+    /// </summary>
+    public static void ClearAllCache()
+    {
+        foreach (var cachedItem in _textureCache.Values)
+        {
+            if (cachedItem.texture != null)
+            {
+                Destroy(cachedItem.texture);
+            }
+        }
+
+        _textureCache.Clear();
+
+        Debug.Log("All texture cache cleared");
+    }
+
+    /// <summary>
+    /// 清理指定URL的缓存
+    /// </summary>
+    public static void ClearCacheForUrl(string url)
+    {
+        if (_textureCache.TryGetValue(url, out CachedTexture cachedItem))
+        {
+            if (cachedItem.texture != null)
+            {
+                Destroy(cachedItem.texture);
+            }
+            _textureCache.Remove(url);
+
+            Debug.Log($"Cache cleared for URL: {url}");
+        }
+    }
+
+    /// <summary>
+    /// 检查指定URL是否在缓存中
+    /// </summary>
+    public static bool IsUrlCached(string url)
+    {
+        return _textureCache.ContainsKey(url) && _textureCache[url].texture != null;
+    }
+
+    /// <summary>
+    /// 获取缓存中所有URL列表
+    /// </summary>
+    public static List<string> GetCachedUrls()
+    {
+        return _textureCache.Keys.ToList();
+    }
+
     #endregion
 
     #region Unity 生命周期
@@ -326,3 +510,5 @@ public class LoadTextureAction : MonoBehaviour
 
     #endregion
 }
+
+
