@@ -129,6 +129,9 @@ GameObject:
   m_Component:
   - component: {fileID: 396423817}
   - component: {fileID: 396423816}
+  - component: {fileID: 396423820}
+  - component: {fileID: 396423819}
+  - component: {fileID: 396423818}
   m_Layer: 0
   m_Name: Actor2
   m_TagString: Untagged
@@ -206,6 +209,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &396423818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396423815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd4b503f13e054866a0823b080cffcf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverBaseUrl: http://localhost:8300
+  requestTimeout: 120
+  maxRetryAttempts: 3
+  retryDelay: 2
+  defaultModelName: sdxl-lightning
+  defaultNegativePrompt: worst quality, low quality, blurry
+  defaultWidth: 768
+  defaultHeight: 768
+  defaultInferenceSteps: 4
+  defaultGuidanceScale: 7.5
+--- !u!114 &396423819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396423815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49fb6417db8e640d09344703e629bbd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  wrapMode: 1
+  filterMode: 1
+--- !u!114 &396423820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396423815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0925cfc6679c1482784181042451bd5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _loadTextureAction: {fileID: 396423819}
+  _generateImageAction: {fileID: 396423818}
+  defaultPrompt: a cat~
+  customModelName: ideogram-v3-turbo
 --- !u!1 &515320877
 GameObject:
   m_ObjectHideFlags: 0
@@ -486,8 +544,6 @@ GameObject:
   m_Component:
   - component: {fileID: 731050564}
   - component: {fileID: 731050565}
-  - component: {fileID: 731050567}
-  - component: {fileID: 731050566}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -522,47 +578,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9be7965c3a5c45b3bbf61ed1904efb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _loadTextureAction: {fileID: 731050567}
-  _generateImageAction: {fileID: 731050566}
---- !u!114 &731050566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 731050563}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd4b503f13e054866a0823b080cffcf9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serverBaseUrl: http://localhost:8300
-  requestTimeout: 120
-  maxRetryAttempts: 3
-  retryDelay: 2
-  defaultModelName: sdxl-lightning
-  defaultNegativePrompt: worst quality, low quality, blurry
-  defaultWidth: 768
-  defaultHeight: 768
-  defaultInferenceSteps: 4
-  defaultGuidanceScale: 7.5
---- !u!114 &731050567
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 731050563}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49fb6417db8e640d09344703e629bbd8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  requestTimeout: 30
-  maxRetryAttempts: 3
-  retryDelay: 1
-  wrapMode: 1
-  filterMode: 1
+  spriteRenderers:
+  - {fileID: 1245950436}
+  - {fileID: 396423816}
 --- !u!1 &937081192
 GameObject:
   m_ObjectHideFlags: 0
@@ -709,6 +727,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1245950437}
   - component: {fileID: 1245950436}
+  - component: {fileID: 1245950440}
+  - component: {fileID: 1245950439}
+  - component: {fileID: 1245950438}
   m_Layer: 0
   m_Name: Actor1
   m_TagString: Untagged
@@ -786,6 +807,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1245950438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1245950435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd4b503f13e054866a0823b080cffcf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverBaseUrl: http://localhost:8300
+  requestTimeout: 120
+  maxRetryAttempts: 3
+  retryDelay: 2
+  defaultModelName: sdxl-lightning
+  defaultNegativePrompt: worst quality, low quality, blurry
+  defaultWidth: 768
+  defaultHeight: 768
+  defaultInferenceSteps: 4
+  defaultGuidanceScale: 7.5
+--- !u!114 &1245950439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1245950435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49fb6417db8e640d09344703e629bbd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  wrapMode: 1
+  filterMode: 1
+--- !u!114 &1245950440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1245950435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0925cfc6679c1482784181042451bd5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _loadTextureAction: {fileID: 1245950439}
+  _generateImageAction: {fileID: 1245950438}
+  defaultPrompt: a cat~
+  customModelName: ideogram-v3-turbo
 --- !u!1 &1736583120
 GameObject:
   m_ObjectHideFlags: 0
