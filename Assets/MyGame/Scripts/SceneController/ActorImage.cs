@@ -9,7 +9,6 @@ public class ActorImage : MonoBehaviour
 
     [Header("图片生成配置")]
     [SerializeField] private string defaultPrompt = "a cat~"; // 默认提示词
-    [SerializeField] private string customModelName = "ideogram-v3-turbo"; // 本页使用的自定义模型
 
     private SpriteRenderer _spriteRenderer;
 
@@ -18,6 +17,9 @@ public class ActorImage : MonoBehaviour
         _spriteRenderer = GetComponent<SpriteRenderer>();
         Debug.Assert(_loadTextureAction != null, "_loadTextureAction is null");
         Debug.Assert(_generateImageAction != null, "_generateImageAction is null");
+
+        // 保持 SpriteRenderer 的原始设置，不强制修改 drawMode 和 size
+        Debug.Log($"SpriteRenderer 初始设置: Size=({_spriteRenderer.size.x}, {_spriteRenderer.size.y}), DrawMode={_spriteRenderer.drawMode}");
     }
 
     /// <summary>
@@ -35,7 +37,7 @@ public class ActorImage : MonoBehaviour
     /// </summary>
     private IEnumerator GenerateImageAndApply()
     {
-        Debug.Log($"开始生成单张图片: {defaultPrompt}，使用模型: {customModelName}");
+        //Debug.Log($"开始生成单张图片: {defaultPrompt}，使用模型: {customModelName}");
 
         // 创建自定义请求，指定模型（使用新的数据结构）
         var request = new GenerateImagesRequest
@@ -68,11 +70,13 @@ public class ActorImage : MonoBehaviour
         // 第三步：应用到UI
         if (_loadTextureAction.HasTexture())
         {
-            var sprite = _loadTextureAction.CreateSpriteFromCurrentTexture(100f);
+            // 使用固定的 pixelsPerUnit，让 Sliced 模式自动处理填满
+            var sprite = _loadTextureAction.CreateSpriteFromCurrentTexture();
             if (sprite != null)
             {
                 _spriteRenderer.sprite = sprite;
                 Debug.Log($"生成的图片已应用到UI: {_loadTextureAction.GetTextureInfo()}");
+                Debug.Log($"SpriteRenderer 设置: Size=({_spriteRenderer.size.x}, {_spriteRenderer.size.y}), DrawMode={_spriteRenderer.drawMode}");
             }
             else
             {

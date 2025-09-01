@@ -187,8 +187,8 @@ SpriteRenderer:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_DrawMode: 1
+  m_Size: {x: 2.8420663, y: 0.98096335}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -203,8 +203,8 @@ Transform:
   m_GameObject: {fileID: 396423815}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.288, y: -0.014, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 3.2643, y: 0.011, z: 0}
+  m_LocalScale: {x: 1.06, y: 2.63, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -262,8 +262,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _loadTextureAction: {fileID: 396423819}
   _generateImageAction: {fileID: 396423818}
-  defaultPrompt: a cat~
-  customModelName: ideogram-v3-turbo
+  defaultPrompt: an apple~
 --- !u!1 &515320877
 GameObject:
   m_ObjectHideFlags: 0
@@ -578,9 +577,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9be7965c3a5c45b3bbf61ed1904efb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteRenderers:
-  - {fileID: 1245950436}
-  - {fileID: 396423816}
+  actorImages: []
 --- !u!1 &937081192
 GameObject:
   m_ObjectHideFlags: 0
@@ -638,10 +635,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: "\u6D4B\u8BD5\uFF01"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
+  m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -785,8 +783,8 @@ SpriteRenderer:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_DrawMode: 1
+  m_Size: {x: 1.878524, y: 1.2094033}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -801,8 +799,8 @@ Transform:
   m_GameObject: {fileID: 1245950435}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.778, y: 0.019, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -1.53, y: -0.05, z: 0}
+  m_LocalScale: {x: 1.06, y: 2.63, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -861,7 +859,6 @@ MonoBehaviour:
   _loadTextureAction: {fileID: 1245950439}
   _generateImageAction: {fileID: 1245950438}
   defaultPrompt: a cat~
-  customModelName: ideogram-v3-turbo
 --- !u!1 &1736583120
 GameObject:
   m_ObjectHideFlags: 0
