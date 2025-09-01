@@ -98,30 +98,33 @@ public class RemoteImageLoadScene : MonoBehaviour
     {
         Debug.Log($"开始生成单张图片: {defaultPrompt}，使用模型: {customModelName}");
 
-        // 创建自定义请求，指定模型
-        var request = new GenerateImageRequest(defaultPrompt)
+        // 创建自定义请求，指定模型（使用新的数据结构）
+        var request = new GenerateImagesRequest
         {
+            prompts = new List<string> { defaultPrompt },
             model_name = customModelName // 使用本页指定的模型而不是默认的 sdxl-lightning
         };
 
         // 第一步：使用 GenerateImageAction 生成图片
-        GenerateImageResponse generateResult = null;
-        yield return StartCoroutine(_generateImageAction.GenerateSingleImageCoroutine(request, (result) =>
+        GenerateImagesResponse generateResult = null;
+        yield return StartCoroutine(_generateImageAction.GenerateImagesCoroutine(request, (result) =>
         {
             generateResult = result;
         }));
 
         // 检查生成是否成功
-        if (generateResult == null || !generateResult.success)
+        if (generateResult == null || !generateResult.success || generateResult.images == null || generateResult.images.Count == 0)
         {
             Debug.LogError($"图片生成失败: {generateResult?.message}");
             yield break;
         }
 
-        Debug.Log($"图片生成成功: {generateResult.image_url}");
+        // 获取第一张生成的图片
+        var firstImage = generateResult.images[0];
+        Debug.Log($"图片生成成功: {firstImage.image_url}");
 
         // 第二步：使用 LoadTextureAction 下载生成的图片
-        yield return StartCoroutine(_loadTextureAction.LoadAndApply(generateResult.image_url));
+        yield return StartCoroutine(_loadTextureAction.LoadAndApply(firstImage.image_url));
 
         // 第三步：应用到UI
         if (_loadTextureAction.HasTexture())
@@ -157,15 +160,16 @@ public class RemoteImageLoadScene : MonoBehaviour
 
         Debug.Log($"开始批量生成图片: {batchPrompts.Count} 张，使用模型: {customModelName}");
 
-        // 创建自定义请求，指定模型
-        var request = new GenerateBatchImagesRequest(batchPrompts)
+        // 创建自定义请求，指定模型（使用新的数据结构）
+        var request = new GenerateImagesRequest
         {
+            prompts = batchPrompts,
             model_name = customModelName // 使用本页指定的模型而不是默认的 sdxl-lightning
         };
 
         // 第一步：使用 GenerateImageAction 批量生成图片
-        GenerateBatchImagesResponse batchResult = null;
-        yield return StartCoroutine(_generateImageAction.GenerateBatchImagesCoroutine(request, (result) =>
+        GenerateImagesResponse batchResult = null;
+        yield return StartCoroutine(_generateImageAction.GenerateImagesCoroutine(request, (result) =>
         {
             batchResult = result;
         }));
@@ -177,7 +181,7 @@ public class RemoteImageLoadScene : MonoBehaviour
             yield break;
         }
 
-        Debug.Log($"批量图片生成成功: {batchResult.total_count} 张");
+        Debug.Log($"批量图片生成成功: {batchResult.images.Count} 张");
 
         // 第二步：随机选择一张图片进行下载
         int randomIndex = Random.Range(0, batchResult.images.Count);
