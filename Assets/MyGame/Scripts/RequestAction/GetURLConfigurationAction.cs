@@ -176,13 +176,13 @@ public class GetURLConfigurationAction : BaseRequestAction
             }
             
             // 验证必要字段
-            if (string.IsNullOrEmpty(_urlConfiguration.api_version))
+            if (string.IsNullOrEmpty(_urlConfiguration.version))
             {
                 Debug.LogError("API version is missing in URL configuration");
                 return false;
             }
             
-            Debug.Log($"URL Configuration parsed successfully. API Version: {_urlConfiguration.api_version}");
+            Debug.Log($"URL Configuration parsed successfully. API Version: {_urlConfiguration.version}");
             return true;
         }
         catch (System.Exception ex)

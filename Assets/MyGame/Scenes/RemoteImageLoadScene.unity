@@ -515,7 +515,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetImage: {fileID: 1214769496}
-  imageUrl: http://localhost:8300/images/ideogram-v3-turbo_029fd970-3fcc-4d7e-9d85-86570824d919.png
+  imageUrl: http://localhost:8300/images/ideogram-v3-turbo_5f514279-b6d2-44f4-a399-d94f0702f9b7.png
   timeout: 10
   _startButton: {fileID: 1202936521}
   _loadTextureAction: {fileID: 399892902}
@@ -795,8 +795,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7443756053782179069, guid: 9c291ef5e845e42d683fb7da95e8517e,
-    type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4818f33f1596dba42819f243b7be0e43, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

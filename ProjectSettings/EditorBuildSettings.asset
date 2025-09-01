@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/MyGame/Scenes/RemoteImageLoadScene.unity
     guid: 172a85f1299fd4e088bd3fb1836719e3
   - enabled: 1

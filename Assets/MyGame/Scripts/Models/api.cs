@@ -6,10 +6,11 @@ using System.Collections.Generic;
 [System.Serializable]
 public class URLConfigurationResponse
 {
-    public string api_version = "";
+    public string message = "";
+    public string version = "";
     public Dictionary<string, string> endpoints = new Dictionary<string, string>();
-    public bool deprecated = false;
-    public string notice = "";
+    // public bool deprecated = false;
+    // public string notice = "";
 }
 
 /**
