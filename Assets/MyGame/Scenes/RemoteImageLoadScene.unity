@@ -515,7 +515,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetImage: {fileID: 1214769496}
-  imageUrl: http://localhost:8300/images/ideogram-v3-turbo_5f514279-b6d2-44f4-a399-d94f0702f9b7.png
+  imageUrl: http://localhost:8300/images/sdxl-lightning_45b0ac8a-cdd0-418a-b6eb-374a83faac27.png
   timeout: 10
   _startButton: {fileID: 1202936521}
   _loadTextureAction: {fileID: 399892902}
