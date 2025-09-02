@@ -28,7 +28,7 @@ public class CampScene : MonoBehaviour
 
     }
 
-    private List<string> ParseImagePaths()
+    private Dictionary<string, string> ParseImagePaths()
     {
         if (!GameContext.Instance.SetupGame)
         {
@@ -43,9 +43,9 @@ public class CampScene : MonoBehaviour
     /// 从GameContext的Mapping中解析角色图片路径
     /// </summary>
     /// <returns>图片路径列表</returns>
-    private List<string> ParseActorImagePaths()
+    private Dictionary<string, string> ParseActorImagePaths()
     {
-        var imagePaths = new List<string>();
+        var imagePaths = new Dictionary<string, string>();
 
         List<string> actors = new List<string>();
         GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors);
@@ -58,25 +58,26 @@ public class CampScene : MonoBehaviour
             if (GameContext.Instance.ImagePath.TryGetValue(actor, out var imagePath))
             {
                 Debug.Log($"Found image path for {actor}: {imagePath}");
-                imagePaths.Add(imagePath);
+                imagePaths.Add(actor, imagePath);
             }
         }
 
         return imagePaths;
     }
 
-    private List<string> ParseDebugImagePaths()
+    private Dictionary<string, string> ParseDebugImagePaths()
     {
-        var imagePaths = new List<string>();
+        var imagePaths = new Dictionary<string, string>();
+
 
         if (GameContext.Instance.ImagePath.TryGetValue("角色.战士.卡恩", out var warriorPath))
         {
-            imagePaths.Add(warriorPath);
+            imagePaths.Add("角色.战士.卡恩", warriorPath);
         }
 
         if (GameContext.Instance.ImagePath.TryGetValue("角色.法师.奥露娜", out var wizardPath))
         {
-            imagePaths.Add(wizardPath);
+            imagePaths.Add("角色.法师.奥露娜", wizardPath);
         }
 
         return imagePaths;
@@ -95,7 +96,7 @@ public class CampScene : MonoBehaviour
     private void OnSpriteClicked(SpriteClickHandler clickHandler)
     {
         Debug.Log($"精灵 {clickHandler.gameObject.name} 被点击了！");
-        
+
         // 在这里添加您的点击处理逻辑
         // 例如：显示角色信息、进入战斗、播放动画等
     }
@@ -119,15 +120,17 @@ public class CampScene : MonoBehaviour
     /// 创建精灵到当前场景，从左到右排列且不重叠
     /// </summary>
     /// <param name="imagePaths">图片路径列表</param>
-    private void CreateSprites(List<string> imagePaths)
+    private void CreateSprites(Dictionary<string, string> imagePaths)
     {
         // 根据传入的路径创建精灵
         var sprites = new List<GameObject>();
 
-        for (int i = 0; i < imagePaths.Count; i++)
+        foreach (var kvp in imagePaths)
         {
-            string spriteName = $"Sprite_{i}"; // 默认命名
-            GameObject sprite = CreateSpriteFromImage(spriteName, imagePaths[i]);
+            string spriteName = kvp.Key; // 使用角色名作为精灵名称
+            string imagePath = kvp.Value;
+
+            GameObject sprite = CreateSpriteFromImage(spriteName, imagePath);
             sprites.Add(sprite);
         }
 

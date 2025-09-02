@@ -11,7 +11,7 @@ public class SpriteClickHandler : MonoBehaviour
 {
     // 点击事件
     public event Action<SpriteClickHandler> OnSpriteClicked;
-    
+
     void Start()
     {
         // 检查是否有Collider2D组件
@@ -20,7 +20,7 @@ public class SpriteClickHandler : MonoBehaviour
             Debug.LogWarning($"SpriteClickHandler on {gameObject.name} requires a Collider2D component to detect mouse events.");
         }
     }
-    
+
     /// <summary>
     /// 鼠标按下事件 - Unity内置方法
     /// 需要对象有Collider2D组件才能触发
@@ -28,7 +28,7 @@ public class SpriteClickHandler : MonoBehaviour
     void OnMouseDown()
     {
         Debug.Log($"Sprite {gameObject.name} clicked!");
-        
+
         // 触发点击事件
         OnSpriteClicked?.Invoke(this);
     }
