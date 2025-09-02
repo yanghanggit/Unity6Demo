@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/MyGame/Scenes/SpriteScene.unity
+    path: Assets/MyGame/Scenes/SpriteTestScene.unity
     guid: 1b735a02fca564dd0bae2e79847f0c3a
   - enabled: 1
     path: Assets/MyGame/Scenes/RemoteImageLoadScene.unity
