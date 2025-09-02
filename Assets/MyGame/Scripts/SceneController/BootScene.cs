@@ -15,6 +15,8 @@ public class BootScene : MonoBehaviour
 
     void Start()
     {
+        GameContext.Instance.SetupGame = true;
+
         Debug.Assert(_getUrlConfigurationAction != null, "_bootAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
         Debug.Assert(_nextButton != null, "_nextButton is null");

@@ -32,6 +32,14 @@ public partial class GameContext
 
     private URLConfigurationResponse _urlConfiguration = new URLConfigurationResponse();
 
+    private bool _setupGame = false;
+
+    public bool SetupGame
+    {
+        get { return _setupGame; }
+        set { _setupGame = value; }
+    }
+
     public string UserName
     {
         get

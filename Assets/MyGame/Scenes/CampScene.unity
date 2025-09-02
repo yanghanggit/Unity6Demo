@@ -614,6 +614,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _preScene: MainScene2
+  sampleSprite: {fileID: 809303518}
+  spacingOffset: 2
 --- !u!1 &524838950
 GameObject:
   m_ObjectHideFlags: 0
@@ -693,7 +695,7 @@ GameObject:
   - component: {fileID: 809303519}
   - component: {fileID: 809303518}
   m_Layer: 0
-  m_Name: TestActor
+  m_Name: SampleActor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -747,8 +749,8 @@ SpriteRenderer:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_DrawMode: 1
+  m_Size: {x: 1.4602927, y: 1.161059}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -763,8 +765,8 @@ Transform:
   m_GameObject: {fileID: 809303517}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -5.0535, y: -0.5084, z: 0}
+  m_LocalScale: {x: 2.244351, y: 4.4506383, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}

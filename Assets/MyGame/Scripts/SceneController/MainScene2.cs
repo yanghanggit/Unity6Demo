@@ -33,6 +33,13 @@ public class MainScene2 : MonoBehaviour
     public void OnClickCamp()
     {
         Debug.Log("OnClickCamp");
+        StartCoroutine(OpenCampScene());
+    }
+
+    IEnumerator OpenCampScene()
+    {
+        yield return new WaitForSeconds(0);
+        SceneManager.LoadScene("CampScene");
     }
 
     public void OnClickDungeon()
