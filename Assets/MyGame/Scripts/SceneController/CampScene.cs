@@ -88,6 +88,18 @@ public class CampScene : MonoBehaviour
         StartCoroutine(ReturnToMainScene());
     }
 
+    /// <summary>
+    /// 处理精灵点击事件
+    /// </summary>
+    /// <param name="clickHandler">被点击的精灵的点击处理器</param>
+    private void OnSpriteClicked(SpriteClickHandler clickHandler)
+    {
+        Debug.Log($"精灵 {clickHandler.gameObject.name} 被点击了！");
+        
+        // 在这里添加您的点击处理逻辑
+        // 例如：显示角色信息、进入战斗、播放动画等
+    }
+
     IEnumerator ReturnToMainScene()
     {
         yield return new WaitForSeconds(0);
@@ -159,6 +171,14 @@ public class CampScene : MonoBehaviour
 
         // 重命名（位置在外部设置）
         spriteObject.name = spriteName;
+
+        // 获取复制过来的点击处理器组件
+        SpriteClickHandler clickHandler = spriteObject.GetComponent<SpriteClickHandler>();
+        if (clickHandler != null)
+        {
+            // 订阅点击事件
+            clickHandler.OnSpriteClicked += OnSpriteClicked;
+        }
 
         // 获取SpriteRenderer组件（从复制的对象中）
         SpriteRenderer spriteRenderer = spriteObject.GetComponent<SpriteRenderer>();
