@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/MyGame/Scenes/SpriteTestScene.unity
     guid: 1b735a02fca564dd0bae2e79847f0c3a
-  - enabled: 1
+  - enabled: 0
     path: Assets/MyGame/Scenes/RemoteImageLoadScene.unity
     guid: 172a85f1299fd4e088bd3fb1836719e3
   - enabled: 1
@@ -17,9 +17,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/MyGame/Scenes/LoginScene.unity
     guid: 54c40005abbc140538d04f390d1a21a2
-  - enabled: 1
+  - enabled: 0
     path: Assets/MyGame/Scenes/MainScene.unity
     guid: d482fecca28c643b59054e00c795f4a8
+  - enabled: 1
+    path: Assets/MyGame/Scenes/MainScene2.unity
+    guid: e3c4d529581b44733a290d57b8603357
   - enabled: 1
     path: Assets/MyGame/Scenes/DungeonScene.unity
     guid: f9b8bdbc826aa47f7993b4a428d989d6
