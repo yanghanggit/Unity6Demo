@@ -5,6 +5,8 @@ using UnityEngine;
 public partial class GameContext
 {
     // 临时写死。
+    public const string CampName = "场景.营地";
+
     private Dictionary<string, string> _imagePath = new Dictionary<string, string>
     {
         { "角色.战士.卡恩", $"{Application.dataPath}/MyGame/Assets/warrior.png" },
@@ -16,4 +18,6 @@ public partial class GameContext
         get { return _imagePath; }
         set { _imagePath = value; }
     }
+
+    
 }

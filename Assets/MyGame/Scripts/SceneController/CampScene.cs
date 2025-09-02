@@ -16,21 +16,8 @@ public class CampScene : MonoBehaviour
     {
         Debug.Assert(sampleSprite != null, "sampleSprite is null");
 
-        // 构建图片路径列表
-        var imagePaths = new List<string>();
-        if (GameContext.Instance.ImagePath.TryGetValue("角色.战士.卡恩", out var warriorPath))
-        {
-            imagePaths.Add(warriorPath);
-        }
-
-        //
-        if (GameContext.Instance.ImagePath.TryGetValue("角色.法师.奥露娜", out var wizardPath))
-        {
-            imagePaths.Add(wizardPath);
-        }
-
         // 创建精灵（自动根据尺寸计算位置）
-        CreateSprites(imagePaths);
+        CreateSprites(ParseImagePaths());
 
         // 隐藏原始的sampleSprite，因为第一个创建的精灵会覆盖它的位置
         sampleSprite.gameObject.SetActive(false);
@@ -39,6 +26,60 @@ public class CampScene : MonoBehaviour
     void Update()
     {
 
+    }
+
+    private List<string> ParseImagePaths()
+    {
+        if (!GameContext.Instance.SetupGame)
+        {
+            Debug.LogWarning("GameContext is not set up. Using debug image paths.");
+            return ParseDebugImagePaths();
+        }
+
+        return ParseActorImagePaths();
+    }
+
+    /// <summary>
+    /// 从GameContext的Mapping中解析角色图片路径
+    /// </summary>
+    /// <returns>图片路径列表</returns>
+    private List<string> ParseActorImagePaths()
+    {
+        var imagePaths = new List<string>();
+
+        List<string> actors = new List<string>();
+        GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors);
+        for (int i = 0; i < actors.Count; i++)
+        {
+            string actor = actors[i];
+            // 在这里处理每个actor，例如打印或存储
+            Debug.Log($"Found actor in {GameContext.CampName}: {actor}");
+
+            if (GameContext.Instance.ImagePath.TryGetValue(actor, out var imagePath))
+            {
+                Debug.Log($"Found image path for {actor}: {imagePath}");
+                imagePaths.Add(imagePath);
+            }
+        }
+
+        return imagePaths;
+    }
+
+    private List<string> ParseDebugImagePaths()
+    {
+        var imagePaths = new List<string>();
+
+        if (GameContext.Instance.ImagePath.TryGetValue("角色.战士.卡恩", out var warriorPath))
+        {
+            imagePaths.Add(warriorPath);
+        }
+
+        if (GameContext.Instance.ImagePath.TryGetValue("角色.法师.奥露娜", out var wizardPath))
+        {
+            imagePaths.Add(wizardPath);
+        }
+
+        return imagePaths;
     }
 
     public void OnClickBack()
