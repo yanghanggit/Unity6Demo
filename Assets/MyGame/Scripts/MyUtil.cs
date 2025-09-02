@@ -126,7 +126,7 @@ public static class MyUtils
                     }
                     rpgCharacterProfileText += "\n";
                 }
-            
+
                 ret += rpgCharacterProfileText;
             }
             else if (component.name == typeof(HandComponent).Name)

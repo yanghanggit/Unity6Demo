@@ -9,8 +9,6 @@ public class URLConfigurationResponse
     public string message = "";
     public string version = "";
     public Dictionary<string, string> endpoints = new Dictionary<string, string>();
-    // public bool deprecated = false;
-    // public string notice = "";
 }
 
 /**

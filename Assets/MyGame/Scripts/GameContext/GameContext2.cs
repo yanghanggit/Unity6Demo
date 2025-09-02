@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 public partial class GameContext
 {
     private List<string> _agentEventLogs = new List<string>();
-    
+
     private Dictionary<string, List<string>> _mapping = new Dictionary<string, List<string>>();
-    
+
     private List<EntitySnapshot> _actorSnapshots = new List<EntitySnapshot>();
 
     private List<AgentShortTermMemory> _agentShortTermMemories = new List<AgentShortTermMemory>();

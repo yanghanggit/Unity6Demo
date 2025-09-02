@@ -21,15 +21,11 @@ public class ViewActorAction : BaseRequestAction
     /// <summary>
     /// 查看角色（协程版本）
     /// </summary>
-    public IEnumerator CallCoroutine(List<string> actors = null)
+    private IEnumerator CallCoroutine(List<string> actors)
     {
         Debug.Log($"View actor request started with {actors?.Count ?? 0} actors");
-        
-        if (actors == null)
-        {
-            actors = new List<string>();
-        }
-        
+        Debug.Assert(actors != null && actors.Count > 0, "Actors list is null or empty");
+
         _lastRequestSuccess = false;
         
         // 检查网络连接
@@ -81,15 +77,11 @@ public class ViewActorAction : BaseRequestAction
     /// <summary>
     /// 查看角色（Async 版本）
     /// </summary>
-    public async Task<bool> CallAsync(List<string> actors = null)
+    private async Task<bool> CallAsync(List<string> actors)
     {
         Debug.Log($"View actor request async started with {actors?.Count ?? 0} actors");
-        
-        if (actors == null)
-        {
-            actors = new List<string>();
-        }
-        
+        Debug.Assert(actors != null && actors.Count > 0, "Actors list is null or empty");
+
         _lastRequestSuccess = false;
         
         // 检查网络连接
@@ -142,14 +134,20 @@ public class ViewActorAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(List<string> actors = null)
+    public IEnumerator Call(List<string> actors)
     {
+        if (actors == null || actors.Count == 0)
+        {
+            Debug.LogWarning("No actors provided for view actor request");
+            yield break;
+        }
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
             var task = CallAsync(actors);
             yield return new WaitUntil(() => task.IsCompleted);
-            
+
             if (task.IsFaulted)
             {
                 Debug.LogError($"Async view actor call failed: {task.Exception?.GetBaseException().Message}");
