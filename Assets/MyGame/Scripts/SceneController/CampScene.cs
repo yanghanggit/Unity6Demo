@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.UI;
 
 public class CampScene : MonoBehaviour
 {
@@ -19,6 +20,11 @@ public class CampScene : MonoBehaviour
 
     private string _currentSpriteName;
 
+    // 对话泡泡相关 - UI系统
+    private GameObject _testSpeechBubbleUI;
+    private Canvas _canvas;
+    private Camera _mainCamera;
+
     void Start()
     {
         Debug.Assert(_templateActor != null, "sampleSprite is null");
@@ -29,6 +35,12 @@ public class CampScene : MonoBehaviour
 
         // 隐藏输入背景
         _inputBackground.SetActive(false);
+
+        // 初始化UI系统组件
+        _canvas = FindFirstObjectByType<Canvas>();
+        _mainCamera = Camera.main;
+        if (_mainCamera == null)
+            _mainCamera = FindFirstObjectByType<Camera>();
 
         // 获取复制过来的点击处理器组件
         SpriteClickHandler clickHandler = _backgroundImage.GetComponent<SpriteClickHandler>();
@@ -43,6 +55,12 @@ public class CampScene : MonoBehaviour
 
         // 隐藏原始的sampleSprite，因为第一个创建的精灵会覆盖它的位置
         _templateActor.gameObject.SetActive(false);
+
+        // 测试：为第一个精灵创建对话泡泡
+        if (_createdSprites.Count > 0)
+        {
+            CreateTestSpeechBubbleUI(_createdSprites[0]);
+        }
     }
 
     void Update()
@@ -395,5 +413,132 @@ public class CampScene : MonoBehaviour
 
         string logContent = MyUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
         Debug.Log(logContent);
+    }
+
+    /// <summary>
+    /// 将世界坐标的Sprite位置转换为Canvas UI坐标
+    /// </summary>
+    /// <param name="targetSprite">目标精灵</param>
+    /// <param name="offsetY">Y轴偏移量（用于调整泡泡位置）</param>
+    /// <returns>Canvas坐标系中的位置</returns>
+    private Vector2 ConvertSpriteToCanvasPosition(GameObject targetSprite, float offsetY = 0.5f)
+    {
+        if (_canvas == null || _mainCamera == null)
+        {
+            Debug.LogError("Canvas or Camera not found for coordinate conversion");
+            return Vector2.zero;
+        }
+
+        // 步骤1：获取精灵的世界坐标位置
+        Vector3 spriteWorldPos = targetSprite.transform.position;
+        SpriteRenderer spriteRenderer = targetSprite.GetComponent<SpriteRenderer>();
+        float spriteHeight = spriteRenderer.bounds.size.y;
+
+        // 步骤2：计算泡泡在精灵头部上方的世界坐标
+        Vector3 bubbleWorldPos = new Vector3(
+            spriteWorldPos.x,
+            spriteWorldPos.y + spriteHeight / 2 + offsetY,
+            spriteWorldPos.z
+        );
+
+        // 步骤3：世界坐标 → 屏幕坐标
+        Vector3 screenPos = _mainCamera.WorldToScreenPoint(bubbleWorldPos);
+
+        // 步骤4：屏幕坐标 → Canvas坐标
+        Vector2 canvasPos;
+        bool success = RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            _canvas.GetComponent<RectTransform>(),
+            screenPos,
+            _canvas.worldCamera,
+            out canvasPos
+        );
+
+        if (!success)
+        {
+            Debug.LogWarning("Failed to convert screen point to canvas coordinates");
+        }
+
+        Debug.Log($"坐标转换: 世界({spriteWorldPos}) → 屏幕({screenPos}) → Canvas({canvasPos})");
+
+        return canvasPos;
+    }
+
+    /// <summary>
+    /// 创建测试用的UI对话泡泡
+    /// </summary>
+    /// <param name="targetSprite">目标精灵</param>
+    private void CreateTestSpeechBubbleUI(GameObject targetSprite)
+    {
+        if (_canvas == null || _mainCamera == null)
+        {
+            Debug.LogError("Canvas or Camera not found for UI speech bubble");
+            return;
+        }
+
+        // 创建UI泡泡的根对象
+        _testSpeechBubbleUI = new GameObject("SpeechBubbleUI");
+        _testSpeechBubbleUI.transform.SetParent(_canvas.transform, false);
+
+        // 添加RectTransform
+        RectTransform rectTransform = _testSpeechBubbleUI.AddComponent<RectTransform>();
+
+        // 🔥 动态计算部分：使用提取的坐标转换函数
+        Vector2 canvasPos = ConvertSpriteToCanvasPosition(targetSprite, 0.5f);
+
+        // 设置UI位置 - 使用动态计算的坐标
+        rectTransform.anchoredPosition = canvasPos;
+        rectTransform.sizeDelta = new Vector2(500, 200);
+
+        // 创建背景Image
+        GameObject background = new GameObject("Background");
+        background.transform.SetParent(_testSpeechBubbleUI.transform, false);
+
+        RectTransform bgRect = background.AddComponent<RectTransform>();
+        bgRect.anchorMin = Vector2.zero;
+        bgRect.anchorMax = Vector2.one;
+        bgRect.offsetMin = Vector2.zero;
+        bgRect.offsetMax = Vector2.zero;
+
+        Image bgImage = background.AddComponent<Image>();
+        bgImage.color = Color.white;
+
+        // 创建文本
+        GameObject textObject = new GameObject("Text");
+        textObject.transform.SetParent(_testSpeechBubbleUI.transform, false);
+
+        RectTransform textRect = textObject.AddComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = new Vector2(10, 10);
+        textRect.offsetMax = new Vector2(-10, -10);
+
+        TextMeshProUGUI textMesh = textObject.AddComponent<TextMeshProUGUI>();
+        textMesh.text = "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!";
+        textMesh.fontSize = 20;
+        textMesh.color = Color.black;
+        textMesh.alignment = TextAlignmentOptions.Center;
+        textMesh.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+        Debug.Log($"Created UI speech bubble at canvas position {canvasPos}");
+
+        // 3秒后自动隐藏泡泡
+        StartCoroutine(HideUISpeechBubbleAfterDelay(3f));
+    }
+
+    /// <summary>
+    /// 延迟隐藏UI对话泡泡
+    /// </summary>
+    /// <param name="delay">延迟时间</param>
+    /// <returns></returns>
+    private IEnumerator HideUISpeechBubbleAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (_testSpeechBubbleUI != null)
+        {
+            Destroy(_testSpeechBubbleUI);
+            _testSpeechBubbleUI = null;
+            Debug.Log("UI Speech bubble hidden");
+        }
     }
 }
