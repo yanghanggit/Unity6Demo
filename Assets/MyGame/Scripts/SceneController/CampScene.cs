@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
-using UnityEngine.UI;
+using System.Linq;
+//using Newtonsoft.Json;
 
 public class CampScene : MonoBehaviour
 {
@@ -14,13 +15,13 @@ public class CampScene : MonoBehaviour
     public GameObject _inputBackground;
     public TMP_InputField _inputField;
     public GameObject _speechBubblePrefab;
+    public float _hideBubbleDuration = 5.0f;
     public HomeGamePlayAction _homeGamePlayAction;
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
     // UI系统组件
     private Canvas _canvas;
     private Camera _mainCamera;
-
 
     void Start()
     {
@@ -32,16 +33,18 @@ public class CampScene : MonoBehaviour
         Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
 
         // 隐藏输入背景
-        _inputBackground.SetActive(false);
+        HideInputBackground();
 
         // 创建对话泡泡
         _speechBubblePrefab.SetActive(false);
 
         // 初始化UI系统组件
         _canvas = FindFirstObjectByType<Canvas>();
+        Debug.Assert(_canvas != null, "Canvas not found in scene");
         _mainCamera = Camera.main;
         if (_mainCamera == null)
             _mainCamera = FindFirstObjectByType<Camera>();
+        Debug.Assert(_mainCamera != null, "Main Camera not found in scene");
 
         // 获取复制过来的点击处理器组件
         SpriteClickHandler clickHandler = _backgroundImage.GetComponent<SpriteClickHandler>();
@@ -60,7 +63,7 @@ public class CampScene : MonoBehaviour
         // 测试：为第一个精灵创建对话泡泡
         if (_createdSprites.Count > 0)
         {
-            CreateTestSpeechBubbleUI(_createdSprites[0], "Hello World! This is a speech bubble using prefab!");
+            //DisplaySpeechBubbleAtTarget(_createdSprites[0], "Hello World! This is a speech bubble using prefab!");
         }
     }
 
@@ -130,6 +133,12 @@ public class CampScene : MonoBehaviour
         StartCoroutine(ReturnToMainScene());
     }
 
+    public void OnClickNext()
+    {
+        Debug.Log("Next button clicked");
+        StartCoroutine(ExecuteHomeAdvancing());
+    }
+
     /// <summary>
     /// 处理精灵点击事件
     /// </summary>
@@ -141,7 +150,15 @@ public class CampScene : MonoBehaviour
         if (clickHandler.gameObject == _backgroundImage)
         {
             Debug.Log("Background clicked, ignoring.");
-            _inputBackground.SetActive(false);
+            HideInputBackground();
+            _currentSpriteName = string.Empty;
+            return;
+        }
+
+        if (clickHandler.gameObject.name == GameContext.Instance.ActorName)
+        {
+            Debug.Log("Clicked on self, ignoring.");
+            HideInputBackground();
             _currentSpriteName = string.Empty;
             return;
         }
@@ -154,6 +171,7 @@ public class CampScene : MonoBehaviour
                 Debug.Log($"Clicked on created sprite: {sprite.name}");
                 // 在这里添加对点击的精灵的处理逻辑
                 _inputBackground.SetActive(true);
+                _inputField.text = "";
                 _currentSpriteName = sprite.name;
                 break;
             }
@@ -266,7 +284,7 @@ public class CampScene : MonoBehaviour
         {
             Debug.LogError($"Failed to load image from path: {imagePath}");
             // 如果加载失败，创建一个简单的替代纹理
-            Texture2D fallbackTexture = CreateSimpleTexture(64, 64, Color.gray);
+            Texture2D fallbackTexture = MyUtils.CreateSimpleTexture(64, 64, Color.gray);
             Sprite fallbackSprite = Sprite.Create(fallbackTexture, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
             spriteRenderer.sprite = fallbackSprite;
         }
@@ -314,29 +332,6 @@ public class CampScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 创建简单的纯色纹理
-    /// </summary>
-    /// <param name="width">宽度</param>
-    /// <param name="height">高度</param>
-    /// <param name="color">颜色</param>
-    /// <returns>纹理</returns>
-    private Texture2D CreateSimpleTexture(int width, int height, Color color)
-    {
-        Texture2D texture = new Texture2D(width, height);
-        Color[] pixels = new Color[width * height];
-
-        for (int i = 0; i < pixels.Length; i++)
-        {
-            pixels[i] = color;
-        }
-
-        texture.SetPixels(pixels);
-        texture.Apply();
-
-        return texture;
-    }
-
-    /// <summary>
     /// InputField (TMP) - On Value Changed 事件处理器
     /// </summary>
     /// <param name="value">输入字段的当前值</param>
@@ -378,6 +373,17 @@ public class CampScene : MonoBehaviour
         // 在这里添加您的取消选中处理逻辑
     }
 
+    private GameObject GetCurrentSprite()
+    {
+        //return _createdSprites.FirstOrDefault(sprite => sprite.name == _currentSpriteName);
+        return GetCreatedSprite(_currentSpriteName);
+    }
+
+    private GameObject GetCreatedSprite(string name)
+    {
+        return _createdSprites.FirstOrDefault(sprite => sprite.name == name);
+    }
+
     public void OnClickSendMessage()
     {
         Debug.Log("Send Message button clicked");
@@ -395,6 +401,10 @@ public class CampScene : MonoBehaviour
         else
         {
             Debug.LogWarning("Cannot send message. Ensure game is set up, a sprite is selected, and input field is not empty.");
+            DisplaySpeechBubbleAtTarget(GetCurrentSprite(), _inputField.text);
+
+            // 隐藏输入框背景
+            HideInputBackground();
         }
     }
 
@@ -412,76 +422,33 @@ public class CampScene : MonoBehaviour
             yield break;
         }
 
-        string logContent = MyUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
-        Debug.Log(logContent);
-    }
+        HideInputBackground();
 
-    /// <summary>
-    /// 将世界坐标的Sprite位置转换为Canvas UI坐标
-    /// </summary>
-    /// <param name="targetSprite">目标精灵</param>
-    /// <param name="offsetY">Y轴偏移量（用于调整泡泡位置）</param>
-    /// <returns>Canvas坐标系中的位置</returns>
-    private Vector2 ConvertSpriteToCanvasPosition(GameObject targetSprite, float offsetY = 0.5f)
-    {
-        if (_canvas == null || _mainCamera == null)
+        //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串
+        string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
+        Debug.Log(joinedLogs);
+
+
+        for (int i = GameContext.Instance.AgentEvents.Count - 1; i >= 0; i--)
         {
-            Debug.LogError("Canvas or Camera not found for coordinate conversion");
-            return Vector2.zero;
+            if (GameContext.Instance.AgentEvents[i].head == (int)AgentEventHead.SPEAK_EVENT)
+            {
+                SpeakEvent speakEvent = (SpeakEvent)GameContext.Instance.AgentEvents[i];
+                DisplaySpeechBubbleAtTarget(GetCreatedSprite(speakEvent.speaker), $"@{speakEvent.listener} {speakEvent.dialogue}");
+                break;
+            }
         }
 
-        // 步骤1：获取精灵的世界坐标位置
-        Vector3 spriteWorldPos = targetSprite.transform.position;
-        SpriteRenderer spriteRenderer = targetSprite.GetComponent<SpriteRenderer>();
-        float spriteHeight = spriteRenderer.bounds.size.y;
-
-        // 步骤2：计算泡泡在精灵头部上方的世界坐标
-        Vector3 bubbleWorldPos = new Vector3(
-            spriteWorldPos.x,
-            spriteWorldPos.y + spriteHeight / 2 + offsetY,
-            spriteWorldPos.z
-        );
-
-        // 步骤3：世界坐标 → 屏幕坐标
-        Vector3 screenPos = _mainCamera.WorldToScreenPoint(bubbleWorldPos);
-
-        // 步骤4：屏幕坐标 → Canvas坐标
-        Vector2 canvasPos;
-        bool success = RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            _canvas.GetComponent<RectTransform>(),
-            screenPos,
-            _canvas.worldCamera,
-            out canvasPos
-        );
-
-        if (!success)
-        {
-            Debug.LogWarning("Failed to convert screen point to canvas coordinates");
-        }
-
-        Debug.Log($"坐标转换: 世界({spriteWorldPos}) → 屏幕({screenPos}) → Canvas({canvasPos})");
-
-        return canvasPos;
+        // yield return new WaitForSeconds(0);
+        // yield return StartCoroutine(ExecuteHomeAdvancing());
     }
 
     /// <summary>
     /// 创建测试用的UI对话泡泡（使用预制体）
     /// </summary>
     /// <param name="targetSprite">目标精灵</param>
-    private void CreateTestSpeechBubbleUI(GameObject targetSprite, string message)
+    private void DisplaySpeechBubbleAtTarget(GameObject targetSprite, string message)
     {
-        if (_canvas == null || _mainCamera == null)
-        {
-            Debug.LogError("Canvas or Camera not found for UI speech bubble");
-            return;
-        }
-
-        if (_speechBubblePrefab == null)
-        {
-            Debug.LogError("Speech bubble prefab is null");
-            return;
-        }
-
         // 激活预制体
         _speechBubblePrefab.SetActive(true);
 
@@ -494,7 +461,7 @@ public class CampScene : MonoBehaviour
         }
 
         // 🔥 动态计算部分：使用提取的坐标转换函数
-        Vector2 canvasPos = ConvertSpriteToCanvasPosition(targetSprite, 0.5f);
+        Vector2 canvasPos = MyUtils.ConvertSpriteToCanvasPosition(targetSprite, _canvas, _mainCamera, 0.5f);
 
         // 设置UI位置 - 使用动态计算的坐标
         rectTransform.anchoredPosition = canvasPos;
@@ -514,7 +481,7 @@ public class CampScene : MonoBehaviour
         Debug.Log($"Positioned speech bubble prefab at canvas position {canvasPos}");
 
         // 延时隐藏泡泡
-        StartCoroutine(HideSpeechBubblePrefabAfterDelay(3f));
+        //StartCoroutine(HideSpeechBubblePrefabAfterDelay(_hideBubbleDuration));
     }
 
     /// <summary>
@@ -530,6 +497,36 @@ public class CampScene : MonoBehaviour
         {
             _speechBubblePrefab.SetActive(false);
             Debug.Log("Speech bubble prefab hidden");
+        }
+    }
+
+    private void HideInputBackground()
+    {
+        _inputField.text = "";
+        _inputBackground.SetActive(false);
+    }
+
+    private IEnumerator ExecuteHomeAdvancing()
+    {
+        yield return _homeGamePlayAction.Call("/advancing");
+        if (!_homeGamePlayAction.LastRequestSuccess)
+        {
+            Debug.LogError("RunHomeAction request failed");
+            yield break;
+        }
+        //
+        //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串
+        string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
+        Debug.Log(joinedLogs);
+
+        for (int i = GameContext.Instance.AgentEvents.Count - 1; i >= 0; i--)
+        {
+            if (GameContext.Instance.AgentEvents[i].head == (int)AgentEventHead.SPEAK_EVENT)
+            {
+                SpeakEvent speakEvent = (SpeakEvent)GameContext.Instance.AgentEvents[i];
+                DisplaySpeechBubbleAtTarget(GetCreatedSprite(speakEvent.speaker), $"@{speakEvent.listener} {speakEvent.dialogue}");
+                break;
+            }
         }
     }
 }

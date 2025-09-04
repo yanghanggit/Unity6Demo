@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using UnityEngine;
 
 public static class MyUtils
 {
@@ -167,6 +168,78 @@ public static class MyUtils
             mainTextUpdater = "No logs";
         }
         return mainTextUpdater;
+    }
+
+    /// <summary>
+    /// 将世界坐标的Sprite位置转换为Canvas UI坐标
+    /// </summary>
+    /// <param name="targetSprite">目标精灵</param>
+    /// <param name="canvas">Canvas组件</param>
+    /// <param name="camera">摄像机组件</param>
+    /// <param name="offsetY">Y轴偏移量（用于调整泡泡位置）</param>
+    /// <returns>Canvas坐标系中的位置</returns>
+    public static Vector2 ConvertSpriteToCanvasPosition(GameObject targetSprite, Canvas canvas, Camera camera, float offsetY = 0.5f)
+    {
+        if (canvas == null || camera == null || targetSprite == null)
+        {
+            UnityEngine.Debug.LogError("Canvas, Camera or targetSprite is null for coordinate conversion");
+            return Vector2.zero;
+        }
+
+        // 步骤1：获取精灵的世界坐标位置
+        Vector3 spriteWorldPos = targetSprite.transform.position;
+        SpriteRenderer spriteRenderer = targetSprite.GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            UnityEngine.Debug.LogError("Target sprite does not have SpriteRenderer component");
+            return Vector2.zero;
+        }
+
+        float spriteHeight = spriteRenderer.bounds.size.y;
+
+        // 步骤2：计算泡泡在精灵头部上方的世界坐标
+        Vector3 bubbleWorldPos = new Vector3(
+            spriteWorldPos.x,
+            spriteWorldPos.y + spriteHeight / 2 + offsetY,
+            spriteWorldPos.z
+        );
+
+        // 步骤3：世界坐标 → 屏幕坐标
+        Vector3 screenPos = camera.WorldToScreenPoint(bubbleWorldPos);
+
+        // 步骤4：屏幕坐标 → Canvas坐标
+        Vector2 canvasPos;
+        bool success = RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvas.GetComponent<RectTransform>(),
+            screenPos,
+            canvas.worldCamera,
+            out canvasPos
+        );
+
+        if (!success)
+        {
+            Debug.LogWarning("Failed to convert screen point to canvas coordinates");
+        }
+
+        Debug.Log($"坐标转换: 世界({spriteWorldPos}) → 屏幕({screenPos}) → Canvas({canvasPos})");
+
+        return canvasPos;
+    }
+
+    public static Texture2D CreateSimpleTexture(int width, int height, Color color)
+    {
+        Texture2D texture = new Texture2D(width, height);
+        Color[] pixels = new Color[width * height];
+
+        for (int i = 0; i < pixels.Length; i++)
+        {
+            pixels[i] = color;
+        }
+
+        texture.SetPixels(pixels);
+        texture.Apply();
+
+        return texture;
     }
 }
 
