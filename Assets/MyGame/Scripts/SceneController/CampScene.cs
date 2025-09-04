@@ -13,17 +13,14 @@ public class CampScene : MonoBehaviour
     public float _spacingOffset = 2.0f; // 额外间距（可调整）
     public GameObject _inputBackground;
     public TMP_InputField _inputField;
-
+    public GameObject _speechBubblePrefab;
     public HomeGamePlayAction _homeGamePlayAction;
-
     private List<GameObject> _createdSprites;
-
     private string _currentSpriteName;
-
-    // 对话泡泡相关 - UI系统
-    private GameObject _testSpeechBubbleUI;
+    // UI系统组件
     private Canvas _canvas;
     private Camera _mainCamera;
+
 
     void Start()
     {
@@ -32,9 +29,13 @@ public class CampScene : MonoBehaviour
         Debug.Assert(_inputBackground != null, "inputBackground is null");
         Debug.Assert(_inputField != null, "inputField is null");
         Debug.Assert(_homeGamePlayAction != null, "_homeRunAction is null");
+        Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
 
         // 隐藏输入背景
         _inputBackground.SetActive(false);
+
+        // 创建对话泡泡
+        _speechBubblePrefab.SetActive(false);
 
         // 初始化UI系统组件
         _canvas = FindFirstObjectByType<Canvas>();
@@ -59,7 +60,7 @@ public class CampScene : MonoBehaviour
         // 测试：为第一个精灵创建对话泡泡
         if (_createdSprites.Count > 0)
         {
-            CreateTestSpeechBubbleUI(_createdSprites[0]);
+            CreateTestSpeechBubbleUI(_createdSprites[0], "Hello World! This is a speech bubble using prefab!");
         }
     }
 
@@ -110,14 +111,14 @@ public class CampScene : MonoBehaviour
         var imagePaths = new Dictionary<string, string>();
 
 
-        if (GameContext.Instance.ImagePath.TryGetValue("角色.战士.卡恩", out var warriorPath))
+        if (GameContext.Instance.ImagePath.TryGetValue(GameContext.WarriorName, out var warriorPath))
         {
-            imagePaths.Add("角色.战士.卡恩", warriorPath);
+            imagePaths.Add(GameContext.WarriorName, warriorPath);
         }
 
-        if (GameContext.Instance.ImagePath.TryGetValue("角色.法师.奥露娜", out var wizardPath))
+        if (GameContext.Instance.ImagePath.TryGetValue(GameContext.WizardName, out var wizardPath))
         {
-            imagePaths.Add("角色.法师.奥露娜", wizardPath);
+            imagePaths.Add(GameContext.WizardName, wizardPath);
         }
 
         return imagePaths;
@@ -464,10 +465,10 @@ public class CampScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 创建测试用的UI对话泡泡
+    /// 创建测试用的UI对话泡泡（使用预制体）
     /// </summary>
     /// <param name="targetSprite">目标精灵</param>
-    private void CreateTestSpeechBubbleUI(GameObject targetSprite)
+    private void CreateTestSpeechBubbleUI(GameObject targetSprite, string message)
     {
         if (_canvas == null || _mainCamera == null)
         {
@@ -475,70 +476,60 @@ public class CampScene : MonoBehaviour
             return;
         }
 
-        // 创建UI泡泡的根对象
-        _testSpeechBubbleUI = new GameObject("SpeechBubbleUI");
-        _testSpeechBubbleUI.transform.SetParent(_canvas.transform, false);
+        if (_speechBubblePrefab == null)
+        {
+            Debug.LogError("Speech bubble prefab is null");
+            return;
+        }
 
-        // 添加RectTransform
-        RectTransform rectTransform = _testSpeechBubbleUI.AddComponent<RectTransform>();
+        // 激活预制体
+        _speechBubblePrefab.SetActive(true);
+
+        // 获取预制体的RectTransform
+        RectTransform rectTransform = _speechBubblePrefab.GetComponent<RectTransform>();
+        if (rectTransform == null)
+        {
+            Debug.LogError("Speech bubble prefab does not have RectTransform component");
+            return;
+        }
 
         // 🔥 动态计算部分：使用提取的坐标转换函数
         Vector2 canvasPos = ConvertSpriteToCanvasPosition(targetSprite, 0.5f);
 
         // 设置UI位置 - 使用动态计算的坐标
         rectTransform.anchoredPosition = canvasPos;
-        rectTransform.sizeDelta = new Vector2(500, 200);
 
-        // 创建背景Image
-        GameObject background = new GameObject("Background");
-        background.transform.SetParent(_testSpeechBubbleUI.transform, false);
+        // 查找并设置文本内容
+        TextMeshProUGUI textMesh = _speechBubblePrefab.GetComponentInChildren<TextMeshProUGUI>();
+        if (textMesh != null)
+        {
+            textMesh.text = message;
+            Debug.Log("Text content set successfully");
+        }
+        else
+        {
+            Debug.LogWarning("TextMeshProUGUI component not found in speech bubble prefab");
+        }
 
-        RectTransform bgRect = background.AddComponent<RectTransform>();
-        bgRect.anchorMin = Vector2.zero;
-        bgRect.anchorMax = Vector2.one;
-        bgRect.offsetMin = Vector2.zero;
-        bgRect.offsetMax = Vector2.zero;
+        Debug.Log($"Positioned speech bubble prefab at canvas position {canvasPos}");
 
-        Image bgImage = background.AddComponent<Image>();
-        bgImage.color = Color.white;
-
-        // 创建文本
-        GameObject textObject = new GameObject("Text");
-        textObject.transform.SetParent(_testSpeechBubbleUI.transform, false);
-
-        RectTransform textRect = textObject.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(10, 10);
-        textRect.offsetMax = new Vector2(-10, -10);
-
-        TextMeshProUGUI textMesh = textObject.AddComponent<TextMeshProUGUI>();
-        textMesh.text = "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!";
-        textMesh.fontSize = 20;
-        textMesh.color = Color.black;
-        textMesh.alignment = TextAlignmentOptions.Center;
-        textMesh.verticalAlignment = VerticalAlignmentOptions.Middle;
-
-        Debug.Log($"Created UI speech bubble at canvas position {canvasPos}");
-
-        // 3秒后自动隐藏泡泡
-        StartCoroutine(HideUISpeechBubbleAfterDelay(3f));
+        // 延时隐藏泡泡
+        StartCoroutine(HideSpeechBubblePrefabAfterDelay(3f));
     }
 
     /// <summary>
-    /// 延迟隐藏UI对话泡泡
+    /// 延时隐藏对话泡泡预制体
     /// </summary>
     /// <param name="delay">延迟时间</param>
     /// <returns></returns>
-    private IEnumerator HideUISpeechBubbleAfterDelay(float delay)
+    private IEnumerator HideSpeechBubblePrefabAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
 
-        if (_testSpeechBubbleUI != null)
+        if (_speechBubblePrefab != null)
         {
-            Destroy(_testSpeechBubbleUI);
-            _testSpeechBubbleUI = null;
-            Debug.Log("UI Speech bubble hidden");
+            _speechBubblePrefab.SetActive(false);
+            Debug.Log("Speech bubble prefab hidden");
         }
     }
 }
