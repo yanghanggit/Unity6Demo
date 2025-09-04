@@ -27,6 +27,9 @@ EditorBuildSettings:
     path: Assets/MyGame/Scenes/CampScene.unity
     guid: 21534fe6f0e6b4b1ca66f7223471b908
   - enabled: 1
+    path: Assets/MyGame/Scenes/ViewDungeonScene.unity
+    guid: ec52a1fbb566f45feb2b321a17191fba
+  - enabled: 1
     path: Assets/MyGame/Scenes/DungeonScene.unity
     guid: f9b8bdbc826aa47f7993b4a428d989d6
   m_configObjects: {}

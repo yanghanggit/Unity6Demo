@@ -45,8 +45,14 @@ public class MainScene2 : MonoBehaviour
     public void OnClickDungeon()
     {
         Debug.Log("OnClickDungeon");
+        StartCoroutine(OpenViewDungeonScene());
     }
 
+    IEnumerator OpenViewDungeonScene()
+    {
+        yield return new WaitForSeconds(0);
+        SceneManager.LoadScene("ViewDungeonScene");
+    }
 
     IEnumerator ReturnToLoginScene()
     {
