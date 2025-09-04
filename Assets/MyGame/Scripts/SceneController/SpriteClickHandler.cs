@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// 简单的精灵点击处理器
@@ -27,6 +28,13 @@ public class SpriteClickHandler : MonoBehaviour
     /// </summary>
     void OnMouseDown()
     {
+        // 检查是否点击在UI上
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            Debug.Log("Clicked on UI, ignoring sprite click.");
+            return; // 如果点击在UI上，不处理这个事件
+        }
+
         Debug.Log($"Sprite {gameObject.name} clicked!");
 
         // 触发点击事件

@@ -2,25 +2,38 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-//using Newtonsoft.Json;
+
 public class CampScene : MonoBehaviour
 {
-    [Header("场景配置")]
     public string _preScene = "MainScene2";
-
-    [Header("精灵配置")]
-    public SpriteRenderer sampleSprite;
-    public float spacingOffset = 2.0f; // 额外间距（可调整）
+    public GameObject _backgroundImage;
+    public SpriteRenderer _templateActor;
+    public float _spacingOffset = 2.0f; // 额外间距（可调整）
+    public GameObject _inputBackground;
+    private List<GameObject> _createdSprites;
 
     void Start()
     {
-        Debug.Assert(sampleSprite != null, "sampleSprite is null");
+        Debug.Assert(_templateActor != null, "sampleSprite is null");
+        Debug.Assert(_backgroundImage != null, "background is null");
+        Debug.Assert(_inputBackground != null, "inputBackground is null");
+
+        // 隐藏输入背景
+        _inputBackground.SetActive(false);
+
+        // 获取复制过来的点击处理器组件
+        SpriteClickHandler clickHandler = _backgroundImage.GetComponent<SpriteClickHandler>();
+        if (clickHandler != null)
+        {
+            // 订阅点击事件
+            clickHandler.OnSpriteClicked += OnSpriteClicked;
+        }
 
         // 创建精灵（自动根据尺寸计算位置）
-        CreateSprites(ParseImagePaths());
+        _createdSprites = CreateSprites(ParseImagePaths());
 
         // 隐藏原始的sampleSprite，因为第一个创建的精灵会覆盖它的位置
-        sampleSprite.gameObject.SetActive(false);
+        _templateActor.gameObject.SetActive(false);
     }
 
     void Update()
@@ -97,8 +110,24 @@ public class CampScene : MonoBehaviour
     {
         Debug.Log($"精灵 {clickHandler.gameObject.name} 被点击了！");
 
-        // 在这里添加您的点击处理逻辑
-        // 例如：显示角色信息、进入战斗、播放动画等
+        if (clickHandler.gameObject == _backgroundImage)
+        {
+            Debug.Log("Background clicked, ignoring.");
+            _inputBackground.SetActive(false);
+            return;
+        }
+
+        // 查看 clickHandler.gameObject 遍历 _createdSprites，如果是在其中就进行 
+        foreach (var sprite in _createdSprites)
+        {
+            if (clickHandler.gameObject == sprite)
+            {
+                Debug.Log($"Clicked on created sprite: {sprite.name}");
+                // 在这里添加对点击的精灵的处理逻辑
+                _inputBackground.SetActive(true);
+                break;
+            }
+        }
     }
 
     IEnumerator ReturnToMainScene()
@@ -120,7 +149,7 @@ public class CampScene : MonoBehaviour
     /// 创建精灵到当前场景，从左到右排列且不重叠
     /// </summary>
     /// <param name="imagePaths">图片路径列表</param>
-    private void CreateSprites(Dictionary<string, string> imagePaths)
+    private List<GameObject> CreateSprites(Dictionary<string, string> imagePaths)
     {
         // 根据传入的路径创建精灵
         var sprites = new List<GameObject>();
@@ -135,7 +164,7 @@ public class CampScene : MonoBehaviour
         }
 
         // 根据精灵的实际尺寸动态计算位置，从sampleSprite的位置开始
-        float currentX = sampleSprite.transform.position.x; // 当前X位置，初始值为sampleSprite的X位置
+        float currentX = _templateActor.transform.position.x; // 当前X位置，初始值为sampleSprite的X位置
 
         for (int i = 0; i < sprites.Count; i++)
         {
@@ -155,10 +184,12 @@ public class CampScene : MonoBehaviour
             Debug.Log($"Set {sprites[i].name} (width: {spriteWidth}) position to: {position}");
 
             // 更新下一个精灵的起始位置（当前精灵右边缘 + 间距）
-            currentX += spriteWidth + spacingOffset;
+            currentX += spriteWidth + _spacingOffset;
         }
 
         Debug.Log($"Created {sprites.Count} sprites positioned from left to right");
+
+        return sprites;
     }
 
     /// <summary>
@@ -170,7 +201,7 @@ public class CampScene : MonoBehaviour
     private GameObject CreateSpriteFromImage(string spriteName, string imagePath)
     {
         // 复制sampleSprite的GameObject
-        GameObject spriteObject = Instantiate(sampleSprite.gameObject);
+        GameObject spriteObject = Instantiate(_templateActor.gameObject);
 
         // 重命名（位置在外部设置）
         spriteObject.name = spriteName;
@@ -274,9 +305,49 @@ public class CampScene : MonoBehaviour
 
         return texture;
     }
+
+    /// <summary>
+    /// InputField (TMP) - On Value Changed 事件处理器
+    /// </summary>
+    /// <param name="value">输入字段的当前值</param>
+    public void OnInputFieldValueChanged(string value)
+    {
+        Debug.Log($"InputField value changed: {value}");
+        // 在这里添加您的值改变处理逻辑
+    }
+
+    /// <summary>
+    /// InputField (TMP) - On End Edit 事件处理器
+    /// </summary>
+    /// <param name="value">输入字段的最终值</param>
+    public void OnInputFieldEndEdit(string value)
+    {
+        Debug.Log($"InputField end edit: {value}");
+        // 在这里添加您的编辑结束处理逻辑
+    }
+
+    /// <summary>
+    /// InputField (TMP) - On Select 事件处理器
+    /// </summary>
+    /// <param name="value">输入字段被选中时的值</param>
+    public void OnInputFieldSelect(string value)
+    {
+        Debug.Log($"InputField selected: {value}");
+        // 在这里添加您的选中处理逻辑
+    }
+
+    /// <summary>
+    /// InputField (TMP) - On Deselect 事件处理器
+    /// </summary>
+    /// <param name="value">输入字段被取消选中时的值</param>
+    public void OnInputFieldDeselect(string value)
+    {
+        Debug.Log($"InputField deselected: {value}");
+        // 在这里添加您的取消选中处理逻辑
+    }
+
+    public void OnClickSendMessage()
+    {
+        Debug.Log("Send Message button clicked");
+    }
 }
-
-
-/*
-
-*/
