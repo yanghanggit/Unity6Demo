@@ -68,7 +68,7 @@ public class LoginScene : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.0f);
-        //_nextScene = "MainScene2";
+        _nextScene = "MainScene2";
         SceneManager.LoadScene(_nextScene);
     }
 }

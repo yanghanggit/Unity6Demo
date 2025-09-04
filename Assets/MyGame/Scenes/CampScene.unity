@@ -639,6 +639,7 @@ GameObject:
   m_Component:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
+  - component: {fileID: 399892902}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -678,6 +679,24 @@ MonoBehaviour:
   _templateActor: {fileID: 809303518}
   _spacingOffset: 2
   _inputBackground: {fileID: 1654066303}
+  _inputField: {fileID: 2076775056}
+  _homeGamePlayAction: {fileID: 399892902}
+--- !u!114 &399892902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 549d431be56eb4c9e95c52a7eb426b12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!1 &428044658
 GameObject:
   m_ObjectHideFlags: 0

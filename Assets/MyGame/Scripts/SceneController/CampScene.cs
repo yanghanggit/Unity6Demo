@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class CampScene : MonoBehaviour
 {
@@ -10,13 +11,21 @@ public class CampScene : MonoBehaviour
     public SpriteRenderer _templateActor;
     public float _spacingOffset = 2.0f; // 额外间距（可调整）
     public GameObject _inputBackground;
+    public TMP_InputField _inputField;
+
+    public HomeGamePlayAction _homeGamePlayAction;
+
     private List<GameObject> _createdSprites;
+
+    private string _currentSpriteName;
 
     void Start()
     {
         Debug.Assert(_templateActor != null, "sampleSprite is null");
         Debug.Assert(_backgroundImage != null, "background is null");
         Debug.Assert(_inputBackground != null, "inputBackground is null");
+        Debug.Assert(_inputField != null, "inputField is null");
+        Debug.Assert(_homeGamePlayAction != null, "_homeRunAction is null");
 
         // 隐藏输入背景
         _inputBackground.SetActive(false);
@@ -114,6 +123,7 @@ public class CampScene : MonoBehaviour
         {
             Debug.Log("Background clicked, ignoring.");
             _inputBackground.SetActive(false);
+            _currentSpriteName = string.Empty;
             return;
         }
 
@@ -125,6 +135,7 @@ public class CampScene : MonoBehaviour
                 Debug.Log($"Clicked on created sprite: {sprite.name}");
                 // 在这里添加对点击的精灵的处理逻辑
                 _inputBackground.SetActive(true);
+                _currentSpriteName = sprite.name;
                 break;
             }
         }
@@ -314,6 +325,8 @@ public class CampScene : MonoBehaviour
     {
         Debug.Log($"InputField value changed: {value}");
         // 在这里添加您的值改变处理逻辑
+        Debug.Log("OnValueChanged: " + _inputField.text);
+        Debug.Log($"你(/speak = @{_currentSpriteName} " + _inputField.text);
     }
 
     /// <summary>
@@ -349,5 +362,38 @@ public class CampScene : MonoBehaviour
     public void OnClickSendMessage()
     {
         Debug.Log("Send Message button clicked");
+        if (GameContext.Instance.SetupGame && !string.IsNullOrEmpty(_currentSpriteName) && !string.IsNullOrEmpty(_inputField.text))
+        {
+            if (_currentSpriteName != GameContext.Instance.ActorName)
+            {
+                StartCoroutine(ExecuteSpeakAction(_currentSpriteName, _inputField.text));
+            }
+            else
+            {
+                Debug.LogWarning("Cannot send message to self.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Cannot send message. Ensure game is set up, a sprite is selected, and input field is not empty.");
+        }
+    }
+
+    private IEnumerator ExecuteSpeakAction(string target, string content)
+    {
+        yield return _homeGamePlayAction.Call("/speak", new Dictionary<string, string>
+        {
+            ["target"] = target,
+            ["content"] = content
+        });
+        Debug.Log("Speak action executed");
+        if (!_homeGamePlayAction.LastRequestSuccess)
+        {
+            Debug.LogError("RunHomeAction request failed");
+            yield break;
+        }
+
+        string logContent = MyUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
+        Debug.Log(logContent);
     }
 }
