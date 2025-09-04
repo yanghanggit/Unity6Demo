@@ -442,7 +442,7 @@ MonoBehaviour:
   _textUserName: {fileID: 470425677}
   _textGameName: {fileID: 143863052}
   _textActorName: {fileID: 1310098622}
-  _nextScene: MainScene
+  _nextScene: MainScene2
   _loginAction: {fileID: 399892902}
   _startAction: {fileID: 399892903}
   _gameConfig: {fileID: 11400000, guid: 54707035bd7b4439aa2c9b6d574b5a61, type: 2}
@@ -458,6 +458,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 451a5d84c98c44038afbe576fc4dfafd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!114 &399892903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -470,6 +474,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 573b6e76dfc824076b101b4eba928202, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!1 &470425675
 GameObject:
   m_ObjectHideFlags: 0

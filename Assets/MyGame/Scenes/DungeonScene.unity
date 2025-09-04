@@ -338,8 +338,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 472.3363, y: 0}
-  m_SizeDelta: {x: -492.3363, y: 0}
+  m_AnchoredPosition: {x: 20, y: 0}
+  m_SizeDelta: {x: -40, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &129710570
 MonoBehaviour:
@@ -1296,7 +1296,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &389373141
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1403,7 +1403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fd8f5a41b78b422d813d0c05bf1ee70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _preScene: MainScene
+  _preScene: MainScene2
   _mainText: {fileID: 129710570}
   _dungeonGamePlayAction: {fileID: 399892903}
   _viewDungeonAction: {fileID: 399892904}
@@ -1411,8 +1411,6 @@ MonoBehaviour:
   _transHomeAction: {fileID: 399892906}
   _XCardPlayer: {fileID: 11400000, guid: 3199971a30b1d4064a76867ed8c535f4, type: 2}
   _XCardEditor: {fileID: 1254172618}
-  _imageGoblin: {fileID: 784212349}
-  _imageOrc: {fileID: 389373140}
 --- !u!114 &399892903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1425,6 +1423,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d46a85287e2f9434db43aceb5e6b17ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!114 &399892904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1437,6 +1439,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8a573799922e489ba7cd168349339df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!114 &399892905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1449,6 +1455,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e1ef5e385ceb46ea824910e77c561a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!114 &399892906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1461,6 +1471,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c985746fe8e8a4d06b9c925a32d0c49c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!1 &519538520
 GameObject:
   m_ObjectHideFlags: 0
@@ -2162,7 +2176,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &784212350
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3158,6 +3172,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d46a85287e2f9434db43aceb5e6b17ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!1 &1271039968
 GameObject:
   m_ObjectHideFlags: 0

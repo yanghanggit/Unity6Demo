@@ -22,9 +22,9 @@ public class DungeonScene : MonoBehaviour
 
     public XCardEditor _XCardEditor;
 
-    public GameObject _imageGoblin;
+    // public GameObject _imageGoblin;
 
-    public GameObject _imageOrc;
+    // public GameObject _imageOrc;
 
     void Start()
     {
@@ -35,12 +35,12 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
-        Debug.Assert(_imageGoblin != null, "_imageGoblin is null");
-        Debug.Assert(_imageOrc != null, "_imageOrc is null");
+        // Debug.Assert(_imageGoblin != null, "_imageGoblin is null");
+        // Debug.Assert(_imageOrc != null, "_imageOrc is null");
 
         _XCardEditor.gameObject.SetActive(false);
-        _imageGoblin.SetActive(false);
-        _imageOrc.SetActive(false);
+        // _imageGoblin.SetActive(false);
+        // _imageOrc.SetActive(false);
         StartCoroutine(ExecuteViewDungeon());
     }
 
@@ -238,7 +238,7 @@ public class DungeonScene : MonoBehaviour
     private void UpdateDungeonDisplay()
     {
         _mainText.text = MyUtils.MappingDisplayText(CurrentMapping()) + "\n" + MyUtils.DungeonCombatDisplayText(GameContext.Instance.Dungeon);
-        UpdateMonsterImage();
+        //UpdateMonsterImage();
     }
 
     private Dictionary<string, List<string>> CurrentMapping()
@@ -252,27 +252,27 @@ public class DungeonScene : MonoBehaviour
     }
 
 
-    private void UpdateMonsterImage()
-    {
-        _imageOrc.SetActive(false);
-        _imageGoblin.SetActive(false);
+    // private void UpdateMonsterImage()
+    // {
+    //     _imageOrc.SetActive(false);
+    //     _imageGoblin.SetActive(false);
 
-        var actors = MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping);
-        for (int i = 0; i < actors.Count; i++)
-        {
-            // TODO, 先这么招吧，无所谓的事。
-            if (actors[i].Contains("哥布林"))
-            {
-                _imageGoblin.SetActive(true);
-                _imageOrc.SetActive(false);
-                return;
-            }
-            else if (actors[i].Contains("兽人"))
-            {
-                _imageGoblin.SetActive(false);
-                _imageOrc.SetActive(true);
-                return;
-            }
-        }
-    }
+    //     var actors = MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping);
+    //     for (int i = 0; i < actors.Count; i++)
+    //     {
+    //         // TODO, 先这么招吧，无所谓的事。
+    //         if (actors[i].Contains("哥布林"))
+    //         {
+    //             _imageGoblin.SetActive(true);
+    //             _imageOrc.SetActive(false);
+    //             return;
+    //         }
+    //         else if (actors[i].Contains("兽人"))
+    //         {
+    //             _imageGoblin.SetActive(false);
+    //             _imageOrc.SetActive(true);
+    //             return;
+    //         }
+    //     }
+    // }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Newtonsoft.Json;
+//using UnityEngine.UI;
 public class MainScene2 : MonoBehaviour
 {
     public string _preScene = "LoginScene";
@@ -13,10 +14,19 @@ public class MainScene2 : MonoBehaviour
 
     public ViewActorAction _viewActorAction;
 
+    public GameObject _dungeonButton;
+
     void Start()
     {
         Debug.Assert(_logoutAction != null, "_logoutAction is null");
+        Debug.Assert(_viewHomeAction != null, "_viewHomeAction is null");
+        Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
+        Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
+
         StartCoroutine(LoadHomeAndActorData());
+
+        // Update dungeon button visibility
+        _dungeonButton.SetActive(GameContext.Instance.homeAdvanceDone);
     }
 
     void Update()

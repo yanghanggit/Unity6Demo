@@ -756,6 +756,7 @@ MonoBehaviour:
   _logoutAction: {fileID: 399892902}
   _viewHomeAction: {fileID: 399892904}
   _viewActorAction: {fileID: 399892903}
+  _dungeonButton: {fileID: 1416183366}
 --- !u!114 &399892902
 MonoBehaviour:
   m_ObjectHideFlags: 0

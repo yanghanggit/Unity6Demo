@@ -514,6 +514,10 @@ public class CampScene : MonoBehaviour
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
+
+        // 更新家园推进状态
+        GameContext.Instance.homeAdvanceDone = true;
+
         //
         //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
