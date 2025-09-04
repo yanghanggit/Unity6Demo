@@ -2,159 +2,75 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using TMPro;
-using System.Collections.Generic;
-
+using System.Linq;
 
 public class ViewDungeonScene : MonoBehaviour
 {
-    // public string _preScene = "LoginScene";
     public string _preScene = "MainScene2";
 
-    // public string _nextScene = "DungeonScene";
+    public string _nextScene = "DungeonScene";
 
     public TMP_Text _mainText;
 
-    // public LogoutAction _logoutAction;
-
-    // public HomeGamePlayAction _homeGamePlayAction;
-
-    // public ViewHomeAction _viewHomeAction;
-
     public ViewDungeonAction _viewDungeonAction;
 
-    // public ViewDungeon _viewDungeonController;
-
-    // public ViewActorAction _viewActorAction;
-
-    // public HomePlayerInput _homePlayerInput;
+    public TransDungeonAction _transDungeonAction;
 
 
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
-        // Debug.Assert(_logoutAction != null, "_logoutAction is null");
-        // Debug.Assert(_homeGamePlayAction != null, "_homeAction is null");
-        // Debug.Assert(_viewHomeAction != null, "_viewHomeAction is null");
-        // Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
-        // Debug.Assert(_viewDungeonController != null, "_viewDungeonController is null");
-        // Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
-        // Debug.Assert(_homePlayerInput != null, "_homePlayerInput is null");
+        Debug.Assert(_transDungeonAction != null, "_transDungeonAction is null");
 
-
-        // _viewDungeonController.gameObject.SetActive(false);
-        // _homePlayerInput.gameObject.SetActive(false);
-
-
-        // StartCoroutine(ExecuteViewHomeAndActors());
+        // Start the coroutine to view the dungeon
+        StartCoroutine(ExecuteViewDungeon());
     }
 
-    // public void UpdateTextFromAgentLogs()
-    // {
-    //     _mainText.text = MyUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
-    // }
+    public void OnClickTransDungeon()
+    {
+        Debug.Log("OnClickTransDungeon");
+        StartCoroutine(ExecuteTransDungeon());
+    }
 
-    // public void OnClickBack()
-    // {
-    //     Debug.Log("OnGoBack");
-    //     StartCoroutine(ReturnToLoginScene());
-    // }
+    IEnumerator ExecuteTransDungeon()
+    {
+        if (_transDungeonAction == null)
+        {
+            yield break;
+        }
+        yield return _transDungeonAction.Call();
+        if (!_transDungeonAction.LastRequestSuccess)
+        {
+            yield break;
+        }
 
-    // public void OnClickHomeRun()
-    // {
-    //     Debug.Log("OnClickHomeRun");
-    //     _mainText.text = "服务器正在运行，请等待！";
-    //     StartCoroutine(ExecuteHomeGameplayAdvancing());
-    // }
+        yield return new WaitForSeconds(0);
+        SceneManager.LoadScene(_nextScene);
+    }
 
-    // public void OnClickViewDungeon()
-    // {
-    //     Debug.Log("OnClickViewDungeon");
-    //     StartCoroutine(ExecuteViewDungeon());
-    // }
+    IEnumerator ExecuteViewDungeon()
+    {
+        yield return _viewDungeonAction.Call();
+        if (!_viewDungeonAction.LastRequestSuccess)
+        {
+            yield break;
+        }
+        _mainText.text = DungeonOverviewDisplayText(GameContext.Instance.Dungeon);
+    }
 
-    // public void OnClickViewHome()
-    // {
-    //     Debug.Log("OnClickViewHome");
-    //     StartCoroutine(ExecuteViewHomeAndActors());
-    // }
+    string DungeonOverviewDisplayText(Dungeon dungeon)
+    {
+        var dungeon_text = "";
+        dungeon_text += "地下城 = " + dungeon.name + "\n";
+        for (int i = 0; i < dungeon.levels.Count; i++)
+        {
+            dungeon_text += "第" + (i + 1) + "关 = " + dungeon.levels[i].name + "\n";
+            dungeon_text += "怪物 = " + string.Join(", ", dungeon.levels[i].actors.Select(a => a.name)) + "\n";
+        }
 
-    // public void OnClickOpenHomePlayerInput()
-    // {
-    //     Debug.Log("OnClickOpenHomePlayerInput");
-    //     _homePlayerInput.OnClickOpen();
-    // }
-
-    // IEnumerator ReturnToLoginScene()
-    // {
-    //     yield return _logoutAction.Call();
-
-    //     if (!_logoutAction.LastRequestSuccess)
-    //     {
-    //         Debug.LogError("LogoutAction request failed");
-    //         yield break;
-    //     }
-
-    //     SceneManager.LoadScene(_preScene);
-    // }
-
-    // IEnumerator ExecuteHomeGameplayAdvancing()
-    // {
-    //     yield return _homeGamePlayAction.Call("/advancing");
-    //     if (!_homeGamePlayAction.LastRequestSuccess)
-    //     {
-    //         yield break;
-    //     }
-    //     //
-    //     UpdateTextFromAgentLogs();
-    // }
-
-    // IEnumerator ExecuteViewDungeon()
-    // {
-    //     yield return _viewDungeonAction.Call();
-    //     if (!_viewDungeonAction.LastRequestSuccess)
-    //     {
-    //         yield break;
-    //     }
-    //     _viewDungeonController.gameObject.SetActive(true);
-    //     _viewDungeonController.UpdateDungeonDisplay();
-    // }
-
-    // private IEnumerator ExecuteViewHomeAndActors()
-    // {
-    //     yield return _viewHomeAction.Call();
-    //     if (!_viewHomeAction.LastRequestSuccess)
-    //     {
-    //         yield break;
-    //     }
-
-    //     yield return _viewActorAction.Call(
-    //         MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
-
-    //     if (!_viewActorAction.LastRequestSuccess)
-    //     {
-    //         yield break;
-    //     }
-
-    //     var text0 = "你 = " + GameContext.Instance.ActorName;
-    //     var text1 = MyUtils.MappingDisplayText(GameContext.Instance.Mapping);
-    //     var text2 = ComposeActorInfoString(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
-    //     _mainText.text = text0 + "\n" + text1 + "\n" + text2;
-    // }
-
-    // private string ComposeActorInfoString(HashSet<string> includedComponentNames = null)
-    // {
-    //     var text = "";
-
-    //     var actorSnapshots = GameContext.Instance.ActorSnapshots;
-    //     for (int i = 0; i < actorSnapshots.Count; i++)
-    //     {
-    //         var actorSnapshot = actorSnapshots[i];
-    //         text += MyUtils.ActorDisplayText(actorSnapshot, includedComponentNames);
-    //         text += "\n";
-    //     }
-    //     return text;
-    // }
+        return dungeon_text;
+    }
 
     public void OnClickBack()
     {

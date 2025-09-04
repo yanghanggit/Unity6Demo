@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class DungeonScene : MonoBehaviour
 {
-    public string _preScene = "MainScene";
+    public string _preScene = "MainScene2";
 
     public TMP_Text _mainText;
 

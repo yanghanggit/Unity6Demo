@@ -11,7 +11,7 @@ public class LoginScene : MonoBehaviour
 
     public TMP_Text _textActorName;
 
-    public string _nextScene = "MainScene";
+    public string _nextScene = "MainScene2";
 
     public LoginAction _loginAction;
 

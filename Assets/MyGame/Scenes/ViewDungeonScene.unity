@@ -404,6 +404,7 @@ GameObject:
   - component: {fileID: 399892900}
   - component: {fileID: 399892902}
   - component: {fileID: 399892901}
+  - component: {fileID: 399892903}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -455,8 +456,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _preScene: MainScene2
+  _nextScene: DungeonScene
   _mainText: {fileID: 3871845}
   _viewDungeonAction: {fileID: 399892901}
+  _transDungeonAction: {fileID: 399892903}
+--- !u!114 &399892903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97be35b404dfd432dbb3b4aa5188f89a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requestTimeout: 30
+  maxRetryAttempts: 3
+  retryDelay: 1
+  useAsyncVersion: 1
 --- !u!1 &433063512
 GameObject:
   m_ObjectHideFlags: 0
@@ -1058,8 +1077,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: ViewDungeon, Assembly-CSharp
+      - m_Target: {fileID: 399892902}
+        m_TargetAssemblyTypeName: ViewDungeonScene, Assembly-CSharp
         m_MethodName: OnClickTransDungeon
         m_Mode: 1
         m_Arguments:
