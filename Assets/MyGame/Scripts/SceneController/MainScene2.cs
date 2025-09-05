@@ -24,9 +24,6 @@ public class MainScene2 : MonoBehaviour
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
 
         StartCoroutine(LoadHomeAndActorData());
-
-        // Update dungeon button visibility
-        _dungeonButton.SetActive(GameContext.Instance.homeAdvanceDone);
     }
 
     void Update()

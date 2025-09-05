@@ -54,8 +54,22 @@ public class CampScene : MonoBehaviour
             clickHandler.OnSpriteClicked += OnSpriteClicked;
         }
 
+        //var imagePaths = new Dictionary<string, string>();
+
+        List<string> actors = new List<string>();
+        GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors);
+        if (actors == null || !GameContext.Instance.SetupGame)
+        {
+            Debug.LogWarning("GameContext is not set up. Using debug actors.");
+            actors = new List<string>
+            {
+                GameContext.WarriorName,
+                GameContext.WizardName
+            };
+        }
+
         // 创建精灵（自动根据尺寸计算位置）
-        _createdSprites = CreateSprites(ParseImagePaths());
+        _createdSprites = InstantiateAndPositionSprites(actors);
 
         // 隐藏原始的sampleSprite，因为第一个创建的精灵会覆盖它的位置
         _templateActor.gameObject.SetActive(false);
@@ -65,66 +79,6 @@ public class CampScene : MonoBehaviour
         {
             //DisplaySpeechBubbleAtTarget(_createdSprites[0], "Hello World! This is a speech bubble using prefab!");
         }
-    }
-
-    void Update()
-    {
-
-    }
-
-    private Dictionary<string, string> ParseImagePaths()
-    {
-        if (!GameContext.Instance.SetupGame)
-        {
-            Debug.LogWarning("GameContext is not set up. Using debug image paths.");
-            return ParseDebugImagePaths();
-        }
-
-        return ParseActorImagePaths();
-    }
-
-    /// <summary>
-    /// 从GameContext的Mapping中解析角色图片路径
-    /// </summary>
-    /// <returns>图片路径列表</returns>
-    private Dictionary<string, string> ParseActorImagePaths()
-    {
-        var imagePaths = new Dictionary<string, string>();
-
-        List<string> actors = new List<string>();
-        GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors);
-        for (int i = 0; i < actors.Count; i++)
-        {
-            string actor = actors[i];
-            // 在这里处理每个actor，例如打印或存储
-            Debug.Log($"Found actor in {GameContext.CampName}: {actor}");
-
-            if (GameContext.Instance.ImagePath.TryGetValue(actor, out var imagePath))
-            {
-                Debug.Log($"Found image path for {actor}: {imagePath}");
-                imagePaths.Add(actor, imagePath);
-            }
-        }
-
-        return imagePaths;
-    }
-
-    private Dictionary<string, string> ParseDebugImagePaths()
-    {
-        var imagePaths = new Dictionary<string, string>();
-
-
-        if (GameContext.Instance.ImagePath.TryGetValue(GameContext.WarriorName, out var warriorPath))
-        {
-            imagePaths.Add(GameContext.WarriorName, warriorPath);
-        }
-
-        if (GameContext.Instance.ImagePath.TryGetValue(GameContext.WizardName, out var wizardPath))
-        {
-            imagePaths.Add(GameContext.WizardName, wizardPath);
-        }
-
-        return imagePaths;
     }
 
     public void OnClickBack()
@@ -196,28 +150,56 @@ public class CampScene : MonoBehaviour
     /// <summary>
     /// 创建精灵到当前场景，从左到右排列且不重叠
     /// </summary>
-    /// <param name="imagePaths">图片路径列表</param>
-    private List<GameObject> CreateSprites(Dictionary<string, string> imagePaths)
+    /// <param name="actors">角色名称列表</param>
+    private List<GameObject> InstantiateAndPositionSprites(List<string> actors)
     {
         // 根据传入的路径创建精灵
         var sprites = new List<GameObject>();
-
-        foreach (var kvp in imagePaths)
+        for (int i = 0; i < actors.Count; i++)
         {
-            string spriteName = kvp.Key; // 使用角色名作为精灵名称
-            string imagePath = kvp.Value;
-
-            GameObject sprite = CreateSpriteFromImage(spriteName, imagePath);
+            GameObject sprite = CreateSprite(actors[i], TextureManager.Instance.GetSprite(actors[i]));
             sprites.Add(sprite);
         }
 
-        // 根据精灵的实际尺寸动态计算位置，从sampleSprite的位置开始
-        float currentX = _templateActor.transform.position.x; // 当前X位置，初始值为sampleSprite的X位置
+        // 使用提取的函数来计算和设置精灵位置
+        PositionSpritesFromLeftToRight(sprites, _templateActor.transform.position.x, _spacingOffset);
+
+        Debug.Log($"Created {sprites.Count} sprites positioned from left to right");
+
+        return sprites;
+    }
+
+    /// <summary>
+    /// 根据精灵的实际尺寸动态计算位置，从指定起始位置开始从左到右排列
+    /// </summary>
+    /// <param name="sprites">需要排列的精灵列表</param>
+    /// <param name="startX">起始X坐标位置</param>
+    /// <param name="spacingOffset">精灵间的额外间距</param>
+    private void PositionSpritesFromLeftToRight(List<GameObject> sprites, float startX, float spacingOffset)
+    {
+        if (sprites == null || sprites.Count == 0)
+        {
+            Debug.LogWarning("PositionSpritesFromLeftToRight: sprites list is null or empty");
+            return;
+        }
+
+        float currentX = startX; // 当前X位置，从起始位置开始
 
         for (int i = 0; i < sprites.Count; i++)
         {
+            if (sprites[i] == null)
+            {
+                Debug.LogWarning($"PositionSpritesFromLeftToRight: sprite at index {i} is null, skipping");
+                continue;
+            }
+
             // 获取当前精灵的SpriteRenderer
             SpriteRenderer spriteRenderer = sprites[i].GetComponent<SpriteRenderer>();
+            if (spriteRenderer == null)
+            {
+                Debug.LogWarning($"PositionSpritesFromLeftToRight: sprite {sprites[i].name} has no SpriteRenderer, skipping");
+                continue;
+            }
 
             // 获取精灵的实际宽度
             float spriteWidth = spriteRenderer.size.x;
@@ -225,19 +207,16 @@ public class CampScene : MonoBehaviour
             // 计算精灵的中心位置（当前X + 精灵宽度的一半）
             float centerX = currentX + spriteWidth / 2f;
 
-            // 设置精灵位置
-            Vector3 position = new Vector3(centerX, 0f, 0f);
-            sprites[i].transform.position = position;
+            // 设置精灵位置（保持原有的Y和Z坐标）
+            Vector3 originalPosition = sprites[i].transform.position;
+            Vector3 newPosition = new Vector3(centerX, originalPosition.y, originalPosition.z);
+            sprites[i].transform.position = newPosition;
 
-            Debug.Log($"Set {sprites[i].name} (width: {spriteWidth}) position to: {position}");
+            Debug.Log($"Set {sprites[i].name} (width: {spriteWidth}) position to: {newPosition}");
 
             // 更新下一个精灵的起始位置（当前精灵右边缘 + 间距）
-            currentX += spriteWidth + _spacingOffset;
+            currentX += spriteWidth + spacingOffset;
         }
-
-        Debug.Log($"Created {sprites.Count} sprites positioned from left to right");
-
-        return sprites;
     }
 
     /// <summary>
@@ -246,7 +225,7 @@ public class CampScene : MonoBehaviour
     /// <param name="spriteName">精灵名称</param>
     /// <param name="imagePath">图片完整路径</param>
     /// <returns>创建的GameObject</returns>
-    private GameObject CreateSpriteFromImage(string spriteName, string imagePath)
+    private GameObject CreateSprite(string spriteName, Sprite cachedSprite)
     {
         // 复制sampleSprite的GameObject
         GameObject spriteObject = Instantiate(_templateActor.gameObject);
@@ -268,8 +247,8 @@ public class CampScene : MonoBehaviour
         Debug.Log($"Copied sprite settings: drawMode={spriteRenderer.drawMode}, size={spriteRenderer.size}");
 
         // 直接使用传入的完整路径加载图片资源
-        Texture2D texture = LoadImageFromPath(imagePath);
-
+        // Texture2D texture = LoadImageFromPath(imagePath);
+        Texture2D texture = cachedSprite.texture;
         if (texture != null)
         {
             // 从纹理创建精灵，保持与原始sampleSprite相同的设置
@@ -278,11 +257,11 @@ public class CampScene : MonoBehaviour
             // 只替换sprite，保持所有其他设置不变
             spriteRenderer.sprite = newSprite;
 
-            Debug.Log($"Successfully loaded image from {imagePath} for {spriteName}, Original texture size: {texture.width}x{texture.height}");
+            //Debug.Log($"Successfully loaded image from {imagePath} for {spriteName}, Original texture size: {texture.width}x{texture.height}");
         }
         else
         {
-            Debug.LogError($"Failed to load image from path: {imagePath}");
+            //Debug.LogError($"Failed to load image from path: {imagePath}");
             // 如果加载失败，创建一个简单的替代纹理
             Texture2D fallbackTexture = MyUtils.CreateSimpleTexture(64, 64, Color.gray);
             Sprite fallbackSprite = Sprite.Create(fallbackTexture, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
@@ -514,9 +493,6 @@ public class CampScene : MonoBehaviour
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
-
-        // 更新家园推进状态
-        GameContext.Instance.homeAdvanceDone = true;
 
         //
         //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串
