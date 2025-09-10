@@ -3,7 +3,7 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using System;
+//using System;
 
 public class DungeonScene : MonoBehaviour
 {
@@ -177,7 +177,7 @@ public class DungeonScene : MonoBehaviour
         yield return _dungeonGamePlayAction.Call("advance_next_dungeon");
         if (!_dungeonGamePlayAction.LastRequestSuccess)
         {
-            _mainText.text = _dungeonGamePlayAction.LastErrorMessage;
+            _mainText.text = _dungeonGamePlayAction.LastRequestResponseText;
             yield break;
         }
 

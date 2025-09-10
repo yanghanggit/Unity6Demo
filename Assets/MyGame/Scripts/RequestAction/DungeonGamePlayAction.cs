@@ -10,30 +10,26 @@ using System.Collections.Generic;
 public class DungeonGamePlayAction : BaseRequestAction
 {
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
-    private DungeonGamePlayResponse _dungeonGamePlayResponse = null;
+    private DungeonGamePlayResponse _lastDungeonGamePlayResponse = null;
     private RequestResult _lastRequestResult = null;
     public bool LastRequestSuccess => _lastRequestResult != null && _lastRequestResult.isSuccess;
 
-    public string LastErrorMessage
+    public string LastRequestResponseText
     {
         get
         {
             if (_lastRequestResult == null)
             {
-                return "No request made yet.";
-            }
-            if (_lastRequestResult.isSuccess)
-            {
                 return string.Empty;
             }
-            return _lastRequestResult.error;
+            return _lastRequestResult.responseText;
         }
     }
 
     public void ResetStatus()
     {
         Debug.Log(this.GetType().Name + ":ResetStatus");
-        _dungeonGamePlayResponse = null;
+        _lastDungeonGamePlayResponse = null;
         _lastRequestResult = null;
     }
 
@@ -214,16 +210,16 @@ public class DungeonGamePlayAction : BaseRequestAction
 
         try
         {
-            _dungeonGamePlayResponse = JsonConvert.DeserializeObject<DungeonGamePlayResponse>(responseText);
+            _lastDungeonGamePlayResponse = JsonConvert.DeserializeObject<DungeonGamePlayResponse>(responseText);
 
-            if (_dungeonGamePlayResponse == null)
+            if (_lastDungeonGamePlayResponse == null)
             {
                 Debug.LogError("DungeonGamePlayAction response is null");
                 return false;
             }
 
             // 设置游戏状态
-            GameContext.Instance.ProcessClientMessages(_dungeonGamePlayResponse.client_messages);
+            GameContext.Instance.ProcessClientMessages(_lastDungeonGamePlayResponse.client_messages);
 
             return true;
         }
