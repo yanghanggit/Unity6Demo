@@ -3,6 +3,7 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using System;
 
 public class DungeonScene : MonoBehaviour
 {
@@ -22,9 +23,6 @@ public class DungeonScene : MonoBehaviour
 
     public XCardEditor _XCardEditor;
 
-    // public GameObject _imageGoblin;
-
-    // public GameObject _imageOrc;
 
     void Start()
     {
@@ -35,12 +33,9 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
-        // Debug.Assert(_imageGoblin != null, "_imageGoblin is null");
-        // Debug.Assert(_imageOrc != null, "_imageOrc is null");
 
         _XCardEditor.gameObject.SetActive(false);
-        // _imageGoblin.SetActive(false);
-        // _imageOrc.SetActive(false);
+
         StartCoroutine(ExecuteViewDungeon());
     }
 
@@ -93,11 +88,11 @@ public class DungeonScene : MonoBehaviour
         _XCardEditor.gameObject.SetActive(true);
     }
 
-    public void OnClickCombatComplete()
-    {
-        Debug.Log("OnClickCombatComplete");
-        StartCoroutine(ExecuteCombatComplete());
-    }
+    // public void OnClickCombatComplete()
+    // {
+    //     Debug.Log("OnClickCombatComplete");
+    //     StartCoroutine(ExecuteCombatComplete());
+    // }
 
     private IEnumerator ExecuteDungeonCombatKickOff()
     {
@@ -107,7 +102,7 @@ public class DungeonScene : MonoBehaviour
             yield break;
         }
 
-        UpdateTextFromAgentLogs();
+        yield return ExecuteViewDungeon();
     }
 
     private IEnumerator ExecuteDrawCards()
@@ -182,12 +177,11 @@ public class DungeonScene : MonoBehaviour
         yield return _dungeonGamePlayAction.Call("advance_next_dungeon");
         if (!_dungeonGamePlayAction.LastRequestSuccess)
         {
+            _mainText.text = _dungeonGamePlayAction.LastErrorMessage;
             yield break;
         }
 
-        UpdateTextFromAgentLogs();
-        _mainText.text = _mainText.text + "\n" + "已进入下一个地下城";
-
+        _mainText.text = "已进入下一个地下城";
         yield return ExecuteViewDungeon();
     }
 
@@ -205,16 +199,16 @@ public class DungeonScene : MonoBehaviour
         SceneManager.LoadScene(_preScene);
     }
 
-    private IEnumerator ExecuteCombatComplete()
-    {
-        yield return _dungeonGamePlayAction.Call("dungeon_combat_complete");
-        if (!_dungeonGamePlayAction.LastRequestSuccess)
-        {
-            yield break;
-        }
+    // private IEnumerator ExecuteCombatComplete()
+    // {
+    //     yield return _dungeonGamePlayAction.Call("dungeon_combat_complete");
+    //     if (!_dungeonGamePlayAction.LastRequestSuccess)
+    //     {
+    //         yield break;
+    //     }
 
-        UpdateTextFromAgentLogs();
-    }
+    //     UpdateTextFromAgentLogs();
+    // }
 
     private void UpdateActorDisplay(HashSet<string> includedComponentNames = null)
     {
@@ -238,7 +232,6 @@ public class DungeonScene : MonoBehaviour
     private void UpdateDungeonDisplay()
     {
         _mainText.text = MyUtils.MappingDisplayText(CurrentMapping()) + "\n" + MyUtils.DungeonCombatDisplayText(GameContext.Instance.Dungeon);
-        //UpdateMonsterImage();
     }
 
     private Dictionary<string, List<string>> CurrentMapping()
@@ -250,29 +243,4 @@ public class DungeonScene : MonoBehaviour
 
         return currentMapping;
     }
-
-
-    // private void UpdateMonsterImage()
-    // {
-    //     _imageOrc.SetActive(false);
-    //     _imageGoblin.SetActive(false);
-
-    //     var actors = MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping);
-    //     for (int i = 0; i < actors.Count; i++)
-    //     {
-    //         // TODO, 先这么招吧，无所谓的事。
-    //         if (actors[i].Contains("哥布林"))
-    //         {
-    //             _imageGoblin.SetActive(true);
-    //             _imageOrc.SetActive(false);
-    //             return;
-    //         }
-    //         else if (actors[i].Contains("兽人"))
-    //         {
-    //             _imageGoblin.SetActive(false);
-    //             _imageOrc.SetActive(true);
-    //             return;
-    //         }
-    //     }
-    // }
 }

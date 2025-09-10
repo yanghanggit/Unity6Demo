@@ -9,74 +9,86 @@ using System.Collections.Generic;
 /// </summary>
 public class DungeonGamePlayAction : BaseRequestAction
 {
-    [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
-    
-    private bool _lastRequestSuccess = false;
-    private DungeonGamePlayResponse _response;
-    
-    public bool LastRequestSuccess => _lastRequestSuccess;
-    
+    private DungeonGamePlayResponse _dungeonGamePlayResponse = null;
+    private RequestResult _lastRequestResult = null;
+    public bool LastRequestSuccess => _lastRequestResult != null && _lastRequestResult.isSuccess;
+
+    public string LastErrorMessage
+    {
+        get
+        {
+            if (_lastRequestResult == null)
+            {
+                return "No request made yet.";
+            }
+            if (_lastRequestResult.isSuccess)
+            {
+                return string.Empty;
+            }
+            return _lastRequestResult.error;
+        }
+    }
 
     public void ResetStatus()
     {
         Debug.Log(this.GetType().Name + ":ResetStatus");
-        _lastRequestSuccess = false;
-        _response = null;
+        _dungeonGamePlayResponse = null;
+        _lastRequestResult = null;
     }
 
     #region 协程版本（兼容现有代码）
-    
+
     /// <summary>
     /// 地下城游戏玩法（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine(string userInputTag, Dictionary<string, string> data = null)
     {
         Debug.Log($"Dungeon gameplay request for tag: {userInputTag}");
-        
+
         if (data == null)
         {
             data = new Dictionary<string, string>();
         }
-        
+
         // 重置请求状态
         ResetStatus();
-        
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available for dungeon gameplay");
             yield break;
         }
-        
+
         // 创建请求数据
-        var requestData = new DungeonGamePlayRequest 
-        { 
-            user_name = GameContext.Instance.UserName, 
-            game_name = GameContext.Instance.GameName, 
-            user_input = new DungeonGamePlayUserInput { tag = userInputTag, data = data } 
+        var requestData = new DungeonGamePlayRequest
+        {
+            user_name = GameContext.Instance.UserName,
+            game_name = GameContext.Instance.GameName,
+            user_input = new DungeonGamePlayUserInput { tag = userInputTag, data = data }
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
-        
+
         bool requestCompleted = false;
-        RequestResult result = null;
-        
+        //RequestResult result = null;
+
         // 发送请求
         yield return PostRequestCoroutine(GameContext.Instance.DUNGEON_GAMEPLAY_URL, jsonData, (response) =>
         {
-            result = response;
+            _lastRequestResult = response;
             requestCompleted = true;
         });
-        
+
         // 等待请求完成
         yield return new WaitUntil(() => requestCompleted);
-        
+
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_lastRequestResult != null && _lastRequestResult.isSuccess)
         {
-            if (TryParseDungeonGamePlayResponse(result.responseText))
+            if (TryParseDungeonGamePlayResponse(_lastRequestResult.responseText))
             {
-                _lastRequestSuccess = true;
+                //_lastRequestSuccess = true;
                 Debug.Log("Dungeon gameplay successful");
             }
             else
@@ -86,56 +98,57 @@ public class DungeonGamePlayAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"Dungeon gameplay failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Dungeon gameplay failed: {_lastRequestResult?.error ?? "Unknown error"}");
         }
     }
-    
+
     #endregion
 
     #region Async 版本（推荐用于 Unity 6）
-    
+
     /// <summary>
     /// 地下城游戏玩法（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync(string userInputTag, Dictionary<string, string> data = null)
     {
         Debug.Log($"Dungeon gameplay request async for tag: {userInputTag}");
-        
+
         if (data == null)
         {
             data = new Dictionary<string, string>();
         }
-        
+
         // 重置请求状态
         ResetStatus();
-        
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available for dungeon gameplay");
             return false;
         }
-        
+
         try
         {
             // 创建请求数据
-            var requestData = new DungeonGamePlayRequest 
-            { 
-                user_name = GameContext.Instance.UserName, 
-                game_name = GameContext.Instance.GameName, 
-                user_input = new DungeonGamePlayUserInput { tag = userInputTag, data = data } 
+            var requestData = new DungeonGamePlayRequest
+            {
+                user_name = GameContext.Instance.UserName,
+                game_name = GameContext.Instance.GameName,
+                user_input = new DungeonGamePlayUserInput { tag = userInputTag, data = data }
             };
             var jsonData = JsonConvert.SerializeObject(requestData);
-            
+
             // 发送请求
-            var result = await PostRequestAsync(GameContext.Instance.DUNGEON_GAMEPLAY_URL, jsonData);
-            
+            _lastRequestResult = await PostRequestAsync(GameContext.Instance.DUNGEON_GAMEPLAY_URL, jsonData);
+
             // 处理结果
-            if (result.isSuccess)
+            if (_lastRequestResult.isSuccess)
             {
-                if (TryParseDungeonGamePlayResponse(result.responseText))
+                if (TryParseDungeonGamePlayResponse(_lastRequestResult.responseText))
                 {
-                    _lastRequestSuccess = true;
+                    //_lastRequestSuccess = true;
+
                     Debug.Log("Dungeon gameplay successful");
                     return true;
                 }
@@ -146,21 +159,21 @@ public class DungeonGamePlayAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"Dungeon gameplay failed: {result.error}");
+                Debug.LogError($"Dungeon gameplay failed: {_lastRequestResult.error}");
             }
         }
         catch (System.Exception ex)
         {
             Debug.LogError($"Exception during dungeon gameplay request: {ex.Message}");
         }
-        
+
         return false;
     }
-    
+
     #endregion
 
     #region 通用调用方法
-    
+
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
@@ -171,7 +184,7 @@ public class DungeonGamePlayAction : BaseRequestAction
             // 使用 async 版本
             var task = CallAsync(userInputTag, data);
             yield return new WaitUntil(() => task.IsCompleted);
-            
+
             if (task.IsFaulted)
             {
                 Debug.LogError($"Async dungeon gameplay call failed: {task.Exception?.GetBaseException().Message}");
@@ -183,11 +196,11 @@ public class DungeonGamePlayAction : BaseRequestAction
             yield return CallCoroutine(userInputTag, data);
         }
     }
-    
+
     #endregion
 
     #region 私有方法
-    
+
     /// <summary>
     /// 尝试解析地下城游戏玩法响应数据
     /// </summary>
@@ -198,20 +211,20 @@ public class DungeonGamePlayAction : BaseRequestAction
             Debug.LogError("Dungeon gameplay response text is empty");
             return false;
         }
-        
+
         try
         {
-            _response = JsonConvert.DeserializeObject<DungeonGamePlayResponse>(responseText);
-            
-            if (_response == null)
+            _dungeonGamePlayResponse = JsonConvert.DeserializeObject<DungeonGamePlayResponse>(responseText);
+
+            if (_dungeonGamePlayResponse == null)
             {
                 Debug.LogError("DungeonGamePlayAction response is null");
                 return false;
             }
 
             // 设置游戏状态
-            GameContext.Instance.ProcessClientMessages(_response.client_messages);
-            
+            GameContext.Instance.ProcessClientMessages(_dungeonGamePlayResponse.client_messages);
+
             return true;
         }
         catch (System.Exception ex)
@@ -220,6 +233,6 @@ public class DungeonGamePlayAction : BaseRequestAction
             return false;
         }
     }
-    
+
     #endregion
 }
