@@ -1,12 +1,11 @@
 
 
-
 using System.Collections.Generic;
 
-
-/**
-* 战斗状态
-*/
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 表示战斗的状态 Phase
+/// </summary>
 public enum CombatPhase
 {
     NONE = 0,
@@ -16,9 +15,10 @@ public enum CombatPhase
     POST_WAIT = 4  // 战斗等待进入新一轮战斗或者回家
 }
 
-/**
- * 
- */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 表示战斗的状态
+/// </summary>
 public enum CombatResult
 {
     NONE = 0,
@@ -26,73 +26,78 @@ public enum CombatResult
     HERO_LOSE = 2  // 失败
 }
 
-/**
- * 
- */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 技能产生的影响
+/// </summary>
 [System.Serializable]
-public class StatusEffect
+public sealed class StatusEffect
 {
-    public string name = "";
-    public string description = "";
-    public int rounds = 0;
+    public string name = "";        // 效果名称
+    public string description = ""; // 效果描述
+    public int rounds = 0;          // 持续回合数
 }
 
-/**
- * 
- */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 技能是一种特殊的道具，它有一个额外的效果
+/// </summary>
 [System.Serializable]
-public class Skill
+public sealed class Skill
 {
-    public string name = "";
-    public string description = "";
-    public string effect = "";
+    public string name = "";        // 此技能名称
+    public string description = ""; // 此技能描述
+    public string effect = "";      // 此技能产生的效果以及造成的影响
 }
 
-/**
- * 
- */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 表示一个回合
+/// </summary>
 [System.Serializable]
-public class Round
+public sealed class Round
 {
     public string tag = "";
     public List<string> round_turns = new List<string>();
-    public string stage_environment = "";
-    public Dictionary<string, string> select_report = new Dictionary<string, string>();
-    public string stage_director_calculation = "";
-    public string stage_director_performance = "";
-    public Dictionary<string, string> feedback_report = new Dictionary<string, string>();
+    public string environment = "";
+    public string calculation = "";
+    public string performance = "";
 }
 
-/**
- * 
- */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 表示一个战斗
+/// </summary>
 [System.Serializable]
-public class Combat
+public sealed class Combat
 {
     public string name = "";
     public CombatPhase phase = CombatPhase.NONE;
     public CombatResult result = CombatResult.NONE;
     public List<Round> rounds = new List<Round>();
-    public Dictionary<string, string> summarize_report = new Dictionary<string, string>();
 }
 
-/**
- * 
- */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 战斗参与
+/// </summary>
 [System.Serializable]
-public class Engagement
+public sealed class Engagement
 {
     public List<Combat> combats = new List<Combat>();
 }
 
-/**
- * 
- */
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 地下城
+/// </summary>
 [System.Serializable]
-public class Dungeon
+public sealed class Dungeon
 {
     public string name = "";
     public List<Stage> levels = new List<Stage>();
     public Engagement engagement = new Engagement();
     public int position = -1;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

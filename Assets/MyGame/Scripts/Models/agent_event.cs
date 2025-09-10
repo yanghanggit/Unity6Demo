@@ -1,6 +1,6 @@
-//using System.Collections.Generic;
-/**
- */
+/// <summary>
+/// 代理事件头部枚举
+/// </summary>
 public enum AgentEventHead
 {
     NONE = 0,
@@ -12,82 +12,88 @@ public enum AgentEventHead
     COMBAT_COMPLETE_EVENT = 6,
 }
 
-/**
-* 
-*/
+/// <summary>
+/// 代理事件基类
+/// </summary>
 [System.Serializable]
 public class AgentEvent
 {
     public int head = (int)AgentEventHead.NONE;
-
     public string message = "";
 }
 
-/**
-* 
-*/
+/// <summary>
+/// 说话事件
+/// </summary>
 [System.Serializable]
-public class SpeakEvent : AgentEvent
+public sealed class SpeakEvent : AgentEvent
 {
-    //public int head = AgentEventHead.SPEAK_EVENT;
+    //public new int head = (int)AgentEventHead.SPEAK_EVENT;
     public string speaker = "";
     public string listener = "";
     public string dialogue = "";
 }
 
-/**
-* 
-*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 耳语事件
+/// </summary>
 [System.Serializable]
-public class WhisperEvent : AgentEvent
+public sealed class WhisperEvent : AgentEvent
 {
-    //public int head = AgentEventHead.WHISPER_EVENT;
+    //public new int head = (int)AgentEventHead.WHISPER_EVENT;
     public string speaker = "";
     public string listener = "";
     public string dialogue = "";
 }
 
-/**
-* 
-*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 宣布事件
+/// </summary>
 [System.Serializable]
-public class AnnounceEvent : AgentEvent
+public sealed class AnnounceEvent : AgentEvent
 {
-    //public int head = AgentEventHead.ANNOUNCE_EVENT;
+    //public new int head = (int)AgentEventHead.ANNOUNCE_EVENT;
     public string announcement_speaker = "";
     public string event_stage = "";
     public string announcement_message = "";
 }
 
-/**
-* 
-*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 心灵语音事件
+/// </summary>
 [System.Serializable]
-public class MindVoiceEvent : AgentEvent
+public sealed class MindVoiceEvent : AgentEvent
 {
-    //public int head = AgentEventHead.MIND_VOICE_EVENT;
+    //public new int head = (int)AgentEventHead.MIND_VOICE_EVENT;
     public string speaker = "";
     public string dialogue = "";
 }
 
-/**
-* 
-*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 战斗开始事件
+/// </summary>
 [System.Serializable]
-public class CombatKickOffEvent : AgentEvent
+public sealed class CombatKickOffEvent : AgentEvent
 {
-    //public int head = AgentEventHead.COMBAT_KICK_OFF_EVENT;
+    //public new int head = (int)AgentEventHead.COMBAT_KICK_OFF_EVENT;
     public string actor = "";
     public string description = "";
 }
 
-/**
-* 
-*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 战斗完成事件
+/// </summary>
 [System.Serializable]
-public class CombatCompleteEvent : AgentEvent
+public sealed class CombatCompleteEvent : AgentEvent
 {
-    //public int head = AgentEventHead.COMBAT_COMPLETE_EVENT;
+    //public new int head = (int)AgentEventHead.COMBAT_COMPLETE_EVENT;
     public string actor = "";
     public string summary = "";
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

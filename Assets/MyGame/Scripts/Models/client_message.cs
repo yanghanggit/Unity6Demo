@@ -1,18 +1,20 @@
-/**
-* GameContext class to manage game state and API endpoint configuration.
-*/
-public class ClientMessageHead
+using System.Collections.Generic;
+
+/// <summary>
+/// 消息类型枚举
+/// </summary>
+public enum MessageType
 {
-    public const int NONE = 0;
-    public const int AGENT_EVENT = 1;
+    NONE = 0,
+    AGENT_EVENT = 1
 }
 
-/**
-* GameContext class to manage game state and API endpoint configuration.
-*/
+/// <summary>
+/// 客户端消息类
+/// </summary>
 [System.Serializable]
-public class ClientMessage
+public sealed class ClientMessage
 {
-    public int head = ClientMessageHead.NONE;
-    public string body = "";
+    public int message_type = (int)MessageType.NONE;
+    public Dictionary<string, object> data = new Dictionary<string, object>();
 }

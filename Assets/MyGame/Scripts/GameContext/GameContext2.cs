@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public partial class GameContext
 {
@@ -129,70 +130,74 @@ public partial class GameContext
             ClientMessage clientMessage = client_messages[i];
             UnityEngine.Debug.Log("clientMessage = " + JsonConvert.SerializeObject(clientMessage));
 
-            switch (clientMessage.head)
+            switch (clientMessage.message_type)
             {
-                case ClientMessageHead.AGENT_EVENT:
-                    AgentEvent agentEventMessage = JsonConvert.DeserializeObject<AgentEvent>(clientMessage.body);
-                    HandleAgentEventMessage(agentEventMessage, clientMessage.body);
+                case (int)MessageType.AGENT_EVENT:
+                    JToken dataToken = JToken.FromObject(clientMessage.data);
+                    //AgentEvent agentEventMessage = dataToken.ToObject<AgentEvent>();
+                    HandleAgentEventMessage(dataToken);
                     //AgentEvents.Add(agentEventMessage);
                     break;
 
                 default:
-                    UnityEngine.Debug.LogWarning("Unknown client message head: " + clientMessage.head);
+                    UnityEngine.Debug.LogWarning("Unknown client message type: " + clientMessage.message_type);
                     break;
             }
         }
     }
 
-    private void HandleAgentEventMessage(AgentEvent agentEvent, string body)
+    private void HandleAgentEventMessage(JToken dataToken)
     {
-        UnityEngine.Debug.Log("body = " + body);
+        //string body = dataToken.ToString();
+        UnityEngine.Debug.Log("body = " + dataToken.ToString());
 
-        switch ((AgentEventHead)agentEvent.head)
+        var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
+        switch ((AgentEventHead)eventHead)
         {
             case AgentEventHead.NONE:
-                UnityEngine.Debug.Log("NONE: " + agentEvent.message);
-                AgentEventLogs.Add(agentEvent.message);
-                AgentEvents.Add(agentEvent);
+                var message = dataToken["message"]?.ToString() ?? "No message";
+                UnityEngine.Debug.Log("NONE: " + message);
+                AgentEventLogs.Add(message);
+                AgentEvents.Add(dataToken.ToObject<AgentEvent>());
                 break;
 
             case AgentEventHead.SPEAK_EVENT:
-                SpeakEvent speakEvent = JsonConvert.DeserializeObject<SpeakEvent>(body);
+                SpeakEvent speakEvent = dataToken.ToObject<SpeakEvent>();
                 UnityEngine.Debug.Log($"SPEAK_EVENT: {speakEvent.speaker} => {speakEvent.listener}: {speakEvent.dialogue}");
                 AgentEventLogs.Add($"{speakEvent.speaker} : @{speakEvent.listener} {speakEvent.dialogue}");
                 AgentEvents.Add(speakEvent);
                 break;
 
             case AgentEventHead.WHISPER_EVENT:
-                WhisperEvent whisperEvent = JsonConvert.DeserializeObject<WhisperEvent>(body);
+                WhisperEvent whisperEvent = dataToken.ToObject<WhisperEvent>();
                 UnityEngine.Debug.Log($"WHISPER_EVENT: {whisperEvent.speaker} => {whisperEvent.listener}: {whisperEvent.dialogue}");
                 AgentEventLogs.Add($"{whisperEvent.speaker} : ......{whisperEvent.listener} {whisperEvent.dialogue}");
                 AgentEvents.Add(whisperEvent);
                 break;
 
             case AgentEventHead.ANNOUNCE_EVENT:
-                AnnounceEvent announceEvent = JsonConvert.DeserializeObject<AnnounceEvent>(body);
+                AnnounceEvent announceEvent = dataToken.ToObject<AnnounceEvent>();
                 UnityEngine.Debug.Log($"ANNOUNCE_EVENT: {announceEvent.announcement_speaker} from {announceEvent.event_stage}: {announceEvent.announcement_message}");
                 AgentEventLogs.Add($"{announceEvent.announcement_speaker}({announceEvent.event_stage}) : !!{announceEvent.announcement_message}");
                 AgentEvents.Add(announceEvent);
                 break;
 
             case AgentEventHead.MIND_VOICE_EVENT:
-                MindVoiceEvent mindVoiceEvent = JsonConvert.DeserializeObject<MindVoiceEvent>(body);
+                MindVoiceEvent mindVoiceEvent = dataToken.ToObject<MindVoiceEvent>();
                 UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.speaker}: {mindVoiceEvent.dialogue}");
                 AgentEventLogs.Add($"{mindVoiceEvent.speaker} % {mindVoiceEvent.dialogue}");
                 AgentEvents.Add(mindVoiceEvent);
                 break;
 
             case AgentEventHead.COMBAT_KICK_OFF_EVENT:
-                CombatKickOffEvent combatKickOffEvent = JsonConvert.DeserializeObject<CombatKickOffEvent>(body);
+                CombatKickOffEvent combatKickOffEvent = dataToken.ToObject<CombatKickOffEvent>();
                 UnityEngine.Debug.Log($"COMBAT_KICK_OFF_EVENT: {combatKickOffEvent.actor} => {combatKickOffEvent.description}");
                 AgentEventLogs.Add($"{combatKickOffEvent.actor} => {combatKickOffEvent.description}");
                 AgentEvents.Add(combatKickOffEvent);
                 break;
 
             case AgentEventHead.COMBAT_COMPLETE_EVENT:
-                CombatCompleteEvent combatCompleteEvent = JsonConvert.DeserializeObject<CombatCompleteEvent>(body);
+                CombatCompleteEvent combatCompleteEvent = dataToken.ToObject<CombatCompleteEvent>();
                 UnityEngine.Debug.Log($"COMBAT_COMPLETE_EVENT: {combatCompleteEvent.actor} => {combatCompleteEvent.summary}");
                 AgentEventLogs.Add($"{combatCompleteEvent.actor} => {combatCompleteEvent.summary}");
                 AgentEvents.Add(combatCompleteEvent);
@@ -200,7 +205,7 @@ public partial class GameContext
 
 
             default:
-                UnityEngine.Debug.LogWarning("Unknown agent event head: " + agentEvent.head);
+                UnityEngine.Debug.LogWarning("Unknown agent event head: " + eventHead);
                 break;
         }
     }
