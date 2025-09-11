@@ -1,41 +1,234 @@
 using System.Collections.Generic;
 
-/** 
- * 
- */
-// # 以下是针对卡牌游戏中 牌组、弃牌堆、抽牌堆、手牌 的类名设计建议，结合常见游戏术语和编程习惯：
-// # 方案 4：极简统一型
-// # 组件	类名	说明
-// # 牌组	Deck	直接命名为 Deck，表示通用牌组。
-// # 抽牌堆	DrawDeck	与 Deck 统一，通过前缀区分功能。
-// # 弃牌堆	DiscardDeck	同上，保持命名一致性。
-// # 手牌	Hand	简洁无冗余。
-// # play_card
-// # draw_card
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 全局唯一标识符 RuntimeComponent
+/// </summary>
 [System.Serializable]
-public class HandDetail
+public sealed class RuntimeComponent
+{
+    public string name = "";
+    public int runtime_index = 0;
+    public string uuid = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 记录kick off原始信息
+/// </summary>
+[System.Serializable]
+public sealed class KickOffMessageComponent
+{
+    public string name = "";
+    public string content = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 标记kick off已经完成
+/// </summary>
+[System.Serializable]
+public sealed class KickOffDoneComponent
+{
+    public string name = "";
+    public string response = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 例如，世界级的entity就标记这个组件
+/// </summary>
+[System.Serializable]
+public sealed class WorldSystemComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 场景标记
+/// </summary>
+[System.Serializable]
+public sealed class StageComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 记录场景的描述 #Environment
+/// </summary>
+[System.Serializable]
+public sealed class EnvironmentComponent
+{
+    public string name = "";
+    public string narrate = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 角色标记
+/// </summary>
+[System.Serializable]
+public sealed class ActorComponent
+{
+    public string name = "";
+    public string current_stage = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 玩家标记
+/// </summary>
+[System.Serializable]
+public sealed class PlayerComponent
+{
+    public string player_name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 摧毁Entity标记
+/// </summary>
+[System.Serializable]
+public sealed class DestroyComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 角色外观信息
+/// </summary>
+[System.Serializable]
+public sealed class AppearanceComponent
+{
+    public string name = "";
+    public string appearance = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Stage专用，标记该Stage是Home
+/// </summary>
+[System.Serializable]
+public sealed class HomeComponent
+{
+    public string name = "";
+    public List<string> action_order = new List<string>();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Stage专用，标记该Stage是Dungeon
+/// </summary>
+[System.Serializable]
+public sealed class DungeonComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Actor专用，标记该Actor是Hero
+/// </summary>
+[System.Serializable]
+public sealed class HeroComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// Actor专用，标记该Actor是Monster
+/// </summary>
+[System.Serializable]
+public sealed class MonsterComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+[System.Serializable]
+public sealed class CanStartPlanningComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 标记player主动行动。
+/// </summary>
+[System.Serializable]
+public sealed class PlayerActiveComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// 以下是针对卡牌游戏中 牌组、弃牌堆、抽牌堆、手牌 的类名设计建议，结合常见游戏术语和编程习惯：
+// 方案 4：极简统一型
+// 组件	类名	说明
+// 牌组	Deck	直接命名为 Deck，表示通用牌组。
+// 抽牌堆	DrawDeck	与 Deck 统一，通过前缀区分功能。
+// 弃牌堆	DiscardDeck	同上，保持命名一致性。
+// 手牌	Hand	简洁无冗余。
+// play_card
+// draw_card
+
+[System.Serializable]
+public sealed class SkillExecutionPlan
 {
     public string skill = "";
-    public List<string> targets = new List<string>();
+    public string target = "";
     public string reason = "";
     public string dialogue = "";
 }
 
+/// <summary>
+/// 手牌组件。
+/// </summary>
 [System.Serializable]
-public class HandComponent
+public sealed class HandComponent
 {
     public string name = "";
     public List<Skill> skills = new List<Skill>();
-    public List<HandDetail> details = new List<HandDetail>();
+    public List<SkillExecutionPlan> skill_execution_plans = new List<SkillExecutionPlan>();
 }
 
-/**
- * 
- */
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 死亡标记
+/// </summary>
 [System.Serializable]
-public class RPGCharacterProfileComponent
+public sealed class DeathComponent
+{
+    public string name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 新版本的重构！
+/// </summary>
+[System.Serializable]
+public sealed class RPGCharacterProfileComponent
 {
     public string name = "";
     public RPGCharacterProfile rpg_character_profile = new RPGCharacterProfile();
     public List<StatusEffect> status_effects = new List<StatusEffect>();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/// <summary>
+/// 问号牌
+/// </summary>
+[System.Serializable]
+public sealed class XCardPlayerComponent
+{
+    public string name = "";
+    public Skill skill = new Skill();
 }
