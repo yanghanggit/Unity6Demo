@@ -144,10 +144,10 @@ public static class MyUtils
                     }
                 }
                 handCompText += "\n";
-                for (int j = 0; j < handComponent.skill_execution_plans.Count; j++)
+                for (int j = 0; j < handComponent.skills.Count; j++)
                 {
-                    var plan = handComponent.skill_execution_plans[j];
-                    handCompText += $"Skill: {plan.skill}, Targets: {plan.target}\n";
+                    var plan = handComponent.skills[j];
+                    handCompText += $"Skill: {plan.name}, Targets: {plan.target}\n";
                 }
                 ret += handCompText + "\n";
             }

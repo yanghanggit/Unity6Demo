@@ -48,6 +48,7 @@ public sealed class Skill
     public string name = "";        // 此技能名称
     public string description = ""; // 此技能描述
     public string effect = "";      // 此技能产生的效果以及造成的影响
+    public string target = "";      // 目标
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

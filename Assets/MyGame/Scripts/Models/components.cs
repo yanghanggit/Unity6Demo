@@ -177,14 +177,6 @@ public sealed class PlayerActiveComponent
 // play_card
 // draw_card
 
-[System.Serializable]
-public sealed class SkillExecutionPlan
-{
-    public string skill = "";
-    public string target = "";
-    public string reason = "";
-    public string dialogue = "";
-}
 
 /// <summary>
 /// 手牌组件。
@@ -194,7 +186,6 @@ public sealed class HandComponent
 {
     public string name = "";
     public List<Skill> skills = new List<Skill>();
-    public List<SkillExecutionPlan> skill_execution_plans = new List<SkillExecutionPlan>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
