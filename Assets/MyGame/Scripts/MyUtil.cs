@@ -119,7 +119,7 @@ public static class MyUtils
                     for (int j = 0; j < rpgCharacterProfileComponent.status_effects.Count; j++)
                     {
                         var statusEffect = rpgCharacterProfileComponent.status_effects[j];
-                        rpgCharacterProfileText += $"{statusEffect.name} ({statusEffect.description}, {statusEffect.rounds})";
+                        rpgCharacterProfileText += $"{statusEffect.name} ({statusEffect.description}, {statusEffect.duration})";
                         if (j < rpgCharacterProfileComponent.status_effects.Count - 1)
                         {
                             rpgCharacterProfileText += ", ";
@@ -137,7 +137,7 @@ public static class MyUtils
                 for (int j = 0; j < handComponent.skills.Count; j++)
                 {
                     var skill = handComponent.skills[j];
-                    handCompText += $"{skill.name} ({skill.description}, {skill.effect})";
+                    handCompText += $"{skill.name} ({skill.description})";
                     if (j < handComponent.skills.Count - 1)
                     {
                         handCompText += ", ";
