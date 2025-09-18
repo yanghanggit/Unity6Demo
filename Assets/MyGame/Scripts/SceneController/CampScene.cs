@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Linq;
-//using Newtonsoft.Json;
 
 public class CampScene : MonoBehaviour
 {
@@ -403,23 +402,10 @@ public class CampScene : MonoBehaviour
 
         HideInputBackground();
 
-        //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
         Debug.Log(joinedLogs);
 
-
-        for (int i = GameContext.Instance.AgentEvents.Count - 1; i >= 0; i--)
-        {
-            if (GameContext.Instance.AgentEvents[i].head == (int)AgentEventHead.SPEAK_EVENT)
-            {
-                SpeakEvent speakEvent = (SpeakEvent)GameContext.Instance.AgentEvents[i];
-                DisplaySpeechBubbleAtTarget(GetCreatedSprite(speakEvent.speaker), $"@{speakEvent.listener} {speakEvent.dialogue}");
-                break;
-            }
-        }
-
-        // yield return new WaitForSeconds(0);
-        // yield return StartCoroutine(ExecuteHomeAdvancing());
+        DisplayAllDialogues();
     }
 
     /// <summary>
@@ -499,13 +485,79 @@ public class CampScene : MonoBehaviour
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
         Debug.Log(joinedLogs);
 
-        for (int i = GameContext.Instance.AgentEvents.Count - 1; i >= 0; i--)
+        // 一次性显示所有对话
+        DisplayAllDialogues();
+    }
+
+    /// <summary>
+    /// 一次性显示所有对话事件的语音泡泡
+    /// </summary>
+    private void DisplayAllDialogues()
+    {
+        Dictionary<string, List<string>> speakerLastDialogue = new Dictionary<string, List<string>>();
+        for (int i = 0; i < GameContext.Instance.AgentEvents.Count; i++)
         {
-            if (GameContext.Instance.AgentEvents[i].head == (int)AgentEventHead.SPEAK_EVENT)
+            switch ((AgentEventHead)GameContext.Instance.AgentEvents[i].head)
             {
-                SpeakEvent speakEvent = (SpeakEvent)GameContext.Instance.AgentEvents[i];
-                DisplaySpeechBubbleAtTarget(GetCreatedSprite(speakEvent.speaker), $"@{speakEvent.listener} {speakEvent.dialogue}");
-                break;
+                case AgentEventHead.NONE:
+                    var message = GameContext.Instance.AgentEvents[i].message;
+                    Debug.Log("NONE: " + message);
+                    break;
+
+                case AgentEventHead.SPEAK_EVENT:
+                    SpeakEvent speakEvent = (SpeakEvent)GameContext.Instance.AgentEvents[i];
+                    Debug.Log($"SPEAK_EVENT: {speakEvent.speaker} => {speakEvent.listener}: {speakEvent.dialogue}");
+                    if (!speakerLastDialogue.ContainsKey(speakEvent.speaker))
+                    {
+                        speakerLastDialogue[speakEvent.speaker] = new List<string>();
+                    }
+                    speakerLastDialogue[speakEvent.speaker].Add($"(speak) @{speakEvent.listener} {speakEvent.dialogue}");
+                    break;
+
+                case AgentEventHead.WHISPER_EVENT:
+                    WhisperEvent whisperEvent = (WhisperEvent)GameContext.Instance.AgentEvents[i];
+                    Debug.Log($"WHISPER_EVENT: {whisperEvent.speaker} => {whisperEvent.listener}: {whisperEvent.dialogue}");
+                    if (!speakerLastDialogue.ContainsKey(whisperEvent.speaker))
+                    {
+                        speakerLastDialogue[whisperEvent.speaker] = new List<string>();
+                    }
+                    speakerLastDialogue[whisperEvent.speaker].Add($"(whisper) @{whisperEvent.listener} {whisperEvent.dialogue}");
+                    break;
+
+                case AgentEventHead.ANNOUNCE_EVENT:
+                    AnnounceEvent announceEvent = (AnnounceEvent)GameContext.Instance.AgentEvents[i];
+                    Debug.Log($"ANNOUNCE_EVENT: {announceEvent.announcement_speaker} from {announceEvent.event_stage}: {announceEvent.announcement_message}");
+                    if (!speakerLastDialogue.ContainsKey(announceEvent.announcement_speaker))
+                    {
+                        speakerLastDialogue[announceEvent.announcement_speaker] = new List<string>();
+                    }
+                    speakerLastDialogue[announceEvent.announcement_speaker].Add($"(announce) [{announceEvent.event_stage}] {announceEvent.announcement_message}");
+                    break;
+
+                case AgentEventHead.MIND_VOICE_EVENT:
+                    MindVoiceEvent mindVoiceEvent = (MindVoiceEvent)GameContext.Instance.AgentEvents[i];
+                    Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.speaker}: {mindVoiceEvent.dialogue}");
+                    if (!speakerLastDialogue.ContainsKey(mindVoiceEvent.speaker))
+                    {
+                        speakerLastDialogue[mindVoiceEvent.speaker] = new List<string>();
+                    }
+                    speakerLastDialogue[mindVoiceEvent.speaker].Add($"(mind) {mindVoiceEvent.dialogue}");
+                    break;
+
+                default:
+                    Debug.LogWarning("Unknown agent event head: " + GameContext.Instance.AgentEvents[i].head);
+                    break;
+            }
+        }
+
+        if (speakerLastDialogue.Count > 0)
+        {
+            foreach (var kvp in speakerLastDialogue)
+            {
+                string speaker = kvp.Key;
+                List<string> dialogues = kvp.Value;
+                string combinedDialogue = string.Join("\n", dialogues);
+                DisplaySpeechBubbleAtTarget(GetCreatedSprite(speaker), combinedDialogue);
             }
         }
     }
