@@ -163,29 +163,29 @@ public partial class GameContext
 
             case AgentEventHead.SPEAK_EVENT:
                 SpeakEvent speakEvent = dataToken.ToObject<SpeakEvent>();
-                UnityEngine.Debug.Log($"SPEAK_EVENT: {speakEvent.speaker} => {speakEvent.listener}: {speakEvent.dialogue}");
-                AgentEventLogs.Add($"{speakEvent.speaker} : @{speakEvent.listener} {speakEvent.dialogue}");
+                UnityEngine.Debug.Log($"SPEAK_EVENT: {speakEvent.actor} => {speakEvent.target}: {speakEvent.content}");
+                AgentEventLogs.Add($"{speakEvent.actor} : @{speakEvent.target} {speakEvent.content}");
                 AgentEvents.Add(speakEvent);
                 break;
 
             case AgentEventHead.WHISPER_EVENT:
                 WhisperEvent whisperEvent = dataToken.ToObject<WhisperEvent>();
-                UnityEngine.Debug.Log($"WHISPER_EVENT: {whisperEvent.speaker} => {whisperEvent.listener}: {whisperEvent.dialogue}");
-                AgentEventLogs.Add($"{whisperEvent.speaker} : ......{whisperEvent.listener} {whisperEvent.dialogue}");
+                UnityEngine.Debug.Log($"WHISPER_EVENT: {whisperEvent.actor} => {whisperEvent.target}: {whisperEvent.content}");
+                AgentEventLogs.Add($"{whisperEvent.actor} : ......{whisperEvent.target} {whisperEvent.content}");
                 AgentEvents.Add(whisperEvent);
                 break;
 
             case AgentEventHead.ANNOUNCE_EVENT:
                 AnnounceEvent announceEvent = dataToken.ToObject<AnnounceEvent>();
-                UnityEngine.Debug.Log($"ANNOUNCE_EVENT: {announceEvent.announcement_speaker} from {announceEvent.event_stage}: {announceEvent.announcement_message}");
-                AgentEventLogs.Add($"{announceEvent.announcement_speaker}({announceEvent.event_stage}) : !!{announceEvent.announcement_message}");
+                UnityEngine.Debug.Log($"ANNOUNCE_EVENT: {announceEvent.actor} from {announceEvent.stage}: {announceEvent.content}");
+                AgentEventLogs.Add($"{announceEvent.actor}({announceEvent.stage}) : !!{announceEvent.content}");
                 AgentEvents.Add(announceEvent);
                 break;
 
             case AgentEventHead.MIND_VOICE_EVENT:
                 MindVoiceEvent mindVoiceEvent = dataToken.ToObject<MindVoiceEvent>();
-                UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.speaker}: {mindVoiceEvent.dialogue}");
-                AgentEventLogs.Add($"{mindVoiceEvent.speaker} % {mindVoiceEvent.dialogue}");
+                UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
+                AgentEventLogs.Add($"{mindVoiceEvent.actor} % {mindVoiceEvent.content}");
                 AgentEvents.Add(mindVoiceEvent);
                 break;
 

@@ -29,9 +29,9 @@ public class AgentEvent
 public sealed class SpeakEvent : AgentEvent
 {
     //public new int head = (int)AgentEventHead.SPEAK_EVENT;
-    public string speaker = "";
-    public string listener = "";
-    public string dialogue = "";
+    public string actor = "";
+    public string target = "";
+    public string content = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,9 +42,9 @@ public sealed class SpeakEvent : AgentEvent
 public sealed class WhisperEvent : AgentEvent
 {
     //public new int head = (int)AgentEventHead.WHISPER_EVENT;
-    public string speaker = "";
-    public string listener = "";
-    public string dialogue = "";
+    public string actor = "";
+    public string target = "";
+    public string content = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,9 +55,9 @@ public sealed class WhisperEvent : AgentEvent
 public sealed class AnnounceEvent : AgentEvent
 {
     //public new int head = (int)AgentEventHead.ANNOUNCE_EVENT;
-    public string announcement_speaker = "";
-    public string event_stage = "";
-    public string announcement_message = "";
+    public string actor = "";
+    public string stage = "";
+    public string content = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -68,8 +68,8 @@ public sealed class AnnounceEvent : AgentEvent
 public sealed class MindVoiceEvent : AgentEvent
 {
     //public new int head = (int)AgentEventHead.MIND_VOICE_EVENT;
-    public string speaker = "";
-    public string dialogue = "";
+    public string actor = "";
+    public string content = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

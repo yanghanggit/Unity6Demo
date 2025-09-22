@@ -506,42 +506,42 @@ public class CampScene : MonoBehaviour
 
                 case AgentEventHead.SPEAK_EVENT:
                     SpeakEvent speakEvent = (SpeakEvent)GameContext.Instance.AgentEvents[i];
-                    Debug.Log($"SPEAK_EVENT: {speakEvent.speaker} => {speakEvent.listener}: {speakEvent.dialogue}");
-                    if (!speakerLastDialogue.ContainsKey(speakEvent.speaker))
+                    Debug.Log($"SPEAK_EVENT: {speakEvent.actor} => {speakEvent.target}: {speakEvent.content}");
+                    if (!speakerLastDialogue.ContainsKey(speakEvent.actor))
                     {
-                        speakerLastDialogue[speakEvent.speaker] = new List<string>();
+                        speakerLastDialogue[speakEvent.actor] = new List<string>();
                     }
-                    speakerLastDialogue[speakEvent.speaker].Add($"(speak) @{speakEvent.listener} {speakEvent.dialogue}");
+                    speakerLastDialogue[speakEvent.actor].Add($"(speak) @{speakEvent.target} {speakEvent.content}");
                     break;
 
                 case AgentEventHead.WHISPER_EVENT:
                     WhisperEvent whisperEvent = (WhisperEvent)GameContext.Instance.AgentEvents[i];
-                    Debug.Log($"WHISPER_EVENT: {whisperEvent.speaker} => {whisperEvent.listener}: {whisperEvent.dialogue}");
-                    if (!speakerLastDialogue.ContainsKey(whisperEvent.speaker))
+                    Debug.Log($"WHISPER_EVENT: {whisperEvent.actor} => {whisperEvent.target}: {whisperEvent.content}");
+                    if (!speakerLastDialogue.ContainsKey(whisperEvent.actor))
                     {
-                        speakerLastDialogue[whisperEvent.speaker] = new List<string>();
+                        speakerLastDialogue[whisperEvent.actor] = new List<string>();
                     }
-                    speakerLastDialogue[whisperEvent.speaker].Add($"(whisper) @{whisperEvent.listener} {whisperEvent.dialogue}");
+                    speakerLastDialogue[whisperEvent.actor].Add($"(whisper) @{whisperEvent.target} {whisperEvent.content}");
                     break;
 
                 case AgentEventHead.ANNOUNCE_EVENT:
                     AnnounceEvent announceEvent = (AnnounceEvent)GameContext.Instance.AgentEvents[i];
-                    Debug.Log($"ANNOUNCE_EVENT: {announceEvent.announcement_speaker} from {announceEvent.event_stage}: {announceEvent.announcement_message}");
-                    if (!speakerLastDialogue.ContainsKey(announceEvent.announcement_speaker))
+                    Debug.Log($"ANNOUNCE_EVENT: {announceEvent.actor} from {announceEvent.stage}: {announceEvent.content}");
+                    if (!speakerLastDialogue.ContainsKey(announceEvent.actor))
                     {
-                        speakerLastDialogue[announceEvent.announcement_speaker] = new List<string>();
+                        speakerLastDialogue[announceEvent.actor] = new List<string>();
                     }
-                    speakerLastDialogue[announceEvent.announcement_speaker].Add($"(announce) [{announceEvent.event_stage}] {announceEvent.announcement_message}");
+                    speakerLastDialogue[announceEvent.actor].Add($"(announce) [{announceEvent.stage}] {announceEvent.content}");
                     break;
 
                 case AgentEventHead.MIND_VOICE_EVENT:
                     MindVoiceEvent mindVoiceEvent = (MindVoiceEvent)GameContext.Instance.AgentEvents[i];
-                    Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.speaker}: {mindVoiceEvent.dialogue}");
-                    if (!speakerLastDialogue.ContainsKey(mindVoiceEvent.speaker))
+                    Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
+                    if (!speakerLastDialogue.ContainsKey(mindVoiceEvent.actor))
                     {
-                        speakerLastDialogue[mindVoiceEvent.speaker] = new List<string>();
+                        speakerLastDialogue[mindVoiceEvent.actor] = new List<string>();
                     }
-                    speakerLastDialogue[mindVoiceEvent.speaker].Add($"(mind) {mindVoiceEvent.dialogue}");
+                    speakerLastDialogue[mindVoiceEvent.actor].Add($"(mind) {mindVoiceEvent.content}");
                     break;
 
                 default:
