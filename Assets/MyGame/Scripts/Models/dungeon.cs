@@ -96,9 +96,9 @@ public sealed class Engagement
 public sealed class Dungeon
 {
     public string name = "";
-    public List<Stage> levels = new List<Stage>();
+    public List<Stage> stages = new List<Stage>();
     public Engagement engagement = new Engagement();
-    public int position = -1;
+    public int current_stage_index = -1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

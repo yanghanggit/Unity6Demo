@@ -63,10 +63,10 @@ public class ViewDungeonScene : MonoBehaviour
     {
         var dungeon_text = "";
         dungeon_text += "地下城 = " + dungeon.name + "\n";
-        for (int i = 0; i < dungeon.levels.Count; i++)
+        for (int i = 0; i < dungeon.stages.Count; i++)
         {
-            dungeon_text += "第" + (i + 1) + "关 = " + dungeon.levels[i].name + "\n";
-            dungeon_text += "怪物 = " + string.Join(", ", dungeon.levels[i].actors.Select(a => a.name)) + "\n";
+            dungeon_text += "第" + (i + 1) + "关 = " + dungeon.stages[i].name + "\n";
+            dungeon_text += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => a.name)) + "\n";
         }
 
         return dungeon_text;
