@@ -9,10 +9,10 @@ using System.Collections.Generic;
 public enum CombatPhase
 {
     NONE = 0,
-    KICK_OFF = 1,  // 初始化，需要同步一些数据与状态
+    KICKOFF = 1,  // 初始化，需要同步一些数据与状态
     ONGOING = 2,  // 运行中，不断进行战斗推理
     COMPLETE = 3,  // 结束，需要进行结算
-    POST_WAIT = 4  // 战斗等待进入新一轮战斗或者回家
+    POSTWAIT = 4  // 战斗等待进入新一轮战斗或者回家
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,6 @@ public sealed class Skill
 {
     public string name = "";        // 此技能名称
     public string description = ""; // 此技能描述
-    //public string effect = "";      // 此技能产生的效果以及造成的影响
     public string target = "";      // 目标
 }
 
@@ -59,7 +58,7 @@ public sealed class Skill
 public sealed class Round
 {
     public string tag = "";
-    public List<string> round_turns = new List<string>();
+    public List<string> action_order = new List<string>();
     public string environment = "";
     public string calculation = "";
     public string performance = "";

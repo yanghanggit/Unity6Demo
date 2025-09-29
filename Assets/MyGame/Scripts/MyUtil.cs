@@ -53,7 +53,7 @@ public static class MyUtils
                 var last_round = last_combat.rounds[last_combat.rounds.Count - 1];
                 dungeon_text += "Last Round: " + last_round.tag + "\n";
                 dungeon_text += "Stage Environment: " + last_round.environment + "\n";
-                dungeon_text += "Round Turn: " + string.Join("-->", last_round.round_turns) + "\n";
+                dungeon_text += "Action Order: " + string.Join("-->", last_round.action_order) + "\n";
             }
         }
 
