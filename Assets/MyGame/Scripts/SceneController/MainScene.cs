@@ -17,13 +17,13 @@ public class MainScene : MonoBehaviour
 
     public HomeGamePlayAction _homeGamePlayAction;
 
-    public ViewHomeAction _viewHomeAction;
+    public HomeStateAction _viewHomeAction;
 
-    public ViewDungeonAction _viewDungeonAction;
+    public DungeonStateAction _viewDungeonAction;
 
     public ViewDungeon _viewDungeonController;
 
-    public ViewActorAction _viewActorAction;
+    public ActorDetailsAction _viewActorAction;
 
     public HomePlayerInput _homePlayerInput;
 

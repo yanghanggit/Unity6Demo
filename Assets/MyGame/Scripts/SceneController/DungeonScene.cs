@@ -13,9 +13,9 @@ public class DungeonScene : MonoBehaviour
 
     public DungeonGamePlayAction _dungeonGamePlayAction;
 
-    public ViewDungeonAction _viewDungeonAction;
+    public DungeonStateAction _viewDungeonAction;
 
-    public ViewActorAction _viewActorAction;
+    public ActorDetailsAction _viewActorAction;
 
     public TransHomeAction _transHomeAction;
 

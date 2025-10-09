@@ -12,7 +12,7 @@ public class ViewDungeonScene : MonoBehaviour
 
     public TMP_Text _mainText;
 
-    public ViewDungeonAction _viewDungeonAction;
+    public DungeonStateAction _viewDungeonAction;
 
     public TransDungeonAction _transDungeonAction;
 

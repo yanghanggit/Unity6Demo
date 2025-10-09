@@ -30,7 +30,7 @@ public partial class GameContext
 
     private string _actorName = "";
 
-    private URLConfigurationResponse _urlConfiguration = new URLConfigurationResponse();
+    private URLConfigResponse _urlConfig = new URLConfigResponse();
 
     private bool _setupGame = false;
 
@@ -76,11 +76,11 @@ public partial class GameContext
         }
     }
 
-    public URLConfigurationResponse URLConfiguration
+    public URLConfigResponse URLConfig
     {
         get
         {
-            return _urlConfiguration;
+            return _urlConfig;
         }
 
         set
@@ -90,7 +90,7 @@ public partial class GameContext
                 UnityEngine.Debug.LogError("APIEndpointConfiguration is null");
                 return;
             }
-            _urlConfiguration = value;
+            _urlConfig = value;
         }
     }
 
@@ -98,7 +98,7 @@ public partial class GameContext
     {
         get
         {
-            return _urlConfiguration.endpoints.ContainsKey("LOGIN_URL") ? _urlConfiguration.endpoints["LOGIN_URL"] : "";
+            return _urlConfig.endpoints.ContainsKey("LOGIN_URL") ? _urlConfig.endpoints["LOGIN_URL"] : "";
         }
     }
 
@@ -106,7 +106,7 @@ public partial class GameContext
     {
         get
         {
-            return _urlConfiguration.endpoints.ContainsKey("LOGOUT_URL") ? _urlConfiguration.endpoints["LOGOUT_URL"] : "";
+            return _urlConfig.endpoints.ContainsKey("LOGOUT_URL") ? _urlConfig.endpoints["LOGOUT_URL"] : "";
         }
     }
 
@@ -114,18 +114,18 @@ public partial class GameContext
     {
         get
         {
-            return _urlConfiguration.endpoints.ContainsKey("HOME_GAMEPLAY_URL") ? _urlConfiguration.endpoints["HOME_GAMEPLAY_URL"] : "";
+            return _urlConfig.endpoints.ContainsKey("HOME_GAMEPLAY_URL") ? _urlConfig.endpoints["HOME_GAMEPLAY_URL"] : "";
         }
     }
 
-    public string VIEW_HOME_URL
+    public string HOME_STATE_URL
     {
         get
         {
-            if (_urlConfiguration.endpoints.ContainsKey("VIEW_HOME_URL"))
+            if (_urlConfig.endpoints.ContainsKey("HOME_STATE_URL"))
             {
-                var baseUrl = _urlConfiguration.endpoints["VIEW_HOME_URL"];
-                return $"{baseUrl}{UserName}/{GameName}";
+                var baseUrl = _urlConfig.endpoints["HOME_STATE_URL"];
+                return $"{baseUrl}{UserName}/{GameName}/state";
             }
             else
             {
@@ -134,14 +134,14 @@ public partial class GameContext
         }
     }
 
-    public string VIEW_DUNGEON_URL
+    public string DUNGEON_STATE_URL
     {
         get
         {
-            if (_urlConfiguration.endpoints.ContainsKey("VIEW_DUNGEON_URL"))
+            if (_urlConfig.endpoints.ContainsKey("DUNGEON_STATE_URL"))
             {
-                var baseUrl = _urlConfiguration.endpoints["VIEW_DUNGEON_URL"];
-                return $"{baseUrl}{UserName}/{GameName}";
+                var baseUrl = _urlConfig.endpoints["DUNGEON_STATE_URL"];
+                return $"{baseUrl}{UserName}/{GameName}/state";
             }
             else
             {
@@ -150,14 +150,14 @@ public partial class GameContext
         }
     }
 
-    public string VIEW_ACTOR_URL
+    public string ACTOR_DETAILS_URL
     {
         get
         {
-            if (_urlConfiguration.endpoints.ContainsKey("VIEW_ACTOR_URL"))
+            if (_urlConfig.endpoints.ContainsKey("ACTOR_DETAILS_URL"))
             {
-                var baseUrl = _urlConfiguration.endpoints["VIEW_ACTOR_URL"];
-                return $"{baseUrl}{UserName}/{GameName}";
+                var baseUrl = _urlConfig.endpoints["ACTOR_DETAILS_URL"];
+                return $"{baseUrl}{UserName}/{GameName}/details";
             }
             else
             {
@@ -170,7 +170,7 @@ public partial class GameContext
     {
         get
         {
-            return _urlConfiguration.endpoints.ContainsKey("START_URL") ? _urlConfiguration.endpoints["START_URL"] : "";
+            return _urlConfig.endpoints.ContainsKey("START_URL") ? _urlConfig.endpoints["START_URL"] : "";
         }
     }
 
@@ -178,7 +178,7 @@ public partial class GameContext
     {
         get
         {
-            return _urlConfiguration.endpoints.ContainsKey("HOME_TRANS_DUNGEON_URL") ? _urlConfiguration.endpoints["HOME_TRANS_DUNGEON_URL"] : "";
+            return _urlConfig.endpoints.ContainsKey("HOME_TRANS_DUNGEON_URL") ? _urlConfig.endpoints["HOME_TRANS_DUNGEON_URL"] : "";
         }
     }
 
@@ -186,7 +186,7 @@ public partial class GameContext
     {
         get
         {
-            return _urlConfiguration.endpoints.ContainsKey("DUNGEON_GAMEPLAY_URL") ? _urlConfiguration.endpoints["DUNGEON_GAMEPLAY_URL"] : "";
+            return _urlConfig.endpoints.ContainsKey("DUNGEON_GAMEPLAY_URL") ? _urlConfig.endpoints["DUNGEON_GAMEPLAY_URL"] : "";
         }
     }
 
@@ -194,7 +194,7 @@ public partial class GameContext
     {
         get
         {
-            return _urlConfiguration.endpoints.ContainsKey("DUNGEON_TRANS_HOME_URL") ? _urlConfiguration.endpoints["DUNGEON_TRANS_HOME_URL"] : "";
+            return _urlConfig.endpoints.ContainsKey("DUNGEON_TRANS_HOME_URL") ? _urlConfig.endpoints["DUNGEON_TRANS_HOME_URL"] : "";
         }
     }
 }

@@ -10,9 +10,9 @@ public class MainScene2 : MonoBehaviour
 
     public LogoutAction _logoutAction;
 
-    public ViewHomeAction _viewHomeAction;
+    public HomeStateAction _viewHomeAction;
 
-    public ViewActorAction _viewActorAction;
+    public ActorDetailsAction _viewActorAction;
 
     public GameObject _dungeonButton;
 

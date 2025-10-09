@@ -4,7 +4,7 @@ using System.Collections.Generic;
  * URL configuration request/response classes.
  */
 [System.Serializable]
-public class URLConfigurationResponse
+public class URLConfigResponse
 {
     public string message = "";
     public string version = "";
@@ -146,7 +146,7 @@ public class DungeonGamePlayResponse
 Dungeon view request/response classes.
  */
 [System.Serializable]
-public class ViewDungeonResponse
+public class DungeonStateResponse
 {
     public Dictionary<string, List<string>> mapping;
     public Dungeon dungeon;
@@ -156,7 +156,7 @@ public class ViewDungeonResponse
  * Home view request/response classes.
  */
 [System.Serializable]
-public class ViewHomeResponse
+public class HomeStateResponse
 {
     public Dictionary<string, List<string>> mapping;
 }
@@ -166,7 +166,7 @@ public class ViewHomeResponse
  */
 
 [System.Serializable]
-public class ViewActorResponse
+public class ActorDetailsResponse
 {
     public List<EntitySerialization> actor_entities_serialization;
 

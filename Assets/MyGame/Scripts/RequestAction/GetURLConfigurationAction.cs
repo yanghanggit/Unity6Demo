@@ -6,16 +6,16 @@ using Newtonsoft.Json;
 /// <summary>
 /// 改进的 URL 配置获取操作，使用新的 ImprovedRequestAction
 /// </summary>
-public class GetURLConfigurationAction : BaseRequestAction
+public class GetURLConfigAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
     
-    private URLConfigurationResponse _urlConfiguration;
+    private URLConfigResponse _urlConfig;
     private bool _lastRequestSuccess = false;
     
     public bool LastRequestSuccess => _lastRequestSuccess;
-    public URLConfigurationResponse URLConfiguration => _urlConfiguration;
+    public URLConfigResponse URLConfig => _urlConfig;
 
     #region 协程版本（兼容现有代码）
     
@@ -27,7 +27,7 @@ public class GetURLConfigurationAction : BaseRequestAction
         Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
         
         _lastRequestSuccess = false;
-        _urlConfiguration = null;
+        _urlConfig = null;
         
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -55,7 +55,7 @@ public class GetURLConfigurationAction : BaseRequestAction
             if (TryParseResponse(result.responseText))
             {
                 _lastRequestSuccess = true;
-                GameContext.Instance.URLConfiguration = _urlConfiguration;
+                GameContext.Instance.URLConfig = _urlConfig;
                 Debug.Log("URL Configuration loaded successfully");
             }
             else
@@ -81,7 +81,7 @@ public class GetURLConfigurationAction : BaseRequestAction
         Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
         
         _lastRequestSuccess = false;
-        _urlConfiguration = null;
+        _urlConfig = null;
         
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -101,7 +101,7 @@ public class GetURLConfigurationAction : BaseRequestAction
                 if (TryParseResponse(result.responseText))
                 {
                     _lastRequestSuccess = true;
-                    GameContext.Instance.URLConfiguration = _urlConfiguration;
+                    GameContext.Instance.URLConfig = _urlConfig;
                     Debug.Log("URL Configuration loaded successfully");
                     return true;
                 }
@@ -167,22 +167,22 @@ public class GetURLConfigurationAction : BaseRequestAction
         
         try
         {
-            _urlConfiguration = JsonConvert.DeserializeObject<URLConfigurationResponse>(responseText);
+            _urlConfig = JsonConvert.DeserializeObject<URLConfigResponse>(responseText);
             
-            if (_urlConfiguration == null)
+            if (_urlConfig == null)
             {
                 Debug.LogError("Deserialized URL configuration is null");
                 return false;
             }
             
             // 验证必要字段
-            if (string.IsNullOrEmpty(_urlConfiguration.version))
+            if (string.IsNullOrEmpty(_urlConfig.version))
             {
                 Debug.LogError("API version is missing in URL configuration");
                 return false;
             }
             
-            Debug.Log($"URL Configuration parsed successfully. API Version: {_urlConfiguration.version}");
+            Debug.Log($"URL Configuration parsed successfully. API Version: {_urlConfig.version}");
             return true;
         }
         catch (System.Exception ex)

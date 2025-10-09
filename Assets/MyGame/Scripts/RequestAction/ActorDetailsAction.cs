@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 查看角色操作，使用改进的 BaseRequestAction
 /// </summary>
-public class ViewActorAction : BaseRequestAction
+public class ActorDetailsAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
@@ -174,7 +174,7 @@ public class ViewActorAction : BaseRequestAction
         {
             parameters.Add(new KeyValuePair<string, string>("actors", actor));
         }
-        return BuildUrlWithQueryParams(GameContext.Instance.VIEW_ACTOR_URL, parameters);
+        return BuildUrlWithQueryParams(GameContext.Instance.ACTOR_DETAILS_URL, parameters);
     }
     
     /// <summary>
@@ -190,7 +190,7 @@ public class ViewActorAction : BaseRequestAction
         
         try
         {
-            var response = JsonConvert.DeserializeObject<ViewActorResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<ActorDetailsResponse>(responseText);
             
             if (response == null)
             {
