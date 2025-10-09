@@ -199,7 +199,7 @@ public class ViewActorAction : BaseRequestAction
             }
 
             // 更新游戏上下文中的角色快照
-            GameContext.Instance.ActorSnapshots = response.actor_snapshots;
+            GameContext.Instance.ActorEntitiesSerialization = response.actor_entities_serialization;
             GameContext.Instance.AgentShortTermMemories = response.agent_short_term_memories;
             
             return true;

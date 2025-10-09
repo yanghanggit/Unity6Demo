@@ -89,12 +89,12 @@ public static class MyUtils
         return new List<string>();
     }
 
-    public static string ActorDisplayText(EntitySnapshot actorSnapshot, HashSet<string> includedComponentNames = null)
+    public static string ActorDisplayText(EntitySerialization actorEntitySerialization, HashSet<string> includedComponentNames = null)
     {
         var ret = "";
-        for (int i = 0; i < actorSnapshot.components.Count; i++)
+        for (int i = 0; i < actorEntitySerialization.components.Count; i++)
         {
-            var component = actorSnapshot.components[i];
+            var component = actorEntitySerialization.components[i];
             if (includedComponentNames != null && !includedComponentNames.Contains(component.name))
             {
                 continue;
@@ -104,7 +104,7 @@ public static class MyUtils
             {
                 var rpgCharacterProfileComponent = JsonConvert.DeserializeObject<RPGCharacterProfileComponent>(JsonConvert.SerializeObject(component.data));
                 var rpgCharacterProfile = rpgCharacterProfileComponent.rpg_character_profile;
-                var rpgCharacterProfileText = $"{actorSnapshot.name} = HP:{rpgCharacterProfile.hp}/{rpgCharacterProfile.max_hp}," +
+                var rpgCharacterProfileText = $"{actorEntitySerialization.name} = HP:{rpgCharacterProfile.hp}/{rpgCharacterProfile.max_hp}," +
                         $" Strength:{rpgCharacterProfile.strength}," +
                         $" Dexterity:{rpgCharacterProfile.dexterity}," +
                         $" Wisdom:{rpgCharacterProfile.wisdom}," +
@@ -133,7 +133,7 @@ public static class MyUtils
             else if (component.name == typeof(HandComponent).Name)
             {
                 var handComponent = JsonConvert.DeserializeObject<HandComponent>(JsonConvert.SerializeObject(component.data));
-                var handCompText = $"{actorSnapshot.name} Hand: ";
+                var handCompText = $"{actorEntitySerialization.name} Hand: ";
                 for (int j = 0; j < handComponent.skills.Count; j++)
                 {
                     var skill = handComponent.skills[j];

@@ -214,11 +214,11 @@ public class DungeonScene : MonoBehaviour
     {
         var text = "";
 
-        var actorSnapshots = GameContext.Instance.ActorSnapshots;
-        for (int i = 0; i < actorSnapshots.Count; i++)
+        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+        for (int i = 0; i < actorEntitiesSerialization.Count; i++)
         {
-            var actorSnapshot = actorSnapshots[i];
-            text += MyUtils.ActorDisplayText(actorSnapshot, includedComponentNames);
+            var actorEntitySerialization = actorEntitiesSerialization[i];
+            text += MyUtils.ActorDisplayText(actorEntitySerialization, includedComponentNames);
             text += "\n";
         }
         _mainText.text = text;

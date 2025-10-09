@@ -100,15 +100,15 @@ public class MainScene2 : MonoBehaviour
 
         Debug.Log("Home and Actor views updated");
 
-        // 打印 GameContext.Instance.ActorSnapshots 的详细信息
-        var actorSnapshots = GameContext.Instance.ActorSnapshots;
-        for (int i = 0; i < actorSnapshots.Count; i++)
+        // 打印 GameContext.Instance.ActorEntitiesSerialization 的详细信息
+        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+        for (int i = 0; i < actorEntitiesSerialization.Count; i++)
         {
-            var snapshot = actorSnapshots[i];
+            var entitySerialization = actorEntitiesSerialization[i];
             try
             {
-                // 直接将 EntitySnapshot 序列化为 JSON 字符串
-                string jsonString = JsonConvert.SerializeObject(snapshot, Formatting.Indented);
+                // 直接将 EntitySerialization 序列化为 JSON 字符串
+                string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
                 Debug.Log($"Actor[{i}] JSON:\n{jsonString}");
             }
             catch (System.Exception ex)

@@ -10,7 +10,7 @@ public partial class GameContext
 
     private Dictionary<string, List<string>> _mapping = new Dictionary<string, List<string>>();
 
-    private List<EntitySnapshot> _actorSnapshots = new List<EntitySnapshot>();
+    private List<EntitySerialization> _actorEntitiesSerialization = new List<EntitySerialization>();
 
     private List<AgentShortTermMemory> _agentShortTermMemories = new List<AgentShortTermMemory>();
 
@@ -86,20 +86,20 @@ public partial class GameContext
         }
     }
 
-    public List<EntitySnapshot> ActorSnapshots
+    public List<EntitySerialization> ActorEntitiesSerialization
     {
         get
         {
-            return _actorSnapshots;
+            return _actorEntitiesSerialization;
         }
         set
         {
             if (value == null)
             {
-                UnityEngine.Debug.LogError("ActorSnapshots is null");
+                UnityEngine.Debug.LogError("ActorEntitiesSerialization is null");
                 return;
             }
-            _actorSnapshots = value;
+            _actorEntitiesSerialization = value;
         }
     }
 

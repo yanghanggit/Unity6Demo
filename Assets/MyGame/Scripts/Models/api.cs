@@ -168,7 +168,7 @@ public class ViewHomeResponse
 [System.Serializable]
 public class ViewActorResponse
 {
-    public List<EntitySnapshot> actor_snapshots;
+    public List<EntitySerialization> actor_entities_serialization;
 
     public List<AgentShortTermMemory> agent_short_term_memories;
 }
