@@ -6,56 +6,55 @@ using Newtonsoft.Json;
 /// <summary>
 /// 改进的 URL 配置获取操作，使用新的 ImprovedRequestAction
 /// </summary>
-public class GetURLConfigAction : BaseRequestAction
+public class RootAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
-    
-    private URLConfigResponse _urlConfig;
+
+    private RootResponse _rootResponse;
     private bool _lastRequestSuccess = false;
-    
+
     public bool LastRequestSuccess => _lastRequestSuccess;
-    public URLConfigResponse URLConfig => _urlConfig;
 
     #region 协程版本（兼容现有代码）
-    
+
     /// <summary>
     /// 获取 URL 配置（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine(string apiEndpointUrl)
     {
         Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
-        
+
         _lastRequestSuccess = false;
-        _urlConfig = null;
-        
+        _rootResponse = null;
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
             yield break;
         }
-        
+
         bool requestCompleted = false;
         RequestResult result = null;
-        
+
         // 发送请求
         yield return GetRequestCoroutine(apiEndpointUrl, (response) =>
         {
             result = response;
             requestCompleted = true;
         });
-        
+
         // 等待请求完成
         yield return new WaitUntil(() => requestCompleted);
-        
+
         // 处理结果
         if (result != null && result.isSuccess)
         {
             if (TryParseResponse(result.responseText))
             {
                 _lastRequestSuccess = true;
-                GameContext.Instance.URLConfig = _urlConfig;
+                GameContext.Instance.Root = _rootResponse;
                 Debug.Log("URL Configuration loaded successfully");
             }
             else
@@ -68,40 +67,40 @@ public class GetURLConfigAction : BaseRequestAction
             Debug.LogError($"Failed to get URL configuration: {result?.error ?? "Unknown error"}");
         }
     }
-    
+
     #endregion
 
     #region Async 版本（推荐用于 Unity 6）
-    
+
     /// <summary>
     /// 获取 URL 配置（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync(string apiEndpointUrl)
     {
         Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
-        
+
         _lastRequestSuccess = false;
-        _urlConfig = null;
-        
+        _rootResponse = null;
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
             return false;
         }
-        
+
         try
         {
             // 发送请求
             var result = await GetRequestAsync(apiEndpointUrl);
-            
+
             // 处理结果
             if (result.isSuccess)
             {
                 if (TryParseResponse(result.responseText))
                 {
                     _lastRequestSuccess = true;
-                    GameContext.Instance.URLConfig = _urlConfig;
+                    GameContext.Instance.Root = _rootResponse;
                     Debug.Log("URL Configuration loaded successfully");
                     return true;
                 }
@@ -119,14 +118,14 @@ public class GetURLConfigAction : BaseRequestAction
         {
             Debug.LogError($"Exception during URL configuration request: {ex.Message}");
         }
-        
+
         return false;
     }
-    
+
     #endregion
 
     #region 通用调用方法
-    
+
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
@@ -137,7 +136,7 @@ public class GetURLConfigAction : BaseRequestAction
             // 使用 async 版本
             var task = CallAsync(apiEndpointUrl);
             yield return new WaitUntil(() => task.IsCompleted);
-            
+
             if (task.IsFaulted)
             {
                 Debug.LogError($"Async call failed: {task.Exception?.GetBaseException().Message}");
@@ -149,11 +148,11 @@ public class GetURLConfigAction : BaseRequestAction
             yield return CallCoroutine(apiEndpointUrl);
         }
     }
-    
+
     #endregion
 
     #region 私有方法
-    
+
     /// <summary>
     /// 尝试解析响应数据
     /// </summary>
@@ -164,25 +163,25 @@ public class GetURLConfigAction : BaseRequestAction
             Debug.LogError("Response text is empty");
             return false;
         }
-        
+
         try
         {
-            _urlConfig = JsonConvert.DeserializeObject<URLConfigResponse>(responseText);
-            
-            if (_urlConfig == null)
+            _rootResponse = JsonConvert.DeserializeObject<RootResponse>(responseText);
+
+            if (_rootResponse == null)
             {
                 Debug.LogError("Deserialized URL configuration is null");
                 return false;
             }
-            
+
             // 验证必要字段
-            if (string.IsNullOrEmpty(_urlConfig.version))
+            if (string.IsNullOrEmpty(_rootResponse.version))
             {
                 Debug.LogError("API version is missing in URL configuration");
                 return false;
             }
-            
-            Debug.Log($"URL Configuration parsed successfully. API Version: {_urlConfig.version}");
+
+            Debug.Log($"URL Configuration parsed successfully. API Version: {_rootResponse.version}");
             return true;
         }
         catch (System.Exception ex)
@@ -191,6 +190,6 @@ public class GetURLConfigAction : BaseRequestAction
             return false;
         }
     }
-    
+
     #endregion
 }

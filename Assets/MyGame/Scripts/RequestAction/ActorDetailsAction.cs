@@ -11,13 +11,13 @@ public class ActorDetailsAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
-    
+
     private bool _lastRequestSuccess = false;
-    
+
     public bool LastRequestSuccess => _lastRequestSuccess;
 
     #region 协程版本（兼容现有代码）
-    
+
     /// <summary>
     /// 查看角色（协程版本）
     /// </summary>
@@ -27,30 +27,30 @@ public class ActorDetailsAction : BaseRequestAction
         Debug.Assert(actors != null && actors.Count > 0, "Actors list is null or empty");
 
         _lastRequestSuccess = false;
-        
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available for view actor");
             yield break;
         }
-        
+
         // 构建完整URL
         string fullUrl = BuildActorUrl(actors);
-        
+
         bool requestCompleted = false;
         RequestResult result = null;
-        
+
         // 发送请求
         yield return GetRequestCoroutine(fullUrl, (response) =>
         {
             result = response;
             requestCompleted = true;
         });
-        
+
         // 等待请求完成
         yield return new WaitUntil(() => requestCompleted);
-        
+
         // 处理结果
         if (result != null && result.isSuccess)
         {
@@ -69,11 +69,11 @@ public class ActorDetailsAction : BaseRequestAction
             Debug.LogError($"View actor failed: {result?.error ?? "Unknown error"}");
         }
     }
-    
+
     #endregion
 
     #region Async 版本（推荐用于 Unity 6）
-    
+
     /// <summary>
     /// 查看角色（Async 版本）
     /// </summary>
@@ -83,23 +83,23 @@ public class ActorDetailsAction : BaseRequestAction
         Debug.Assert(actors != null && actors.Count > 0, "Actors list is null or empty");
 
         _lastRequestSuccess = false;
-        
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available for view actor");
             return false;
         }
-        
+
         try
         {
             // 构建完整URL
             string fullUrl = BuildActorUrl(actors);
             Debug.Log($"View actor request URL: {fullUrl}");
-            
+
             // 发送请求
             var result = await GetRequestAsync(fullUrl);
-            
+
             // 处理结果
             if (result.isSuccess)
             {
@@ -123,14 +123,14 @@ public class ActorDetailsAction : BaseRequestAction
         {
             Debug.LogError($"Exception during view actor request: {ex.Message}");
         }
-        
+
         return false;
     }
-    
+
     #endregion
 
     #region 通用调用方法
-    
+
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
@@ -159,11 +159,11 @@ public class ActorDetailsAction : BaseRequestAction
             yield return CallCoroutine(actors);
         }
     }
-    
+
     #endregion
 
     #region 私有方法
-    
+
     /// <summary>
     /// 构建角色请求URL
     /// </summary>
@@ -174,9 +174,9 @@ public class ActorDetailsAction : BaseRequestAction
         {
             parameters.Add(new KeyValuePair<string, string>("actors", actor));
         }
-        return BuildUrlWithQueryParams(GameContext.Instance.ACTOR_DETAILS_URL, parameters);
+        return BuildUrlWithQueryParams(GameContext.Instance.ActorDetailsUrl, parameters);
     }
-    
+
     /// <summary>
     /// 尝试解析查看角色响应数据
     /// </summary>
@@ -187,11 +187,11 @@ public class ActorDetailsAction : BaseRequestAction
             Debug.LogError("View actor response text is empty");
             return false;
         }
-        
+
         try
         {
             var response = JsonConvert.DeserializeObject<ActorDetailsResponse>(responseText);
-            
+
             if (response == null)
             {
                 Debug.LogError("ViewActorAction response is null");
@@ -201,7 +201,7 @@ public class ActorDetailsAction : BaseRequestAction
             // 更新游戏上下文中的角色快照
             GameContext.Instance.ActorEntitiesSerialization = response.actor_entities_serialization;
             GameContext.Instance.AgentShortTermMemories = response.agent_short_term_memories;
-            
+
             return true;
         }
         catch (System.Exception ex)
@@ -210,6 +210,6 @@ public class ActorDetailsAction : BaseRequestAction
             return false;
         }
     }
-    
+
     #endregion
 }

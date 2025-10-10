@@ -4,11 +4,15 @@ using System.Collections.Generic;
  * URL configuration request/response classes.
  */
 [System.Serializable]
-public class URLConfigResponse
+public class RootResponse
 {
-    public string message = "";
-    public string version = "";
-    public Dictionary<string, string> endpoints = new Dictionary<string, string>();
+    public string service;
+    public string description;
+    public string version;
+    public string status;
+    public string timestamp;
+
+    public Dictionary<string, string> endpoints;
 }
 
 /**

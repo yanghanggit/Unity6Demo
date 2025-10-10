@@ -10,50 +10,50 @@ public class TransDungeonAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
-    
+
     private bool _lastRequestSuccess = false;
-    
+
     public bool LastRequestSuccess => _lastRequestSuccess;
 
     #region 协程版本（兼容现有代码）
-    
+
     /// <summary>
     /// 转换到地下城（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
         Debug.Log("Trans to dungeon request started");
-        
+
         _lastRequestSuccess = false;
-        
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available for trans dungeon");
             yield break;
         }
-        
+
         // 创建请求数据
-        var requestData = new HomeTransDungeonRequest 
-        { 
-            user_name = GameContext.Instance.UserName, 
-            game_name = GameContext.Instance.GameName 
+        var requestData = new HomeTransDungeonRequest
+        {
+            user_name = GameContext.Instance.UserName,
+            game_name = GameContext.Instance.GameName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
-        
+
         bool requestCompleted = false;
         RequestResult result = null;
-        
+
         // 发送请求
-        yield return PostRequestCoroutine(GameContext.Instance.HOME_TRANS_DUNGEON_URL, jsonData, (response) =>
+        yield return PostRequestCoroutine(GameContext.Instance.HomeTransDungeonUrl, jsonData, (response) =>
         {
             result = response;
             requestCompleted = true;
         });
-        
+
         // 等待请求完成
         yield return new WaitUntil(() => requestCompleted);
-        
+
         // 处理结果
         if (result != null && result.isSuccess)
         {
@@ -72,40 +72,40 @@ public class TransDungeonAction : BaseRequestAction
             Debug.LogError($"Trans to dungeon failed: {result?.error ?? "Unknown error"}");
         }
     }
-    
+
     #endregion
 
     #region Async 版本（推荐用于 Unity 6）
-    
+
     /// <summary>
     /// 转换到地下城（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
         Debug.Log("Trans to dungeon request async started");
-        
+
         _lastRequestSuccess = false;
-        
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available for trans dungeon");
             return false;
         }
-        
+
         try
         {
             // 创建请求数据
-            var requestData = new HomeTransDungeonRequest 
-            { 
-                user_name = GameContext.Instance.UserName, 
-                game_name = GameContext.Instance.GameName 
+            var requestData = new HomeTransDungeonRequest
+            {
+                user_name = GameContext.Instance.UserName,
+                game_name = GameContext.Instance.GameName
             };
             var jsonData = JsonConvert.SerializeObject(requestData);
-            
+
             // 发送请求
-            var result = await PostRequestAsync(GameContext.Instance.HOME_TRANS_DUNGEON_URL, jsonData);
-            
+            var result = await PostRequestAsync(GameContext.Instance.HomeTransDungeonUrl, jsonData);
+
             // 处理结果
             if (result.isSuccess)
             {
@@ -129,14 +129,14 @@ public class TransDungeonAction : BaseRequestAction
         {
             Debug.LogError($"Exception during trans dungeon request: {ex.Message}");
         }
-        
+
         return false;
     }
-    
+
     #endregion
 
     #region 通用调用方法
-    
+
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
@@ -147,7 +147,7 @@ public class TransDungeonAction : BaseRequestAction
             // 使用 async 版本
             var task = CallAsync();
             yield return new WaitUntil(() => task.IsCompleted);
-            
+
             if (task.IsFaulted)
             {
                 Debug.LogError($"Async trans dungeon call failed: {task.Exception?.GetBaseException().Message}");
@@ -159,11 +159,11 @@ public class TransDungeonAction : BaseRequestAction
             yield return CallCoroutine();
         }
     }
-    
+
     #endregion
 
     #region 私有方法
-    
+
     /// <summary>
     /// 尝试解析转换到地下城响应数据
     /// </summary>
@@ -174,19 +174,19 @@ public class TransDungeonAction : BaseRequestAction
             Debug.LogError("Trans dungeon response text is empty");
             return false;
         }
-        
+
         try
         {
             var response = JsonConvert.DeserializeObject<HomeTransDungeonResponse>(responseText);
-            
+
             if (response == null)
             {
                 Debug.LogError("TransDungeonAction response is null");
                 return false;
             }
-            
+
             Debug.Log($"TransDungeonAction.message = {response.message}");
-            
+
             return true;
         }
         catch (System.Exception ex)
@@ -195,6 +195,6 @@ public class TransDungeonAction : BaseRequestAction
             return false;
         }
     }
-    
+
     #endregion
 }

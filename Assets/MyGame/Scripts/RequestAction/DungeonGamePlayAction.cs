@@ -70,7 +70,7 @@ public class DungeonGamePlayAction : BaseRequestAction
         //RequestResult result = null;
 
         // 发送请求
-        yield return PostRequestCoroutine(GameContext.Instance.DUNGEON_GAMEPLAY_URL, jsonData, (response) =>
+        yield return PostRequestCoroutine(GameContext.Instance.DungeonGameplayUrl, jsonData, (response) =>
         {
             _lastRequestResult = response;
             requestCompleted = true;
@@ -136,7 +136,7 @@ public class DungeonGamePlayAction : BaseRequestAction
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            _lastRequestResult = await PostRequestAsync(GameContext.Instance.DUNGEON_GAMEPLAY_URL, jsonData);
+            _lastRequestResult = await PostRequestAsync(GameContext.Instance.DungeonGameplayUrl, jsonData);
 
             // 处理结果
             if (_lastRequestResult.isSuccess)

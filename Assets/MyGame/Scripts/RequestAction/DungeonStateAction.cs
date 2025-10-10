@@ -10,42 +10,42 @@ public class DungeonStateAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
-    
+
     private bool _lastRequestSuccess = false;
-    
+
     public bool LastRequestSuccess => _lastRequestSuccess;
 
     #region 协程版本（兼容现有代码）
-    
+
     /// <summary>
     /// 查看地下城（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
         Debug.Log("View dungeon request started");
-        
+
         _lastRequestSuccess = false;
-        
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available for view dungeon");
             yield break;
         }
-        
+
         bool requestCompleted = false;
         RequestResult result = null;
-        
+
         // 发送请求
-        yield return GetRequestCoroutine(GameContext.Instance.DUNGEON_STATE_URL, (response) =>
+        yield return GetRequestCoroutine(GameContext.Instance.DungeonStateUrl, (response) =>
         {
             result = response;
             requestCompleted = true;
         });
-        
+
         // 等待请求完成
         yield return new WaitUntil(() => requestCompleted);
-        
+
         // 处理结果
         if (result != null && result.isSuccess)
         {
@@ -64,32 +64,32 @@ public class DungeonStateAction : BaseRequestAction
             Debug.LogError($"View dungeon failed: {result?.error ?? "Unknown error"}");
         }
     }
-    
+
     #endregion
 
     #region Async 版本（推荐用于 Unity 6）
-    
+
     /// <summary>
     /// 查看地下城（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
         Debug.Log("View dungeon request async started");
-        
+
         _lastRequestSuccess = false;
-        
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available for view dungeon");
             return false;
         }
-        
+
         try
         {
             // 发送请求
-            var result = await GetRequestAsync(GameContext.Instance.DUNGEON_STATE_URL);
-            
+            var result = await GetRequestAsync(GameContext.Instance.DungeonStateUrl);
+
             // 处理结果
             if (result.isSuccess)
             {
@@ -113,14 +113,14 @@ public class DungeonStateAction : BaseRequestAction
         {
             Debug.LogError($"Exception during view dungeon request: {ex.Message}");
         }
-        
+
         return false;
     }
-    
+
     #endregion
 
     #region 通用调用方法
-    
+
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
@@ -131,7 +131,7 @@ public class DungeonStateAction : BaseRequestAction
             // 使用 async 版本
             var task = CallAsync();
             yield return new WaitUntil(() => task.IsCompleted);
-            
+
             if (task.IsFaulted)
             {
                 Debug.LogError($"Async view dungeon call failed: {task.Exception?.GetBaseException().Message}");
@@ -143,11 +143,11 @@ public class DungeonStateAction : BaseRequestAction
             yield return CallCoroutine();
         }
     }
-    
+
     #endregion
 
     #region 私有方法
-    
+
     /// <summary>
     /// 尝试解析查看地下城响应数据
     /// </summary>
@@ -158,11 +158,11 @@ public class DungeonStateAction : BaseRequestAction
             Debug.LogError("View dungeon response text is empty");
             return false;
         }
-        
+
         try
         {
             var response = JsonConvert.DeserializeObject<DungeonStateResponse>(responseText);
-            
+
             if (response == null)
             {
                 Debug.LogError("ViewDungeonAction response is null");
@@ -172,7 +172,7 @@ public class DungeonStateAction : BaseRequestAction
             // 设置游戏上下文
             GameContext.Instance.Mapping = response.mapping;
             GameContext.Instance.Dungeon = response.dungeon;
-            
+
             return true;
         }
         catch (System.Exception ex)
@@ -181,6 +181,6 @@ public class DungeonStateAction : BaseRequestAction
             return false;
         }
     }
-    
+
     #endregion
 }

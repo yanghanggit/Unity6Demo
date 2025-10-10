@@ -30,7 +30,7 @@ public partial class GameContext
 
     private string _actorName = "";
 
-    private URLConfigResponse _urlConfig = new URLConfigResponse();
+    private RootResponse _rootResponse = new RootResponse();
 
     private bool _setupGame = false;
 
@@ -76,125 +76,117 @@ public partial class GameContext
         }
     }
 
-    public URLConfigResponse URLConfig
+    public RootResponse Root
     {
         get
         {
-            return _urlConfig;
+            return _rootResponse;
         }
 
         set
         {
             if (value == null)
             {
-                UnityEngine.Debug.LogError("APIEndpointConfiguration is null");
+                UnityEngine.Debug.LogError("_rootResponse is null");
                 return;
             }
-            _urlConfig = value;
+            _rootResponse = value;
+
+            // 验证关键字段
+            UnityEngine.Debug.Assert(_rootResponse.endpoints != null, "endpoints is null");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("login"), "endpoints does not contain login");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("logout"), "endpoints does not contain logout");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_gameplay"), "endpoints does not contain home_gameplay");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_state"), "endpoints does not contain home_state");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_state"), "endpoints does not contain dungeon_state");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("actor_details"), "endpoints does not contain actor_details");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("start"), "endpoints does not contain start");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_trans_dungeon"), "endpoints does not contain home_trans_dungeon");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_gameplay"), "endpoints does not contain dungeon_gameplay");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_trans_home"), "endpoints does not contain dungeon_trans_home");
         }
     }
 
-    public string LOGIN_URL
+    public string LoginUrl
     {
         get
         {
-            return _urlConfig.endpoints.ContainsKey("LOGIN_URL") ? _urlConfig.endpoints["LOGIN_URL"] : "";
+            return _rootResponse.endpoints["login"];
         }
     }
 
-    public string LOGOUT_URL
+    public string LogoutUrl
     {
         get
         {
-            return _urlConfig.endpoints.ContainsKey("LOGOUT_URL") ? _urlConfig.endpoints["LOGOUT_URL"] : "";
+            return _rootResponse.endpoints["logout"];
         }
     }
 
-    public string HOME_GAMEPLAY_URL
+    public string HomeGameplayUrl
     {
         get
         {
-            return _urlConfig.endpoints.ContainsKey("HOME_GAMEPLAY_URL") ? _urlConfig.endpoints["HOME_GAMEPLAY_URL"] : "";
+            return _rootResponse.endpoints["home_gameplay"];
         }
     }
 
-    public string HOME_STATE_URL
+    public string HomeStateUrl
     {
         get
         {
-            if (_urlConfig.endpoints.ContainsKey("HOME_STATE_URL"))
-            {
-                var baseUrl = _urlConfig.endpoints["HOME_STATE_URL"];
-                return $"{baseUrl}{UserName}/{GameName}/state";
-            }
-            else
-            {
-                return "";
-            }
+            var baseUrl = _rootResponse.endpoints["home_state"];
+            return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }
 
-    public string DUNGEON_STATE_URL
+    public string DungeonStateUrl
     {
         get
         {
-            if (_urlConfig.endpoints.ContainsKey("DUNGEON_STATE_URL"))
-            {
-                var baseUrl = _urlConfig.endpoints["DUNGEON_STATE_URL"];
-                return $"{baseUrl}{UserName}/{GameName}/state";
-            }
-            else
-            {
-                return "";
-            }
+            var baseUrl = _rootResponse.endpoints["dungeon_state"];
+            return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }
 
-    public string ACTOR_DETAILS_URL
+    public string ActorDetailsUrl
     {
         get
         {
-            if (_urlConfig.endpoints.ContainsKey("ACTOR_DETAILS_URL"))
-            {
-                var baseUrl = _urlConfig.endpoints["ACTOR_DETAILS_URL"];
-                return $"{baseUrl}{UserName}/{GameName}/details";
-            }
-            else
-            {
-                return "";
-            }
+            var baseUrl = _rootResponse.endpoints["actor_details"];
+            return $"{baseUrl}{UserName}/{GameName}/details";
         }
     }
 
-    public string START_URL
+    public string StartUrl
     {
         get
         {
-            return _urlConfig.endpoints.ContainsKey("START_URL") ? _urlConfig.endpoints["START_URL"] : "";
+            return _rootResponse.endpoints["start"];
         }
     }
 
-    public string HOME_TRANS_DUNGEON_URL
+    public string HomeTransDungeonUrl
     {
         get
         {
-            return _urlConfig.endpoints.ContainsKey("HOME_TRANS_DUNGEON_URL") ? _urlConfig.endpoints["HOME_TRANS_DUNGEON_URL"] : "";
+            return _rootResponse.endpoints["home_trans_dungeon"];
         }
     }
 
-    public string DUNGEON_GAMEPLAY_URL
+    public string DungeonGameplayUrl
     {
         get
         {
-            return _urlConfig.endpoints.ContainsKey("DUNGEON_GAMEPLAY_URL") ? _urlConfig.endpoints["DUNGEON_GAMEPLAY_URL"] : "";
+            return _rootResponse.endpoints["dungeon_gameplay"];
         }
     }
 
-    public string DUNGEON_TRANS_HOME_URL
+    public string DungeonTransHomeUrl
     {
         get
         {
-            return _urlConfig.endpoints.ContainsKey("DUNGEON_TRANS_HOME_URL") ? _urlConfig.endpoints["DUNGEON_TRANS_HOME_URL"] : "";
+            return _rootResponse.endpoints["dungeon_trans_home"];
         }
     }
 }
