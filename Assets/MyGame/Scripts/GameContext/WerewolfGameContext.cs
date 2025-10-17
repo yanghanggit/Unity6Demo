@@ -1,4 +1,7 @@
 
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 public partial class WerewolfGameContext
 {
     private static WerewolfGameContext _instance;
@@ -24,12 +27,38 @@ public partial class WerewolfGameContext
 
     private static readonly object lockObj = new object();
 
-    public readonly  string UserName = "Player1";
+    public readonly string UserName = "Player1";
 
-    public  readonly string GameName = "Game2";
+    public readonly string GameName = "Game2";
 
     private RootResponse _rootResponse = new RootResponse();
 
+    private string _stageName = "";
+
+    private List<string> _actors = new List<string>();
+
+    private int _gameTime = 0;
+
+    private List<EntitySerialization> _actorEntities = new List<EntitySerialization>();
+
+    public void UpdateGameState(int gameTime, List<string> actors, string stageName)
+    {
+        _gameTime = gameTime;
+        _actors = actors;
+        _stageName = stageName;
+    }
+
+    public void UpdateActorEntities(List<EntitySerialization> actorEntities)
+    {
+        _actorEntities = actorEntities;
+        //UnityEngine.Debug.Log($"Updated actor entities count: {_actorEntities.Count}");
+        for (int i = 0; i < _actorEntities.Count; i++)
+        {
+            var serializer = _actorEntities[i];
+            UnityEngine.Debug.Log($"Actor Entity {i}:" + JsonConvert.SerializeObject(serializer));
+        }
+
+    }
 
     public RootResponse Root
     {
@@ -68,6 +97,16 @@ public partial class WerewolfGameContext
         {
             var baseUrl = _rootResponse.endpoints["werewolf_game_actor_details"];
             return $"{baseUrl}{UserName}/{GameName}/details";
+        }
+    }
+
+
+    public string StateUrl
+    {
+        get
+        {
+            var baseUrl = _rootResponse.endpoints["werewolf_game_state"];
+            return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }
 

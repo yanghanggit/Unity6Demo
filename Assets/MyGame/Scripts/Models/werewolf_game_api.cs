@@ -31,19 +31,15 @@ public class WerewolfGamePlayResponse
 [System.Serializable]
 public class WerewolfGameStateResponse
 {
-    public string message;
+    public Dictionary<string, List<string>> mapping;
+
+    public int game_time;
 }
-
-
-// @final
-// class WerewolfGameActorDetailsResponse(BaseModel):
-//     actor_entities_serialization: List[EntitySerialization]
-//     agent_short_term_memories: List[AgentChatHistory]
 
 [System.Serializable]
 public class WerewolfGameActorDetailsResponse
 {
     public List<EntitySerialization> actor_entities_serialization;
 
-    public List<AgentShortTermMemory> agent_short_term_memories;
+    //public List<AgentChatHistory> agent_short_term_memories;
 }

@@ -483,6 +483,7 @@ GameObject:
   - component: {fileID: 399892903}
   - component: {fileID: 399892904}
   - component: {fileID: 399892905}
+  - component: {fileID: 399892906}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -520,6 +521,7 @@ MonoBehaviour:
   _rootAction: {fileID: 399892902}
   _werewolfGameStartAction: {fileID: 399892903}
   _werewolfGameActorDetailsAction: {fileID: 399892905}
+  _werewolfGameStateAction: {fileID: 399892906}
   serverUrl: http://192.168.192.54:8000/
   _nextButton: {fileID: 1202936521}
 --- !u!114 &399892902
@@ -576,6 +578,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b319a21d3db0846e7a09709bd7ccf561, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WerewolfGameActorDetailsAction
+  requestTimeout: 30
+  useAsyncVersion: 1
+--- !u!114 &399892906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2078c554d0bd2434d8f08aeedb5bd542, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WerewolfGameStateAction
   requestTimeout: 30
   useAsyncVersion: 1
 --- !u!1 &524838950

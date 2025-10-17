@@ -12,7 +12,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private WerewolfGameActorDetailsResponse _response = null;
+    private WerewolfGameActorDetailsResponse _responseData = null;
 
     private string _url;
 
@@ -22,7 +22,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
 
     private List<string> _actors;
 
-    public WerewolfGameActorDetailsResponse Response => _response;
+    public WerewolfGameActorDetailsResponse ResponseData => _responseData;
 
     public void Setup(string url, string userName, string gameName, List<string> actors)
     {
@@ -30,7 +30,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
         _userName = userName;
         _gameName = gameName;
         _actors = actors;
-        _response = null;
+        _responseData = null;
 
         Debug.Assert(actors.Count > 0, "Actors list is empty");
         Debug.Log($"WerewolfGameActorDetailsAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, Actors count: {actors.Count}");
@@ -213,7 +213,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
             }
 
             // 更新游戏上下文中的角色快照
-            _response = response;
+            _responseData = response;
             return true;
         }
         catch (System.Exception ex)

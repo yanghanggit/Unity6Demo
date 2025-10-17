@@ -12,7 +12,7 @@ public partial class GameContext
 
     private List<EntitySerialization> _actorEntitiesSerialization = new List<EntitySerialization>();
 
-    private List<AgentShortTermMemory> _agentShortTermMemories = new List<AgentShortTermMemory>();
+    private List<AgentChatHistory> _agentShortTermMemories = new List<AgentChatHistory>();
 
     private Dungeon _dungeon = new Dungeon();
 
@@ -103,7 +103,7 @@ public partial class GameContext
         }
     }
 
-    public List<AgentShortTermMemory> AgentShortTermMemories
+    public List<AgentChatHistory> AgentShortTermMemories
     {
         get
         {

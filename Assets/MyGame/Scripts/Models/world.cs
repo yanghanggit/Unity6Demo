@@ -9,7 +9,7 @@ public class BaseMessage
 }
 
 [System.Serializable]
-public class AgentShortTermMemory
+public class AgentChatHistory
 {
     public string name = "";
     public List<BaseMessage> chat_history = new List<BaseMessage>();

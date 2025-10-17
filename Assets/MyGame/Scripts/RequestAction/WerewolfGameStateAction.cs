@@ -4,20 +4,22 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// 开始游戏操作，使用改进的 WerewolfGameStartAction
+/// 查看家园操作，使用改进的 BaseRequestAction
 /// </summary>
-public class WerewolfGameStartAction : BaseRequestAction
+public class WerewolfGameStateAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private WerewolfGameStartResponse _responseData;
+    // 响应数据
+    private WerewolfGameStateResponse _responseData = null;
 
-    public WerewolfGameStartResponse ResponseData => _responseData;
+    public WerewolfGameStateResponse ResponseData => _responseData;
 
     private string _url;
     private string _userName;
     private string _gameName;
+
 
     public void Setup(string url, string userName, string gameName)
     {
@@ -26,43 +28,32 @@ public class WerewolfGameStartAction : BaseRequestAction
         _gameName = gameName;
         _responseData = null;
 
-        Debug.Log($"WerewolfGameStartAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+        Debug.Log($"WerewolfGameStateAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
     }
-
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
-    /// 开始游戏（协程版本）
+    /// 查看家园（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
-        //Debug.Log($"Start game request for actor: {actorName}");
+        Debug.Log("View home request started");
 
-        // _lastRequestSuccess = false;
-        //_response = null;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for start game");
+            Debug.LogError("No network connection available for view home");
             yield break;
         }
-
-        // 创建请求数据
-        var requestData = new WerewolfGameStartRequest
-        {
-            user_name = _userName,
-            game_name = _gameName,
-            //actor_name = actorName
-        };
-        var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
         RequestResult result = null;
 
         // 发送请求
-        yield return PostRequestCoroutine(_url, jsonData, (response) =>
+        yield return GetRequestCoroutine(_url, (response) =>
         {
             result = response;
             requestCompleted = true;
@@ -74,19 +65,19 @@ public class WerewolfGameStartAction : BaseRequestAction
         // 处理结果
         if (result != null && result.isSuccess)
         {
-            if (TryParseStartResponse(result.responseText))
+            if (TryParseViewHomeResponse(result.responseText))
             {
-                //_werewolfGameStartResponse = new WerewolfGameStartResponse
-                Debug.Log("Start game successful");
+                //_lastRequestSuccess = true;
+                Debug.Log("View home successful");
             }
             else
             {
-                Debug.LogError("Failed to parse start game response");
+                Debug.LogError("Failed to parse view home response");
             }
         }
         else
         {
-            Debug.LogError($"Start game failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"View home failed: {result?.error ?? "Unknown error"}");
         }
     }
 
@@ -95,57 +86,48 @@ public class WerewolfGameStartAction : BaseRequestAction
     #region Async 版本（推荐用于 Unity 6）
 
     /// <summary>
-    /// 开始游戏（Async 版本）
+    /// 查看家园（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
-        //Debug.Log($"Start game request async for actor: {actorName}");
+        Debug.Log("View home request async started");
 
-        //_response = null;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for start game");
+            Debug.LogError("No network connection available for view home");
             return false;
         }
 
         try
         {
-            // 创建请求数据
-            var requestData = new WerewolfGameStartRequest
-            {
-                user_name = _userName,
-                game_name = _gameName
-                //actor_name = actorName
-            };
-            var jsonData = JsonConvert.SerializeObject(requestData);
-
             // 发送请求
-            var result = await PostRequestAsync(_url, jsonData);
+            var result = await GetRequestAsync(_url);
 
             // 处理结果
             if (result.isSuccess)
             {
-                if (TryParseStartResponse(result.responseText))
+                if (TryParseViewHomeResponse(result.responseText))
                 {
                     //_lastRequestSuccess = true;
-                    Debug.Log("Start game successful");
+                    Debug.Log("View home successful");
                     return true;
                 }
                 else
                 {
-                    Debug.LogError("Failed to parse start game response");
+                    Debug.LogError("Failed to parse view home response");
                 }
             }
             else
             {
-                Debug.LogError($"Start game failed: {result.error}");
+                Debug.LogError($"View home failed: {result.error}");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Exception during start game request: {ex.Message}");
+            Debug.LogError($"Exception during view home request: {ex.Message}");
         }
 
         return false;
@@ -168,7 +150,7 @@ public class WerewolfGameStartAction : BaseRequestAction
 
             if (task.IsFaulted)
             {
-                Debug.LogError($"Async start game call failed: {task.Exception?.GetBaseException().Message}");
+                Debug.LogError($"Async view home call failed: {task.Exception?.GetBaseException().Message}");
             }
         }
         else
@@ -183,35 +165,35 @@ public class WerewolfGameStartAction : BaseRequestAction
     #region 私有方法
 
     /// <summary>
-    /// 尝试解析开始游戏响应数据
+    /// 尝试解析查看家园响应数据
     /// </summary>
-    private bool TryParseStartResponse(string responseText)
+    private bool TryParseViewHomeResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
-            Debug.LogError("Start game response text is empty");
+            Debug.LogError("View home response text is empty");
             return false;
         }
 
         try
         {
-            var response = JsonConvert.DeserializeObject<WerewolfGameStartResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<WerewolfGameStateResponse>(responseText);
 
             if (response == null)
             {
-                Debug.LogError("StartAction response is null");
+                Debug.LogError("ViewHomeAction response is null");
                 return false;
             }
 
-            Debug.Log($"StartAction.message = {response.message}");
+            // 设置游戏上下文
+            //GameContext.Instance.Mapping = response.mapping;
 
-            // 设置角色名称
             _responseData = response;
             return true;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Failed to parse start game response: {ex.Message}");
+            Debug.LogError($"Failed to parse view home response: {ex.Message}");
             return false;
         }
     }

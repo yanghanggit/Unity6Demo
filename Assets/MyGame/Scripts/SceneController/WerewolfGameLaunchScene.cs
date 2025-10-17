@@ -4,15 +4,18 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 
-public class WerewolfGame : MonoBehaviour
+// Launch
+public class WerewolfGameLaunchScene : MonoBehaviour
 {
+    public string serverUrl = "http://192.168.192.54:8000/";
+
     public RootAction _rootAction;
 
     public WerewolfGameStartAction _werewolfGameStartAction;
 
-    public WerewolfGameActorDetailsAction _werewolfGameActorDetailsAction;
+    public WerewolfGameStateAction _werewolfGameStateAction;
 
-    public string serverUrl = "http://192.168.192.54:8000/";
+    public WerewolfGameActorDetailsAction _werewolfGameActorDetailsAction;
 
     public Button _nextButton;
 
@@ -21,6 +24,7 @@ public class WerewolfGame : MonoBehaviour
         Debug.Assert(_rootAction != null, "_bootAction is null");
         Debug.Assert(_werewolfGameStartAction != null, "_werewolfGameStartAction is null");
         Debug.Assert(_werewolfGameActorDetailsAction != null, "_werewolfGameActorDetailsAction is null");
+        Debug.Assert(_werewolfGameStateAction != null, "_werewolfGameStateAction is null");
         Debug.Assert(_nextButton != null, "_nextButton is null");
 
         _nextButton.gameObject.SetActive(false);
@@ -57,32 +61,71 @@ public class WerewolfGame : MonoBehaviour
 
         // 发起开始游戏请求
         yield return _werewolfGameStartAction.Call();
-        if (_werewolfGameStartAction.Response == null)
+        if (_werewolfGameStartAction.ResponseData == null)
         {
             Debug.LogError("Failed to start Werewolf game.");
             yield break;
         }
 
-        // 开界面，可以进行下一步
-        _nextButton.gameObject.SetActive(true);
+        // 设置游戏状态请求
+        _werewolfGameStateAction.Setup(
+            WerewolfGameContext.Instance.StateUrl,
+            WerewolfGameContext.Instance.UserName,
+            WerewolfGameContext.Instance.GameName
+        );
+        // 发起游戏状态请求
+        yield return _werewolfGameStateAction.Call();
+        if (_werewolfGameStateAction.ResponseData == null)
+        {
+            Debug.LogError("Failed to get Werewolf game state.");
+            yield break;
+        }
 
+        // 设置游戏上下文
+        Debug.Assert(_werewolfGameStateAction.ResponseData.mapping != null, "Mapping is null in Werewolf game state response.");
+        Debug.Assert(_werewolfGameStateAction.ResponseData.mapping.Count == 1, "Mapping count is not correct in Werewolf game state response.");
 
+        // 获取唯一的场景与场景中的角色列表
+        string uniqueKey = "";
+        List<string> uniqueValue = new List<string>();
+        foreach (var kv in _werewolfGameStateAction.ResponseData.mapping)
+        {
+            uniqueKey = kv.Key;
+            uniqueValue = kv.Value;
+            break;
+        }
+
+        WerewolfGameContext.Instance.UpdateGameState(
+            _werewolfGameStateAction.ResponseData.game_time,
+            uniqueValue,
+            uniqueKey
+            );
+
+        // 设置查看角色请求
         _werewolfGameActorDetailsAction.Setup(
             WerewolfGameContext.Instance.ActorDetailsUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
-            new List<string> { "角色.1号玩家" }
+            uniqueValue
         );
 
         // 发起查看角色请求
         yield return _werewolfGameActorDetailsAction.Call();
-        if (_werewolfGameActorDetailsAction.Response == null)
+        if (_werewolfGameActorDetailsAction.ResponseData == null)
         {
             Debug.LogError("Failed to get Werewolf game actor details.");
             yield break;
         }
 
         Debug.Log("Werewolf game setup complete.");
+
+        // 设置角色实体到游戏上下文
+        WerewolfGameContext.Instance.UpdateActorEntities(
+            _werewolfGameActorDetailsAction.ResponseData.actor_entities_serialization
+        );
+
+        // 开界面，可以进行下一步
+        _nextButton.gameObject.SetActive(true);
     }
 
     private IEnumerator LoadNextScene()
