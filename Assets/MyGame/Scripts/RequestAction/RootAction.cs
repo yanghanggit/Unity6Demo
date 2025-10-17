@@ -12,9 +12,10 @@ public class RootAction : BaseRequestAction
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
     private RootResponse _rootResponse;
-    private bool _lastRequestSuccess = false;
+    //private bool _lastRequestSuccess = false;
+    public bool LastRequestSuccess => _rootResponse != null;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    public RootResponse RootResponse => _rootResponse;
 
     #region 协程版本（兼容现有代码）
 
@@ -25,7 +26,7 @@ public class RootAction : BaseRequestAction
     {
         Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
         _rootResponse = null;
 
         // 检查网络连接
@@ -53,7 +54,7 @@ public class RootAction : BaseRequestAction
         {
             if (TryParseResponse(result.responseText))
             {
-                _lastRequestSuccess = true;
+                //_lastRequestSuccess = true;
                 GameContext.Instance.Root = _rootResponse;
                 Debug.Log("URL Configuration loaded successfully");
             }
@@ -79,7 +80,7 @@ public class RootAction : BaseRequestAction
     {
         Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
         _rootResponse = null;
 
         // 检查网络连接
@@ -99,7 +100,7 @@ public class RootAction : BaseRequestAction
             {
                 if (TryParseResponse(result.responseText))
                 {
-                    _lastRequestSuccess = true;
+                    //_lastRequestSuccess = true;
                     GameContext.Instance.Root = _rootResponse;
                     Debug.Log("URL Configuration loaded successfully");
                     return true;
