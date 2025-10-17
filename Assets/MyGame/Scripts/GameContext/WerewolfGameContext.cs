@@ -118,4 +118,62 @@ public partial class WerewolfGameContext
         }
     }
 
+
+    public List<string> ConvertClientMessagesToText(List<ClientMessage> clientMessages)
+    {
+        List<string> processedMessages = new List<string>();
+
+        for (int i = 0; i < clientMessages.Count; i++)
+        {
+            ClientMessage clientMessage = clientMessages[i];
+            UnityEngine.Debug.Log("clientMessage = " + JsonConvert.SerializeObject(clientMessage));
+
+            switch (clientMessage.message_type)
+            {
+                case (int)MessageType.AGENT_EVENT:
+                    JToken dataToken = JToken.FromObject(clientMessage.data);
+                    var handledMessage = FormatAgentEventAsText(dataToken);
+                    processedMessages.Add(handledMessage);
+                    break;
+
+                default:
+                    UnityEngine.Debug.LogWarning("Unknown client message type: " + clientMessage.message_type);
+                    break;
+            }
+        }
+
+        return processedMessages;
+    }
+
+    private string FormatAgentEventAsText(JToken dataToken)
+    {
+        UnityEngine.Debug.Log("body = " + dataToken.ToString());
+
+        var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
+        switch ((AgentEventHead)eventHead)
+        {
+            case AgentEventHead.NONE:
+                var message = dataToken["message"]?.ToString() ?? "No message";
+                UnityEngine.Debug.Log("NONE: " + message);
+                return message;
+
+            case AgentEventHead.MIND_EVENT:
+                MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
+                UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
+                return $"{mindVoiceEvent.actor}...: {mindVoiceEvent.content}";
+
+            case AgentEventHead.DISCUSSION_EVENT:
+                DiscussionEvent discussionEvent = dataToken.ToObject<DiscussionEvent>();
+                UnityEngine.Debug.Log($"DISCUSSION_EVENT: {discussionEvent.actor}: {discussionEvent.content}");
+                return $"{discussionEvent.actor} says: {discussionEvent.content}";
+
+
+            default:
+                UnityEngine.Debug.LogWarning("Unknown agent event head: " + eventHead);
+                break;
+        }
+
+        return "Unknown message type";
+    }
+
 }

@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.SceneManagement;
+//using UnityEngine.SceneManagement;
 //using System;
 
 public class WerewolfGamePlayScene : MonoBehaviour
@@ -73,5 +73,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             Debug.Log($"Client Message {i}: " + JsonUtility.ToJson(message));
             _mainText.text += JsonUtility.ToJson(message) + "\n";
         }
+
+        var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(_werewolfGamePlayAction.ResponseData.client_messages);
+        _mainText.text = string.Join("\n", processedMessages);
     }
 }

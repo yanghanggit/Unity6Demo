@@ -8,8 +8,11 @@ public enum AgentEventHead
     WHISPER_EVENT = 2,
     ANNOUNCE_EVENT = 3,
     MIND_EVENT = 4,
-    COMBAT_KICK_OFF_EVENT = 5,
-    COMBAT_COMPLETE_EVENT = 6,
+    QUERY_EVENT = 5,
+    TRANS_STAGE_EVENT = 6,
+    COMBAT_KICK_OFF_EVENT = 7,
+    COMBAT_COMPLETE_EVENT = 8,
+    DISCUSSION_EVENT = 9,
 }
 
 /// <summary>
@@ -96,4 +99,13 @@ public sealed class CombatCompleteEvent : AgentEvent
     public string summary = "";
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+
+[System.Serializable]
+public sealed class DiscussionEvent : AgentEvent
+{
+    //public new int head = (int)AgentEventHead.DISCUSSION_EVENT;
+    public string actor = "";
+    public string stage = "";
+    public string content = "";
+}
