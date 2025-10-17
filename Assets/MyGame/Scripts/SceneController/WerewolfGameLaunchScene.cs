@@ -28,7 +28,7 @@ public class WerewolfGameLaunchScene : MonoBehaviour
         Debug.Assert(_nextButton != null, "_nextButton is null");
 
         _nextButton.gameObject.SetActive(false);
-        StartCoroutine(LoadApiEndpoints());
+        StartCoroutine(SetupGameApiServices());
     }
 
     public void OnClickNext()
@@ -36,11 +36,27 @@ public class WerewolfGameLaunchScene : MonoBehaviour
         StartCoroutine(LoadNextScene());
     }
 
-    private IEnumerator LoadApiEndpoints()
+    private IEnumerator SetupGameApiServices()
     {
         //隐藏按钮
         _nextButton.gameObject.SetActive(false);
 
+        // Pipeline: 分段逐步处理
+        yield return LoadRootApiEndpoints();
+        yield return StartWerewolfGame();
+        yield return LoadGameState();
+        yield return UpdateGameStateContext();
+        yield return LoadActorDetails();
+        yield return UpdateActorEntitiesContext();
+
+        Debug.Log("Werewolf game setup complete.");
+
+        // 开界面,可以进行下一步
+        _nextButton.gameObject.SetActive(true);
+    }
+
+    private IEnumerator LoadRootApiEndpoints()
+    {
         //加载 Root API endpoints
         yield return _rootAction.Call(serverUrl);
         if (!_rootAction.LastRequestSuccess)
@@ -49,9 +65,12 @@ public class WerewolfGameLaunchScene : MonoBehaviour
             yield break;
         }
 
-        // 设置游戏上下文，内含 URL 配置
+        // 设置游戏上下文,内含 URL 配置
         WerewolfGameContext.Instance.Root = _rootAction.RootResponse;
+    }
 
+    private IEnumerator StartWerewolfGame()
+    {
         //设置下
         _werewolfGameStartAction.Setup(
             WerewolfGameContext.Instance.StartUrl,
@@ -66,13 +85,17 @@ public class WerewolfGameLaunchScene : MonoBehaviour
             Debug.LogError("Failed to start Werewolf game.");
             yield break;
         }
+    }
 
+    private IEnumerator LoadGameState()
+    {
         // 设置游戏状态请求
         _werewolfGameStateAction.Setup(
             WerewolfGameContext.Instance.StateUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName
         );
+
         // 发起游戏状态请求
         yield return _werewolfGameStateAction.Call();
         if (_werewolfGameStateAction.ResponseData == null)
@@ -80,7 +103,10 @@ public class WerewolfGameLaunchScene : MonoBehaviour
             Debug.LogError("Failed to get Werewolf game state.");
             yield break;
         }
+    }
 
+    private IEnumerator UpdateGameStateContext()
+    {
         // 设置游戏上下文
         Debug.Assert(_werewolfGameStateAction.ResponseData.mapping != null, "Mapping is null in Werewolf game state response.");
         Debug.Assert(_werewolfGameStateAction.ResponseData.mapping.Count == 1, "Mapping count is not correct in Werewolf game state response.");
@@ -99,7 +125,22 @@ public class WerewolfGameLaunchScene : MonoBehaviour
             _werewolfGameStateAction.ResponseData.game_time,
             uniqueValue,
             uniqueKey
-            );
+        );
+
+        yield return null;
+    }
+
+    private IEnumerator LoadActorDetails()
+    {
+        // 从游戏状态中获取角色列表
+        string uniqueKey = "";
+        List<string> uniqueValue = new List<string>();
+        foreach (var kv in _werewolfGameStateAction.ResponseData.mapping)
+        {
+            uniqueKey = kv.Key;
+            uniqueValue = kv.Value;
+            break;
+        }
 
         // 设置查看角色请求
         _werewolfGameActorDetailsAction.Setup(
@@ -116,22 +157,21 @@ public class WerewolfGameLaunchScene : MonoBehaviour
             Debug.LogError("Failed to get Werewolf game actor details.");
             yield break;
         }
+    }
 
-        Debug.Log("Werewolf game setup complete.");
-
+    private IEnumerator UpdateActorEntitiesContext()
+    {
         // 设置角色实体到游戏上下文
         WerewolfGameContext.Instance.UpdateActorEntities(
             _werewolfGameActorDetailsAction.ResponseData.actor_entities_serialization
         );
 
-        // 开界面，可以进行下一步
-        _nextButton.gameObject.SetActive(true);
+        yield return null;
     }
-
     private IEnumerator LoadNextScene()
     {
         yield return new WaitForSeconds(0.0f);
-        //SceneManager.LoadScene(_nextScene);
+        SceneManager.LoadScene("WerewolfGamePlayScene");
     }
 
 }
