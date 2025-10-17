@@ -182,8 +182,8 @@ public partial class GameContext
                 AgentEvents.Add(announceEvent);
                 break;
 
-            case AgentEventHead.MIND_VOICE_EVENT:
-                MindVoiceEvent mindVoiceEvent = dataToken.ToObject<MindVoiceEvent>();
+            case AgentEventHead.MIND_EVENT:
+                MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
                 UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
                 AgentEventLogs.Add($"{mindVoiceEvent.actor} % {mindVoiceEvent.content}");
                 AgentEvents.Add(mindVoiceEvent);

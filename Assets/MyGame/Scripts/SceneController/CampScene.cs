@@ -534,8 +534,8 @@ public class CampScene : MonoBehaviour
                     speakerLastDialogue[announceEvent.actor].Add($"(announce) [{announceEvent.stage}] {announceEvent.content}");
                     break;
 
-                case AgentEventHead.MIND_VOICE_EVENT:
-                    MindVoiceEvent mindVoiceEvent = (MindVoiceEvent)GameContext.Instance.AgentEvents[i];
+                case AgentEventHead.MIND_EVENT:
+                    MindEvent mindVoiceEvent = (MindEvent)GameContext.Instance.AgentEvents[i];
                     Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
                     if (!speakerLastDialogue.ContainsKey(mindVoiceEvent.actor))
                     {

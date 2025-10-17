@@ -7,7 +7,7 @@ public enum AgentEventHead
     SPEAK_EVENT = 1,
     WHISPER_EVENT = 2,
     ANNOUNCE_EVENT = 3,
-    MIND_VOICE_EVENT = 4,
+    MIND_EVENT = 4,
     COMBAT_KICK_OFF_EVENT = 5,
     COMBAT_COMPLETE_EVENT = 6,
 }
@@ -65,7 +65,7 @@ public sealed class AnnounceEvent : AgentEvent
 /// 心灵语音事件
 /// </summary>
 [System.Serializable]
-public sealed class MindVoiceEvent : AgentEvent
+public sealed class MindEvent : AgentEvent
 {
     //public new int head = (int)AgentEventHead.MIND_VOICE_EVENT;
     public string actor = "";
