@@ -59,14 +59,14 @@ public class WerewolfGameLaunchScene : MonoBehaviour
     {
         //加载 Root API endpoints
         yield return _rootAction.Call(serverUrl);
-        if (!_rootAction.LastRequestSuccess)
+        if (_rootAction.ResponseData == null)
         {
             Debug.LogError("Failed to load Root API endpoints.");
             yield break;
         }
 
         // 设置游戏上下文,内含 URL 配置
-        WerewolfGameContext.Instance.Root = _rootAction.RootResponse;
+        WerewolfGameContext.Instance.Root = _rootAction.ResponseData;
     }
 
     private IEnumerator StartWerewolfGame()

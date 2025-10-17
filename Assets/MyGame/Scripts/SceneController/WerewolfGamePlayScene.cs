@@ -7,240 +7,71 @@ using UnityEngine.SceneManagement;
 
 public class WerewolfGamePlayScene : MonoBehaviour
 {
-    //public string _preScene = "MainScene2";
-
     public TMP_Text _mainText;
 
-    // public DungeonGamePlayAction _dungeonGamePlayAction;
-
-    // public DungeonStateAction _viewDungeonAction;
-
-    // public ActorDetailsAction _viewActorAction;
-
-    // public TransHomeAction _transHomeAction;
-
-    // public XCardPlayer _XCardPlayer;
-
-    // public XCardEditor _XCardEditor;
-
+    public WerewolfGamePlayAction _werewolfGamePlayAction;
 
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        // Debug.Assert(_dungeonGamePlayAction != null, "_dungeonAction is null");
-        // Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
-        // Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
-        // Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
-        // Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
-        // Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
-
-        // _XCardEditor.gameObject.SetActive(false);
-
-        //StartCoroutine(ExecuteViewDungeon());
+        Debug.Assert(_werewolfGamePlayAction != null, "_werewolfGamePlayAction is null");
     }
 
-    // public void OnClickDungeonCombatKickOff()
-    // {
-    //     Debug.Log("OnClickDungeonCombatKickOff");
-    //     StartCoroutine(ExecuteDungeonCombatKickOff());
-    // }
 
-    // public void OnClickViewDungeon()
-    // {
-    //     Debug.Log("OnClickViewDungeon");
-    //     StartCoroutine(ExecuteViewDungeon());
-    // }
+    public void OnClickKickOff()
+    {
+        Debug.Log("OnClickKickOff");
+        StartCoroutine(KickOff());
+    }
 
-    // public void OnClickViewActor()
-    // {
-    //     Debug.Log("OnClickViewActor");
-    //     StartCoroutine(ExecuteViewActor());
-    // }
+    public void OnClickTime()
+    {
+        Debug.Log("OnClickTime");
+    }
 
-    // public void OnClickDrawCards()
-    // {
-    //     Debug.Log("OnClickDrawCards");
-    //     StartCoroutine(ExecuteDrawCards());
-    // }
+    public void OnClickNight()
+    {
+        Debug.Log("OnClickNight");
+    }
 
-    // public void OnClickPlayCards()
-    // {
-    //     Debug.Log("OnClickPlayCards");
-    //     StartCoroutine(ExecutePlayCards());
-    // }
+    public void OnClickDay()
+    {
+        Debug.Log("OnClickDay");
+    }
 
-    // public void OnClickAdvanceNextDungeon()
-    // {
-    //     Debug.Log("OnClickAdvanceNextDungeon");
-    //     StartCoroutine(ExecuteAdvanceNextDungeon());
-    // }
-
-    // public void OnClickBackHome()
-    // {
-    //     Debug.Log("OnClickBackHome");
-    //     StartCoroutine(ExecuteBackHome());
-    // }
+    public void OnClickVote()
+    {
+        Debug.Log("OnClickVote");
+    }
 
 
-    // public void OnClickXCard()
-    // {
-    //     Debug.Log("OnClickXCard");
-    //     _XCardEditor.gameObject.SetActive(true);
-    // }
+    private IEnumerator KickOff()
+    {
+        // 设置请求参数
+        _werewolfGamePlayAction.Setup(
+            WerewolfGameContext.Instance.GameplayUrl,
+            WerewolfGameContext.Instance.UserName,
+            WerewolfGameContext.Instance.GameName,
+            new Dictionary<string, string>
+            { { "user_input", "/kickoff" } }
+        );
 
-    // // public void OnClickCombatComplete()
-    // // {
-    // //     Debug.Log("OnClickCombatComplete");
-    // //     StartCoroutine(ExecuteCombatComplete());
-    // // }
 
-    // private IEnumerator ExecuteDungeonCombatKickOff()
-    // {
-    //     yield return _dungeonGamePlayAction.Call("dungeon_combat_kick_off");
-    //     if (!_dungeonGamePlayAction.LastRequestSuccess)
-    //     {
-    //         yield break;
-    //     }
+        // 发送请求
+        yield return _werewolfGamePlayAction.Call();
+        if (_werewolfGamePlayAction.ResponseData == null)
+        {
+            Debug.LogError("WerewolfGamePlayAction ResponseData is null");
+            yield break;
+        }
 
-    //     yield return ExecuteViewDungeon();
-    // }
-
-    // private IEnumerator ExecuteDrawCards()
-    // {
-    //     yield return _dungeonGamePlayAction.Call("draw_cards");
-    //     if (!_dungeonGamePlayAction.LastRequestSuccess)
-    //     {
-    //         Debug.LogError("ExecuteDrawCards request failed");
-    //         yield break;
-    //     }
-
-    //     yield return _viewActorAction.Call(
-    //         MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
-
-    //     if (!_viewActorAction.LastRequestSuccess)
-    //     {
-    //         Debug.LogError("ViewActorAction request failed");
-    //         yield break;
-    //     }
-
-    //     Debug.Log("ExecuteDrawCards request success");
-    //     UpdateActorDisplay(new HashSet<string> { typeof(HandComponent).Name });
-    // }
-
-    // private IEnumerator ExecutePlayCards()
-    // {
-    //     yield return _dungeonGamePlayAction.Call("play_cards");
-    //     if (!_dungeonGamePlayAction.LastRequestSuccess)
-    //     {
-    //         Debug.LogError("ExecutePlayCards request failed");
-    //         yield break;
-    //     }
-
-    //     Debug.Log("ExecutePlayCards request success");
-    //     UpdateTextFromAgentLogs();
-    // }
-
-    // private IEnumerator ExecuteViewDungeon()
-    // {
-    //     yield return _viewDungeonAction.Call();
-    //     if (!_viewDungeonAction.LastRequestSuccess)
-    //     {
-    //         yield break;
-    //     }
-
-    //     yield return _viewActorAction.Call(
-    //         MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
-
-    //     if (!_viewActorAction.LastRequestSuccess)
-    //     {
-    //         yield break;
-    //     }
-
-    //     UpdateDungeonDisplay();
-    // }
-
-    // private IEnumerator ExecuteViewActor()
-    // {
-    //     yield return _viewActorAction.Call(
-    //         MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
-
-    //     if (!_viewActorAction.LastRequestSuccess)
-    //     {
-    //         yield break;
-    //     }
-
-    //     UpdateActorDisplay(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
-    // }
-
-    // private IEnumerator ExecuteAdvanceNextDungeon()
-    // {
-    //     yield return _dungeonGamePlayAction.Call("advance_next_dungeon");
-    //     if (!_dungeonGamePlayAction.LastRequestSuccess)
-    //     {
-    //         _mainText.text = _dungeonGamePlayAction.LastRequestResponseText;
-    //         yield break;
-    //     }
-
-    //     _mainText.text = "已进入下一个地下城";
-    //     yield return ExecuteViewDungeon();
-    // }
-
-    // private IEnumerator ExecuteBackHome()
-    // {
-    //     Debug.Log("ExecuteBackHome");
-    //     yield return _transHomeAction.Call();
-    //     if (!_transHomeAction.LastRequestSuccess)
-    //     {
-    //         Debug.LogError("TransHomeAction request failed");
-    //         yield break;
-    //     }
-    //     Debug.Log("TransHomeAction request success");
-    //     yield return new WaitForSeconds(0);
-    //     SceneManager.LoadScene(_preScene);
-    // }
-
-    // // private IEnumerator ExecuteCombatComplete()
-    // // {
-    // //     yield return _dungeonGamePlayAction.Call("dungeon_combat_complete");
-    // //     if (!_dungeonGamePlayAction.LastRequestSuccess)
-    // //     {
-    // //         yield break;
-    // //     }
-
-    // //     UpdateTextFromAgentLogs();
-    // // }
-
-    // private void UpdateActorDisplay(HashSet<string> includedComponentNames = null)
-    // {
-    //     var text = "";
-
-    //     var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
-    //     for (int i = 0; i < actorEntitiesSerialization.Count; i++)
-    //     {
-    //         var actorEntitySerialization = actorEntitiesSerialization[i];
-    //         text += MyUtils.ActorDisplayText(actorEntitySerialization, includedComponentNames);
-    //         text += "\n";
-    //     }
-    //     _mainText.text = text;
-    // }
-
-    // private void UpdateTextFromAgentLogs()
-    // {
-    //     _mainText.text = MyUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
-    // }
-
-    // private void UpdateDungeonDisplay()
-    // {
-    //     _mainText.text = MyUtils.MappingDisplayText(CurrentMapping()) + "\n" + MyUtils.DungeonCombatDisplayText(GameContext.Instance.Dungeon);
-    // }
-
-    // private Dictionary<string, List<string>> CurrentMapping()
-    // {
-    //     Dictionary<string, List<string>> currentMapping = new Dictionary<string, List<string>>();
-
-    //     var currentActorStage = MyUtils.GetActorLocation(GameContext.Instance.ActorName, GameContext.Instance.Mapping);
-    //     currentMapping[currentActorStage] = GameContext.Instance.Mapping[currentActorStage];
-
-    //     return currentMapping;
-    // }
+        // 显示结果
+        _mainText.text = "";
+        for (int i = 0; i < _werewolfGamePlayAction.ResponseData.client_messages.Count; i++)
+        {
+            var message = _werewolfGamePlayAction.ResponseData.client_messages[i];
+            Debug.Log($"Client Message {i}: " + JsonUtility.ToJson(message));
+            _mainText.text += JsonUtility.ToJson(message) + "\n";
+        }
+    }
 }

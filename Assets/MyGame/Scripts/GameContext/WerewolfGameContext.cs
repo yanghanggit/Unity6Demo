@@ -110,4 +110,12 @@ public partial class WerewolfGameContext
         }
     }
 
+    public string GameplayUrl
+    {
+        get
+        {
+            return _rootResponse.endpoints["werewolf_gameplay"];
+        }
+    }
+
 }

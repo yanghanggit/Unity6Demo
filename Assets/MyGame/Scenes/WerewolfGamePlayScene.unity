@@ -202,9 +202,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: DungeonScene, Assembly-CSharp
-        m_MethodName: OnClickDungeonCombatKickOff
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: WerewolfGamePlayScene, Assembly-CSharp
+        m_MethodName: OnClickKickOff
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -446,7 +446,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u7ED3\u675F\u672C\u5730\u4E0B\u57CE\u5E76\u56DE\u5BB6"
+  m_text: "\u8BA8\u8BBA\u7ED3\u675F\u6295\u7968"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,
@@ -673,6 +673,7 @@ GameObject:
   m_Component:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
+  - component: {fileID: 399892902}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -707,7 +708,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e97366ca587a648d9a0e99946c66b108, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WerewolfGamePlayScene
-  _mainText: {fileID: 0}
+  _mainText: {fileID: 129710570}
+  _werewolfGamePlayAction: {fileID: 399892902}
+--- !u!114 &399892902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80b4ba029fa134f9383718b967af3131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WerewolfGamePlayAction
+  requestTimeout: 30
+  useAsyncVersion: 1
 --- !u!1 &524838950
 GameObject:
   m_ObjectHideFlags: 0
@@ -859,9 +875,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: DungeonScene, Assembly-CSharp
-        m_MethodName: OnClickDrawCards
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: WerewolfGamePlayScene, Assembly-CSharp
+        m_MethodName: OnClickTime
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1042,7 +1058,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u5165\u573A(\u6218\u6597\u521D\u59CB\u5316)"
+  m_text: "\u5F00\u5C40\u6E38\u620F"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,
@@ -1179,7 +1195,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u6267\u884C\u5C40(\u968F\u673A\u51FA\u724C\u4E0E\u6F14\u7ECE)"
+  m_text: "\u63A8\u8FDB\u591C\u665A\u8FDB\u7A0B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,
@@ -1342,9 +1358,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: DungeonScene, Assembly-CSharp
-        m_MethodName: OnClickPlayCards
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: WerewolfGamePlayScene, Assembly-CSharp
+        m_MethodName: OnClickNight
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1449,7 +1465,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u7EE7\u7EED\u4E0B\u4E00\u5173"
+  m_text: "\u63A8\u8FDB\u767D\u5929\u8FDB\u7A0B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,
@@ -1612,9 +1628,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: DungeonScene, Assembly-CSharp
-        m_MethodName: OnClickAdvanceNextDungeon
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: WerewolfGamePlayScene, Assembly-CSharp
+        m_MethodName: OnClickDay
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1719,7 +1735,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u5F00\u5C40(\u66F4\u65B0\u72B6\u6001\u4E0E\u6293\u624B\u724C)"
+  m_text: "\u63A8\u8FDB\u65F6\u95F4"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,
@@ -1882,9 +1898,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: DungeonScene, Assembly-CSharp
-        m_MethodName: OnClickBackHome
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: WerewolfGamePlayScene, Assembly-CSharp
+        m_MethodName: OnClickVote
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

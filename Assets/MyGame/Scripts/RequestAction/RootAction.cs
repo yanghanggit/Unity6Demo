@@ -11,11 +11,11 @@ public class RootAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private RootResponse _rootResponse;
+    private RootResponse _responseData;
     //private bool _lastRequestSuccess = false;
-    public bool LastRequestSuccess => _rootResponse != null;
+    //public bool LastRequestSuccess => _responseData != null;
 
-    public RootResponse RootResponse => _rootResponse;
+    public RootResponse ResponseData => _responseData;
 
     #region 协程版本（兼容现有代码）
 
@@ -27,7 +27,7 @@ public class RootAction : BaseRequestAction
         Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
 
         //_lastRequestSuccess = false;
-        _rootResponse = null;
+        _responseData = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -55,7 +55,7 @@ public class RootAction : BaseRequestAction
             if (TryParseResponse(result.responseText))
             {
                 //_lastRequestSuccess = true;
-                GameContext.Instance.Root = _rootResponse;
+                GameContext.Instance.Root = _responseData;
                 Debug.Log("URL Configuration loaded successfully");
             }
             else
@@ -81,7 +81,7 @@ public class RootAction : BaseRequestAction
         Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
 
         //_lastRequestSuccess = false;
-        _rootResponse = null;
+        _responseData = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -101,7 +101,7 @@ public class RootAction : BaseRequestAction
                 if (TryParseResponse(result.responseText))
                 {
                     //_lastRequestSuccess = true;
-                    GameContext.Instance.Root = _rootResponse;
+                    GameContext.Instance.Root = _responseData;
                     Debug.Log("URL Configuration loaded successfully");
                     return true;
                 }
@@ -167,22 +167,22 @@ public class RootAction : BaseRequestAction
 
         try
         {
-            _rootResponse = JsonConvert.DeserializeObject<RootResponse>(responseText);
+            _responseData = JsonConvert.DeserializeObject<RootResponse>(responseText);
 
-            if (_rootResponse == null)
+            if (_responseData == null)
             {
                 Debug.LogError("Deserialized URL configuration is null");
                 return false;
             }
 
             // 验证必要字段
-            if (string.IsNullOrEmpty(_rootResponse.version))
+            if (string.IsNullOrEmpty(_responseData.version))
             {
                 Debug.LogError("API version is missing in URL configuration");
                 return false;
             }
 
-            Debug.Log($"URL Configuration parsed successfully. API Version: {_rootResponse.version}");
+            Debug.Log($"URL Configuration parsed successfully. API Version: {_responseData.version}");
             return true;
         }
         catch (System.Exception ex)
