@@ -2,12 +2,15 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class WerewolfGame : MonoBehaviour
 {
     public RootAction _rootAction;
 
     public WerewolfGameStartAction _werewolfGameStartAction;
+
+    public WerewolfGameActorDetailsAction _werewolfGameActorDetailsAction;
 
     public string serverUrl = "http://192.168.192.54:8000/";
 
@@ -17,6 +20,7 @@ public class WerewolfGame : MonoBehaviour
     {
         Debug.Assert(_rootAction != null, "_bootAction is null");
         Debug.Assert(_werewolfGameStartAction != null, "_werewolfGameStartAction is null");
+        Debug.Assert(_werewolfGameActorDetailsAction != null, "_werewolfGameActorDetailsAction is null");
         Debug.Assert(_nextButton != null, "_nextButton is null");
 
         _nextButton.gameObject.SetActive(false);
@@ -47,7 +51,7 @@ public class WerewolfGame : MonoBehaviour
         //设置下
         _werewolfGameStartAction.Setup(
             WerewolfGameContext.Instance.StartUrl,
-            WerewolfGameContext.Instance.PlayerName,
+            WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName
         );
 
@@ -61,6 +65,24 @@ public class WerewolfGame : MonoBehaviour
 
         // 开界面，可以进行下一步
         _nextButton.gameObject.SetActive(true);
+
+
+        _werewolfGameActorDetailsAction.Setup(
+            WerewolfGameContext.Instance.ActorDetailsUrl,
+            WerewolfGameContext.Instance.UserName,
+            WerewolfGameContext.Instance.GameName,
+            new List<string> { "角色.1号玩家" }
+        );
+
+        // 发起查看角色请求
+        yield return _werewolfGameActorDetailsAction.Call();
+        if (_werewolfGameActorDetailsAction.Response == null)
+        {
+            Debug.LogError("Failed to get Werewolf game actor details.");
+            yield break;
+        }
+
+        Debug.Log("Werewolf game setup complete.");
     }
 
     private IEnumerator LoadNextScene()

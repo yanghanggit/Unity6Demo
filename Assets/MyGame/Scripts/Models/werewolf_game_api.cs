@@ -33,3 +33,17 @@ public class WerewolfGameStateResponse
 {
     public string message;
 }
+
+
+// @final
+// class WerewolfGameActorDetailsResponse(BaseModel):
+//     actor_entities_serialization: List[EntitySerialization]
+//     agent_short_term_memories: List[AgentChatHistory]
+
+[System.Serializable]
+public class WerewolfGameActorDetailsResponse
+{
+    public List<EntitySerialization> actor_entities_serialization;
+
+    public List<AgentShortTermMemory> agent_short_term_memories;
+}

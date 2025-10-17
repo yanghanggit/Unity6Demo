@@ -24,7 +24,7 @@ public partial class WerewolfGameContext
 
     private static readonly object lockObj = new object();
 
-    public readonly  string PlayerName = "Player1";
+    public readonly  string UserName = "Player1";
 
     public  readonly string GameName = "Game2";
 
@@ -58,6 +58,16 @@ public partial class WerewolfGameContext
         get
         {
             return _rootResponse.endpoints["werewolf_game_start"];
+        }
+    }
+
+
+    public string ActorDetailsUrl
+    {
+        get
+        {
+            var baseUrl = _rootResponse.endpoints["werewolf_game_actor_details"];
+            return $"{baseUrl}{UserName}/{GameName}/details";
         }
     }
 
