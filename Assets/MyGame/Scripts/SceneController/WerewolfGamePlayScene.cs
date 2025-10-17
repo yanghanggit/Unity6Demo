@@ -2,8 +2,6 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
-//using UnityEngine.SceneManagement;
-//using System;
 
 public class WerewolfGamePlayScene : MonoBehaviour
 {
@@ -27,21 +25,25 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public void OnClickTime()
     {
         Debug.Log("OnClickTime");
+        StartCoroutine(Time());
     }
 
     public void OnClickNight()
     {
         Debug.Log("OnClickNight");
+        StartCoroutine(Night());
     }
 
     public void OnClickDay()
     {
         Debug.Log("OnClickDay");
+        StartCoroutine(Day());
     }
 
     public void OnClickVote()
     {
         Debug.Log("OnClickVote");
+        StartCoroutine(Vote());
     }
 
 
@@ -56,7 +58,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             { { "user_input", "/kickoff" } }
         );
 
-
         // 发送请求
         yield return _werewolfGamePlayAction.Call();
         if (_werewolfGamePlayAction.ResponseData == null)
@@ -66,15 +67,100 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         // 显示结果
-        _mainText.text = "";
-        for (int i = 0; i < _werewolfGamePlayAction.ResponseData.client_messages.Count; i++)
+        UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
+    }
+
+    private IEnumerator Time()
+    {
+        _werewolfGamePlayAction.Setup(
+            WerewolfGameContext.Instance.GameplayUrl,
+            WerewolfGameContext.Instance.UserName,
+            WerewolfGameContext.Instance.GameName,
+            new Dictionary<string, string>
+            { { "user_input", "/time" } }
+        );
+
+        yield return _werewolfGamePlayAction.Call();
+        if (_werewolfGamePlayAction.ResponseData == null)
         {
-            var message = _werewolfGamePlayAction.ResponseData.client_messages[i];
+            Debug.LogError("WerewolfGamePlayAction ResponseData is null");
+            yield break;
+        }
+
+        UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
+    }
+
+    private IEnumerator Night()
+    {
+        _werewolfGamePlayAction.Setup(
+           WerewolfGameContext.Instance.GameplayUrl,
+           WerewolfGameContext.Instance.UserName,
+           WerewolfGameContext.Instance.GameName,
+           new Dictionary<string, string>
+           { { "user_input", "/night" } }
+       );
+
+        yield return _werewolfGamePlayAction.Call();
+        if (_werewolfGamePlayAction.ResponseData == null)
+        {
+            Debug.LogError("WerewolfGamePlayAction ResponseData is null");
+            yield break;
+        }
+
+        UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
+    }
+
+    private IEnumerator Day()
+    {
+        _werewolfGamePlayAction.Setup(
+            WerewolfGameContext.Instance.GameplayUrl,
+            WerewolfGameContext.Instance.UserName,
+            WerewolfGameContext.Instance.GameName,
+            new Dictionary<string, string>
+            { { "user_input", "/day" } }
+        );
+
+        yield return _werewolfGamePlayAction.Call();
+        if (_werewolfGamePlayAction.ResponseData == null)
+        {
+            Debug.LogError("WerewolfGamePlayAction ResponseData is null");
+            yield break;
+        }
+
+        UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
+    }
+
+    private IEnumerator Vote()
+    {
+        _werewolfGamePlayAction.Setup(
+            WerewolfGameContext.Instance.GameplayUrl,
+            WerewolfGameContext.Instance.UserName,
+            WerewolfGameContext.Instance.GameName,
+            new Dictionary<string, string>
+            { { "user_input", "/vote" } }
+        );
+
+        yield return _werewolfGamePlayAction.Call();
+        if (_werewolfGamePlayAction.ResponseData == null)
+        {
+            Debug.LogError("WerewolfGamePlayAction ResponseData is null");
+            yield break;
+        }
+
+        UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
+    }
+
+    private void UpdateMainTextByClientMessages(List<ClientMessage> messages)
+    {
+        _mainText.text = "";
+        for (int i = 0; i < messages.Count; i++)
+        {
+            var message = messages[i];
             Debug.Log($"Client Message {i}: " + JsonUtility.ToJson(message));
             _mainText.text += JsonUtility.ToJson(message) + "\n";
         }
 
-        var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(_werewolfGamePlayAction.ResponseData.client_messages);
+        var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(messages);
         _mainText.text = string.Join("\n", processedMessages);
     }
 }
