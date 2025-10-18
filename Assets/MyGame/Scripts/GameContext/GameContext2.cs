@@ -120,14 +120,14 @@ public partial class GameContext
         }
     }
 
-    public void ProcessClientMessages(List<ClientMessage> client_messages)
+    public void ProcessClientMessages(List<SessionMessage> client_messages)
     {
         AgentEventLogs.Clear();
         AgentEvents.Clear();
 
         for (int i = 0; i < client_messages.Count; i++)
         {
-            ClientMessage clientMessage = client_messages[i];
+            SessionMessage clientMessage = client_messages[i];
             UnityEngine.Debug.Log("clientMessage = " + JsonConvert.SerializeObject(clientMessage));
 
             switch (clientMessage.message_type)

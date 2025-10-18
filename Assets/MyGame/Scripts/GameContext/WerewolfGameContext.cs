@@ -119,13 +119,13 @@ public partial class WerewolfGameContext
     }
 
 
-    public List<string> ConvertClientMessagesToText(List<ClientMessage> clientMessages)
+    public List<string> ConvertClientMessagesToText(List<SessionMessage> clientMessages)
     {
         List<string> processedMessages = new List<string>();
 
         for (int i = 0; i < clientMessages.Count; i++)
         {
-            ClientMessage clientMessage = clientMessages[i];
+            SessionMessage clientMessage = clientMessages[i];
             UnityEngine.Debug.Log("clientMessage = " + JsonConvert.SerializeObject(clientMessage));
 
             switch (clientMessage.message_type)

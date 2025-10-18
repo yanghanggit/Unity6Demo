@@ -150,7 +150,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
     }
 
-    private void UpdateMainTextByClientMessages(List<ClientMessage> messages)
+    private void UpdateMainTextByClientMessages(List<SessionMessage> messages)
     {
         _mainText.text = "";
         for (int i = 0; i < messages.Count; i++)

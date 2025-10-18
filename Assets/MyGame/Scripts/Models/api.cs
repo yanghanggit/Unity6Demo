@@ -83,7 +83,7 @@ public class HomeGamePlayRequest
 [System.Serializable]
 public class HomeGamePlayResponse
 {
-    public List<ClientMessage> client_messages;
+    public List<SessionMessage> client_messages;
 }
 
 /**
@@ -143,7 +143,7 @@ public class DungeonGamePlayRequest
 [System.Serializable]
 public class DungeonGamePlayResponse
 {
-    public List<ClientMessage> client_messages;
+    public List<SessionMessage> client_messages;
 }
 
 /** * 

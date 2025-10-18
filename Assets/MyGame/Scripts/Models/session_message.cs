@@ -13,7 +13,7 @@ public enum MessageType
 /// 客户端消息类
 /// </summary>
 [System.Serializable]
-public sealed class ClientMessage
+public sealed class SessionMessage
 {
     public int message_type = (int)MessageType.NONE;
     public Dictionary<string, object> data = new Dictionary<string, object>();

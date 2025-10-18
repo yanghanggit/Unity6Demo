@@ -25,7 +25,7 @@ public class WerewolfGamePlayRequest
 [System.Serializable]
 public class WerewolfGamePlayResponse
 {
-    public List<ClientMessage> client_messages;
+    public List<SessionMessage> client_messages;
 }
 
 [System.Serializable]
