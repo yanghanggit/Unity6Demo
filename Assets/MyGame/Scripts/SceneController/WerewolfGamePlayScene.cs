@@ -52,17 +52,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator KickOff()
     {
-        // 设置请求参数
-        _werewolfGamePlayAction.Setup(
-            WerewolfGameContext.Instance.GameplayUrl,
+        // 发送请求
+        yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
             new Dictionary<string, string>
-            { { "user_input", "/kickoff" } }
-        );
+            { { "user_input", "/kickoff" } });
 
-        // 发送请求
-        yield return _werewolfGamePlayAction.Call();
         if (_werewolfGamePlayAction.ResponseData == null)
         {
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
@@ -93,15 +89,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Time()
     {
-        _werewolfGamePlayAction.Setup(
-            WerewolfGameContext.Instance.GameplayUrl,
+        //
+        yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
             new Dictionary<string, string>
-            { { "user_input", "/time" } }
-        );
+            { { "user_input", "/time" } });
 
-        yield return _werewolfGamePlayAction.Call();
         if (_werewolfGamePlayAction.ResponseData == null)
         {
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
@@ -132,15 +126,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Night()
     {
-        _werewolfGamePlayAction.Setup(
-           WerewolfGameContext.Instance.GameplayUrl,
+        // 
+        yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
            WerewolfGameContext.Instance.UserName,
            WerewolfGameContext.Instance.GameName,
            new Dictionary<string, string>
-           { { "user_input", "/night" } }
-       );
+           { { "user_input", "/night" } });
 
-        yield return _werewolfGamePlayAction.Call();
         if (_werewolfGamePlayAction.ResponseData == null)
         {
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
@@ -171,15 +163,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Day()
     {
-        _werewolfGamePlayAction.Setup(
-            WerewolfGameContext.Instance.GameplayUrl,
+        // 
+        yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
             new Dictionary<string, string>
-            { { "user_input", "/day" } }
-        );
+            { { "user_input", "/day" } });
 
-        yield return _werewolfGamePlayAction.Call();
         if (_werewolfGamePlayAction.ResponseData == null)
         {
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
@@ -210,15 +200,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Vote()
     {
-        _werewolfGamePlayAction.Setup(
-            WerewolfGameContext.Instance.GameplayUrl,
+        // 
+        yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
             new Dictionary<string, string>
-            { { "user_input", "/vote" } }
-        );
+            { { "user_input", "/vote" } });
 
-        yield return _werewolfGamePlayAction.Call();
         if (_werewolfGamePlayAction.ResponseData == null)
         {
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");

@@ -140,8 +140,10 @@ public class WerewolfGameStateAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call()
+    public IEnumerator Call(string url, string userName, string gameName)
     {
+        Setup(url, userName, gameName);
+        
         if (useAsyncVersion)
         {
             // 使用 async 版本
@@ -185,9 +187,7 @@ public class WerewolfGameStateAction : BaseRequestAction
                 return false;
             }
 
-            // 设置游戏上下文
-            //GameContext.Instance.Mapping = response.mapping;
-
+            // 赋值响应数据
             _responseData = response;
             return true;
         }

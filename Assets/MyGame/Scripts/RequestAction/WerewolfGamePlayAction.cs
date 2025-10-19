@@ -155,8 +155,10 @@ public class WerewolfGamePlayAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call()
+    public IEnumerator Call(string url, string userName, string gameName, Dictionary<string, string> data)
     {
+        Setup(url, userName, gameName, data);
+
         if (useAsyncVersion)
         {
             // 使用 async 版本

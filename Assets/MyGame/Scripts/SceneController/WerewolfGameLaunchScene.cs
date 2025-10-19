@@ -71,15 +71,12 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 
     private IEnumerator StartWerewolfGame()
     {
-        //设置下
-        _werewolfGameStartAction.Setup(
+        // 发起开始游戏请求
+        yield return _werewolfGameStartAction.Call(
             WerewolfGameContext.Instance.StartUrl,
             WerewolfGameContext.Instance.UserName,
-            WerewolfGameContext.Instance.GameName
-        );
+            WerewolfGameContext.Instance.GameName);
 
-        // 发起开始游戏请求
-        yield return _werewolfGameStartAction.Call();
         if (_werewolfGameStartAction.ResponseData == null)
         {
             Debug.LogError("Failed to start Werewolf game.");
@@ -89,15 +86,10 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 
     private IEnumerator LoadGameState()
     {
-        // 设置游戏状态请求
-        _werewolfGameStateAction.Setup(
-            WerewolfGameContext.Instance.StateUrl,
-            WerewolfGameContext.Instance.UserName,
-            WerewolfGameContext.Instance.GameName
-        );
-
         // 发起游戏状态请求
-        yield return _werewolfGameStateAction.Call();
+        yield return _werewolfGameStateAction.Call(WerewolfGameContext.Instance.StateUrl,
+            WerewolfGameContext.Instance.UserName,
+            WerewolfGameContext.Instance.GameName);
         if (_werewolfGameStateAction.ResponseData == null)
         {
             Debug.LogError("Failed to get Werewolf game state.");
@@ -142,16 +134,11 @@ public class WerewolfGameLaunchScene : MonoBehaviour
             break;
         }
 
-        // 设置查看角色请求
-        _werewolfGameActorDetailsAction.Setup(
-            WerewolfGameContext.Instance.ActorDetailsUrl,
+        // 发起查看角色请求
+        yield return _werewolfGameActorDetailsAction.Call( WerewolfGameContext.Instance.ActorDetailsUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
-            uniqueValue
-        );
-
-        // 发起查看角色请求
-        yield return _werewolfGameActorDetailsAction.Call();
+            uniqueValue);
         if (_werewolfGameActorDetailsAction.ResponseData == null)
         {
             Debug.LogError("Failed to get Werewolf game actor details.");
