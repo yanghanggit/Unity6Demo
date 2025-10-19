@@ -152,51 +152,51 @@ public partial class GameContext
         UnityEngine.Debug.Log("body = " + dataToken.ToString());
 
         var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
-        switch ((AgentEventHead)eventHead)
+        switch ((EventHead)eventHead)
         {
-            case AgentEventHead.NONE:
+            case EventHead.NONE:
                 var message = dataToken["message"]?.ToString() ?? "No message";
                 UnityEngine.Debug.Log("NONE: " + message);
                 AgentEventLogs.Add(message);
                 AgentEvents.Add(dataToken.ToObject<AgentEvent>());
                 break;
 
-            case AgentEventHead.SPEAK_EVENT:
+            case EventHead.SPEAK_EVENT:
                 SpeakEvent speakEvent = dataToken.ToObject<SpeakEvent>();
                 UnityEngine.Debug.Log($"SPEAK_EVENT: {speakEvent.actor} => {speakEvent.target}: {speakEvent.content}");
                 AgentEventLogs.Add($"{speakEvent.actor} : @{speakEvent.target} {speakEvent.content}");
                 AgentEvents.Add(speakEvent);
                 break;
 
-            case AgentEventHead.WHISPER_EVENT:
+            case EventHead.WHISPER_EVENT:
                 WhisperEvent whisperEvent = dataToken.ToObject<WhisperEvent>();
                 UnityEngine.Debug.Log($"WHISPER_EVENT: {whisperEvent.actor} => {whisperEvent.target}: {whisperEvent.content}");
                 AgentEventLogs.Add($"{whisperEvent.actor} : ......{whisperEvent.target} {whisperEvent.content}");
                 AgentEvents.Add(whisperEvent);
                 break;
 
-            case AgentEventHead.ANNOUNCE_EVENT:
+            case EventHead.ANNOUNCE_EVENT:
                 AnnounceEvent announceEvent = dataToken.ToObject<AnnounceEvent>();
                 UnityEngine.Debug.Log($"ANNOUNCE_EVENT: {announceEvent.actor} from {announceEvent.stage}: {announceEvent.content}");
                 AgentEventLogs.Add($"{announceEvent.actor}({announceEvent.stage}) : !!{announceEvent.content}");
                 AgentEvents.Add(announceEvent);
                 break;
 
-            case AgentEventHead.MIND_EVENT:
+            case EventHead.MIND_EVENT:
                 MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
                 UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
                 AgentEventLogs.Add($"{mindVoiceEvent.actor} % {mindVoiceEvent.content}");
                 AgentEvents.Add(mindVoiceEvent);
                 break;
 
-            case AgentEventHead.COMBAT_KICK_OFF_EVENT:
+            case EventHead.COMBAT_KICK_OFF_EVENT:
                 CombatKickOffEvent combatKickOffEvent = dataToken.ToObject<CombatKickOffEvent>();
                 UnityEngine.Debug.Log($"COMBAT_KICK_OFF_EVENT: {combatKickOffEvent.actor} => {combatKickOffEvent.description}");
                 AgentEventLogs.Add($"{combatKickOffEvent.actor} => {combatKickOffEvent.description}");
                 AgentEvents.Add(combatKickOffEvent);
                 break;
 
-            case AgentEventHead.COMBAT_COMPLETE_EVENT:
+            case EventHead.COMBAT_COMPLETE_EVENT:
                 CombatCompleteEvent combatCompleteEvent = dataToken.ToObject<CombatCompleteEvent>();
                 UnityEngine.Debug.Log($"COMBAT_COMPLETE_EVENT: {combatCompleteEvent.actor} => {combatCompleteEvent.summary}");
                 AgentEventLogs.Add($"{combatCompleteEvent.actor} => {combatCompleteEvent.summary}");

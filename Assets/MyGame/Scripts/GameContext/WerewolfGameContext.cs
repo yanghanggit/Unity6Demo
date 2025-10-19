@@ -190,19 +190,19 @@ public partial class WerewolfGameContext
         UnityEngine.Debug.Log("body = " + dataToken.ToString());
 
         var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
-        switch ((AgentEventHead)eventHead)
+        switch ((EventHead)eventHead)
         {
-            case AgentEventHead.NONE:
+            case EventHead.NONE:
                 var message = dataToken["message"]?.ToString() ?? "No message";
                 UnityEngine.Debug.Log("NONE: " + message);
                 return message;
 
-            case AgentEventHead.MIND_EVENT:
+            case EventHead.MIND_EVENT:
                 MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
                 UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
                 return $"{mindVoiceEvent.actor}...: {mindVoiceEvent.content}";
 
-            case AgentEventHead.DISCUSSION_EVENT:
+            case EventHead.DISCUSSION_EVENT:
                 DiscussionEvent discussionEvent = dataToken.ToObject<DiscussionEvent>();
                 UnityEngine.Debug.Log($"DISCUSSION_EVENT: {discussionEvent.actor}: {discussionEvent.content}");
                 return $"{discussionEvent.actor} says: {discussionEvent.content}";

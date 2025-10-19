@@ -6,7 +6,8 @@ using System.Collections.Generic;
 public enum MessageType
 {
     NONE = 0,
-    AGENT_EVENT = 1
+    AGENT_EVENT = 1,
+    GAME = 2,
 }
 
 /// <summary>

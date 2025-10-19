@@ -497,14 +497,14 @@ public class CampScene : MonoBehaviour
         Dictionary<string, List<string>> speakerLastDialogue = new Dictionary<string, List<string>>();
         for (int i = 0; i < GameContext.Instance.AgentEvents.Count; i++)
         {
-            switch ((AgentEventHead)GameContext.Instance.AgentEvents[i].head)
+            switch ((EventHead)GameContext.Instance.AgentEvents[i].head)
             {
-                case AgentEventHead.NONE:
+                case EventHead.NONE:
                     var message = GameContext.Instance.AgentEvents[i].message;
                     Debug.Log("NONE: " + message);
                     break;
 
-                case AgentEventHead.SPEAK_EVENT:
+                case EventHead.SPEAK_EVENT:
                     SpeakEvent speakEvent = (SpeakEvent)GameContext.Instance.AgentEvents[i];
                     Debug.Log($"SPEAK_EVENT: {speakEvent.actor} => {speakEvent.target}: {speakEvent.content}");
                     if (!speakerLastDialogue.ContainsKey(speakEvent.actor))
@@ -514,7 +514,7 @@ public class CampScene : MonoBehaviour
                     speakerLastDialogue[speakEvent.actor].Add($"(speak) @{speakEvent.target} {speakEvent.content}");
                     break;
 
-                case AgentEventHead.WHISPER_EVENT:
+                case EventHead.WHISPER_EVENT:
                     WhisperEvent whisperEvent = (WhisperEvent)GameContext.Instance.AgentEvents[i];
                     Debug.Log($"WHISPER_EVENT: {whisperEvent.actor} => {whisperEvent.target}: {whisperEvent.content}");
                     if (!speakerLastDialogue.ContainsKey(whisperEvent.actor))
@@ -524,7 +524,7 @@ public class CampScene : MonoBehaviour
                     speakerLastDialogue[whisperEvent.actor].Add($"(whisper) @{whisperEvent.target} {whisperEvent.content}");
                     break;
 
-                case AgentEventHead.ANNOUNCE_EVENT:
+                case EventHead.ANNOUNCE_EVENT:
                     AnnounceEvent announceEvent = (AnnounceEvent)GameContext.Instance.AgentEvents[i];
                     Debug.Log($"ANNOUNCE_EVENT: {announceEvent.actor} from {announceEvent.stage}: {announceEvent.content}");
                     if (!speakerLastDialogue.ContainsKey(announceEvent.actor))
@@ -534,7 +534,7 @@ public class CampScene : MonoBehaviour
                     speakerLastDialogue[announceEvent.actor].Add($"(announce) [{announceEvent.stage}] {announceEvent.content}");
                     break;
 
-                case AgentEventHead.MIND_EVENT:
+                case EventHead.MIND_EVENT:
                     MindEvent mindVoiceEvent = (MindEvent)GameContext.Instance.AgentEvents[i];
                     Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
                     if (!speakerLastDialogue.ContainsKey(mindVoiceEvent.actor))

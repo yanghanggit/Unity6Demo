@@ -1,7 +1,7 @@
 /// <summary>
 /// 代理事件头部枚举
 /// </summary>
-public enum AgentEventHead
+public enum EventHead
 {
     NONE = 0,
     SPEAK_EVENT = 1,
@@ -21,7 +21,7 @@ public enum AgentEventHead
 [System.Serializable]
 public class AgentEvent
 {
-    public int head = (int)AgentEventHead.NONE;
+    public int head = (int)EventHead.NONE;
     public string message = "";
 }
 
