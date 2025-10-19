@@ -25,7 +25,7 @@ public class WerewolfGamePlayRequest
 [System.Serializable]
 public class WerewolfGamePlayResponse
 {
-    public List<SessionMessage> client_messages;
+    public List<SessionMessage> session_messages;
 }
 
 [System.Serializable]
@@ -40,6 +40,4 @@ public class WerewolfGameStateResponse
 public class WerewolfGameActorDetailsResponse
 {
     public List<EntitySerialization> actor_entities_serialization;
-
-    //public List<AgentChatHistory> agent_short_term_memories;
 }

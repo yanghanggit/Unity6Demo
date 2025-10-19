@@ -16,29 +16,40 @@ public class SessionMessagesAction : BaseRequestAction
 
     public SessionMessageResponse ResponseData => _responseData;
 
-
-
     private string _url;
 
     private string _userName;
 
     private string _gameName;
 
-    private int _lastSequenceId;
+    private int _requestLastSequenceId;
+
+    public int ResponseLastSequenceId
+    {
+        get
+        {
+            if (_responseData != null && _responseData.session_messages != null && _responseData.session_messages.Count > 0)
+            {
+                var lastMessage = _responseData.session_messages[^1];
+                return lastMessage.sequence_id;
+            }
+            return -1;
+        }
+    }
 
 
     #region 协程版本（兼容现有代码）
 
-    public void Setup(string url, string userName, string gameName, int lastSequenceId)
+    public void Setup(string url, string userName, string gameName, int requestLastSequenceId)
     {
         _url = url;
         _userName = userName;
         _gameName = gameName;
-        _lastSequenceId = lastSequenceId;
+        _requestLastSequenceId = requestLastSequenceId;
         _responseData = null;
 
-        Debug.Log($"WerewolfGameActorDetailsAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, LastSequenceId: {_lastSequenceId}");
-        Debug.Log($"Full URL: {FullUrl}");
+        Debug.Log($"WerewolfGameActorDetailsAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, LastSequenceId: {_requestLastSequenceId}");
+        Debug.Log($"Full URL: {ConstructedUrl}");
     }
 
     private string BuildUrl(int lastSequenceId)
@@ -50,7 +61,7 @@ public class SessionMessagesAction : BaseRequestAction
         return BuildUrlWithQueryParams(_url, parameters);
     }
 
-    public string FullUrl => BuildUrl(_lastSequenceId);
+    public string ConstructedUrl => BuildUrl(_requestLastSequenceId);
 
     /// <summary>
     /// 查看家园（协程版本）
@@ -58,8 +69,6 @@ public class SessionMessagesAction : BaseRequestAction
     public IEnumerator CallCoroutine()
     {
         Debug.Log("View home request started");
-
-        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -72,7 +81,7 @@ public class SessionMessagesAction : BaseRequestAction
         RequestResult result = null;
 
         // 发送请求
-        yield return GetRequestCoroutine(FullUrl, (response) =>
+        yield return GetRequestCoroutine(ConstructedUrl, (response) =>
         {
             result = response;
             requestCompleted = true;
@@ -86,7 +95,6 @@ public class SessionMessagesAction : BaseRequestAction
         {
             if (TryParseViewHomeResponse(result.responseText))
             {
-                //_lastRequestSuccess = true;
                 Debug.Log("View home successful");
             }
             else
@@ -123,14 +131,13 @@ public class SessionMessagesAction : BaseRequestAction
         try
         {
             // 发送请求
-            var result = await GetRequestAsync(FullUrl);
+            var result = await GetRequestAsync(ConstructedUrl);
 
             // 处理结果
             if (result.isSuccess)
             {
                 if (TryParseViewHomeResponse(result.responseText))
                 {
-                    //_lastRequestSuccess = true;
                     Debug.Log("View home successful");
                     return true;
                 }

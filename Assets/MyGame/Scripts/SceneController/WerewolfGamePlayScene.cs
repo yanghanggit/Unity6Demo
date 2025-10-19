@@ -84,11 +84,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        if (_sessionMessagesAction.ResponseData.session_messages.Count > 0)
-        {
-            var lastMessage = _sessionMessagesAction.ResponseData.session_messages[^1];
-            WerewolfGameContext.Instance.LastSequenceId = lastMessage.sequence_id;
-        }
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
 
         // 显示结果
         UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
@@ -111,7 +108,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        //UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
         // 获取会话消息
         _sessionMessagesAction.Setup(
             WerewolfGameContext.Instance.SessionMessagesUrl,
@@ -127,11 +123,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        if (_sessionMessagesAction.ResponseData.session_messages.Count > 0)
-        {
-            var lastMessage = _sessionMessagesAction.ResponseData.session_messages[^1];
-            WerewolfGameContext.Instance.LastSequenceId = lastMessage.sequence_id;
-        }
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
 
         // 显示结果
         UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
@@ -154,7 +147,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        //UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
         // 获取会话消息
         _sessionMessagesAction.Setup(
             WerewolfGameContext.Instance.SessionMessagesUrl,
@@ -170,11 +162,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        if (_sessionMessagesAction.ResponseData.session_messages.Count > 0)
-        {
-            var lastMessage = _sessionMessagesAction.ResponseData.session_messages[^1];
-            WerewolfGameContext.Instance.LastSequenceId = lastMessage.sequence_id;
-        }
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
 
         // 显示结果
         UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
@@ -197,7 +186,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        //UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
         // 获取会话消息
         _sessionMessagesAction.Setup(
             WerewolfGameContext.Instance.SessionMessagesUrl,
@@ -213,11 +201,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        if (_sessionMessagesAction.ResponseData.session_messages.Count > 0)
-        {
-            var lastMessage = _sessionMessagesAction.ResponseData.session_messages[^1];
-            WerewolfGameContext.Instance.LastSequenceId = lastMessage.sequence_id;
-        }
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
 
         // 显示结果
         UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
@@ -240,7 +225,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        //UpdateMainTextByClientMessages(_werewolfGamePlayAction.ResponseData.client_messages);
         // 获取会话消息
         _sessionMessagesAction.Setup(
             WerewolfGameContext.Instance.SessionMessagesUrl,
@@ -256,11 +240,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        if (_sessionMessagesAction.ResponseData.session_messages.Count > 0)
-        {
-            var lastMessage = _sessionMessagesAction.ResponseData.session_messages[^1];
-            WerewolfGameContext.Instance.LastSequenceId = lastMessage.sequence_id;
-        }
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
 
         // 显示结果
         UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
@@ -278,5 +259,23 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(messages);
         _mainText.text = string.Join("\n", processedMessages);
+    }
+
+    private void UpdateLastSequenceIdFromResponse()
+    {
+        if (_sessionMessagesAction.ResponseData == null)
+        {
+            Debug.LogWarning("SessionMessagesAction ResponseData is null");
+            Debug.Assert(false, "SessionMessagesAction ResponseData is null");
+            return;
+        }
+
+        if (_sessionMessagesAction.ResponseLastSequenceId < 0)
+        {
+            Debug.LogWarning("Invalid last sequence ID");
+            return;
+        }
+
+        WerewolfGameContext.Instance.LastSequenceId = _sessionMessagesAction.ResponseLastSequenceId;
     }
 }
