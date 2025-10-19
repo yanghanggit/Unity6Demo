@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -27,7 +28,20 @@ public partial class WerewolfGameContext
 
     private static readonly object lockObj = new object();
 
-    public readonly string UserName = "Player1";
+    private string _userName = string.Empty;
+
+    public string UserName
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_userName))
+            {
+                _userName = $"player-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}";
+                UnityEngine.Debug.Log($"UserName not set, generated default UserName: {_userName}");
+            }
+            return _userName;
+        }
+    }
 
     public readonly string GameName = "Game2";
 
@@ -40,6 +54,23 @@ public partial class WerewolfGameContext
     private int _gameTime = 0;
 
     private List<EntitySerialization> _actorEntities = new List<EntitySerialization>();
+
+
+    // lastSequenceId
+
+    private int _lastSequenceId = 0;
+    public int LastSequenceId
+    {
+        get
+        {
+            return _lastSequenceId;
+        }
+        set
+        {
+            _lastSequenceId = value;
+        }
+    }
+
 
     public void UpdateGameState(int gameTime, List<string> actors, string stageName)
     {
@@ -115,6 +146,15 @@ public partial class WerewolfGameContext
         get
         {
             return _rootResponse.endpoints["werewolf_gameplay"];
+        }
+    }
+
+    public string SessionMessagesUrl
+    {
+        get
+        {
+            var baseUrl = _rootResponse.endpoints["session_messages"];
+            return $"{baseUrl}{UserName}/{GameName}/since";
         }
     }
 

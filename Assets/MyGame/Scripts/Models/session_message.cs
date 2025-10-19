@@ -17,4 +17,5 @@ public sealed class SessionMessage
 {
     public int message_type = (int)MessageType.NONE;
     public Dictionary<string, object> data = new Dictionary<string, object>();
+    public int sequence_id = 0;
 }

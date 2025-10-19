@@ -176,3 +176,9 @@ public class ActorDetailsResponse
 
     public List<AgentChatHistory> agent_short_term_memories;
 }
+
+[System.Serializable]
+public class SessionMessageResponse
+{
+    public List<SessionMessage> session_messages;
+}

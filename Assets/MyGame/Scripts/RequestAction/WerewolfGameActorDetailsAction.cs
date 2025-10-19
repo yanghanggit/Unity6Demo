@@ -54,7 +54,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
         }
 
         // 构建完整URL
-        string fullUrl = BuildActorUrl(_actors);
+        string fullUrl = BuildUrl(_actors);
 
         bool requestCompleted = false;
         RequestResult result = null;
@@ -109,7 +109,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
         try
         {
             // 构建完整URL
-            string fullUrl = BuildActorUrl(_actors);
+            string fullUrl = BuildUrl(_actors);
             Debug.Log($"View actor request URL: {fullUrl}");
 
             // 发送请求
@@ -181,7 +181,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
     /// <summary>
     /// 构建角色请求URL
     /// </summary>
-    private string BuildActorUrl(List<string> actors)
+    private string BuildUrl(List<string> actors)
     {
         var parameters = new List<KeyValuePair<string, string>>();
         foreach (var actor in actors)
