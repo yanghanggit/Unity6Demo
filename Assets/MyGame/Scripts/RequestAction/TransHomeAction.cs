@@ -11,9 +11,27 @@ public class TransHomeAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private bool _lastRequestSuccess = false;
+    // private bool _lastRequestSuccess = false;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    // public bool LastRequestSuccess => _lastRequestSuccess;
+
+    //DungeonTransHomeResponse
+
+    private string _url;
+    private string _userName;
+    private string _gameName;
+    private DungeonTransHomeResponse _responseData;
+    public DungeonTransHomeResponse ResponseData => _responseData;
+
+    public void Setup(string url, string userName, string gameName)
+    {
+        _url = url;
+        _userName = userName;
+        _gameName = gameName;
+        _responseData = null;
+
+        Debug.Log($"TransHomeAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+    }
 
     #region 协程版本（兼容现有代码）
 
@@ -24,7 +42,7 @@ public class TransHomeAction : BaseRequestAction
     {
         Debug.Log("Trans to home request started");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -36,8 +54,8 @@ public class TransHomeAction : BaseRequestAction
         // 创建请求数据
         var requestData = new DungeonTransHomeRequest
         {
-            user_name = GameContext.Instance.UserName,
-            game_name = GameContext.Instance.GameName
+            user_name = _userName,
+            game_name = _gameName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
@@ -45,7 +63,7 @@ public class TransHomeAction : BaseRequestAction
         RequestResult result = null;
 
         // 发送请求
-        yield return PostRequestCoroutine(GameContext.Instance.DungeonTransHomeUrl, jsonData, (response) =>
+        yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
             result = response;
             requestCompleted = true;
@@ -57,9 +75,9 @@ public class TransHomeAction : BaseRequestAction
         // 处理结果
         if (result != null && result.isSuccess)
         {
-            if (TryParseTransHomeResponse(result.responseText))
+            if (TryParseResponse(result.responseText))
             {
-                _lastRequestSuccess = true;
+                //_lastRequestSuccess = true;
                 Debug.Log("Trans to home successful");
             }
             else
@@ -84,7 +102,7 @@ public class TransHomeAction : BaseRequestAction
     {
         Debug.Log("Trans to home request async started");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -98,20 +116,20 @@ public class TransHomeAction : BaseRequestAction
             // 创建请求数据
             var requestData = new DungeonTransHomeRequest
             {
-                user_name = GameContext.Instance.UserName,
-                game_name = GameContext.Instance.GameName
+                user_name = _userName,
+                game_name = _gameName
             };
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            var result = await PostRequestAsync(GameContext.Instance.DungeonTransHomeUrl, jsonData);
+            var result = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
             if (result.isSuccess)
             {
-                if (TryParseTransHomeResponse(result.responseText))
+                if (TryParseResponse(result.responseText))
                 {
-                    _lastRequestSuccess = true;
+                    //_lastRequestSuccess = true;
                     Debug.Log("Trans to home successful");
                     return true;
                 }
@@ -140,8 +158,11 @@ public class TransHomeAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call()
+    public IEnumerator Call(string url, string user, string game)
     {
+        Setup(url, user, game);
+
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
@@ -167,7 +188,7 @@ public class TransHomeAction : BaseRequestAction
     /// <summary>
     /// 尝试解析转换到家园响应数据
     /// </summary>
-    private bool TryParseTransHomeResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
@@ -186,7 +207,7 @@ public class TransHomeAction : BaseRequestAction
             }
 
             Debug.Log($"TransHomeAction.message = {response.message}");
-
+            _responseData = response;
             return true;
         }
         catch (System.Exception ex)

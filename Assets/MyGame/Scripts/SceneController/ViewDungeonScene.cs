@@ -39,8 +39,9 @@ public class ViewDungeonScene : MonoBehaviour
         {
             yield break;
         }
-        yield return _transDungeonAction.Call();
-        if (!_transDungeonAction.LastRequestSuccess)
+        yield return _transDungeonAction.Call(GameContext.Instance.HomeTransDungeonUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
+        //if (!_transDungeonAction.LastRequestSuccess)
+        if (_transDungeonAction.ResponseData == null)
         {
             yield break;
         }

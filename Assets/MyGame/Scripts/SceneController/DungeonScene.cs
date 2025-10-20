@@ -200,8 +200,9 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteBackHome()
     {
         Debug.Log("ExecuteBackHome");
-        yield return _transHomeAction.Call();
-        if (!_transHomeAction.LastRequestSuccess)
+        yield return _transHomeAction.Call(GameContext.Instance.DungeonTransHomeUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
+        //if (!_transHomeAction.LastRequestSuccess)
+        if (_transHomeAction.ResponseData == null)
         {
             Debug.LogError("TransHomeAction request failed");
             yield break;
