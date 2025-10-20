@@ -11,9 +11,24 @@ public class LogoutAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private bool _lastRequestSuccess = false;
+    private string _url;
+    private string _userName;
+    private string _gameName;
+    private RequestResult _requestResult = null;
+    public RequestResult ReqResult => _requestResult;
+    private LogoutResponse _responseData = null;
+    public LogoutResponse ResponseData => _responseData;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    private void Setup(string url, string userName, string gameName)
+    {
+        _url = url;
+        _userName = userName;
+        _gameName = gameName;
+        _requestResult = null;
+        _responseData = null;
+
+        Debug.Log($"LogoutAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+    }
 
     #region 协程版本（兼容现有代码）
 
@@ -24,7 +39,7 @@ public class LogoutAction : BaseRequestAction
     {
         Debug.Log("Logout request started");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -36,18 +51,18 @@ public class LogoutAction : BaseRequestAction
         // 创建请求数据
         var requestData = new LogoutRequest
         {
-            user_name = GameContext.Instance.UserName,
-            game_name = GameContext.Instance.GameName
+            user_name = _userName,
+            game_name = _gameName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-        RequestResult result = null;
+        //RequestResult result = null;
 
         // 发送请求
-        yield return PostRequestCoroutine(GameContext.Instance.LogoutUrl, jsonData, (response) =>
+        yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -55,11 +70,11 @@ public class LogoutAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseLogoutResponse(result.responseText))
+            if (TryParseLogoutResponse(_requestResult.responseText))
             {
-                _lastRequestSuccess = true;
+                //_lastRequestSuccess = true;
                 Debug.Log("Logout successful");
             }
             else
@@ -69,7 +84,7 @@ public class LogoutAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"Logout failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Logout failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -84,8 +99,6 @@ public class LogoutAction : BaseRequestAction
     {
         Debug.Log("Logout request async started");
 
-        _lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -98,20 +111,20 @@ public class LogoutAction : BaseRequestAction
             // 创建请求数据
             var requestData = new LogoutRequest
             {
-                user_name = GameContext.Instance.UserName,
-                game_name = GameContext.Instance.GameName
+                user_name = _userName,
+                game_name = _gameName
             };
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            var result = await PostRequestAsync(GameContext.Instance.LogoutUrl, jsonData);
+            _requestResult = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseLogoutResponse(result.responseText))
+                if (TryParseLogoutResponse(_requestResult.responseText))
                 {
-                    _lastRequestSuccess = true;
+                    //_lastRequestSuccess = true;
                     Debug.Log("Logout successful");
                     return true;
                 }
@@ -122,7 +135,7 @@ public class LogoutAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"Logout failed: {result.error}");
+                Debug.LogError($"Logout failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -140,8 +153,11 @@ public class LogoutAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call()
+    public IEnumerator Call(string url, string user, string game)
     {
+        Setup(url, user, game);
+
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
@@ -178,7 +194,6 @@ public class LogoutAction : BaseRequestAction
         try
         {
             var response = JsonConvert.DeserializeObject<LogoutResponse>(responseText);
-
             if (response == null)
             {
                 Debug.LogError("LogoutAction response is null");
@@ -186,12 +201,9 @@ public class LogoutAction : BaseRequestAction
             }
 
             Debug.Log($"LogoutAction.message = {response.message}");
-
-            // 清除登录信息
-            GameContext.Instance.UserName = "";
-            GameContext.Instance.GameName = "";
-            GameContext.Instance.ActorName = "";
-
+            
+            // 
+            _responseData = response;
             return true;
         }
         catch (System.Exception ex)

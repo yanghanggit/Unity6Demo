@@ -85,13 +85,17 @@ public class MainScene : MonoBehaviour
 
     IEnumerator ReturnToLoginScene()
     {
-        yield return _logoutAction.Call();
+        yield return _logoutAction.Call(GameContext.Instance.LogoutUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
 
-        if (!_logoutAction.LastRequestSuccess)
+        if (_logoutAction.ReqResult == null || !_logoutAction.ReqResult.isSuccess)
         {
             Debug.LogError("LogoutAction request failed");
             yield break;
         }
+
+        GameContext.Instance.UserName = "";
+        GameContext.Instance.GameName = "";
+        GameContext.Instance.ActorName = "";
 
         SceneManager.LoadScene(_preScene);
     }
