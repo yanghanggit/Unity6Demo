@@ -96,23 +96,36 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteDungeonCombatKickOff()
     {
-        yield return _dungeonGamePlayAction.Call("dungeon_combat_kick_off");
-        if (!_dungeonGamePlayAction.LastRequestSuccess)
+        yield return _dungeonGamePlayAction.Call(
+            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "dungeon_combat_kick_off");
+        if (_dungeonGamePlayAction.ResponseData == null)
         {
             yield break;
         }
+
+        GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
 
         yield return ExecuteViewDungeon();
     }
 
     private IEnumerator ExecuteDrawCards()
     {
-        yield return _dungeonGamePlayAction.Call("draw_cards");
-        if (!_dungeonGamePlayAction.LastRequestSuccess)
+        yield return _dungeonGamePlayAction.Call(
+            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+
+            "draw_cards");
+        if (_dungeonGamePlayAction.ResponseData == null)
         {
             Debug.LogError("ExecuteDrawCards request failed");
             yield break;
         }
+
+        GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
 
         yield return _viewActorAction.Call(
             GameContext.Instance.ActorDetailsUrl,
@@ -132,12 +145,19 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecutePlayCards()
     {
-        yield return _dungeonGamePlayAction.Call("play_cards");
-        if (!_dungeonGamePlayAction.LastRequestSuccess)
+        yield return _dungeonGamePlayAction.Call(
+            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "play_cards");
+
+        if (_dungeonGamePlayAction.ResponseData == null)
         {
             Debug.LogError("ExecutePlayCards request failed");
             yield break;
         }
+
+        GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
 
         Debug.Log("ExecutePlayCards request success");
         UpdateTextFromAgentLogs();
@@ -186,10 +206,14 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteAdvanceNextDungeon()
     {
-        yield return _dungeonGamePlayAction.Call("advance_next_dungeon");
-        if (!_dungeonGamePlayAction.LastRequestSuccess)
+        yield return _dungeonGamePlayAction.Call(
+            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "advance_next_dungeon");
+        if (_dungeonGamePlayAction.ResponseData == null)
         {
-            _mainText.text = _dungeonGamePlayAction.LastRequestResponseText;
+            _mainText.text = _dungeonGamePlayAction.ReqResult.responseText;
             yield break;
         }
 

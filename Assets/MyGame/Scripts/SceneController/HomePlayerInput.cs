@@ -91,24 +91,37 @@ public class HomePlayerInput : MonoBehaviour
         player_input_data["target"] = target;
         player_input_data["content"] = content;
 
-        yield return _homeGamePlayAction.Call("/speak", player_input_data);
-        if (!_homeGamePlayAction.LastRequestSuccess)
+        yield return _homeGamePlayAction.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+
+            "/speak", player_input_data);
+        if (_homeGamePlayAction.ResponseData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
+
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
 
         UpdateTextFromAgentLogs();
     }
 
     private IEnumerator ExecuteHomeGameplayAdvancing()
     {
-        yield return _homeGamePlayAction.Call("/advancing");
-        if (!_homeGamePlayAction.LastRequestSuccess)
+        yield return _homeGamePlayAction.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "/advancing");
+        if (_homeGamePlayAction.ResponseData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
+
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
         //
         UpdateTextFromAgentLogs();
     }

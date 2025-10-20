@@ -12,26 +12,37 @@ public class HomeGamePlayAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private bool _lastRequestSuccess = false;
+    private string _url;
+    private string _userName;
+    private string _gameName;
+    private string _userInputTag;
+    private Dictionary<string, string> _data;
+    private RequestResult _requestResult = null;
+    public RequestResult ReqResult => _requestResult;
+    private HomeGamePlayResponse _responseData = null;
+    public HomeGamePlayResponse ResponseData => _responseData;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    public void Setup(string url, string userName, string gameName, string userInputTag, Dictionary<string, string> data = null)
+    {
+        _url = url;
+        _userName = userName;
+        _gameName = gameName;
+        _userInputTag = userInputTag;
+        _data = data ?? new Dictionary<string, string>();
+        _requestResult = null;
+        _responseData = null;
+
+        Debug.Log($"HomeGamePlayAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, UserInputTag: {_userInputTag}");
+        Debug.Log($"HomeGamePlayAction initialized with Data: {JsonConvert.SerializeObject(_data)}");
+    }
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
     /// 家园游戏玩法（协程版本）
     /// </summary>
-    public IEnumerator CallCoroutine(string userInputTag, Dictionary<string, string> data = null)
+    public IEnumerator CallCoroutine()
     {
-        Debug.Log($"Home gameplay request for tag: {userInputTag}");
-
-        if (data == null)
-        {
-            data = new Dictionary<string, string>();
-        }
-
-        _lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -42,19 +53,19 @@ public class HomeGamePlayAction : BaseRequestAction
         // 创建请求数据
         var requestData = new HomeGamePlayRequest
         {
-            user_name = GameContext.Instance.UserName,
-            game_name = GameContext.Instance.GameName,
-            user_input = new HomeGamePlayUserInput { tag = userInputTag, data = data }
+            user_name = _userName,
+            game_name = _gameName,
+            user_input = new HomeGamePlayUserInput { tag = _userInputTag, data = _data }
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-        RequestResult result = null;
+
 
         // 发送请求
-        yield return PostRequestCoroutine(GameContext.Instance.HomeGameplayUrl, jsonData, (response) =>
+        yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -62,11 +73,11 @@ public class HomeGamePlayAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseHomeGamePlayResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
-                _lastRequestSuccess = true;
+                //_lastRequestSuccess = true;
                 Debug.Log("Home gameplay successful");
             }
             else
@@ -76,7 +87,7 @@ public class HomeGamePlayAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"Home gameplay failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Home gameplay failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -87,17 +98,8 @@ public class HomeGamePlayAction : BaseRequestAction
     /// <summary>
     /// 家园游戏玩法（Async 版本）
     /// </summary>
-    public async Task<bool> CallAsync(string userInputTag, Dictionary<string, string> data = null)
+    public async Task<bool> CallAsync()
     {
-        Debug.Log($"Home gameplay request async for tag: {userInputTag}");
-
-        if (data == null)
-        {
-            data = new Dictionary<string, string>();
-        }
-
-        _lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -110,21 +112,21 @@ public class HomeGamePlayAction : BaseRequestAction
             // 创建请求数据
             var requestData = new HomeGamePlayRequest
             {
-                user_name = GameContext.Instance.UserName,
-                game_name = GameContext.Instance.GameName,
-                user_input = new HomeGamePlayUserInput { tag = userInputTag, data = data }
+                user_name = _userName,
+                game_name = _gameName,
+                user_input = new HomeGamePlayUserInput { tag = _userInputTag, data = _data }
             };
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            var result = await PostRequestAsync(GameContext.Instance.HomeGameplayUrl, jsonData);
+            _requestResult = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseHomeGamePlayResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
-                    _lastRequestSuccess = true;
+                    //_lastRequestSuccess = true;
                     Debug.Log("Home gameplay successful");
                     return true;
                 }
@@ -135,7 +137,7 @@ public class HomeGamePlayAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"Home gameplay failed: {result.error}");
+                Debug.LogError($"Home gameplay failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -153,12 +155,15 @@ public class HomeGamePlayAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string userInputTag, Dictionary<string, string> data = null)
+    public IEnumerator Call(string url, string userName, string gameName, string userInputTag, Dictionary<string, string> data = null)
     {
+        Setup(url, userName, gameName, userInputTag, data);
+
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
-            var task = CallAsync(userInputTag, data);
+            var task = CallAsync();
             yield return new WaitUntil(() => task.IsCompleted);
 
             if (task.IsFaulted)
@@ -169,7 +174,7 @@ public class HomeGamePlayAction : BaseRequestAction
         else
         {
             // 使用协程版本
-            yield return CallCoroutine(userInputTag, data);
+            yield return CallCoroutine();
         }
     }
 
@@ -180,7 +185,7 @@ public class HomeGamePlayAction : BaseRequestAction
     /// <summary>
     /// 尝试解析家园游戏玩法响应数据
     /// </summary>
-    private bool TryParseHomeGamePlayResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
@@ -199,8 +204,7 @@ public class HomeGamePlayAction : BaseRequestAction
             }
 
             // 设置游戏状态
-            GameContext.Instance.ProcessClientMessages(response.client_messages);
-
+            _responseData = response;
             return true;
         }
         catch (System.Exception ex)

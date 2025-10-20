@@ -71,14 +71,22 @@ public class XCardEditor : MonoBehaviour
         data["name"] = skillName;
         data["description"] = skillDescription;
         data["effect"] = skillEffect;
-        yield return _dungeonGamePlayAction.Call("x_card", data);
-        if (!_dungeonGamePlayAction.LastRequestSuccess)
+        yield return _dungeonGamePlayAction.Call(
+            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "x_card", data);
+        if (_dungeonGamePlayAction.ResponseData == null)
         {
             Debug.LogError("ExecuteXCard request failed");
             yield break;
         }
 
-        Debug.Log("ExecuteXCard request success");
+        //
+        GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
+
+        //
+        //Debug.Log("ExecuteXCard request success");
 
         // 自动关闭。
         OnClickClose();

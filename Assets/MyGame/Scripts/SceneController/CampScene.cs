@@ -388,17 +388,26 @@ public class CampScene : MonoBehaviour
 
     private IEnumerator ExecuteSpeakAction(string target, string content)
     {
-        yield return _homeGamePlayAction.Call("/speak", new Dictionary<string, string>
-        {
-            ["target"] = target,
-            ["content"] = content
-        });
+        yield return _homeGamePlayAction.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "/speak", new Dictionary<string, string>
+            {
+                ["target"] = target,
+                ["content"] = content
+            });
+
         Debug.Log("Speak action executed");
-        if (!_homeGamePlayAction.LastRequestSuccess)
+        //if (!_homeGamePlayAction.LastRequestSuccess)
+        if (_homeGamePlayAction.ResponseData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
+
+        //
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
 
         HideInputBackground();
 
@@ -473,12 +482,20 @@ public class CampScene : MonoBehaviour
 
     private IEnumerator ExecuteHomeAdvancing()
     {
-        yield return _homeGamePlayAction.Call("/advancing");
-        if (!_homeGamePlayAction.LastRequestSuccess)
+        yield return _homeGamePlayAction.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+
+            "/advancing");
+        //if (!_homeGamePlayAction.LastRequestSuccess)
+        if (_homeGamePlayAction.ResponseData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
+
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
 
         //
         //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串

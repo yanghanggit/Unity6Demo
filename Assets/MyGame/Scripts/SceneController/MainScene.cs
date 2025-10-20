@@ -102,11 +102,18 @@ public class MainScene : MonoBehaviour
 
     IEnumerator ExecuteHomeGameplayAdvancing()
     {
-        yield return _homeGamePlayAction.Call("/advancing");
-        if (!_homeGamePlayAction.LastRequestSuccess)
+        yield return _homeGamePlayAction.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "/advancing");
+
+        if (_homeGamePlayAction.ResponseData == null)
         {
             yield break;
         }
+
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
         //
         UpdateTextFromAgentLogs();
     }
