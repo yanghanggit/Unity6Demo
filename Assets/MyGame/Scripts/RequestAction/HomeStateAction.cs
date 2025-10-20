@@ -11,9 +11,25 @@ public class HomeStateAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private bool _lastRequestSuccess = false;
+    // private bool _lastRequestSuccess = false;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    // public bool LastRequestSuccess => _lastRequestSuccess;
+
+    private string _url;
+
+    private HomeStateResponse _responseData;
+
+    public HomeStateResponse ResponseData => _responseData;
+
+
+    public void SetUrl(string url)
+    {
+        _url = url;
+        _responseData = null;
+        Debug.Log($"HomeStateAction URL set to: {_url}");
+    }
+
+
 
     #region 协程版本（兼容现有代码）
 
@@ -24,7 +40,7 @@ public class HomeStateAction : BaseRequestAction
     {
         Debug.Log("View home request started");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -37,7 +53,7 @@ public class HomeStateAction : BaseRequestAction
         RequestResult result = null;
 
         // 发送请求
-        yield return GetRequestCoroutine(GameContext.Instance.HomeStateUrl, (response) =>
+        yield return GetRequestCoroutine(_url, (response) =>
         {
             result = response;
             requestCompleted = true;
@@ -49,9 +65,9 @@ public class HomeStateAction : BaseRequestAction
         // 处理结果
         if (result != null && result.isSuccess)
         {
-            if (TryParseViewHomeResponse(result.responseText))
+            if (TryParseResponse(result.responseText))
             {
-                _lastRequestSuccess = true;
+                //_lastRequestSuccess = true;
                 Debug.Log("View home successful");
             }
             else
@@ -76,7 +92,7 @@ public class HomeStateAction : BaseRequestAction
     {
         Debug.Log("View home request async started");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -88,14 +104,14 @@ public class HomeStateAction : BaseRequestAction
         try
         {
             // 发送请求
-            var result = await GetRequestAsync(GameContext.Instance.HomeStateUrl);
+            var result = await GetRequestAsync(_url);
 
             // 处理结果
             if (result.isSuccess)
             {
-                if (TryParseViewHomeResponse(result.responseText))
+                if (TryParseResponse(result.responseText))
                 {
-                    _lastRequestSuccess = true;
+                    //_lastRequestSuccess = true;
                     Debug.Log("View home successful");
                     return true;
                 }
@@ -124,8 +140,10 @@ public class HomeStateAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call()
+    public IEnumerator Call(string url)
     {
+        SetUrl(url);
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
@@ -151,7 +169,7 @@ public class HomeStateAction : BaseRequestAction
     /// <summary>
     /// 尝试解析查看家园响应数据
     /// </summary>
-    private bool TryParseViewHomeResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
@@ -170,7 +188,8 @@ public class HomeStateAction : BaseRequestAction
             }
 
             // 设置游戏上下文
-            GameContext.Instance.Mapping = response.mapping;
+            //GameContext.Instance.Mapping = response.mapping;
+            _responseData = response;
 
             return true;
         }

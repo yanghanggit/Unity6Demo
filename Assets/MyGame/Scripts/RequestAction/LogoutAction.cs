@@ -72,7 +72,7 @@ public class LogoutAction : BaseRequestAction
         // 处理结果
         if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseLogoutResponse(_requestResult.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
                 //_lastRequestSuccess = true;
                 Debug.Log("Logout successful");
@@ -122,7 +122,7 @@ public class LogoutAction : BaseRequestAction
             // 处理结果
             if (_requestResult.isSuccess)
             {
-                if (TryParseLogoutResponse(_requestResult.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
                     //_lastRequestSuccess = true;
                     Debug.Log("Logout successful");
@@ -183,7 +183,7 @@ public class LogoutAction : BaseRequestAction
     /// <summary>
     /// 尝试解析登出响应数据
     /// </summary>
-    private bool TryParseLogoutResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {

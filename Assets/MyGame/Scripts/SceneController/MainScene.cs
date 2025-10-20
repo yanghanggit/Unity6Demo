@@ -124,11 +124,14 @@ public class MainScene : MonoBehaviour
 
     private IEnumerator ExecuteViewHomeAndActors()
     {
-        yield return _viewHomeAction.Call();
-        if (!_viewHomeAction.LastRequestSuccess)
+        yield return _viewHomeAction.Call(GameContext.Instance.HomeStateUrl);
+        //if (!_viewHomeAction.LastRequestSuccess)
+        if (_viewHomeAction.ResponseData == null)
         {
             yield break;
         }
+
+        GameContext.Instance.Mapping = _viewHomeAction.ResponseData.mapping;
 
         yield return _viewActorAction.Call(
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));

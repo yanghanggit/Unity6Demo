@@ -80,11 +80,13 @@ public class MainScene2 : MonoBehaviour
 
     private IEnumerator LoadHomeAndActorData()
     {
-        yield return _viewHomeAction.Call();
-        if (!_viewHomeAction.LastRequestSuccess)
+        yield return _viewHomeAction.Call(GameContext.Instance.HomeStateUrl);
+        if (_viewHomeAction.ResponseData == null)
         {
             yield break;
         }
+
+         GameContext.Instance.Mapping = _viewHomeAction.ResponseData.mapping;
 
         //提取Mapping中所有的values组成一个List
         List<string> allActors = new List<string>();
