@@ -51,11 +51,15 @@ public class ViewDungeonScene : MonoBehaviour
 
     IEnumerator ExecuteViewDungeon()
     {
-        yield return _viewDungeonAction.Call();
-        if (!_viewDungeonAction.LastRequestSuccess)
+        yield return _viewDungeonAction.Call(GameContext.Instance.DungeonStateUrl);
+        if (_viewDungeonAction.ResponseData == null)
         {
             yield break;
         }
+
+        GameContext.Instance.Mapping = _viewDungeonAction.ResponseData.mapping;
+        GameContext.Instance.Dungeon = _viewDungeonAction.ResponseData.dungeon;
+
         _mainText.text = DungeonOverviewDisplayText(GameContext.Instance.Dungeon);
     }
 

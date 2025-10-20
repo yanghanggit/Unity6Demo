@@ -11,9 +11,19 @@ public class DungeonStateAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private bool _lastRequestSuccess = false;
+    private string _url;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    private DungeonStateResponse _responseData;
+
+    public DungeonStateResponse ResponseData => _responseData;
+
+    public void Setup(string url)
+    {
+        _url = url;
+        _responseData = null;
+        Debug.Log($"DungeonStateAction URL set to: {_url}");
+    }
+
 
     #region 协程版本（兼容现有代码）
 
@@ -24,7 +34,7 @@ public class DungeonStateAction : BaseRequestAction
     {
         Debug.Log("View dungeon request started");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -37,7 +47,7 @@ public class DungeonStateAction : BaseRequestAction
         RequestResult result = null;
 
         // 发送请求
-        yield return GetRequestCoroutine(GameContext.Instance.DungeonStateUrl, (response) =>
+        yield return GetRequestCoroutine(_url, (response) =>
         {
             result = response;
             requestCompleted = true;
@@ -49,9 +59,9 @@ public class DungeonStateAction : BaseRequestAction
         // 处理结果
         if (result != null && result.isSuccess)
         {
-            if (TryParseViewDungeonResponse(result.responseText))
+            if (TryParseResponse(result.responseText))
             {
-                _lastRequestSuccess = true;
+                //_lastRequestSuccess = true;
                 Debug.Log("View dungeon successful");
             }
             else
@@ -76,7 +86,7 @@ public class DungeonStateAction : BaseRequestAction
     {
         Debug.Log("View dungeon request async started");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -88,14 +98,14 @@ public class DungeonStateAction : BaseRequestAction
         try
         {
             // 发送请求
-            var result = await GetRequestAsync(GameContext.Instance.DungeonStateUrl);
+            var result = await GetRequestAsync(_url);
 
             // 处理结果
             if (result.isSuccess)
             {
-                if (TryParseViewDungeonResponse(result.responseText))
+                if (TryParseResponse(result.responseText))
                 {
-                    _lastRequestSuccess = true;
+                    // _lastRequestSuccess = true;
                     Debug.Log("View dungeon successful");
                     return true;
                 }
@@ -124,8 +134,10 @@ public class DungeonStateAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call()
+    public IEnumerator Call(string url)
     {
+        Setup(url);
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
@@ -151,7 +163,7 @@ public class DungeonStateAction : BaseRequestAction
     /// <summary>
     /// 尝试解析查看地下城响应数据
     /// </summary>
-    private bool TryParseViewDungeonResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
@@ -162,17 +174,13 @@ public class DungeonStateAction : BaseRequestAction
         try
         {
             var response = JsonConvert.DeserializeObject<DungeonStateResponse>(responseText);
-
             if (response == null)
             {
                 Debug.LogError("ViewDungeonAction response is null");
                 return false;
             }
 
-            // 设置游戏上下文
-            GameContext.Instance.Mapping = response.mapping;
-            GameContext.Instance.Dungeon = response.dungeon;
-
+            _responseData = response;
             return true;
         }
         catch (System.Exception ex)
