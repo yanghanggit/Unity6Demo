@@ -12,22 +12,33 @@ public class ActorDetailsAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private bool _lastRequestSuccess = false;
+    private string _url;
+    private List<string> _actors;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    private ActorDetailsResponse _responseData;
+
+    public ActorDetailsResponse ResponseData => _responseData;
+
+    public void Setup(string url, List<string> actors)
+    {
+        _url = url;
+        _actors = actors;
+        _responseData = null;
+        Debug.Log($"ActorDetailsAction setup with URL: {_url} and {actors?.Count ?? 0} actors");
+        for (int i = 0; i < actors.Count; i++)
+        {
+            Debug.Log($"Actor {i}: {actors[i]}");
+        }
+    }
+
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
     /// 查看角色（协程版本）
     /// </summary>
-    private IEnumerator CallCoroutine(List<string> actors)
+    private IEnumerator CallCoroutine()
     {
-        Debug.Log($"View actor request started with {actors?.Count ?? 0} actors");
-        Debug.Assert(actors != null && actors.Count > 0, "Actors list is null or empty");
-
-        _lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -36,7 +47,7 @@ public class ActorDetailsAction : BaseRequestAction
         }
 
         // 构建完整URL
-        string fullUrl = BuildActorUrl(actors);
+        string fullUrl = BuildUrl(_actors);
 
         bool requestCompleted = false;
         RequestResult result = null;
@@ -54,9 +65,9 @@ public class ActorDetailsAction : BaseRequestAction
         // 处理结果
         if (result != null && result.isSuccess)
         {
-            if (TryParseViewActorResponse(result.responseText))
+            if (TryParseResponse(result.responseText))
             {
-                _lastRequestSuccess = true;
+                //_lastRequestSuccess = true;
                 Debug.Log("View actor successful");
             }
             else
@@ -77,13 +88,8 @@ public class ActorDetailsAction : BaseRequestAction
     /// <summary>
     /// 查看角色（Async 版本）
     /// </summary>
-    private async Task<bool> CallAsync(List<string> actors)
+    private async Task<bool> CallAsync()
     {
-        Debug.Log($"View actor request async started with {actors?.Count ?? 0} actors");
-        Debug.Assert(actors != null && actors.Count > 0, "Actors list is null or empty");
-
-        _lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -94,7 +100,7 @@ public class ActorDetailsAction : BaseRequestAction
         try
         {
             // 构建完整URL
-            string fullUrl = BuildActorUrl(actors);
+            string fullUrl = BuildUrl(_actors);
             Debug.Log($"View actor request URL: {fullUrl}");
 
             // 发送请求
@@ -103,9 +109,8 @@ public class ActorDetailsAction : BaseRequestAction
             // 处理结果
             if (result.isSuccess)
             {
-                if (TryParseViewActorResponse(result.responseText))
+                if (TryParseResponse(result.responseText))
                 {
-                    _lastRequestSuccess = true;
                     Debug.Log("View actor successful");
                     return true;
                 }
@@ -134,8 +139,11 @@ public class ActorDetailsAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(List<string> actors)
+    public IEnumerator Call(string url, List<string> actors)
     {
+
+        Setup(url, actors);
+
         if (actors == null || actors.Count == 0)
         {
             Debug.LogWarning("No actors provided for view actor request");
@@ -145,7 +153,7 @@ public class ActorDetailsAction : BaseRequestAction
         if (useAsyncVersion)
         {
             // 使用 async 版本
-            var task = CallAsync(actors);
+            var task = CallAsync();
             yield return new WaitUntil(() => task.IsCompleted);
 
             if (task.IsFaulted)
@@ -156,7 +164,7 @@ public class ActorDetailsAction : BaseRequestAction
         else
         {
             // 使用协程版本
-            yield return CallCoroutine(actors);
+            yield return CallCoroutine();
         }
     }
 
@@ -167,20 +175,20 @@ public class ActorDetailsAction : BaseRequestAction
     /// <summary>
     /// 构建角色请求URL
     /// </summary>
-    private string BuildActorUrl(List<string> actors)
+    private string BuildUrl(List<string> actors)
     {
         var parameters = new List<KeyValuePair<string, string>>();
         foreach (var actor in actors)
         {
             parameters.Add(new KeyValuePair<string, string>("actors", actor));
         }
-        return BuildUrlWithQueryParams(GameContext.Instance.ActorDetailsUrl, parameters);
+        return BuildUrlWithQueryParams(_url, parameters);
     }
 
     /// <summary>
     /// 尝试解析查看角色响应数据
     /// </summary>
-    private bool TryParseViewActorResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
@@ -191,17 +199,13 @@ public class ActorDetailsAction : BaseRequestAction
         try
         {
             var response = JsonConvert.DeserializeObject<ActorDetailsResponse>(responseText);
-
             if (response == null)
             {
                 Debug.LogError("ViewActorAction response is null");
                 return false;
             }
 
-            // 更新游戏上下文中的角色快照
-            GameContext.Instance.ActorEntitiesSerialization = response.actor_entities_serialization;
-            GameContext.Instance.AgentShortTermMemories = response.agent_short_term_memories;
-
+            _responseData = response;
             return true;
         }
         catch (System.Exception ex)

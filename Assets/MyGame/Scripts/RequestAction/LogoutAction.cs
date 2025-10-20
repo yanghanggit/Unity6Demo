@@ -124,7 +124,6 @@ public class LogoutAction : BaseRequestAction
             {
                 if (TryParseResponse(_requestResult.responseText))
                 {
-                    //_lastRequestSuccess = true;
                     Debug.Log("Logout successful");
                     return true;
                 }
@@ -201,8 +200,6 @@ public class LogoutAction : BaseRequestAction
             }
 
             Debug.Log($"LogoutAction.message = {response.message}");
-            
-            // 
             _responseData = response;
             return true;
         }

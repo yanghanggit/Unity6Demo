@@ -86,7 +86,7 @@ public class MainScene2 : MonoBehaviour
             yield break;
         }
 
-         GameContext.Instance.Mapping = _viewHomeAction.ResponseData.mapping;
+        GameContext.Instance.Mapping = _viewHomeAction.ResponseData.mapping;
 
         //提取Mapping中所有的values组成一个List
         List<string> allActors = new List<string>();
@@ -96,12 +96,13 @@ public class MainScene2 : MonoBehaviour
         }
         //打印 allActors
         Debug.Log("All Actors: " + string.Join(", ", allActors));
-        yield return _viewActorAction.Call(allActors);
-
-        if (!_viewActorAction.LastRequestSuccess)
+        yield return _viewActorAction.Call(GameContext.Instance.ActorDetailsUrl, allActors);
+        if (_viewActorAction.ResponseData == null)
         {
             yield break;
         }
+
+        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
 
         Debug.Log("Home and Actor views updated");
 

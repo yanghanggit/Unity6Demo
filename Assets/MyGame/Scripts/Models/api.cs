@@ -174,7 +174,7 @@ public class ActorDetailsResponse
 {
     public List<EntitySerialization> actor_entities_serialization;
 
-    public List<AgentChatHistory> agent_short_term_memories;
+    //public List<AgentChatHistory> agent_short_term_memories;
 }
 
 [System.Serializable]

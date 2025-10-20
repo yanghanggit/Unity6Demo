@@ -134,12 +134,15 @@ public class MainScene : MonoBehaviour
         GameContext.Instance.Mapping = _viewHomeAction.ResponseData.mapping;
 
         yield return _viewActorAction.Call(
+            GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (!_viewActorAction.LastRequestSuccess)
+        if (_viewActorAction.ResponseData == null)
         {
             yield break;
         }
+
+        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
 
         var text0 = "你 = " + GameContext.Instance.ActorName;
         var text1 = MyUtils.MappingDisplayText(GameContext.Instance.Mapping);

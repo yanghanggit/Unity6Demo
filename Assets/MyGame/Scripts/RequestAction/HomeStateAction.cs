@@ -188,9 +188,7 @@ public class HomeStateAction : BaseRequestAction
             }
 
             // 设置游戏上下文
-            //GameContext.Instance.Mapping = response.mapping;
             _responseData = response;
-
             return true;
         }
         catch (System.Exception ex)

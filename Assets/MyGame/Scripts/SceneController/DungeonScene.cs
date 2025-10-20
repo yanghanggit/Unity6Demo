@@ -115,13 +115,16 @@ public class DungeonScene : MonoBehaviour
         }
 
         yield return _viewActorAction.Call(
+            GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (!_viewActorAction.LastRequestSuccess)
+        if (_viewActorAction.ResponseData == null)
         {
             Debug.LogError("ViewActorAction request failed");
             yield break;
         }
+
+        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
 
         Debug.Log("ExecuteDrawCards request success");
         UpdateActorDisplay(new HashSet<string> { typeof(HandComponent).Name });
@@ -149,12 +152,15 @@ public class DungeonScene : MonoBehaviour
         }
 
         yield return _viewActorAction.Call(
+            GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (!_viewActorAction.LastRequestSuccess)
+        if (_viewActorAction.ResponseData == null)
         {
             yield break;
         }
+
+        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
 
         UpdateDungeonDisplay();
     }
@@ -162,12 +168,15 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteViewActor()
     {
         yield return _viewActorAction.Call(
+            GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (!_viewActorAction.LastRequestSuccess)
+        if (_viewActorAction.ResponseData == null)
         {
             yield break;
         }
+
+        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
 
         UpdateActorDisplay(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
     }
