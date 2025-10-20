@@ -14,18 +14,22 @@ public class WerewolfGameStateAction : BaseRequestAction
     // 响应数据
     private WerewolfGameStateResponse _responseData = null;
 
+    private RequestResult _requestResult = null;
+
     public WerewolfGameStateResponse ResponseData => _responseData;
+
+    public RequestResult ReqResult => _requestResult;
 
     private string _url;
     private string _userName;
     private string _gameName;
-
 
     public void Setup(string url, string userName, string gameName)
     {
         _url = url;
         _userName = userName;
         _gameName = gameName;
+        _requestResult = null;
         _responseData = null;
 
         Debug.Log($"WerewolfGameStateAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
@@ -40,8 +44,6 @@ public class WerewolfGameStateAction : BaseRequestAction
     {
         Debug.Log("View home request started");
 
-        //_lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -50,12 +52,11 @@ public class WerewolfGameStateAction : BaseRequestAction
         }
 
         bool requestCompleted = false;
-        RequestResult result = null;
 
         // 发送请求
         yield return GetRequestCoroutine(_url, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -63,11 +64,10 @@ public class WerewolfGameStateAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseViewHomeResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
-                //_lastRequestSuccess = true;
                 Debug.Log("View home successful");
             }
             else
@@ -77,7 +77,7 @@ public class WerewolfGameStateAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"View home failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"View home failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -104,14 +104,13 @@ public class WerewolfGameStateAction : BaseRequestAction
         try
         {
             // 发送请求
-            var result = await GetRequestAsync(_url);
+            _requestResult = await GetRequestAsync(_url);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseViewHomeResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
-                    //_lastRequestSuccess = true;
                     Debug.Log("View home successful");
                     return true;
                 }
@@ -122,7 +121,7 @@ public class WerewolfGameStateAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"View home failed: {result.error}");
+                Debug.LogError($"View home failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -143,7 +142,7 @@ public class WerewolfGameStateAction : BaseRequestAction
     public IEnumerator Call(string url, string userName, string gameName)
     {
         Setup(url, userName, gameName);
-        
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
@@ -169,7 +168,7 @@ public class WerewolfGameStateAction : BaseRequestAction
     /// <summary>
     /// 尝试解析查看家园响应数据
     /// </summary>
-    private bool TryParseViewHomeResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {

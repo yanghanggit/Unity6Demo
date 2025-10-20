@@ -9,9 +9,13 @@ public class WerewolfGamePlayAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private WerewolfGamePlayResponse _responseData;
+    private WerewolfGamePlayResponse _responseData = null;
+
+    private RequestResult _requestResult = null;
 
     public WerewolfGamePlayResponse ResponseData => _responseData;
+
+    public RequestResult ReqResult => _requestResult;
 
     private string _url;
 
@@ -26,8 +30,9 @@ public class WerewolfGamePlayAction : BaseRequestAction
         _url = url;
         _userName = userName;
         _gameName = gameName;
-        _responseData = null;
         _data = data;
+        _requestResult = null;
+        _responseData = null;
 
         Debug.Log($"WerewolfGamePlayAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, Data count: {_data.Count}");
 
@@ -62,12 +67,11 @@ public class WerewolfGamePlayAction : BaseRequestAction
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-        RequestResult result = null;
 
         // 发送请求
         yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -75,9 +79,9 @@ public class WerewolfGamePlayAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseHomeGamePlayResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
                 Debug.Log("Home gameplay successful");
             }
@@ -88,7 +92,7 @@ public class WerewolfGamePlayAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"Home gameplay failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Home gameplay failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -120,12 +124,12 @@ public class WerewolfGamePlayAction : BaseRequestAction
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            var result = await PostRequestAsync(_url, jsonData);
+            _requestResult = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseHomeGamePlayResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
                     Debug.Log("Home gameplay successful");
                     return true;
@@ -137,7 +141,7 @@ public class WerewolfGamePlayAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"Home gameplay failed: {result.error}");
+                Debug.LogError($"Home gameplay failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -184,7 +188,7 @@ public class WerewolfGamePlayAction : BaseRequestAction
     /// <summary>
     /// 尝试解析家园游戏玩法响应数据
     /// </summary>
-    private bool TryParseHomeGamePlayResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {

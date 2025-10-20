@@ -11,9 +11,13 @@ public class WerewolfGameStartAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private WerewolfGameStartResponse _responseData;
+    private WerewolfGameStartResponse _responseData = null;
+
+    private RequestResult _requestResult = null;
 
     public WerewolfGameStartResponse ResponseData => _responseData;
+
+    public RequestResult ReqResult => _requestResult;
 
     private string _url;
     private string _userName;
@@ -24,6 +28,7 @@ public class WerewolfGameStartAction : BaseRequestAction
         _url = url;
         _userName = userName;
         _gameName = gameName;
+        _requestResult = null;
         _responseData = null;
 
         Debug.Log($"WerewolfGameStartAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
@@ -37,11 +42,6 @@ public class WerewolfGameStartAction : BaseRequestAction
     /// </summary>
     public IEnumerator CallCoroutine()
     {
-        //Debug.Log($"Start game request for actor: {actorName}");
-
-        // _lastRequestSuccess = false;
-        //_response = null;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -54,17 +54,15 @@ public class WerewolfGameStartAction : BaseRequestAction
         {
             user_name = _userName,
             game_name = _gameName,
-            //actor_name = actorName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-        RequestResult result = null;
 
         // 发送请求
         yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -72,9 +70,9 @@ public class WerewolfGameStartAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseStartResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
                 //_werewolfGameStartResponse = new WerewolfGameStartResponse
                 Debug.Log("Start game successful");
@@ -86,7 +84,7 @@ public class WerewolfGameStartAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"Start game failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Start game failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -122,12 +120,12 @@ public class WerewolfGameStartAction : BaseRequestAction
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            var result = await PostRequestAsync(_url, jsonData);
+            _requestResult = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseStartResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
                     //_lastRequestSuccess = true;
                     Debug.Log("Start game successful");
@@ -140,7 +138,7 @@ public class WerewolfGameStartAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"Start game failed: {result.error}");
+                Debug.LogError($"Start game failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -187,7 +185,7 @@ public class WerewolfGameStartAction : BaseRequestAction
     /// <summary>
     /// 尝试解析开始游戏响应数据
     /// </summary>
-    private bool TryParseStartResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {

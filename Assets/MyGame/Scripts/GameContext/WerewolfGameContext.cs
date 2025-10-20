@@ -176,6 +176,11 @@ public partial class WerewolfGameContext
                     processedMessages.Add(handledMessage);
                     break;
 
+                case (int)MessageType.GAME:
+                    // 处理系统事件
+                    processedMessages.Add("[GAME]: " + JsonConvert.SerializeObject(clientMessage.data));
+                    break;
+
                 default:
                     UnityEngine.Debug.LogWarning("Unknown client message type: " + clientMessage.message_type);
                     break;

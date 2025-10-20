@@ -242,7 +242,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
         {
             var message = messages[i];
             Debug.Log($"Client Message {i}: " + JsonUtility.ToJson(message));
-            _mainText.text += JsonUtility.ToJson(message) + "\n";
         }
 
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(messages);

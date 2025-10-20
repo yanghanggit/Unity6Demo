@@ -14,6 +14,8 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
 
     private WerewolfGameActorDetailsResponse _responseData = null;
 
+    private RequestResult _requestResult = null;
+
     private string _url;
 
     private string _userName;
@@ -24,12 +26,15 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
 
     public WerewolfGameActorDetailsResponse ResponseData => _responseData;
 
+    public RequestResult ReqResult => _requestResult;
+
     public void Setup(string url, string userName, string gameName, List<string> actors)
     {
         _url = url;
         _userName = userName;
         _gameName = gameName;
         _actors = actors;
+        _requestResult = null;
         _responseData = null;
 
         Debug.Assert(actors.Count > 0, "Actors list is empty");
@@ -43,9 +48,6 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
     /// </summary>
     private IEnumerator CallCoroutine()
     {
-        //Debug.Log($"View actor request started with {_actors?.Count ?? 0} actors");
-        //Debug.Assert(_actors != null && _actors.Count > 0, "Actors list is null or empty");
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -57,12 +59,11 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
         string fullUrl = BuildUrl(_actors);
 
         bool requestCompleted = false;
-        RequestResult result = null;
 
         // 发送请求
         yield return GetRequestCoroutine(fullUrl, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -70,9 +71,9 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseViewActorResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
                 Debug.Log("View actor successful");
             }
@@ -83,7 +84,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"View actor failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"View actor failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -113,12 +114,12 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
             Debug.Log($"View actor request URL: {fullUrl}");
 
             // 发送请求
-            var result = await GetRequestAsync(fullUrl);
+            _requestResult = await GetRequestAsync(fullUrl);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseViewActorResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
                     Debug.Log("View actor successful");
                     return true;
@@ -130,7 +131,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"View actor failed: {result.error}");
+                Debug.LogError($"View actor failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -198,7 +199,7 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
     /// <summary>
     /// 尝试解析查看角色响应数据
     /// </summary>
-    private bool TryParseViewActorResponse(string responseText)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
@@ -209,7 +210,6 @@ public class WerewolfGameActorDetailsAction : BaseRequestAction
         try
         {
             var response = JsonConvert.DeserializeObject<WerewolfGameActorDetailsResponse>(responseText);
-
             if (response == null)
             {
                 Debug.LogError("ViewActorAction response is null");
