@@ -15,7 +15,7 @@ public class BootScene : MonoBehaviour
 
     void Start()
     {
-        GameContext.Instance.SetupGame = true;
+        //GameContext.Instance.SetupGame = true;
 
         Debug.Assert(_rootAction != null, "_bootAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
@@ -36,6 +36,8 @@ public class BootScene : MonoBehaviour
         if (_rootAction.ResponseData != null)
         {
             _nextButton.gameObject.SetActive(true);
+            GameContext.Instance.Root = _rootAction.ResponseData;
+            Debug.Log("Using LocalNet for API endpoints");
             yield break;
         }
 
@@ -43,6 +45,8 @@ public class BootScene : MonoBehaviour
         if (_rootAction.ResponseData != null)
         {
             _nextButton.gameObject.SetActive(true);
+            GameContext.Instance.Root = _rootAction.ResponseData;
+            Debug.Log("Using LocalHost for API endpoints");
             yield break;
         }
     }

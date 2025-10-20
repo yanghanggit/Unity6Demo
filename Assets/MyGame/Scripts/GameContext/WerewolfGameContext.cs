@@ -55,9 +55,6 @@ public partial class WerewolfGameContext
 
     private List<EntitySerialization> _actorEntities = new List<EntitySerialization>();
 
-
-    // lastSequenceId
-
     private int _lastSequenceId = 0;
     public int LastSequenceId
     {
@@ -82,7 +79,6 @@ public partial class WerewolfGameContext
     public void UpdateActorEntities(List<EntitySerialization> actorEntities)
     {
         _actorEntities = actorEntities;
-        //UnityEngine.Debug.Log($"Updated actor entities count: {_actorEntities.Count}");
         for (int i = 0; i < _actorEntities.Count; i++)
         {
             var serializer = _actorEntities[i];

@@ -57,7 +57,7 @@ public class CampScene : MonoBehaviour
 
         List<string> actors = new List<string>();
         GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors);
-        if (actors == null || !GameContext.Instance.SetupGame)
+        if (actors == null || GameContext.Instance.Root == null)
         {
             Debug.LogWarning("GameContext is not set up. Using debug actors.");
             actors = new List<string>
@@ -135,7 +135,7 @@ public class CampScene : MonoBehaviour
     {
         yield return new WaitForSeconds(0);
 
-        if (GameContext.Instance.SetupGame)
+        if (GameContext.Instance.Root != null)
         {
             Debug.Log("Returning to MainScene2");
             SceneManager.LoadScene(_preScene);
@@ -365,7 +365,7 @@ public class CampScene : MonoBehaviour
     public void OnClickSendMessage()
     {
         Debug.Log("Send Message button clicked");
-        if (GameContext.Instance.SetupGame && !string.IsNullOrEmpty(_currentSpriteName) && !string.IsNullOrEmpty(_inputField.text))
+        if (GameContext.Instance.Root != null && !string.IsNullOrEmpty(_currentSpriteName) && !string.IsNullOrEmpty(_inputField.text))
         {
             if (_currentSpriteName != GameContext.Instance.ActorName)
             {

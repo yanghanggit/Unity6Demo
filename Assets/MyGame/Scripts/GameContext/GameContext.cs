@@ -32,13 +32,13 @@ public partial class GameContext
 
     private RootResponse _rootResponse = new RootResponse();
 
-    private bool _setupGame = false;
+    // private bool _setupGame = false;
 
-    public bool SetupGame
-    {
-        get { return _setupGame; }
-        set { _setupGame = value; }
-    }
+    // public bool SetupGame
+    // {
+    //     get { return _setupGame; }
+    //     set { _setupGame = value; }
+    // }
 
     public string UserName
     {

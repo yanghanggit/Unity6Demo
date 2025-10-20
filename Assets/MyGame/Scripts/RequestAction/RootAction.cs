@@ -12,23 +12,31 @@ public class RootAction : BaseRequestAction
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
     private RootResponse _responseData;
-    //private bool _lastRequestSuccess = false;
-    //public bool LastRequestSuccess => _responseData != null;
 
     public RootResponse ResponseData => _responseData;
+
+    private RequestResult _requestResult = null;
+
+    public RequestResult ReqResult => _requestResult;
+
+    private string _url;
+
+    public void Setup(string url)
+    {
+        _url = url;
+        _requestResult = null;
+        _responseData = null;
+
+        Debug.Log($"RootAction initialized with URL: {_url}");
+    }
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
     /// 获取 URL 配置（协程版本）
     /// </summary>
-    public IEnumerator CallCoroutine(string apiEndpointUrl)
+    public IEnumerator CallCoroutine()
     {
-        Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
-
-        //_lastRequestSuccess = false;
-        _responseData = null;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -37,12 +45,11 @@ public class RootAction : BaseRequestAction
         }
 
         bool requestCompleted = false;
-        RequestResult result = null;
 
         // 发送请求
-        yield return GetRequestCoroutine(apiEndpointUrl, (response) =>
+        yield return GetRequestCoroutine(_url, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -50,12 +57,10 @@ public class RootAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
-                //_lastRequestSuccess = true;
-                GameContext.Instance.Root = _responseData;
                 Debug.Log("URL Configuration loaded successfully");
             }
             else
@@ -65,7 +70,7 @@ public class RootAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"Failed to get URL configuration: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Failed to get URL configuration: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -76,13 +81,8 @@ public class RootAction : BaseRequestAction
     /// <summary>
     /// 获取 URL 配置（Async 版本）
     /// </summary>
-    public async Task<bool> CallAsync(string apiEndpointUrl)
+    public async Task<bool> CallAsync()
     {
-        Debug.Log($"Getting URL Configuration from: {apiEndpointUrl}");
-
-        //_lastRequestSuccess = false;
-        _responseData = null;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -93,15 +93,13 @@ public class RootAction : BaseRequestAction
         try
         {
             // 发送请求
-            var result = await GetRequestAsync(apiEndpointUrl);
+            _requestResult = await GetRequestAsync(_url);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
-                    //_lastRequestSuccess = true;
-                    GameContext.Instance.Root = _responseData;
                     Debug.Log("URL Configuration loaded successfully");
                     return true;
                 }
@@ -112,7 +110,7 @@ public class RootAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"Failed to get URL configuration: {result.error}");
+                Debug.LogError($"Failed to get URL configuration: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -130,12 +128,15 @@ public class RootAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string apiEndpointUrl)
+    public IEnumerator Call(string rootUrl)
     {
+        // 初始化
+        Setup(rootUrl);
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
-            var task = CallAsync(apiEndpointUrl);
+            var task = CallAsync();
             yield return new WaitUntil(() => task.IsCompleted);
 
             if (task.IsFaulted)
@@ -146,7 +147,7 @@ public class RootAction : BaseRequestAction
         else
         {
             // 使用协程版本
-            yield return CallCoroutine(apiEndpointUrl);
+            yield return CallCoroutine();
         }
     }
 
