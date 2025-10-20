@@ -53,19 +53,26 @@ public class LoginScene : MonoBehaviour
 
     private IEnumerator LoginThenStartNewGame(string userName, string gameName, string actorName)
     {
-        yield return _loginAction.Call(userName, gameName);
-        if (!_loginAction.LastRequestSuccess)
+        yield return _loginAction.Call(GameContext.Instance.LoginUrl, userName, gameName);
+        if (_loginAction.ReqResult == null || !_loginAction.ReqResult.isSuccess)
         {
             Debug.LogError("Login failed");
             yield break;
         }
 
-        yield return _startAction.Call(actorName);
-        if (!_startAction.LastRequestSuccess)
+        // 保存登录信息
+        GameContext.Instance.UserName = userName;
+        GameContext.Instance.GameName = gameName;
+        GameContext.Instance.ActorName = "";
+
+        yield return _startAction.Call(GameContext.Instance.StartUrl, userName, gameName, actorName);
+        if (_startAction.ReqResult == null || !_startAction.ReqResult.isSuccess)
         {
             Debug.LogError("Start new game failed");
             yield break;
         }
+
+        GameContext.Instance.ActorName = actorName;
 
         yield return new WaitForSeconds(0.0f);
         //_nextScene = "MainScene2";

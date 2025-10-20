@@ -11,20 +11,40 @@ public class StartAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private bool _lastRequestSuccess = false;
+    private string _url;
+    private string _userName;
+    private string _gameName;
+    private string _actorName;
+    private RequestResult _requestResult = null;
+    public RequestResult ReqResult => _requestResult;
+    private StartResponse _responseData = null;
+    public StartResponse ResponseData => _responseData;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    void Setup(string url, string userName, string gameName, string actorName)
+    {
+        _url = url;
+        _userName = userName;
+        _gameName = gameName;
+        _actorName = actorName;
+        _requestResult = null;
+        _responseData = null;
+
+        Debug.Log($"StartAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, ActorName: {_actorName}");
+    }
+
+
+
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
     /// 开始游戏（协程版本）
     /// </summary>
-    public IEnumerator CallCoroutine(string actorName)
+    public IEnumerator CallCoroutine()
     {
-        Debug.Log($"Start game request for actor: {actorName}");
+        //Debug.Log($"Start game request for actor: {actorName}");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -36,19 +56,19 @@ public class StartAction : BaseRequestAction
         // 创建请求数据
         var requestData = new StartRequest
         {
-            user_name = GameContext.Instance.UserName,
-            game_name = GameContext.Instance.GameName,
-            actor_name = actorName
+            user_name = _userName,
+            game_name = _gameName,
+            actor_name = _actorName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-        RequestResult result = null;
+        //RequestResult result = null;
 
         // 发送请求
-        yield return PostRequestCoroutine(GameContext.Instance.StartUrl, jsonData, (response) =>
+        yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -56,11 +76,10 @@ public class StartAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseStartResponse(result.responseText, actorName))
+            if (TryParseResponse(_requestResult.responseText))
             {
-                _lastRequestSuccess = true;
                 Debug.Log("Start game successful");
             }
             else
@@ -70,7 +89,7 @@ public class StartAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"Start game failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Start game failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -81,11 +100,11 @@ public class StartAction : BaseRequestAction
     /// <summary>
     /// 开始游戏（Async 版本）
     /// </summary>
-    public async Task<bool> CallAsync(string actorName)
+    public async Task<bool> CallAsync()
     {
-        Debug.Log($"Start game request async for actor: {actorName}");
+        // Debug.Log($"Start game request async for actor: {actorName}");
 
-        _lastRequestSuccess = false;
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -99,21 +118,20 @@ public class StartAction : BaseRequestAction
             // 创建请求数据
             var requestData = new StartRequest
             {
-                user_name = GameContext.Instance.UserName,
-                game_name = GameContext.Instance.GameName,
-                actor_name = actorName
+                user_name = _userName,
+                game_name = _gameName,
+                actor_name = _actorName
             };
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            var result = await PostRequestAsync(GameContext.Instance.StartUrl, jsonData);
+            _requestResult = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseStartResponse(result.responseText, actorName))
+                if (TryParseResponse(_requestResult.responseText))
                 {
-                    _lastRequestSuccess = true;
                     Debug.Log("Start game successful");
                     return true;
                 }
@@ -124,7 +142,7 @@ public class StartAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"Start game failed: {result.error}");
+                Debug.LogError($"Start game failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -142,12 +160,14 @@ public class StartAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string actorName)
+    public IEnumerator Call(string url, string user, string game, string actor)
     {
+        Setup(url, user, game, actor);
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
-            var task = CallAsync(actorName);
+            var task = CallAsync();
             yield return new WaitUntil(() => task.IsCompleted);
 
             if (task.IsFaulted)
@@ -158,7 +178,7 @@ public class StartAction : BaseRequestAction
         else
         {
             // 使用协程版本
-            yield return CallCoroutine(actorName);
+            yield return CallCoroutine();
         }
     }
 
@@ -169,7 +189,7 @@ public class StartAction : BaseRequestAction
     /// <summary>
     /// 尝试解析开始游戏响应数据
     /// </summary>
-    private bool TryParseStartResponse(string responseText, string actorName)
+    private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
@@ -189,9 +209,7 @@ public class StartAction : BaseRequestAction
 
             Debug.Log($"StartAction.message = {response.message}");
 
-            // 设置角色名称
-            GameContext.Instance.ActorName = actorName;
-
+            _responseData = response;
             return true;
         }
         catch (System.Exception ex)

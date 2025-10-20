@@ -11,21 +11,35 @@ public class LoginAction : BaseRequestAction
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private bool _lastRequestSuccess = false;
+    private string _url;
+    private string _userName;
+    private string _gameName;
+    private RequestResult _requestResult = null;
+    public RequestResult ReqResult => _requestResult;
 
-    public bool LastRequestSuccess => _lastRequestSuccess;
+    private LoginResponse _responseData = null;
+    public LoginResponse ResponseData => _responseData;
+  
+
+    void Setup(string url, string userName, string gameName)
+    {
+        _url = url;
+        _userName = userName;
+        _gameName = gameName;
+        _requestResult = null;
+        _responseData = null;
+
+        Debug.Log($"LoginAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+    }
+
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
     /// 用户登录（协程版本）
     /// </summary>
-    public IEnumerator CallCoroutine(string user, string game)
+    public IEnumerator CallCoroutine()
     {
-        Debug.Log($"Login request for user: {user}, game: {game}");
-
-        _lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -34,16 +48,16 @@ public class LoginAction : BaseRequestAction
         }
 
         // 创建请求数据
-        var requestData = new LoginRequest { user_name = user, game_name = game };
+        var requestData = new LoginRequest { user_name = _userName, game_name = _gameName };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-        RequestResult result = null;
+        //RequestResult result = null;
 
         // 发送请求
-        yield return PostRequestCoroutine(GameContext.Instance.LoginUrl, jsonData, (response) =>
+        yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -51,11 +65,10 @@ public class LoginAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseLoginResponse(result.responseText, user, game))
+            if (TryParseResponse(_requestResult.responseText))
             {
-                _lastRequestSuccess = true;
                 Debug.Log("Login successful");
             }
             else
@@ -65,7 +78,7 @@ public class LoginAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"Login failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Login failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -76,12 +89,8 @@ public class LoginAction : BaseRequestAction
     /// <summary>
     /// 用户登录（Async 版本）
     /// </summary>
-    public async Task<bool> CallAsync(string user, string game)
+    public async Task<bool> CallAsync()
     {
-        Debug.Log($"Login request async for user: {user}, game: {game}");
-
-        _lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -92,18 +101,17 @@ public class LoginAction : BaseRequestAction
         try
         {
             // 创建请求数据
-            var requestData = new LoginRequest { user_name = user, game_name = game };
+            var requestData = new LoginRequest { user_name = _userName, game_name = _gameName };
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            var result = await PostRequestAsync(GameContext.Instance.LoginUrl, jsonData);
+            _requestResult = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseLoginResponse(result.responseText, user, game))
+                if (TryParseResponse(_requestResult.responseText))
                 {
-                    _lastRequestSuccess = true;
                     Debug.Log("Login successful");
                     return true;
                 }
@@ -114,7 +122,7 @@ public class LoginAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"Login failed: {result.error}");
+                Debug.LogError($"Login failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -132,12 +140,14 @@ public class LoginAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string user, string game)
+    public IEnumerator Call(string url, string user, string game)
     {
+        Setup(url, user, game);
+
         if (useAsyncVersion)
         {
             // 使用 async 版本
-            var task = CallAsync(user, game);
+            var task = CallAsync();
             yield return new WaitUntil(() => task.IsCompleted);
 
             if (task.IsFaulted)
@@ -148,7 +158,7 @@ public class LoginAction : BaseRequestAction
         else
         {
             // 使用协程版本
-            yield return CallCoroutine(user, game);
+            yield return CallCoroutine();
         }
     }
 
@@ -159,18 +169,11 @@ public class LoginAction : BaseRequestAction
     /// <summary>
     /// 尝试解析登录响应数据
     /// </summary>
-    private bool TryParseLoginResponse(string responseText, string user, string game)
+    private bool TryParseResponse(string responseText)
     {
-        if (string.IsNullOrEmpty(responseText))
-        {
-            Debug.LogError("Login response text is empty");
-            return false;
-        }
-
         try
         {
             var response = JsonConvert.DeserializeObject<LoginResponse>(responseText);
-
             if (response == null)
             {
                 Debug.LogError("LoginAction response is null");
@@ -179,11 +182,7 @@ public class LoginAction : BaseRequestAction
 
             Debug.Log($"LoginAction.message = {response.message}");
 
-            // 设置登录信息
-            GameContext.Instance.UserName = user;
-            GameContext.Instance.GameName = game;
-            GameContext.Instance.ActorName = "";
-
+            _responseData = response;
             return true;
         }
         catch (System.Exception ex)
