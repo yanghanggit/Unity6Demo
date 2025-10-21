@@ -11,13 +11,66 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     public SessionMessagesAction _sessionMessagesAction;
 
+    public TMP_Text _button1Text;
+    public TMP_Text _button2Text;
+    public TMP_Text _button3Text;
+    public TMP_Text _button4Text;
+    public TMP_Text _button5Text;
+    public TMP_Text _button6Text;
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_werewolfGamePlayAction != null, "_werewolfGamePlayAction is null");
         Debug.Assert(_sessionMessagesAction != null, "_sessionMessagesAction is null");
+        SetupButtonTexts();
     }
 
+    private void SetupButtonTexts()
+    {
+        // 从 WerewolfGameContext 获取所有角色的 appearances
+        List<string> appearances = WerewolfGameContext.Instance.GetAllActorAppearances();
+        
+        // 将 TMP_Text 放入数组便于遍历
+        TMP_Text[] buttonTexts = new TMP_Text[]
+        {
+            _button1Text, _button2Text, _button3Text,
+            _button4Text, _button5Text, _button6Text
+        };
+
+        // 为每个按钮文本设置内容
+        for (int i = 0; i < buttonTexts.Length && i < appearances.Count; i++)
+        {
+            if (buttonTexts[i] != null)
+            {
+                string maskName = ExtractMaskName(appearances[i + 1]); // +1 因为第0个是旁白角色
+                buttonTexts[i].text = maskName;
+                Debug.Log($"Set button {i + 1} text to: {maskName}");
+                Debug.Log($"Actor {i + 1} appearance: {appearances[i + 1]}");
+
+            }
+            else
+            {
+                Debug.LogWarning($"Button {i + 1} text component is null");
+            }
+        }
+    }
+    
+    private string ExtractMaskName(string appearance)
+    {
+        
+        // 查找包含"面具"的词
+        if (appearance.Contains("面具"))
+        {
+            // 提取"XX面具"格式的文本
+            int maskIndex = appearance.IndexOf("面具");
+            if (maskIndex >= 2)
+            {
+                // 提取面具前的2个字符 + "面具"
+                return appearance.Substring(maskIndex - 2, 4);
+            }
+        }
+        return appearance;
+    }
 
     public void OnClickKickOff()
     {
@@ -126,6 +179,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Night()
     {
+        WerewolfGameContext.Instance.ShowMindEvents = true;
+
         // 
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
            WerewolfGameContext.Instance.UserName,

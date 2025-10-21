@@ -3,10 +3,11 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 public partial class WerewolfGameContext
 {
     private static WerewolfGameContext _instance;
-
+    
     public static WerewolfGameContext Instance
     {
         get
@@ -186,6 +187,7 @@ public partial class WerewolfGameContext
         return processedMessages;
     }
 
+    public bool ShowMindEvents = false; // 添加配置字段
     private string FormatAgentEventAsText(JToken dataToken)
     {
         UnityEngine.Debug.Log("body = " + dataToken.ToString());
@@ -199,6 +201,10 @@ public partial class WerewolfGameContext
                 return message;
 
             case EventHead.MIND_EVENT:
+                if (!ShowMindEvents) // 检查配置
+                {
+                    return string.Empty;
+                }
                 MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
                 UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
                 return $"{mindVoiceEvent.actor}...: {mindVoiceEvent.content}";
@@ -215,6 +221,34 @@ public partial class WerewolfGameContext
         }
 
         return "Unknown message type";
+    }
+    
+    public string GetActorAppearance(int actorIndex)
+    {
+        if (actorIndex < 0 || actorIndex >= _actorEntities.Count)
+        {
+            UnityEngine.Debug.LogWarning($"Invalid actor index: {actorIndex}");
+            return "N/A";
+        }
+
+        var serializer = _actorEntities[actorIndex];
+        JObject jObj = JObject.Parse(JsonConvert.SerializeObject(serializer));
+        
+        var components = jObj["components"] as JArray;
+        var appearanceComponent = components?.FirstOrDefault(c => 
+            c["name"]?.ToString() == "AppearanceComponent");
+        
+        return appearanceComponent?["data"]?["appearance"]?.ToString() ?? "N/A";
+    }
+
+    public List<string> GetAllActorAppearances()
+    {
+        List<string> appearances = new List<string>();
+        for (int i = 0; i < _actorEntities.Count; i++)
+        {
+            appearances.Add(GetActorAppearance(i));
+        }
+        return appearances;
     }
 
 }
