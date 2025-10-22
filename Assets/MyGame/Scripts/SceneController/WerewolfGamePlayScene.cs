@@ -18,6 +18,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public TMP_Text _button5Text;
     public TMP_Text _button6Text;
 
+    // Loading 图像（带 Animator 组件的 GameObject）
+    public GameObject _loadingImage;
+
     private bool _isKickOffComplete = false;
     private List<string> _actorNames = new List<string>();
 
@@ -26,6 +29,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_werewolfGamePlayAction != null, "_werewolfGamePlayAction is null");
         Debug.Assert(_sessionMessagesAction != null, "_sessionMessagesAction is null");
+        Debug.Assert(_loadingImage != null, "_loadingImage is null");
+        
+        // 初始状态：隐藏 loading，显示主文本
+        SetLoadingState(false);
+        
         SetupButtonTexts();
     }
 
@@ -123,6 +131,23 @@ public class WerewolfGamePlayScene : MonoBehaviour
         return appearance;
     }
 
+    /// <summary>
+    /// 设置 Loading 状态
+    /// </summary>
+    /// <param name="isLoading">true=显示loading并隐藏文本, false=隐藏loading并显示文本</param>
+    private void SetLoadingState(bool isLoading)
+    {
+        if (_loadingImage != null)
+        {
+            _loadingImage.SetActive(isLoading);
+        }
+        
+        if (_mainText != null)
+        {
+            _mainText.gameObject.SetActive(!isLoading);
+        }
+    }
+
     public void OnClickKickOff()
     {
         Debug.Log("OnClickKickOff");
@@ -156,6 +181,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator KickOff()
     {
+        // 显示 loading 动画，隐藏文本
+        SetLoadingState(true);
+        
         // 发送请求
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
@@ -166,6 +194,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
         if (_werewolfGamePlayAction.ResponseData == null)
         {
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
+            // 出错时也要隐藏 loading
+            SetLoadingState(false);
+            _mainText.text = "开局失败：请求错误";
             yield break;
         }
 
@@ -181,19 +212,25 @@ public class WerewolfGamePlayScene : MonoBehaviour
         if (_sessionMessagesAction.ResponseData == null)
         {
             Debug.LogError("SessionMessagesAction ResponseData is null");
+            // 出错时也要隐藏 loading
+            SetLoadingState(false);
+            _mainText.text = "开局失败：获取消息错误";
             yield break;
         }
 
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
-        // 处理消息（记录已在 GameContext 中做），但 UI 显示为“开局已完成”
+        // 处理消息（记录已在 GameContext 中做），但 UI 显示为"开局已完成"
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
             _sessionMessagesAction.ResponseData.session_messages);
         Debug.Log("Kickoff processed messages:\n" + string.Join("\n", processedMessages));
 
         _isKickOffComplete = true;
         SetupButtonTexts(); // 更新按钮绑定的 actor 名称
+        
+        // 隐藏 loading，显示完成文本
+        SetLoadingState(false);
         _mainText.text = "开局已完成\n点击角色按钮查看对应消息";
     }
 
