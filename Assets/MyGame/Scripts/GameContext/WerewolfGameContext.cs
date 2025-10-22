@@ -61,6 +61,7 @@ public partial class WerewolfGameContext
         public string Actor { get; set; }
         public string Content { get; set; }
         public MessageRecordType MessageType { get; set; }
+        public string Phase { get; set; } // 新增：记录消息所属阶段（如 "kickoff", "night", "day" 等）
     }
 
     public enum MessageRecordType
@@ -72,6 +73,13 @@ public partial class WerewolfGameContext
     
     public List<MessageRecord> MessageRecords => _messageRecords;
 
+    // 新增：当前游戏阶段
+    private string _currentPhase = "";
+    public string CurrentPhase
+    {
+        get => _currentPhase;
+        set => _currentPhase = value;
+    }
 
     private int _lastSequenceId = 0;
     public int LastSequenceId
@@ -173,9 +181,15 @@ public partial class WerewolfGameContext
     }
 
 
-    public List<string> ConvertClientMessagesToText(List<SessionMessage> clientMessages)
+    public List<string> ConvertClientMessagesToText(List<SessionMessage> clientMessages, string phase = "")
     {
         List<string> processedMessages = new List<string>();
+
+        // 如果指定了阶段，更新当前阶段
+        if (!string.IsNullOrEmpty(phase))
+        {
+            _currentPhase = phase;
+        }
 
         for (int i = 0; i < clientMessages.Count; i++)
         {
@@ -192,7 +206,8 @@ public partial class WerewolfGameContext
 
                 case (int)MessageType.GAME:
                     // 处理系统事件
-                    processedMessages.Add("[GAME]: " + JsonConvert.SerializeObject(clientMessage.data));
+                    var gameMessage = FormatGameMessageAsText(clientMessage.data);
+                    processedMessages.Add(gameMessage);
                     break;
 
                 default:
@@ -226,6 +241,7 @@ public partial class WerewolfGameContext
                     Actor = mindVoiceEvent.actor,
                     Content = mindVoiceEvent.content,
                     MessageType = MessageRecordType.Mind,
+                    Phase = _currentPhase,
                 });
 
                 return $"{mindVoiceEvent.actor}...: {mindVoiceEvent.content}";
@@ -240,6 +256,7 @@ public partial class WerewolfGameContext
                     Actor = discussionEvent.actor,
                     Content = discussionEvent.content,
                     MessageType = MessageRecordType.Discussion,
+                    Phase = _currentPhase,
                 });
 
                 return $"{discussionEvent.actor} says: {discussionEvent.content}";
@@ -252,11 +269,55 @@ public partial class WerewolfGameContext
 
         return "Unknown message type";
     }
+
+    private string FormatGameMessageAsText(object data)
+    {
+        try
+        {
+            JObject gameData = JObject.FromObject(data);
+            
+            // 检查是否包含 phase 和 turn_number
+            if (gameData["phase"] != null && gameData["turn_number"] != null)
+            {
+                int turnNumber = gameData["turn_number"].ToObject<int>();
+                string phase = gameData["phase"].ToString();
+                
+                // 计算是第几个回合（从1开始）
+                int roundNumber = (turnNumber + 1) / 2;
+                
+                // 判断是夜晚还是白天（奇数为夜晚，偶数为白天）
+                string timeOfDay = (turnNumber % 2 == 1) ? "夜晚" : "白天";
+                
+                // 格式化输出
+                string ordinal = GetOrdinalNumber(roundNumber);
+                return $"回合{turnNumber}：{ordinal}{timeOfDay}";
+            }
+            
+            // 如果不是预期的格式，返回原始JSON
+            return "[GAME]: " + JsonConvert.SerializeObject(data);
+        }
+        catch (System.Exception ex)
+        {
+            UnityEngine.Debug.LogError($"Error formatting game message: {ex.Message}");
+            return "[GAME]: " + JsonConvert.SerializeObject(data);
+        }
+    }
+    
+    private string GetOrdinalNumber(int number)
+    {
+        return $"第{number}个";
+    }
     
     // 添加辅助方法以根据条件获取消息记录
      public List<MessageRecord> GetMessagesByActor(string actorName)
     {
         return _messageRecords.Where(m => m.Actor == actorName).ToList();
+    }
+
+    // 新增：根据角色和阶段获取消息
+    public List<MessageRecord> GetMessagesByActorAndPhase(string actorName, string phase)
+    {
+        return _messageRecords.Where(m => m.Actor == actorName && m.Phase == phase).ToList();
     }
     
     public void ClearMessageRecords()

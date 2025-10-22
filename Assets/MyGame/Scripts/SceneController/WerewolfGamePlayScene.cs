@@ -22,6 +22,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public GameObject _loadingImage;
 
     private bool _isKickOffComplete = false;
+    private bool _isNightComplete = false;
+    private bool _isDayComplete = false; // 新增：标记 Day 是否完成
     private List<string> _actorNames = new List<string>();
 
     void Start()
@@ -78,10 +80,17 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // 新增：按钮回调（在 Inspector 中传入 0..5）
     public void OnClickActorButton(int buttonIndex)
     {
-        if (!_isKickOffComplete)
+        // Day 阶段后禁用角色按钮功能
+        if (_isDayComplete)
         {
-            Debug.LogWarning("Please complete kick off first!");
-            _mainText.text = "请先完成游戏开局 (Kick Off)";
+            Debug.LogWarning("Actor buttons are disabled after Day phase");
+            return;
+        }
+
+        if (!_isKickOffComplete && !_isNightComplete)
+        {
+            Debug.LogWarning("Please complete kick off");
+            _mainText.text = "请先完成游戏开局 (Kick Off) ";
             return;
         }
 
@@ -92,7 +101,17 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         string actorName = _actorNames[buttonIndex];
-        ShowActorMessages(actorName);
+        
+        // 如果 Night 完成但 Day 未完成，只显示 Night 阶段的消息
+        if (_isNightComplete && !_isDayComplete)
+        {
+            ShowActorMessagesForPhase(actorName, "night");
+        }
+        else
+        {
+            // 否则显示所有消息（KickOff 阶段）
+            ShowActorMessages(actorName);
+        }
     }
 
     private void ShowActorMessages(string actorName)
@@ -106,6 +125,26 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         List<string> displayMessages = new List<string>();
         displayMessages.Add($"=== {actorName} 的消息 ===");
+        foreach (var msg in messages)
+        {
+            string prefix = msg.MessageType == WerewolfGameContext.MessageRecordType.Mind ? "[内心]" : "[发言]";
+            displayMessages.Add($"{prefix} {msg.Content}");
+        }
+        _mainText.text = string.Join("\n", displayMessages);
+    }
+
+    // 新增：显示特定阶段的角色消息
+    private void ShowActorMessagesForPhase(string actorName, string phase)
+    {
+        var messages = WerewolfGameContext.Instance.GetMessagesByActorAndPhase(actorName, phase);
+        if (messages == null || messages.Count == 0)
+        {
+            _mainText.text = $"{actorName} 该阶段没有行动";
+            return;
+        }
+
+        List<string> displayMessages = new List<string>();
+        displayMessages.Add($"=== {actorName} 的{phase}阶段消息 ===");
         foreach (var msg in messages)
         {
             string prefix = msg.MessageType == WerewolfGameContext.MessageRecordType.Mind ? "[内心]" : "[发言]";
@@ -223,7 +262,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 处理消息（记录已在 GameContext 中做），但 UI 显示为"开局已完成"
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
-            _sessionMessagesAction.ResponseData.session_messages);
+            _sessionMessagesAction.ResponseData.session_messages, "kickoff");
         Debug.Log("Kickoff processed messages:\n" + string.Join("\n", processedMessages));
 
         _isKickOffComplete = true;
@@ -273,7 +312,16 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Night()
     {
+        // 检查是否已完成 KickOff
+        if (!_isKickOffComplete)
+        {
+            Debug.LogWarning("Must complete kick off before night!");
+            _mainText.text = "必须先完成游戏开局 (Kick Off) 才能进入夜晚";
+            yield break;
+        }
 
+        // 显示 loading 动画，隐藏文本
+        SetLoadingState(true);
         // 
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
            WerewolfGameContext.Instance.UserName,
@@ -283,6 +331,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         if (_werewolfGamePlayAction.ResponseData == null)
         {
+            SetLoadingState(false);
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
             yield break;
         }
@@ -298,6 +347,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         yield return _sessionMessagesAction.Call();
         if (_sessionMessagesAction.ResponseData == null)
         {
+            SetLoadingState(false);    
             Debug.LogError("SessionMessagesAction ResponseData is null");
             yield break;
         }
@@ -305,12 +355,23 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
-        // 显示结果
-        UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+        // 处理消息（记录已在 GameContext 中做），但 UI 显示为"夜晚行动已完成"
+        var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
+            _sessionMessagesAction.ResponseData.session_messages, "night");
+        Debug.Log("Night processed messages:\n" + string.Join("\n", processedMessages));
+
+        // 标记 Night 完成
+        _isNightComplete = true;
+
+        // 隐藏 loading，显示完成文本
+        SetLoadingState(false);
+        _mainText.text = "夜晚行动已完成\n点击角色按钮查看夜晚行动细节";
     }
 
     private IEnumerator Day()
     {
+        // 显示 loading 动画，隐藏文本
+        SetLoadingState(true);
         // 
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
@@ -320,6 +381,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         if (_werewolfGamePlayAction.ResponseData == null)
         {
+            SetLoadingState(false);
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
             yield break;
         }
@@ -335,6 +397,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         yield return _sessionMessagesAction.Call();
         if (_sessionMessagesAction.ResponseData == null)
         {
+            SetLoadingState(false);
             Debug.LogError("SessionMessagesAction ResponseData is null");
             yield break;
         }
@@ -342,12 +405,19 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
+        // 标记 Day 完成，禁用角色按钮功能
+        _isDayComplete = true;
+
+        SetLoadingState(false);
+
         // 显示结果
         UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
     }
 
     private IEnumerator Vote()
     {
+        // 显示 loading 动画，隐藏文本
+        SetLoadingState(true);
         // 
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
@@ -357,6 +427,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         if (_werewolfGamePlayAction.ResponseData == null)
         {
+            SetLoadingState(false);
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
             yield break;
         }
@@ -372,12 +443,15 @@ public class WerewolfGamePlayScene : MonoBehaviour
         yield return _sessionMessagesAction.Call();
         if (_sessionMessagesAction.ResponseData == null)
         {
+            SetLoadingState(false);
             Debug.LogError("SessionMessagesAction ResponseData is null");
             yield break;
         }
 
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
+
+        SetLoadingState(false);
 
         // 显示结果
         UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
