@@ -56,6 +56,23 @@ public partial class WerewolfGameContext
 
     private List<EntitySerialization> _actorEntities = new List<EntitySerialization>();
 
+    public class MessageRecord
+    {
+        public string Actor { get; set; }
+        public string Content { get; set; }
+        public MessageRecordType MessageType { get; set; }
+    }
+
+    public enum MessageRecordType
+    {
+        Mind,
+        Discussion
+    }
+    private List<MessageRecord> _messageRecords = new List<MessageRecord>();
+    
+    public List<MessageRecord> MessageRecords => _messageRecords;
+
+
     private int _lastSequenceId = 0;
     public int LastSequenceId
     {
@@ -183,11 +200,10 @@ public partial class WerewolfGameContext
                     break;
             }
         }
-
+        UnityEngine.Debug.Log("processedMessages = " + JsonConvert.SerializeObject(processedMessages));
         return processedMessages;
     }
 
-    public bool ShowMindEvents = false; // 添加配置字段
     private string FormatAgentEventAsText(JToken dataToken)
     {
         UnityEngine.Debug.Log("body = " + dataToken.ToString());
@@ -201,17 +217,31 @@ public partial class WerewolfGameContext
                 return message;
 
             case EventHead.MIND_EVENT:
-                if (!ShowMindEvents) // 检查配置
-                {
-                    return string.Empty;
-                }
                 MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
                 UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
+                
+                // 存储心声消息
+                _messageRecords.Add(new MessageRecord
+                {
+                    Actor = mindVoiceEvent.actor,
+                    Content = mindVoiceEvent.content,
+                    MessageType = MessageRecordType.Mind,
+                });
+
                 return $"{mindVoiceEvent.actor}...: {mindVoiceEvent.content}";
 
             case EventHead.DISCUSSION_EVENT:
                 DiscussionEvent discussionEvent = dataToken.ToObject<DiscussionEvent>();
                 UnityEngine.Debug.Log($"DISCUSSION_EVENT: {discussionEvent.actor}: {discussionEvent.content}");
+                
+                // 存储讨论消息
+                _messageRecords.Add(new MessageRecord
+                {
+                    Actor = discussionEvent.actor,
+                    Content = discussionEvent.content,
+                    MessageType = MessageRecordType.Discussion,
+                });
+
                 return $"{discussionEvent.actor} says: {discussionEvent.content}";
 
 
@@ -223,6 +253,17 @@ public partial class WerewolfGameContext
         return "Unknown message type";
     }
     
+    // 添加辅助方法以根据条件获取消息记录
+     public List<MessageRecord> GetMessagesByActor(string actorName)
+    {
+        return _messageRecords.Where(m => m.Actor == actorName).ToList();
+    }
+    
+    public void ClearMessageRecords()
+    {
+        _messageRecords.Clear();
+    }
+
     public string GetActorAppearance(int actorIndex)
     {
         if (actorIndex < 0 || actorIndex >= _actorEntities.Count)
@@ -251,4 +292,20 @@ public partial class WerewolfGameContext
         return appearances;
     }
 
+    // 新增：获取所有 actor 名称（按实体顺序），用于消息匹配
+    public List<string> GetAllActorNames()
+    {
+        List<string> actorNames = new List<string>();
+        for (int i = 0; i < _actorEntities.Count; i++)
+        {
+            var serializer = _actorEntities[i];
+            JObject jObj = JObject.Parse(JsonConvert.SerializeObject(serializer));
+            
+            // 从实体中提取 name 字段
+            string actorName = jObj["name"]?.ToString() ?? "Unknown";
+            actorNames.Add(actorName);
+            UnityEngine.Debug.Log($"Actor Entity {i} name: {actorName}");
+        }
+        return actorNames;
+    }
 }

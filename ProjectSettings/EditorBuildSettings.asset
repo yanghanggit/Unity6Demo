@@ -5,10 +5,10 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/MyGame/Scenes/WerewolfGameLaunchScene.unity
     guid: 0f6b171359a7e45b9942da5fc28b4d86
-  - enabled: 0
+  - enabled: 1
     path: Assets/MyGame/Scenes/WerewolfGamePlayScene.unity
     guid: bdd1b1a127a4a495a8c15156911cb2ee
   - enabled: 1

@@ -17,6 +17,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public TMP_Text _button4Text;
     public TMP_Text _button5Text;
     public TMP_Text _button6Text;
+
+    private bool _isKickOffComplete = false;
+    private List<string> _actorNames = new List<string>();
+
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
@@ -27,26 +31,34 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private void SetupButtonTexts()
     {
-        // 从 WerewolfGameContext 获取所有角色的 appearances
+        // 从 WerewolfGameContext 获取所有角色的 appearances 和原始名字
         List<string> appearances = WerewolfGameContext.Instance.GetAllActorAppearances();
-        
-        // 将 TMP_Text 放入数组便于遍历
+        List<string> actorNames = WerewolfGameContext.Instance.GetAllActorNames();
+
         TMP_Text[] buttonTexts = new TMP_Text[]
         {
             _button1Text, _button2Text, _button3Text,
             _button4Text, _button5Text, _button6Text
         };
+        
+        _actorNames.Clear();
 
-        // 为每个按钮文本设置内容
-        for (int i = 0; i < buttonTexts.Length && i < appearances.Count; i++)
+        // 确保使用 appearances[i+1] 时不会越界（第0个为旁白）
+        for (int i = 0; i < buttonTexts.Length && i + 1 < appearances.Count; i++)
         {
             if (buttonTexts[i] != null)
             {
-                string maskName = ExtractMaskName(appearances[i + 1]); // +1 因为第0个是旁白角色
+                string maskName = ExtractMaskName(appearances[i + 1]); // 按钮显示面具名
                 buttonTexts[i].text = maskName;
-                Debug.Log($"Set button {i + 1} text to: {maskName}");
-                Debug.Log($"Actor {i + 1} appearance: {appearances[i + 1]}");
 
+                // actorNames 使用原始角色名；若没有则回退为面具名
+                string actorName = (actorNames != null && actorNames.Count > i + 1)
+                    ? actorNames[i + 1]
+                    : maskName;
+
+                _actorNames.Add(actorName);
+                Debug.Log($"Set button {i + 1} text to: {maskName} (actor: {actorName})");
+                Debug.Log($"Actor {i + 1} appearance: {appearances[i + 1]}");
             }
             else
             {
@@ -54,7 +66,46 @@ public class WerewolfGamePlayScene : MonoBehaviour
             }
         }
     }
-    
+
+    // 新增：按钮回调（在 Inspector 中传入 0..5）
+    public void OnClickActorButton(int buttonIndex)
+    {
+        if (!_isKickOffComplete)
+        {
+            Debug.LogWarning("Please complete kick off first!");
+            _mainText.text = "请先完成游戏开局 (Kick Off)";
+            return;
+        }
+
+        if (buttonIndex < 0 || buttonIndex >= _actorNames.Count)
+        {
+            Debug.LogWarning($"Invalid button index: {buttonIndex}");
+            return;
+        }
+
+        string actorName = _actorNames[buttonIndex];
+        ShowActorMessages(actorName);
+    }
+
+    private void ShowActorMessages(string actorName)
+    {
+        var messages = WerewolfGameContext.Instance.GetMessagesByActor(actorName);
+        if (messages == null || messages.Count == 0)
+        {
+            _mainText.text = $"{actorName} 暂无消息";
+            return;
+        }
+
+        List<string> displayMessages = new List<string>();
+        displayMessages.Add($"=== {actorName} 的消息 ===");
+        foreach (var msg in messages)
+        {
+            string prefix = msg.MessageType == WerewolfGameContext.MessageRecordType.Mind ? "[内心]" : "[发言]";
+            displayMessages.Add($"{prefix} {msg.Content}");
+        }
+        _mainText.text = string.Join("\n", displayMessages);
+    }
+
     private string ExtractMaskName(string appearance)
     {
         
@@ -136,8 +187,14 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
-        // 显示结果
-        UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+        // 处理消息（记录已在 GameContext 中做），但 UI 显示为“开局已完成”
+        var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
+            _sessionMessagesAction.ResponseData.session_messages);
+        Debug.Log("Kickoff processed messages:\n" + string.Join("\n", processedMessages));
+
+        _isKickOffComplete = true;
+        SetupButtonTexts(); // 更新按钮绑定的 actor 名称
+        _mainText.text = "开局已完成\n点击角色按钮查看对应消息";
     }
 
     private IEnumerator Time()
@@ -179,7 +236,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Night()
     {
-        WerewolfGameContext.Instance.ShowMindEvents = true;
 
         // 
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
