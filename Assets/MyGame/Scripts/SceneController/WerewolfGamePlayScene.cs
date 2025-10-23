@@ -24,6 +24,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
     private bool _isKickOffComplete = false;
     private bool _isNightComplete = false;
     private bool _isDayComplete = false; // 新增：标记 Day 是否完成
+    private bool _areButtonsEnabled = true; // 新增：标记按钮是否启用
     private List<string> _actorNames = new List<string>();
 
     void Start()
@@ -80,10 +81,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // 新增：按钮回调（在 Inspector 中传入 0..5）
     public void OnClickActorButton(int buttonIndex)
     {
-        // Day 阶段后禁用角色按钮功能
-        if (_isDayComplete)
+        // 检查按钮是否被禁用
+        if (!_areButtonsEnabled)
         {
-            Debug.LogWarning("Actor buttons are disabled after Day phase");
+            Debug.LogWarning("Actor buttons are currently disabled (Day phase)");
             return;
         }
 
@@ -147,7 +148,22 @@ public class WerewolfGamePlayScene : MonoBehaviour
         displayMessages.Add($"=== {actorName} 的{phase}阶段消息 ===");
         foreach (var msg in messages)
         {
-            string prefix = msg.MessageType == WerewolfGameContext.MessageRecordType.Mind ? "[内心]" : "[发言]";
+            string prefix;
+            switch (msg.MessageType)
+            {
+                case WerewolfGameContext.MessageRecordType.NightActionEvent:
+                    prefix = "[夜晚行动]";
+                    break;
+                case WerewolfGameContext.MessageRecordType.Mind:
+                    prefix = "[内心]";
+                    break;
+                case WerewolfGameContext.MessageRecordType.Discussion:
+                    prefix = "[发言]";
+                    break;
+                default:
+                    prefix = "[未知]";
+                    break;
+            }
             displayMessages.Add($"{prefix} {msg.Content}");
         }
         _mainText.text = string.Join("\n", displayMessages);
@@ -235,7 +251,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             Debug.LogError("WerewolfGamePlayAction ResponseData is null");
             // 出错时也要隐藏 loading
             SetLoadingState(false);
-            _mainText.text = "开局失败：请求错误";
             yield break;
         }
 
@@ -363,6 +378,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 标记 Night 完成
         _isNightComplete = true;
 
+        // Night 阶段完成后，启用角色按钮
+        _areButtonsEnabled = true;
+        Debug.Log("Night phase completed - Actor buttons ENABLED");
+
         // 隐藏 loading，显示完成文本
         SetLoadingState(false);
         _mainText.text = "夜晚行动已完成\n点击角色按钮查看夜晚行动细节";
@@ -407,6 +426,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 标记 Day 完成，禁用角色按钮功能
         _isDayComplete = true;
+        
+        // Day 阶段完成后，禁用角色按钮
+        _areButtonsEnabled = false;
+        Debug.Log("Day phase completed - Actor buttons DISABLED");
 
         SetLoadingState(false);
 

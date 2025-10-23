@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using UnityEditor.Build.Content;
 public partial class WerewolfGameContext
 {
     private static WerewolfGameContext _instance;
@@ -66,6 +67,7 @@ public partial class WerewolfGameContext
 
     public enum MessageRecordType
     {
+        NightActionEvent,        // 新增：NIGHT_ACTION_EVENT 类型消息（夜晚行动）
         Mind,
         Discussion
     }
@@ -231,6 +233,21 @@ public partial class WerewolfGameContext
                 UnityEngine.Debug.Log("NONE: " + message);
                 return message;
 
+            case EventHead.NIGHT_ACTION_EVENT:
+                NightActionEvent nightActionEvent = dataToken.ToObject<NightActionEvent>();
+                UnityEngine.Debug.Log($"NIGHT_ACTION_EVENT: {nightActionEvent.actor}: {nightActionEvent.message}");
+
+                // 存储 NIGHT_ACTION_EVENT 类型消息
+                _messageRecords.Add(new MessageRecord
+                {
+                    Actor = nightActionEvent.actor,
+                    Content = nightActionEvent.message,
+                    MessageType = MessageRecordType.NightActionEvent,
+                    Phase = _currentPhase,
+                });
+
+                return $"{nightActionEvent.actor} performed a night action.";
+
             case EventHead.MIND_EVENT:
                 MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
                 UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
@@ -314,10 +331,13 @@ public partial class WerewolfGameContext
         return _messageRecords.Where(m => m.Actor == actorName).ToList();
     }
 
-    // 新增：根据角色和阶段获取消息
+    // 新增：根据角色和阶段获取消息（包括该角色的所有类型消息）
     public List<MessageRecord> GetMessagesByActorAndPhase(string actorName, string phase)
     {
-        return _messageRecords.Where(m => m.Actor == actorName && m.Phase == phase).ToList();
+        // 获取该角色在该阶段的所有消息（包括 Mind、Discussion 和 None 类型）
+        return _messageRecords
+            .Where(m => m.Phase == phase && m.Actor == actorName)
+            .ToList();
     }
     
     public void ClearMessageRecords()
