@@ -62,12 +62,12 @@ public partial class WerewolfGameContext
         public string Actor { get; set; }
         public string Content { get; set; }
         public MessageRecordType MessageType { get; set; }
-        public string Phase { get; set; } // 新增：记录消息所属阶段（如 "kickoff", "night", "day" 等）
+        public string Phase { get; set; }
     }
 
     public enum MessageRecordType
     {
-        NightActionEvent,        // 新增：NIGHT_ACTION_EVENT 类型消息（夜晚行动）
+        NightActionEvent,
         Mind,
         Discussion
     }
@@ -75,7 +75,6 @@ public partial class WerewolfGameContext
     
     public List<MessageRecord> MessageRecords => _messageRecords;
 
-    // 新增：当前游戏阶段
     private string _currentPhase = "";
     public string CurrentPhase
     {
@@ -187,16 +186,28 @@ public partial class WerewolfGameContext
     {
         List<string> processedMessages = new List<string>();
 
-        // 如果指定了阶段，更新当前阶段
-        if (!string.IsNullOrEmpty(phase))
+        // 如果是 kickoff 阶段，直接设置
+        if (phase == "kickoff")
         {
             _currentPhase = phase;
         }
-
+        
+        // 先处理 GAME 消息以更新 _currentPhase（FormatGameMessageAsText 会设置精确的阶段标识）
         for (int i = 0; i < clientMessages.Count; i++)
         {
             SessionMessage clientMessage = clientMessages[i];
-            UnityEngine.Debug.Log("clientMessage = " + JsonConvert.SerializeObject(clientMessage));
+            if (clientMessage.message_type == (int)MessageType.GAME)
+            {
+                var gameMessage = FormatGameMessageAsText(clientMessage.data);
+                processedMessages.Add(gameMessage);
+                break;
+            }
+        }
+
+        // 处理其他消息
+        for (int i = 0; i < clientMessages.Count; i++)
+        {
+            SessionMessage clientMessage = clientMessages[i];
 
             switch (clientMessage.message_type)
             {
@@ -207,9 +218,7 @@ public partial class WerewolfGameContext
                     break;
 
                 case (int)MessageType.GAME:
-                    // 处理系统事件
-                    var gameMessage = FormatGameMessageAsText(clientMessage.data);
-                    processedMessages.Add(gameMessage);
+                    // 已在上面处理
                     break;
 
                 default:
@@ -217,27 +226,22 @@ public partial class WerewolfGameContext
                     break;
             }
         }
-        UnityEngine.Debug.Log("processedMessages = " + JsonConvert.SerializeObject(processedMessages));
         return processedMessages;
     }
 
     private string FormatAgentEventAsText(JToken dataToken)
     {
-        UnityEngine.Debug.Log("body = " + dataToken.ToString());
-
         var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
         switch ((EventHead)eventHead)
         {
             case EventHead.NONE:
                 var message = dataToken["message"]?.ToString() ?? "No message";
-                UnityEngine.Debug.Log("NONE: " + message);
                 return message;
 
             case EventHead.NIGHT_ACTION_EVENT:
                 NightActionEvent nightActionEvent = dataToken.ToObject<NightActionEvent>();
                 UnityEngine.Debug.Log($"NIGHT_ACTION_EVENT: {nightActionEvent.actor}: {nightActionEvent.message}");
 
-                // 存储 NIGHT_ACTION_EVENT 类型消息
                 _messageRecords.Add(new MessageRecord
                 {
                     Actor = nightActionEvent.actor,
@@ -250,9 +254,7 @@ public partial class WerewolfGameContext
 
             case EventHead.MIND_EVENT:
                 MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
-                UnityEngine.Debug.Log($"MIND_VOICE_EVENT: {mindVoiceEvent.actor}: {mindVoiceEvent.content}");
                 
-                // 存储心声消息
                 _messageRecords.Add(new MessageRecord
                 {
                     Actor = mindVoiceEvent.actor,
@@ -265,9 +267,7 @@ public partial class WerewolfGameContext
 
             case EventHead.DISCUSSION_EVENT:
                 DiscussionEvent discussionEvent = dataToken.ToObject<DiscussionEvent>();
-                UnityEngine.Debug.Log($"DISCUSSION_EVENT: {discussionEvent.actor}: {discussionEvent.content}");
                 
-                // 存储讨论消息
                 _messageRecords.Add(new MessageRecord
                 {
                     Actor = discussionEvent.actor,
@@ -277,7 +277,6 @@ public partial class WerewolfGameContext
                 });
 
                 return $"{discussionEvent.actor} says: {discussionEvent.content}";
-
 
             default:
                 UnityEngine.Debug.LogWarning("Unknown agent event head: " + eventHead);
@@ -293,24 +292,33 @@ public partial class WerewolfGameContext
         {
             JObject gameData = JObject.FromObject(data);
             
-            // 检查是否包含 phase 和 turn_number
             if (gameData["phase"] != null && gameData["turn_number"] != null)
             {
                 int turnNumber = gameData["turn_number"].ToObject<int>();
                 string phase = gameData["phase"].ToString();
                 
-                // 计算是第几个回合（从1开始）
+                // 根据 phase 和 turn_number 更新 _currentPhase
+                if (phase.ToLower() == "night")
+                {
+                    _currentPhase = $"night_{turnNumber}";
+                }
+                else if (phase.ToLower() == "day")
+                {
+                    _currentPhase = $"day_{turnNumber}";
+                }
+                else
+                {
+                    _currentPhase = $"{phase}_{turnNumber}";
+                }
+                
+                // 计算是第几个回合
                 int roundNumber = (turnNumber + 1) / 2;
-                
-                // 判断是夜晚还是白天（奇数为夜晚，偶数为白天）
                 string timeOfDay = (turnNumber % 2 == 1) ? "夜晚" : "白天";
-                
-                // 格式化输出
                 string ordinal = GetOrdinalNumber(roundNumber);
+                
                 return $"回合{turnNumber}：{ordinal}{timeOfDay}";
             }
             
-            // 如果不是预期的格式，返回原始JSON
             return "[GAME]: " + JsonConvert.SerializeObject(data);
         }
         catch (System.Exception ex)
@@ -325,16 +333,13 @@ public partial class WerewolfGameContext
         return $"第{number}个";
     }
     
-    // 添加辅助方法以根据条件获取消息记录
-     public List<MessageRecord> GetMessagesByActor(string actorName)
+    public List<MessageRecord> GetMessagesByActor(string actorName)
     {
         return _messageRecords.Where(m => m.Actor == actorName).ToList();
     }
 
-    // 新增：根据角色和阶段获取消息（包括该角色的所有类型消息）
     public List<MessageRecord> GetMessagesByActorAndPhase(string actorName, string phase)
     {
-        // 获取该角色在该阶段的所有消息（包括 Mind、Discussion 和 None 类型）
         return _messageRecords
             .Where(m => m.Phase == phase && m.Actor == actorName)
             .ToList();

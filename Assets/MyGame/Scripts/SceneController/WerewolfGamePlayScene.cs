@@ -22,9 +22,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public GameObject _loadingImage;
 
     private bool _isKickOffComplete = false;
-    private bool _isNightComplete = false;
-    private bool _isDayComplete = false; // 新增：标记 Day 是否完成
-    private bool _areButtonsEnabled = true; // 新增：标记按钮是否启用
     private List<string> _actorNames = new List<string>();
 
     void Start()
@@ -81,14 +78,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // 新增：按钮回调（在 Inspector 中传入 0..5）
     public void OnClickActorButton(int buttonIndex)
     {
-        // 检查按钮是否被禁用
-        if (!_areButtonsEnabled)
-        {
-            Debug.LogWarning("Actor buttons are currently disabled (Day phase)");
-            return;
-        }
-
-        if (!_isKickOffComplete && !_isNightComplete)
+        if (!_isKickOffComplete)
         {
             Debug.LogWarning("Please complete kick off");
             _mainText.text = "请先完成游戏开局 (Kick Off) ";
@@ -103,49 +93,33 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         string actorName = _actorNames[buttonIndex];
         
-        // 如果 Night 完成但 Day 未完成，只显示 Night 阶段的消息
-        if (_isNightComplete && !_isDayComplete)
+        // 显示当前阶段的消息
+        string currentPhase = WerewolfGameContext.Instance.CurrentPhase;
+        
+        if (!string.IsNullOrEmpty(currentPhase))
         {
-            ShowActorMessagesForPhase(actorName, "night");
+            Debug.Log($"Showing messages for actor: {actorName}, phase: {currentPhase}");
+            ShowActorMessagesForPhase(actorName, currentPhase);
         }
         else
         {
-            // 否则显示所有消息（KickOff 阶段）
-            ShowActorMessages(actorName);
+            Debug.LogWarning("Current phase is not set");
+            _mainText.text = "当前阶段未设置";
         }
     }
 
-    private void ShowActorMessages(string actorName)
-    {
-        var messages = WerewolfGameContext.Instance.GetMessagesByActor(actorName);
-        if (messages == null || messages.Count == 0)
-        {
-            _mainText.text = $"{actorName} 暂无消息";
-            return;
-        }
-
-        List<string> displayMessages = new List<string>();
-        displayMessages.Add($"=== {actorName} 的消息 ===");
-        foreach (var msg in messages)
-        {
-            string prefix = msg.MessageType == WerewolfGameContext.MessageRecordType.Mind ? "[内心]" : "[发言]";
-            displayMessages.Add($"{prefix} {msg.Content}");
-        }
-        _mainText.text = string.Join("\n", displayMessages);
-    }
-
-    // 新增：显示特定阶段的角色消息
+    // 显示特定阶段的角色消息
     private void ShowActorMessagesForPhase(string actorName, string phase)
     {
         var messages = WerewolfGameContext.Instance.GetMessagesByActorAndPhase(actorName, phase);
         if (messages == null || messages.Count == 0)
         {
-            _mainText.text = $"{actorName} 该阶段没有行动";
+            _mainText.text = $"{actorName} 在 {GetPhaseFriendlyName(phase)} 阶段没有消息";
             return;
         }
 
         List<string> displayMessages = new List<string>();
-        displayMessages.Add($"=== {actorName} 的{phase}阶段消息 ===");
+        displayMessages.Add($"=== {actorName} 的 {GetPhaseFriendlyName(phase)} 阶段消息 ===");
         foreach (var msg in messages)
         {
             string prefix;
@@ -167,6 +141,35 @@ public class WerewolfGamePlayScene : MonoBehaviour
             displayMessages.Add($"{prefix} {msg.Content}");
         }
         _mainText.text = string.Join("\n", displayMessages);
+    }
+
+    // 将阶段标识转换为友好名称
+    private string GetPhaseFriendlyName(string phase)
+    {
+        if (phase == "kickoff")
+        {
+            return "开局";
+        }
+        else if (phase.StartsWith("night_"))
+        {
+            string turnStr = phase.Substring(6); // 提取 turn number
+            if (int.TryParse(turnStr, out int turn))
+            {
+                int nightNumber = (turn + 1) / 2;
+                return $"第{nightNumber}个夜晚";
+            }
+        }
+        else if (phase.StartsWith("day_"))
+        {
+            string turnStr = phase.Substring(4); // 提取 turn number
+            if (int.TryParse(turnStr, out int turn))
+            {
+                int dayNumber = turn / 2;
+                return $"第{dayNumber}个白天";
+            }
+        }
+        
+        return phase; // 如果无法解析，返回原始phase
     }
 
     private string ExtractMaskName(string appearance)
@@ -370,17 +373,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
-        // 处理消息（记录已在 GameContext 中做），但 UI 显示为"夜晚行动已完成"
+        // 处理消息
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
             _sessionMessagesAction.ResponseData.session_messages, "night");
         Debug.Log("Night processed messages:\n" + string.Join("\n", processedMessages));
-
-        // 标记 Night 完成
-        _isNightComplete = true;
-
-        // Night 阶段完成后，启用角色按钮
-        _areButtonsEnabled = true;
-        Debug.Log("Night phase completed - Actor buttons ENABLED");
 
         // 隐藏 loading，显示完成文本
         SetLoadingState(false);
@@ -423,13 +419,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
-
-        // 标记 Day 完成，禁用角色按钮功能
-        _isDayComplete = true;
-        
-        // Day 阶段完成后，禁用角色按钮
-        _areButtonsEnabled = false;
-        Debug.Log("Day phase completed - Actor buttons DISABLED");
 
         SetLoadingState(false);
 
