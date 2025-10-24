@@ -12,6 +12,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     public StagesStateAction _stagesStateAction;
 
+    public WerewolfGameStateAction _werewolfGameStateAction;
+
     public ActorDetailsAction _actorDetailsAction;
 
     public SessionMessagesAction _sessionMessagesAction;
@@ -448,9 +450,34 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
+        // 获取并更新游戏状态（包括胜利条件）
+        yield return UpdateGameStateInTime();
+
+        // 检测并显示胜利条件
+        string victoryCondition = WerewolfGameContext.Instance.VictoryCondition;
+        Debug.Log($"=== Victory Condition Check ===");
+        Debug.Log($"胜利情况: {(string.IsNullOrEmpty(victoryCondition) ? "None" : victoryCondition)}");
+
         StartCoroutine(CheckActorDeathStatus());
-        // 显示结果
-        UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+        
+        // 根据胜利条件显示结果
+        if (victoryCondition == "TOWN_VICTORY")
+        {
+            _mainText.text = "村民胜利！\n游戏将在5秒后退出...";
+            yield return new WaitForSeconds(5f);
+            QuitGame();
+        }
+        else if (victoryCondition == "WEREWOLVES_VICTORY")
+        {
+            _mainText.text = "狼人胜利！\n游戏将在5秒后退出...";
+            yield return new WaitForSeconds(5f);
+            QuitGame();
+        }
+        else
+        {
+            // 没有胜利条件时显示正常消息
+            UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+        }
     }
 
     private IEnumerator Night()
@@ -630,5 +657,47 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         WerewolfGameContext.Instance.LastSequenceId = _sessionMessagesAction.ResponseLastSequenceId;
+    }
+
+    private IEnumerator UpdateGameStateInTime()
+    {
+        // 调用 WerewolfGameStateAction 获取游戏状态（包含 victory_condition）
+        yield return _werewolfGameStateAction.Call(
+            WerewolfGameContext.Instance.StateUrl,
+            WerewolfGameContext.Instance.UserName,
+            WerewolfGameContext.Instance.GameName
+        );
+
+        if (_werewolfGameStateAction.ResponseData == null)
+        {
+            Debug.LogError("WerewolfGameStateAction ResponseData is null");
+            yield break;
+        }
+
+        // 只更新 victory_condition
+        WerewolfGameContext.Instance.UpdateGameState(
+            _werewolfGameStateAction.ResponseData.game_time,
+            new List<string>(), // 不需要更新角色列表
+            "", // 不需要更新场景名
+            _werewolfGameStateAction.ResponseData.victory_condition
+        );
+
+        Debug.Log($"Victory Condition updated: {_werewolfGameStateAction.ResponseData.victory_condition}");
+    }
+
+    /// <summary>
+    /// 退出游戏
+    /// </summary>
+    private void QuitGame()
+    {
+        Debug.Log("Quitting game...");
+        
+#if UNITY_EDITOR
+        // 在编辑器中停止播放
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        // 在构建版本中退出应用
+        Application.Quit();
+#endif
     }
 }

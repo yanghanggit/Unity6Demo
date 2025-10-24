@@ -34,6 +34,7 @@ public class WerewolfGameStateResponse
     //public Dictionary<string, List<string>> mapping;
 
     public int game_time;
+    public string victory_condition;
 }
 
 // [System.Serializable]

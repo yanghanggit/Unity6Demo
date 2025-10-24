@@ -55,6 +55,13 @@ public partial class WerewolfGameContext
 
     private int _gameTime = 0;
 
+    private string _victory_condition = "";
+
+    public string VictoryCondition
+    {
+        get { return _victory_condition; }
+    }
+
     private List<EntitySerialization> _actorEntities = new List<EntitySerialization>();
 
     public class MessageRecord
@@ -96,11 +103,12 @@ public partial class WerewolfGameContext
     }
 
 
-    public void UpdateGameState(int gameTime, List<string> actors, string stageName)
+    public void UpdateGameState(int gameTime, List<string> actors, string stageName, string victory_condition)
     {
         _gameTime = gameTime;
         _actors = actors;
         _stageName = stageName;
+        _victory_condition = victory_condition;
     }
 
     public void UpdateActorEntities(List<EntitySerialization> actorEntities)

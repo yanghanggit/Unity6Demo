@@ -128,7 +128,8 @@ public class WerewolfGameLaunchScene : MonoBehaviour
         WerewolfGameContext.Instance.UpdateGameState(
             _werewolfGameStateAction.ResponseData.game_time,
             uniqueValue,
-            uniqueKey
+            uniqueKey,
+            _werewolfGameStateAction.ResponseData.victory_condition
         );
 
         yield return null;
