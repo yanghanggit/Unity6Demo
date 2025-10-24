@@ -519,7 +519,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92692539bebe448bb92e561662cea152, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WerewolfGame
-  serverUrl: http://192.168.192.59:8000/
+  serverUrl: http://192.168.192.54:8000/
   _rootAction: {fileID: 399892902}
   _werewolfGameStartAction: {fileID: 399892903}
   _werewolfGameStateAction: {fileID: 399892906}

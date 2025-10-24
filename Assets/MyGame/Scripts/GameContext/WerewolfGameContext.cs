@@ -378,6 +378,24 @@ public partial class WerewolfGameContext
         return appearanceComponent?["data"]?["appearance"]?.ToString() ?? "N/A";
     }
 
+    public bool HasDeathComponent(int actorIndex)
+    {
+        if (actorIndex < 0 || actorIndex >= _actorEntities.Count)
+        {
+            UnityEngine.Debug.LogWarning($"Invalid actor index: {actorIndex}");
+            return false;
+        }
+
+        var serializer = _actorEntities[actorIndex];
+        JObject jObj = JObject.Parse(JsonConvert.SerializeObject(serializer));
+
+        var components = jObj["components"] as JArray;
+        var deathComponent = components?.FirstOrDefault(c =>
+            c["name"]?.ToString() == "DeathComponent");
+
+        return deathComponent != null;
+    }
+
     public List<string> GetAllActorAppearances()
     {
         List<string> appearances = new List<string>();

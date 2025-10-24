@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +10,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     public WerewolfGamePlayAction _werewolfGamePlayAction;
 
+    public StagesStateAction _stagesStateAction;
+
+    public ActorDetailsAction _actorDetailsAction;
+
     public SessionMessagesAction _sessionMessagesAction;
 
     public TMP_Text _button1Text;
@@ -17,6 +22,14 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public TMP_Text _button4Text;
     public TMP_Text _button5Text;
     public TMP_Text _button6Text;
+
+    // 按钮组件引用
+    public Button _button1;
+    public Button _button2;
+    public Button _button3;
+    public Button _button4;
+    public Button _button5;
+    public Button _button6;
 
     // Loading 图像（带 Animator 组件的 GameObject）
     public GameObject _loadingImage;
@@ -245,11 +258,76 @@ public class WerewolfGamePlayScene : MonoBehaviour
         {
             _loadingImage.SetActive(isLoading);
         }
-        
+
         if (_mainText != null)
         {
             _mainText.gameObject.SetActive(!isLoading);
         }
+    }
+    private IEnumerator CheckActorDeathStatus()
+    {
+        Debug.Log("=== 检测角色死亡状态 ===");
+        
+        // 获取最新的角色实体数据
+        yield return _actorDetailsAction.Call(
+            WerewolfGameContext.Instance.ActorDetailsUrl,
+            WerewolfGameContext.Instance.GetAllActorNames()
+        );
+
+        if (_actorDetailsAction.ResponseData == null)
+        {
+            Debug.LogError("ActorDetailsAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新角色实体数据
+        WerewolfGameContext.Instance.UpdateActorEntities(
+            _actorDetailsAction.ResponseData.actor_entities_serialization
+        );
+        
+        // 检测每个角色的死亡状态（从索引1开始，跳过旁白）
+        var actorNames = WerewolfGameContext.Instance.GetAllActorNames();
+        for (int i = 1; i < actorNames.Count; i++)
+        {
+            bool hasDeath = WerewolfGameContext.Instance.HasDeathComponent(i);
+            Debug.Log($"{actorNames[i]}: {(hasDeath ? "已死亡 ☠" : "存活 ✓")}");
+            
+            // 更新对应按钮的状态（i-1 是因为按钮索引从0开始，而角色从1开始）
+            if (hasDeath && i - 1 < 6)
+            {
+                UpdateButtonState(i - 1, false);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 更新按钮状态：禁用并变灰
+    /// </summary>
+    /// <param name="buttonIndex">按钮索引 (0-5)</param>
+    /// <param name="isAlive">是否存活</param>
+    private void UpdateButtonState(int buttonIndex, bool isAlive)
+    {
+        Button[] buttons = { _button1, _button2, _button3, _button4, _button5, _button6 };
+        
+        if (buttonIndex < 0 || buttonIndex >= buttons.Length || buttons[buttonIndex] == null)
+        {
+            Debug.LogWarning($"Invalid button at index: {buttonIndex}");
+            return;
+        }
+        
+        Button button = buttons[buttonIndex];
+        button.interactable = isAlive;
+        
+        // 修改按钮颜色
+        ColorBlock colors = button.colors;
+        Color targetColor = isAlive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
+        colors.normalColor = targetColor;
+        colors.highlightedColor = isAlive ? new Color(0.9f, 0.9f, 0.9f, 1f) : targetColor;
+        colors.pressedColor = isAlive ? new Color(0.8f, 0.8f, 0.8f, 1f) : targetColor;
+        colors.disabledColor = targetColor;
+        button.colors = colors;
+        
+        Debug.Log($"Button {buttonIndex + 1}: {(isAlive ? "Active" : "Dead (Disabled)")}");
     }
 
     public void OnClickKickOff()
@@ -370,6 +448,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
+        StartCoroutine(CheckActorDeathStatus());
         // 显示结果
         UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
     }
