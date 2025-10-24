@@ -11,19 +11,20 @@ public class ActorDetailsAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
-
     private string _url;
     private List<string> _actors;
-
     private ActorDetailsResponse _responseData;
-
     public ActorDetailsResponse ResponseData => _responseData;
+    private RequestResult _requestResult = null;
+    public RequestResult ReqResult => _requestResult;
 
     public void Setup(string url, List<string> actors)
     {
         _url = url;
         _actors = actors;
         _responseData = null;
+        _requestResult = null;
+        
         Debug.Log($"ActorDetailsAction setup with URL: {_url} and {actors?.Count ?? 0} actors");
         for (int i = 0; i < actors.Count; i++)
         {
@@ -50,12 +51,11 @@ public class ActorDetailsAction : BaseRequestAction
         string fullUrl = BuildUrl(_actors);
 
         bool requestCompleted = false;
-        RequestResult result = null;
 
         // 发送请求
         yield return GetRequestCoroutine(fullUrl, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -63,9 +63,9 @@ public class ActorDetailsAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
                 //_lastRequestSuccess = true;
                 Debug.Log("View actor successful");
@@ -77,7 +77,7 @@ public class ActorDetailsAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"View actor failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"View actor failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -104,12 +104,12 @@ public class ActorDetailsAction : BaseRequestAction
             Debug.Log($"View actor request URL: {fullUrl}");
 
             // 发送请求
-            var result = await GetRequestAsync(fullUrl);
+            _requestResult = await GetRequestAsync(fullUrl);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
                     Debug.Log("View actor successful");
                     return true;
@@ -121,7 +121,7 @@ public class ActorDetailsAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"View actor failed: {result.error}");
+                Debug.LogError($"View actor failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)

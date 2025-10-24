@@ -15,7 +15,7 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 
     public WerewolfGameStateAction _werewolfGameStateAction;
 
-    public WerewolfGameActorDetailsAction _werewolfGameActorDetailsAction;
+    public ActorDetailsAction _actorDetailsAction;
 
     public Button _nextButton;
 
@@ -23,7 +23,7 @@ public class WerewolfGameLaunchScene : MonoBehaviour
     {
         Debug.Assert(_rootAction != null, "_bootAction is null");
         Debug.Assert(_werewolfGameStartAction != null, "_werewolfGameStartAction is null");
-        Debug.Assert(_werewolfGameActorDetailsAction != null, "_werewolfGameActorDetailsAction is null");
+        Debug.Assert(_actorDetailsAction != null, "_werewolfGameActorDetailsAction is null");
         Debug.Assert(_werewolfGameStateAction != null, "_werewolfGameStateAction is null");
         Debug.Assert(_nextButton != null, "_nextButton is null");
 
@@ -134,12 +134,14 @@ public class WerewolfGameLaunchScene : MonoBehaviour
             break;
         }
 
+        Debug.Log($"Loading actor details for key: {uniqueKey}, actors: {string.Join(", ", uniqueValue)}");
+
         // 发起查看角色请求
-        yield return _werewolfGameActorDetailsAction.Call( WerewolfGameContext.Instance.ActorDetailsUrl,
-            WerewolfGameContext.Instance.UserName,
-            WerewolfGameContext.Instance.GameName,
+        yield return _actorDetailsAction.Call(WerewolfGameContext.Instance.ActorDetailsUrl,
+            //WerewolfGameContext.Instance.UserName,
+            //WerewolfGameContext.Instance.GameName,
             uniqueValue);
-        if (_werewolfGameActorDetailsAction.ResponseData == null)
+        if (_actorDetailsAction.ResponseData == null)
         {
             Debug.LogError("Failed to get Werewolf game actor details.");
             yield break;
@@ -150,7 +152,7 @@ public class WerewolfGameLaunchScene : MonoBehaviour
     {
         // 设置角色实体到游戏上下文
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _werewolfGameActorDetailsAction.ResponseData.actor_entities_serialization
+            _actorDetailsAction.ResponseData.actor_entities_serialization
         );
 
         yield return null;
