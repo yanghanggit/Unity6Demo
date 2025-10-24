@@ -120,6 +120,53 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         List<string> displayMessages = new List<string>();
         displayMessages.Add($"=== {actorName} 的 {GetPhaseFriendlyName(phase)} 阶段消息 ===");
+        
+        AppendMessagesWithPrefix(displayMessages, messages);
+        
+        _mainText.text = string.Join("\n", displayMessages);
+    }
+
+    // 显示新增的消息（从指定索引开始）
+    private void ShowNewlyAddedMessages(int startIndex)
+    {
+        string currentPhase = WerewolfGameContext.Instance.CurrentPhase;
+        List<string> displayMessages = new List<string>();
+        displayMessages.Add($"=== {GetPhaseFriendlyName(currentPhase)} 阶段消息 ===\n");
+        
+        // 获取所有消息记录
+        var allMessages = WerewolfGameContext.Instance.MessageRecords;
+        
+        // 按角色分组新增的消息
+        Dictionary<string, List<WerewolfGameContext.MessageRecord>> newMessagesByActor = 
+            new Dictionary<string, List<WerewolfGameContext.MessageRecord>>();
+        
+        for (int i = startIndex; i < allMessages.Count; i++)
+        {
+            var msg = allMessages[i];
+            if (!newMessagesByActor.ContainsKey(msg.Actor))
+            {
+                newMessagesByActor[msg.Actor] = new List<WerewolfGameContext.MessageRecord>();
+            }
+            newMessagesByActor[msg.Actor].Add(msg);
+        }
+        
+        // 按角色顺序显示
+        foreach (string actorName in _actorNames)
+        {
+            if (newMessagesByActor.ContainsKey(actorName) && newMessagesByActor[actorName].Count > 0)
+            {
+                displayMessages.Add($"--- {actorName} ---");
+                AppendMessagesWithPrefix(displayMessages, newMessagesByActor[actorName]);
+                displayMessages.Add("");
+            }
+        }
+        
+        _mainText.text = string.Join("\n", displayMessages);
+    }
+
+    // 添加带前缀的消息到列表
+    private void AppendMessagesWithPrefix(List<string> displayMessages, List<WerewolfGameContext.MessageRecord> messages)
+    {
         foreach (var msg in messages)
         {
             string prefix;
@@ -140,7 +187,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             }
             displayMessages.Add($"{prefix} {msg.Content}");
         }
-        _mainText.text = string.Join("\n", displayMessages);
     }
 
     // 将阶段标识转换为友好名称
@@ -420,10 +466,17 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
-        SetLoadingState(false);
+        // 记录处理前的消息数量
+        int messageCountBefore = WerewolfGameContext.Instance.MessageRecords.Count;
 
-        // 显示结果
-        UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+        // 处理消息以更新阶段信息（会添加到记录中）
+        WerewolfGameContext.Instance.ConvertClientMessagesToText(
+            _sessionMessagesAction.ResponseData.session_messages, "day");
+
+        SetLoadingState(false);
+        
+        // 只显示本次新增的消息
+        ShowNewlyAddedMessages(messageCountBefore);
     }
 
     private IEnumerator Vote()
