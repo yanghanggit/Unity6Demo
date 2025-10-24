@@ -484,6 +484,7 @@ GameObject:
   - component: {fileID: 399892904}
   - component: {fileID: 399892906}
   - component: {fileID: 399892907}
+  - component: {fileID: 399892908}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -523,6 +524,7 @@ MonoBehaviour:
   _werewolfGameStartAction: {fileID: 399892903}
   _werewolfGameStateAction: {fileID: 399892906}
   _actorDetailsAction: {fileID: 399892907}
+  _stagesStateAction: {fileID: 399892908}
   _nextButton: {fileID: 1202936521}
 --- !u!114 &399892902
 MonoBehaviour:
@@ -592,6 +594,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e1ef5e385ceb46ea824910e77c561a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActorDetailsAction
+  requestTimeout: 30
+  useAsyncVersion: 1
+--- !u!114 &399892908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3be24e7a16bd42a9b0f0a5b47fc88e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StagesStateAction
   requestTimeout: 30
   useAsyncVersion: 1
 --- !u!1 &524838950

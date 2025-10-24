@@ -31,13 +31,13 @@ public class WerewolfGamePlayResponse
 [System.Serializable]
 public class WerewolfGameStateResponse
 {
-    public Dictionary<string, List<string>> mapping;
+    //public Dictionary<string, List<string>> mapping;
 
     public int game_time;
 }
 
-[System.Serializable]
-public class WerewolfGameActorDetailsResponse
-{
-    public List<EntitySerialization> actor_entities_serialization;
-}
+// [System.Serializable]
+// public class WerewolfGameActorDetailsResponse
+// {
+//     public List<EntitySerialization> actor_entities_serialization;
+// }

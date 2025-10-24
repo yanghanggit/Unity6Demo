@@ -154,6 +154,16 @@ public partial class WerewolfGameContext
         }
     }
 
+    
+    public string StagesStateUrl
+    {
+        get
+        {
+            var baseUrl = _rootResponse.endpoints["stages_state"];
+            return $"{baseUrl}{UserName}/{GameName}/state";
+        }
+    }
+
 
     public string StateUrl
     {
