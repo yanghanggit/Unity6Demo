@@ -6,26 +6,27 @@ using Newtonsoft.Json;
 /// <summary>
 /// 查看家园操作，使用改进的 BaseRequestAction
 /// </summary>
-public class HomeStateAction : BaseRequestAction
+public class StagesStateAction : BaseRequestAction
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    // private bool _lastRequestSuccess = false;
-
-    // public bool LastRequestSuccess => _lastRequestSuccess;
-
     private string _url;
 
-    private HomeStateResponse _responseData;
+    private StagesStateResponse _responseData;
 
-    public HomeStateResponse ResponseData => _responseData;
+    public StagesStateResponse ResponseData => _responseData;
+
+    private RequestResult _requestResult = null;
+
+    public RequestResult ReqResult => _requestResult;
 
 
-    public void SetUrl(string url)
+    public void Setup(string url)
     {
         _url = url;
         _responseData = null;
+        _requestResult = null;
         Debug.Log($"HomeStateAction URL set to: {_url}");
     }
 
@@ -40,8 +41,6 @@ public class HomeStateAction : BaseRequestAction
     {
         Debug.Log("View home request started");
 
-        //_lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -50,12 +49,11 @@ public class HomeStateAction : BaseRequestAction
         }
 
         bool requestCompleted = false;
-        RequestResult result = null;
 
         // 发送请求
         yield return GetRequestCoroutine(_url, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -63,11 +61,10 @@ public class HomeStateAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
-                //_lastRequestSuccess = true;
                 Debug.Log("View home successful");
             }
             else
@@ -77,7 +74,7 @@ public class HomeStateAction : BaseRequestAction
         }
         else
         {
-            Debug.LogError($"View home failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"View home failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -92,8 +89,6 @@ public class HomeStateAction : BaseRequestAction
     {
         Debug.Log("View home request async started");
 
-        //_lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -104,14 +99,13 @@ public class HomeStateAction : BaseRequestAction
         try
         {
             // 发送请求
-            var result = await GetRequestAsync(_url);
+            _requestResult = await GetRequestAsync(_url);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
-                    //_lastRequestSuccess = true;
                     Debug.Log("View home successful");
                     return true;
                 }
@@ -122,7 +116,7 @@ public class HomeStateAction : BaseRequestAction
             }
             else
             {
-                Debug.LogError($"View home failed: {result.error}");
+                Debug.LogError($"View home failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
@@ -142,7 +136,7 @@ public class HomeStateAction : BaseRequestAction
     /// </summary>
     public IEnumerator Call(string url)
     {
-        SetUrl(url);
+        Setup(url);
 
         if (useAsyncVersion)
         {
@@ -179,7 +173,7 @@ public class HomeStateAction : BaseRequestAction
 
         try
         {
-            var response = JsonConvert.DeserializeObject<HomeStateResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<StagesStateResponse>(responseText);
 
             if (response == null)
             {

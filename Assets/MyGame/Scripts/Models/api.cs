@@ -160,7 +160,7 @@ public class DungeonStateResponse
  * Home view request/response classes.
  */
 [System.Serializable]
-public class HomeStateResponse
+public class StagesStateResponse
 {
     public Dictionary<string, List<string>> mapping;
 }

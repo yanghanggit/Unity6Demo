@@ -15,7 +15,9 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 
     public WerewolfGameStateAction _werewolfGameStateAction;
 
-    public WerewolfGameActorDetailsAction _werewolfGameActorDetailsAction;
+    public ActorDetailsAction _actorDetailsAction;
+
+    public StagesStateAction _stagesStateAction;
 
     public Button _nextButton;
 
@@ -23,8 +25,9 @@ public class WerewolfGameLaunchScene : MonoBehaviour
     {
         Debug.Assert(_rootAction != null, "_bootAction is null");
         Debug.Assert(_werewolfGameStartAction != null, "_werewolfGameStartAction is null");
-        Debug.Assert(_werewolfGameActorDetailsAction != null, "_werewolfGameActorDetailsAction is null");
+        Debug.Assert(_actorDetailsAction != null, "_werewolfGameActorDetailsAction is null");
         Debug.Assert(_werewolfGameStateAction != null, "_werewolfGameStateAction is null");
+        Debug.Assert(_stagesStateAction != null, "_stagesStateAction is null");
         Debug.Assert(_nextButton != null, "_nextButton is null");
 
         _nextButton.gameObject.SetActive(false);
@@ -86,6 +89,15 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 
     private IEnumerator LoadGameState()
     {
+        //
+        yield return _stagesStateAction.Call(
+            WerewolfGameContext.Instance.StagesStateUrl);
+        if (_stagesStateAction.ResponseData == null)
+        {
+            Debug.LogError("Failed to get Stages state.");
+            yield break;
+        }
+
         // 发起游戏状态请求
         yield return _werewolfGameStateAction.Call(WerewolfGameContext.Instance.StateUrl,
             WerewolfGameContext.Instance.UserName,
@@ -100,13 +112,13 @@ public class WerewolfGameLaunchScene : MonoBehaviour
     private IEnumerator UpdateGameStateContext()
     {
         // 设置游戏上下文
-        Debug.Assert(_werewolfGameStateAction.ResponseData.mapping != null, "Mapping is null in Werewolf game state response.");
-        Debug.Assert(_werewolfGameStateAction.ResponseData.mapping.Count == 1, "Mapping count is not correct in Werewolf game state response.");
+        Debug.Assert(_stagesStateAction.ResponseData.mapping != null, "Mapping is null in Werewolf game state response.");
+        Debug.Assert(_stagesStateAction.ResponseData.mapping.Count == 1, "Mapping count is not correct in Werewolf game state response.");
 
-        // 获取唯一的场景与场景中的角色列表
+        //获取唯一的场景与场景中的角色列表
         string uniqueKey = "";
         List<string> uniqueValue = new List<string>();
-        foreach (var kv in _werewolfGameStateAction.ResponseData.mapping)
+        foreach (var kv in _stagesStateAction.ResponseData.mapping)
         {
             uniqueKey = kv.Key;
             uniqueValue = kv.Value;
@@ -127,19 +139,19 @@ public class WerewolfGameLaunchScene : MonoBehaviour
         // 从游戏状态中获取角色列表
         string uniqueKey = "";
         List<string> uniqueValue = new List<string>();
-        foreach (var kv in _werewolfGameStateAction.ResponseData.mapping)
+        foreach (var kv in _stagesStateAction.ResponseData.mapping)
         {
             uniqueKey = kv.Key;
             uniqueValue = kv.Value;
             break;
         }
 
+        Debug.Log($"Loading actor details for key: {uniqueKey}, actors: {string.Join(", ", uniqueValue)}");
+
         // 发起查看角色请求
-        yield return _werewolfGameActorDetailsAction.Call( WerewolfGameContext.Instance.ActorDetailsUrl,
-            WerewolfGameContext.Instance.UserName,
-            WerewolfGameContext.Instance.GameName,
+        yield return _actorDetailsAction.Call(WerewolfGameContext.Instance.ActorDetailsUrl,
             uniqueValue);
-        if (_werewolfGameActorDetailsAction.ResponseData == null)
+        if (_actorDetailsAction.ResponseData == null)
         {
             Debug.LogError("Failed to get Werewolf game actor details.");
             yield break;
@@ -150,7 +162,7 @@ public class WerewolfGameLaunchScene : MonoBehaviour
     {
         // 设置角色实体到游戏上下文
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _werewolfGameActorDetailsAction.ResponseData.actor_entities_serialization
+            _actorDetailsAction.ResponseData.actor_entities_serialization
         );
 
         yield return null;

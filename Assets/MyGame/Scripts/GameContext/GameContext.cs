@@ -97,7 +97,7 @@ public partial class GameContext
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("login"), "endpoints does not contain login");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("logout"), "endpoints does not contain logout");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_gameplay"), "endpoints does not contain home_gameplay");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_state"), "endpoints does not contain home_state");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("stages_state"), "endpoints does not contain stages_state");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_state"), "endpoints does not contain dungeon_state");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("actor_details"), "endpoints does not contain actor_details");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("start"), "endpoints does not contain start");
@@ -135,7 +135,7 @@ public partial class GameContext
     {
         get
         {
-            var baseUrl = _rootResponse.endpoints["home_state"];
+            var baseUrl = _rootResponse.endpoints["stages_state"];
             return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }

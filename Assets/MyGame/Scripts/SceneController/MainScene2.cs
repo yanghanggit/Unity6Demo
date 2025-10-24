@@ -10,7 +10,7 @@ public class MainScene2 : MonoBehaviour
 
     public LogoutAction _logoutAction;
 
-    public HomeStateAction _viewHomeAction;
+    public StagesStateAction _viewHomeAction;
 
     public ActorDetailsAction _viewActorAction;
 

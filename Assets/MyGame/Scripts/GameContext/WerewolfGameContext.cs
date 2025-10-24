@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Linq;
-using UnityEditor.Build.Content;
+//using UnityEditor.Build.Content;
 public partial class WerewolfGameContext
 {
     private static WerewolfGameContext _instance;
-    
+
     public static WerewolfGameContext Instance
     {
         get
@@ -72,7 +72,7 @@ public partial class WerewolfGameContext
         Discussion
     }
     private List<MessageRecord> _messageRecords = new List<MessageRecord>();
-    
+
     public List<MessageRecord> MessageRecords => _messageRecords;
 
     private string _currentPhase = "";
@@ -149,8 +149,18 @@ public partial class WerewolfGameContext
     {
         get
         {
-            var baseUrl = _rootResponse.endpoints["werewolf_game_actor_details"];
+            var baseUrl = _rootResponse.endpoints["actor_details"];
             return $"{baseUrl}{UserName}/{GameName}/details";
+        }
+    }
+
+    
+    public string StagesStateUrl
+    {
+        get
+        {
+            var baseUrl = _rootResponse.endpoints["stages_state"];
+            return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }
 
@@ -191,7 +201,7 @@ public partial class WerewolfGameContext
         {
             _currentPhase = phase;
         }
-        
+
         // 先处理 GAME 消息以更新 _currentPhase（FormatGameMessageAsText 会设置精确的阶段标识）
         for (int i = 0; i < clientMessages.Count; i++)
         {
@@ -254,7 +264,7 @@ public partial class WerewolfGameContext
 
             case EventHead.MIND_EVENT:
                 MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
-                
+
                 _messageRecords.Add(new MessageRecord
                 {
                     Actor = mindVoiceEvent.actor,
@@ -267,7 +277,7 @@ public partial class WerewolfGameContext
 
             case EventHead.DISCUSSION_EVENT:
                 DiscussionEvent discussionEvent = dataToken.ToObject<DiscussionEvent>();
-                
+
                 _messageRecords.Add(new MessageRecord
                 {
                     Actor = discussionEvent.actor,
@@ -291,12 +301,12 @@ public partial class WerewolfGameContext
         try
         {
             JObject gameData = JObject.FromObject(data);
-            
+
             if (gameData["phase"] != null && gameData["turn_number"] != null)
             {
                 int turnNumber = gameData["turn_number"].ToObject<int>();
                 string phase = gameData["phase"].ToString();
-                
+
                 // 根据 phase 和 turn_number 更新 _currentPhase
                 if (phase.ToLower() == "night")
                 {
@@ -310,15 +320,15 @@ public partial class WerewolfGameContext
                 {
                     _currentPhase = $"{phase}_{turnNumber}";
                 }
-                
+
                 // 计算是第几个回合
                 int roundNumber = (turnNumber + 1) / 2;
                 string timeOfDay = (turnNumber % 2 == 1) ? "夜晚" : "白天";
                 string ordinal = GetOrdinalNumber(roundNumber);
-                
+
                 return $"回合{turnNumber}：{ordinal}{timeOfDay}";
             }
-            
+
             return "[GAME]: " + JsonConvert.SerializeObject(data);
         }
         catch (System.Exception ex)
@@ -327,12 +337,12 @@ public partial class WerewolfGameContext
             return "[GAME]: " + JsonConvert.SerializeObject(data);
         }
     }
-    
+
     private string GetOrdinalNumber(int number)
     {
         return $"第{number}个";
     }
-    
+
     public List<MessageRecord> GetMessagesByActor(string actorName)
     {
         return _messageRecords.Where(m => m.Actor == actorName).ToList();
@@ -344,7 +354,7 @@ public partial class WerewolfGameContext
             .Where(m => m.Phase == phase && m.Actor == actorName)
             .ToList();
     }
-    
+
     public void ClearMessageRecords()
     {
         _messageRecords.Clear();
@@ -360,11 +370,11 @@ public partial class WerewolfGameContext
 
         var serializer = _actorEntities[actorIndex];
         JObject jObj = JObject.Parse(JsonConvert.SerializeObject(serializer));
-        
+
         var components = jObj["components"] as JArray;
-        var appearanceComponent = components?.FirstOrDefault(c => 
+        var appearanceComponent = components?.FirstOrDefault(c =>
             c["name"]?.ToString() == "AppearanceComponent");
-        
+
         return appearanceComponent?["data"]?["appearance"]?.ToString() ?? "N/A";
     }
 
@@ -386,7 +396,7 @@ public partial class WerewolfGameContext
         {
             var serializer = _actorEntities[i];
             JObject jObj = JObject.Parse(JsonConvert.SerializeObject(serializer));
-            
+
             // 从实体中提取 name 字段
             string actorName = jObj["name"]?.ToString() ?? "Unknown";
             actorNames.Add(actorName);
