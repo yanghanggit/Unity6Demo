@@ -376,6 +376,40 @@ public partial class WerewolfGameContext
         _messageRecords.Clear();
     }
 
+    /// <summary>
+    /// 重置所有游戏数据到初始状态，用于重新开始游戏
+    /// </summary>
+    public void Reset()
+    {
+        UnityEngine.Debug.Log("=== Resetting WerewolfGameContext ===");
+        
+        // 重置用户名（下次获取时会重新生成）
+        _userName = string.Empty;
+        
+        // 重置游戏状态相关
+        _stageName = string.Empty;
+        _actors.Clear();
+        _gameTime = 0;
+        _victory_condition = string.Empty;
+        _is_discussion_complete = false;
+        
+        // 重置角色实体数据
+        _actorEntities.Clear();
+        
+        // 重置消息记录
+        _messageRecords.Clear();
+        
+        // 重置当前阶段
+        _currentPhase = string.Empty;
+        
+        // 重置序列ID
+        _lastSequenceId = 0;
+        
+        // 注意：不重置 _rootResponse，因为它包含服务器端点配置，不需要重新获取
+        
+        UnityEngine.Debug.Log("=== WerewolfGameContext Reset Complete ===");
+    }
+
     public string GetActorAppearance(int actorIndex)
     {
         if (actorIndex < 0 || actorIndex >= _actorEntities.Count)

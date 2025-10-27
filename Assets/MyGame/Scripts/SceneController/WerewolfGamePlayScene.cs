@@ -579,16 +579,16 @@ public class WerewolfGamePlayScene : MonoBehaviour
         if (victoryCondition == "TOWN_VICTORY")
         {
             UpdateButtonTextsWithRoles(); // 显示真实身份
-            _mainText.text = "村民胜利！\n游戏将在5秒后退出...";
-            yield return new WaitForSeconds(5f);
-            QuitGame();
+            _mainText.text = "村民胜利！\n游戏将在10秒后重新开始...";
+            yield return new WaitForSeconds(10f);
+            RestartGame();
         }
         else if (victoryCondition == "WEREWOLVES_VICTORY")
         {
             UpdateButtonTextsWithRoles(); // 显示真实身份
-            _mainText.text = "狼人胜利！\n游戏将在5秒后退出...";
-            yield return new WaitForSeconds(5f);
-            QuitGame();
+            _mainText.text = "狼人胜利！\n游戏将在10秒后重新开始...";
+            yield return new WaitForSeconds(10f);
+            RestartGame();
         }
         else
         {
@@ -849,18 +849,16 @@ public class WerewolfGamePlayScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 退出游戏
+    /// 重新开始游戏：重置所有数据并返回到 Launch Scene
     /// </summary>
-    private void QuitGame()
+    private void RestartGame()
     {
-        Debug.Log("Quitting game...");
-
-#if UNITY_EDITOR
-        // 在编辑器中停止播放
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        // 在构建版本中退出应用
-        Application.Quit();
-#endif
+        Debug.Log("Restarting game...");
+        
+        // 重置游戏上下文中的所有数据
+        WerewolfGameContext.Instance.Reset();
+        
+        // 加载 Launch Scene
+        UnityEngine.SceneManagement.SceneManager.LoadScene("WerewolfGameLaunchScene");
     }
 }
