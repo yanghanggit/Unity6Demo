@@ -63,7 +63,7 @@ public partial class WerewolfGameContext
     }
 
     private bool _is_discussion_complete;
-    
+
     public bool IsDiscussionComplete
     {
         get { return _is_discussion_complete; }
@@ -170,7 +170,7 @@ public partial class WerewolfGameContext
         }
     }
 
-    
+
     public string StagesStateUrl
     {
         get
@@ -394,7 +394,7 @@ public partial class WerewolfGameContext
         return appearanceComponent?["data"]?["appearance"]?.ToString() ?? "N/A";
     }
 
-    public bool HasDeathComponent(int actorIndex)
+    private bool HasComponent(int actorIndex, string componentName)
     {
         if (actorIndex < 0 || actorIndex >= _actorEntities.Count)
         {
@@ -404,12 +404,27 @@ public partial class WerewolfGameContext
 
         var serializer = _actorEntities[actorIndex];
         JObject jObj = JObject.Parse(JsonConvert.SerializeObject(serializer));
-
         var components = jObj["components"] as JArray;
-        var deathComponent = components?.FirstOrDefault(c =>
-            c["name"]?.ToString() == "DeathComponent");
 
-        return deathComponent != null;
+        return components?.Any(c => c["name"]?.ToString() == componentName) ?? false;
+    }
+
+    public bool HasDeathComponent(int actorIndex) => HasComponent(actorIndex, "DeathComponent");
+    public bool HasWerewolfComponent(int actorIndex) => HasComponent(actorIndex, "WerewolfComponent");
+    public bool HasSeerComponent(int actorIndex) => HasComponent(actorIndex, "SeerComponent");
+    public bool HasWitchComponent(int actorIndex) => HasComponent(actorIndex, "WitchComponent");
+    public bool HasVillagerComponent(int actorIndex) => HasComponent(actorIndex, "VillagerComponent");
+
+    public string GetActorRole(int actorIndex)
+    {
+        if (actorIndex < 0 || actorIndex >= _actorEntities.Count) return "未知";
+
+        if (HasWerewolfComponent(actorIndex)) return "狼人";
+        if (HasSeerComponent(actorIndex)) return "预言家";
+        if (HasWitchComponent(actorIndex)) return "女巫";
+        if (HasVillagerComponent(actorIndex)) return "村民";
+
+        return "未知";
     }
 
     public List<string> GetAllActorAppearances()

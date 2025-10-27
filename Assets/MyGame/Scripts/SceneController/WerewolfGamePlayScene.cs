@@ -52,10 +52,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
         Debug.Assert(_werewolfGamePlayAction != null, "_werewolfGamePlayAction is null");
         Debug.Assert(_sessionMessagesAction != null, "_sessionMessagesAction is null");
         Debug.Assert(_loadingImage != null, "_loadingImage is null");
-        
+
         // 初始状态：隐藏 loading，显示主文本
         SetLoadingState(false);
-        
+
         SetupButtonTexts();
     }
 
@@ -70,7 +70,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             _button1Text, _button2Text, _button3Text,
             _button4Text, _button5Text, _button6Text
         };
-        
+
         _actorNames.Clear();
 
         // 确保使用 appearances[i+1] 时不会越界（第0个为旁白）
@@ -126,10 +126,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         string actorName = _actorNames[buttonIndex];
-        
+
         // 显示当前阶段的消息
         string currentPhase = WerewolfGameContext.Instance.CurrentPhase;
-        
+
         if (!string.IsNullOrEmpty(currentPhase))
         {
             Debug.Log($"Showing messages for actor: {actorName}, phase: {currentPhase}");
@@ -154,9 +154,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         List<string> displayMessages = new List<string>();
         displayMessages.Add($"=== {actorName} 的 {GetPhaseFriendlyName(phase)} 阶段消息 ===");
-        
+
         AppendMessagesWithPrefix(displayMessages, messages);
-        
+
         _mainText.text = string.Join("\n", displayMessages);
     }
 
@@ -166,14 +166,14 @@ public class WerewolfGamePlayScene : MonoBehaviour
         string currentPhase = WerewolfGameContext.Instance.CurrentPhase;
         List<string> displayMessages = new List<string>();
         displayMessages.Add($"=== {GetPhaseFriendlyName(currentPhase)} 阶段消息 ===\n");
-        
+
         // 获取所有消息记录
         var allMessages = WerewolfGameContext.Instance.MessageRecords;
-        
+
         // 按角色分组新增的消息
-        Dictionary<string, List<WerewolfGameContext.MessageRecord>> newMessagesByActor = 
+        Dictionary<string, List<WerewolfGameContext.MessageRecord>> newMessagesByActor =
             new Dictionary<string, List<WerewolfGameContext.MessageRecord>>();
-        
+
         for (int i = startIndex; i < allMessages.Count; i++)
         {
             var msg = allMessages[i];
@@ -183,7 +183,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             }
             newMessagesByActor[msg.Actor].Add(msg);
         }
-        
+
         // 按角色顺序显示
         foreach (string actorName in _actorNames)
         {
@@ -194,7 +194,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 displayMessages.Add("");
             }
         }
-        
+
         _mainText.text = string.Join("\n", displayMessages);
     }
 
@@ -248,13 +248,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 return $"第{dayNumber}个白天";
             }
         }
-        
+
         return phase; // 如果无法解析，返回原始phase
     }
 
     private string ExtractMaskName(string appearance)
     {
-        
+
         // 查找包含"面具"的词
         if (appearance.Contains("面具"))
         {
@@ -267,6 +267,30 @@ public class WerewolfGamePlayScene : MonoBehaviour
             }
         }
         return appearance;
+    }
+
+    /// <summary>
+    /// 更新按钮文字为真实身份
+    /// </summary>
+    private void UpdateButtonTextsWithRoles()
+    {
+        TMP_Text[] buttonTexts = new TMP_Text[]
+        {
+            _button1Text, _button2Text, _button3Text,
+            _button4Text, _button5Text, _button6Text
+        };
+
+        // 从索引1开始（跳过旁白），对应按钮索引0-5
+        for (int i = 0; i < buttonTexts.Length; i++)
+        {
+            if (buttonTexts[i] != null)
+            {
+                int actorIndex = i + 1; // 角色实体索引（跳过索引0的旁白）
+                string role = WerewolfGameContext.Instance.GetActorRole(actorIndex);
+                buttonTexts[i].text = role;
+                Debug.Log($"Updated button {i + 1} to role: {role} (actorIndex: {actorIndex})");
+            }
+        }
     }
 
     /// <summary>
@@ -303,7 +327,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 将消息转换为文本并检测是否包含"白天"或"夜晚"
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(messages);
-        
+
         foreach (var messageText in processedMessages)
         {
             if (messageText.Contains("白天"))
@@ -335,7 +359,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
     private IEnumerator CheckActorDeathStatus()
     {
         Debug.Log("=== 检测角色死亡状态 ===");
-        
+
         // 获取最新的角色实体数据
         yield return _actorDetailsAction.Call(
             WerewolfGameContext.Instance.ActorDetailsUrl,
@@ -352,14 +376,14 @@ public class WerewolfGamePlayScene : MonoBehaviour
         WerewolfGameContext.Instance.UpdateActorEntities(
             _actorDetailsAction.ResponseData.actor_entities_serialization
         );
-        
+
         // 检测每个角色的死亡状态（从索引1开始，跳过旁白）
         var actorNames = WerewolfGameContext.Instance.GetAllActorNames();
         for (int i = 1; i < actorNames.Count; i++)
         {
             bool hasDeath = WerewolfGameContext.Instance.HasDeathComponent(i);
             Debug.Log($"{actorNames[i]}: {(hasDeath ? "已死亡 ☠" : "存活 ✓")}");
-            
+
             // 更新对应按钮的状态（i-1 是因为按钮索引从0开始，而角色从1开始）
             if (hasDeath && i - 1 < 6)
             {
@@ -367,7 +391,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             }
         }
     }
-    
+
     /// <summary>
     /// 更新按钮状态：禁用并变灰
     /// </summary>
@@ -376,16 +400,16 @@ public class WerewolfGamePlayScene : MonoBehaviour
     private void UpdateButtonState(int buttonIndex, bool isAlive)
     {
         Button[] buttons = { _button1, _button2, _button3, _button4, _button5, _button6 };
-        
+
         if (buttonIndex < 0 || buttonIndex >= buttons.Length || buttons[buttonIndex] == null)
         {
             Debug.LogWarning($"Invalid button at index: {buttonIndex}");
             return;
         }
-        
+
         Button button = buttons[buttonIndex];
         button.interactable = isAlive;
-        
+
         // 修改按钮颜色
         ColorBlock colors = button.colors;
         Color targetColor = isAlive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
@@ -394,7 +418,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         colors.pressedColor = isAlive ? new Color(0.8f, 0.8f, 0.8f, 1f) : targetColor;
         colors.disabledColor = targetColor;
         button.colors = colors;
-        
+
         Debug.Log($"Button {buttonIndex + 1}: {(isAlive ? "Active" : "Dead (Disabled)")}");
     }
 
@@ -443,7 +467,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
-        
+
         // 发送请求
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
@@ -487,10 +511,12 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         _isKickOffComplete = true;
         SetupButtonTexts(); // 更新按钮绑定的 actor 名称
-        
+
         // 隐藏 loading，显示完成文本
         SetLoadingState(false);
         _mainText.text = "开局已完成\n点击角色按钮查看对应消息";
+        // UpdateButtonTextsWithRoles(); // 显示真实身份
+
     }
 
     private IEnumerator Time()
@@ -548,16 +574,18 @@ public class WerewolfGamePlayScene : MonoBehaviour
         Debug.Log($"胜利情况: {(string.IsNullOrEmpty(victoryCondition) ? "None" : victoryCondition)}");
 
         StartCoroutine(CheckActorDeathStatus());
-        
+
         // 根据胜利条件显示结果
         if (victoryCondition == "TOWN_VICTORY")
         {
+            UpdateButtonTextsWithRoles(); // 显示真实身份
             _mainText.text = "村民胜利！\n游戏将在5秒后退出...";
             yield return new WaitForSeconds(5f);
             QuitGame();
         }
         else if (victoryCondition == "WEREWOLVES_VICTORY")
         {
+            UpdateButtonTextsWithRoles(); // 显示真实身份
             _mainText.text = "狼人胜利！\n游戏将在5秒后退出...";
             yield return new WaitForSeconds(5f);
             QuitGame();
@@ -616,7 +644,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         yield return _sessionMessagesAction.Call();
         if (_sessionMessagesAction.ResponseData == null)
         {
-            SetLoadingState(false);    
+            SetLoadingState(false);
             Debug.LogError("SessionMessagesAction ResponseData is null");
             yield break;
         }
@@ -826,7 +854,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
     private void QuitGame()
     {
         Debug.Log("Quitting game...");
-        
+
 #if UNITY_EDITOR
         // 在编辑器中停止播放
         UnityEditor.EditorApplication.isPlaying = false;
