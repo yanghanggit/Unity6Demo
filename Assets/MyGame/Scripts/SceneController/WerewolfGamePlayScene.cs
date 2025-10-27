@@ -33,11 +33,15 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public Button _button5;
     public Button _button6;
 
-    // Loading 图像（带 Animator 组件的 GameObject）
+    // Loading 图像(带 Animator 组件的 GameObject)
     public GameObject _loadingImage;
 
     // 点击角色按钮时显示的图片
     public GameObject _actorDetailsImage;
+
+    // 白天和夜晚背景图片
+    public GameObject _dayBackgroundImage;
+    public GameObject _nightBackgroundImage;
 
     private bool _isKickOffComplete = false;
     private List<string> _actorNames = new List<string>();
@@ -281,6 +285,53 @@ public class WerewolfGamePlayScene : MonoBehaviour
             _mainText.gameObject.SetActive(!isLoading);
         }
     }
+
+    /// <summary>
+    /// 根据消息内容切换背景图片
+    /// </summary>
+    /// <param name="messages">会话消息列表</param>
+    private void SwitchBackgroundByMessages(List<SessionMessage> messages)
+    {
+        if (_dayBackgroundImage == null || _nightBackgroundImage == null)
+        {
+            Debug.LogWarning("Background images not assigned");
+            return;
+        }
+
+        bool hasDay = false;
+        bool hasNight = false;
+
+        // 将消息转换为文本并检测是否包含"白天"或"夜晚"
+        var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(messages);
+        
+        foreach (var messageText in processedMessages)
+        {
+            if (messageText.Contains("白天"))
+            {
+                hasDay = true;
+            }
+            if (messageText.Contains("夜晚"))
+            {
+                hasNight = true;
+            }
+        }
+
+        // 根据检测结果切换背景
+        if (hasDay)
+        {
+            _dayBackgroundImage.SetActive(true);
+            _nightBackgroundImage.SetActive(false);
+            Debug.Log("切换到白天背景");
+        }
+        else if (hasNight)
+        {
+            _dayBackgroundImage.SetActive(false);
+            _nightBackgroundImage.SetActive(true);
+            Debug.Log("切换到夜晚背景");
+        }
+        // 如果两个都没有,保持不变(不做任何操作)
+    }
+
     private IEnumerator CheckActorDeathStatus()
     {
         Debug.Log("=== 检测角色死亡状态 ===");
@@ -484,6 +535,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
+
+        // 根据消息内容切换背景图片
+        SwitchBackgroundByMessages(_sessionMessagesAction.ResponseData.session_messages);
 
         // 获取并更新游戏状态（包括胜利条件）
         yield return UpdateGameStateInTime();
