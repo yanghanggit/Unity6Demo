@@ -36,6 +36,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // Loading 图像（带 Animator 组件的 GameObject）
     public GameObject _loadingImage;
 
+    // 点击角色按钮时显示的图片
+    public GameObject _actorDetailsImage;
+
     private bool _isKickOffComplete = false;
     private List<string> _actorNames = new List<string>();
 
@@ -104,6 +107,18 @@ public class WerewolfGamePlayScene : MonoBehaviour
         {
             Debug.LogWarning($"Invalid button index: {buttonIndex}");
             return;
+        }
+
+        // 显示角色详情图片
+        if (_actorDetailsImage != null)
+        {
+            _actorDetailsImage.SetActive(true);
+        }
+
+        // 修改主文本字体颜色为黑色
+        if (_mainText != null)
+        {
+            _mainText.color = Color.black;
         }
 
         string actorName = _actorNames[buttonIndex];
@@ -365,6 +380,16 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator KickOff()
     {
+        // 隐藏角色详情图片，恢复字体颜色为白色
+        if (_actorDetailsImage != null)
+        {
+            _actorDetailsImage.SetActive(false);
+        }
+        if (_mainText != null)
+        {
+            _mainText.color = Color.white;
+        }
+
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
         
@@ -419,6 +444,16 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Time()
     {
+        // 隐藏角色详情图片，恢复字体颜色为白色
+        if (_actorDetailsImage != null)
+        {
+            _actorDetailsImage.SetActive(false);
+        }
+        if (_mainText != null)
+        {
+            _mainText.color = Color.white;
+        }
+
         //
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
@@ -490,6 +525,16 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
+        // 隐藏角色详情图片，恢复字体颜色为白色
+        if (_actorDetailsImage != null)
+        {
+            _actorDetailsImage.SetActive(false);
+        }
+        if (_mainText != null)
+        {
+            _mainText.color = Color.white;
+        }
+
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
         // 
@@ -537,9 +582,34 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Day()
     {
+        // 隐藏角色详情图片，恢复字体颜色为白色
+        if (_actorDetailsImage != null)
+        {
+            _actorDetailsImage.SetActive(false);
+        }
+        if (_mainText != null)
+        {
+            _mainText.color = Color.white;
+        }
+
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
-        // 
+
+        // 先检查讨论完成状态
+        yield return UpdateGameStateInTime();
+
+        bool isDiscussionComplete = WerewolfGameContext.Instance.IsDiscussionComplete;
+        Debug.Log($"Discussion Complete Status: {isDiscussionComplete}");
+
+        // 如果讨论已完成，直接显示提示信息，不再调用 /day
+        if (isDiscussionComplete)
+        {
+            SetLoadingState(false);
+            _mainText.text = "讨论已完成";
+            yield break;
+        }
+
+        // 讨论未完成，继续执行 /day 命令
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
@@ -580,13 +650,23 @@ public class WerewolfGamePlayScene : MonoBehaviour
             _sessionMessagesAction.ResponseData.session_messages, "day");
 
         SetLoadingState(false);
-        
-        // 只显示本次新增的消息
+
+        // 显示本次新增的消息
         ShowNewlyAddedMessages(messageCountBefore);
     }
 
     private IEnumerator Vote()
     {
+        // 隐藏角色详情图片，恢复字体颜色为白色
+        if (_actorDetailsImage != null)
+        {
+            _actorDetailsImage.SetActive(false);
+        }
+        if (_mainText != null)
+        {
+            _mainText.color = Color.white;
+        }
+
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
         // 
@@ -679,7 +759,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             _werewolfGameStateAction.ResponseData.game_time,
             new List<string>(), // 不需要更新角色列表
             "", // 不需要更新场景名
-            _werewolfGameStateAction.ResponseData.victory_condition
+            _werewolfGameStateAction.ResponseData.victory_condition,
+            _werewolfGameStateAction.ResponseData.is_discussion_complete
         );
 
         Debug.Log($"Victory Condition updated: {_werewolfGameStateAction.ResponseData.victory_condition}");

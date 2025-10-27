@@ -62,6 +62,13 @@ public partial class WerewolfGameContext
         get { return _victory_condition; }
     }
 
+    private bool _is_discussion_complete;
+    
+    public bool IsDiscussionComplete
+    {
+        get { return _is_discussion_complete; }
+    }
+
     private List<EntitySerialization> _actorEntities = new List<EntitySerialization>();
 
     public class MessageRecord
@@ -103,12 +110,13 @@ public partial class WerewolfGameContext
     }
 
 
-    public void UpdateGameState(int gameTime, List<string> actors, string stageName, string victory_condition)
+    public void UpdateGameState(int gameTime, List<string> actors, string stageName, string victory_condition, bool is_discussion_complete)
     {
         _gameTime = gameTime;
         _actors = actors;
         _stageName = stageName;
         _victory_condition = victory_condition;
+        _is_discussion_complete = is_discussion_complete;
     }
 
     public void UpdateActorEntities(List<EntitySerialization> actorEntities)

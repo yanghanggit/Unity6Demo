@@ -35,6 +35,7 @@ public class WerewolfGameStateResponse
 
     public int game_time;
     public string victory_condition;
+    public bool is_discussion_complete;
 }
 
 // [System.Serializable]

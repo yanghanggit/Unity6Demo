@@ -129,7 +129,8 @@ public class WerewolfGameLaunchScene : MonoBehaviour
             _werewolfGameStateAction.ResponseData.game_time,
             uniqueValue,
             uniqueKey,
-            _werewolfGameStateAction.ResponseData.victory_condition
+            _werewolfGameStateAction.ResponseData.victory_condition,
+            _werewolfGameStateAction.ResponseData.is_discussion_complete
         );
 
         yield return null;
