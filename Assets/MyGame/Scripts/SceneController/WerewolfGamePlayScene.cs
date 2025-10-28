@@ -24,6 +24,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public TMP_Text _button4Text;
     public TMP_Text _button5Text;
     public TMP_Text _button6Text;
+    
+    // 下一阶段按钮的Text组件
+    public TMP_Text _nextPhaseButtonText;
 
     // 按钮组件引用
     public Button _button1;
@@ -888,6 +891,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public void OnClickNextPhase()
     {
         Debug.Log($"OnClickNextPhase - Current Phase: {_currentGamePhase}");
+        
+        // 将按钮文字更改为"继续"
+        if (_nextPhaseButtonText != null)
+        {
+            _nextPhaseButtonText.text = "继续";
+        }
+        
         StartCoroutine(ExecuteNextPhase());
     }
 
@@ -1113,6 +1123,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
         
         Debug.Log($"Next Phase Complete - New Phase: {_currentGamePhase}, Completed: {_currentPhaseCompleted}");
+        
+        // 重置按钮文字为当前阶段的提示文本
+        ResetNextPhaseButtonText();
     }
 
     /// <summary>
@@ -1142,6 +1155,17 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 return "点击进入下一个夜晚 (Night)";
             default:
                 return "未知阶段";
+        }
+    }
+
+    /// <summary>
+    /// 重置下一阶段按钮的文字为当前阶段的提示文本
+    /// </summary>
+    public void ResetNextPhaseButtonText()
+    {
+        if (_nextPhaseButtonText != null)
+        {
+            _nextPhaseButtonText.text = GetCurrentPhaseHint();
         }
     }
 }
