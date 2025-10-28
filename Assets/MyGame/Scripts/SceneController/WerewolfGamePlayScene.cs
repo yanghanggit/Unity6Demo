@@ -36,6 +36,23 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public Button _button5;
     public Button _button6;
 
+    // 按钮图像组件引用（用于显示面具图片）
+    public Image _button1Image;
+    public Image _button2Image;
+    public Image _button3Image;
+    public Image _button4Image;
+    public Image _button5Image;
+    public Image _button6Image;
+
+    // 面具图片资源的字典（在 Inspector 中配置）
+    [System.Serializable]
+    public class MaskSpriteEntry
+    {
+        public string maskName;  // 面具名称，如 "处女面具"
+        public Sprite sprite;    // 对应的 Sprite 资源
+    }
+    public MaskSpriteEntry[] maskSprites;  // 面具图片数组
+
     // Loading 图像(带 Animator 组件的 GameObject)
     public GameObject _loadingImage;
 
@@ -88,36 +105,59 @@ public class WerewolfGamePlayScene : MonoBehaviour
         List<string> appearances = WerewolfGameContext.Instance.GetAllActorAppearances();
         List<string> actorNames = WerewolfGameContext.Instance.GetAllActorNames();
 
-        TMP_Text[] buttonTexts = new TMP_Text[]
+        Image[] buttonImages = new Image[]
         {
-            _button1Text, _button2Text, _button3Text,
-            _button4Text, _button5Text, _button6Text
+            _button1Image, _button2Image, _button3Image,
+            _button4Image, _button5Image, _button6Image
         };
 
         _actorNames.Clear();
 
         // 确保使用 appearances[i+1] 时不会越界（第0个为旁白）
-        for (int i = 0; i < buttonTexts.Length && i + 1 < appearances.Count; i++)
+        for (int i = 0; i < buttonImages.Length && i + 1 < appearances.Count; i++)
         {
-            if (buttonTexts[i] != null)
-            {
-                string maskName = ExtractMaskName(appearances[i + 1]); // 按钮显示面具名
-                buttonTexts[i].text = maskName;
+            string maskName = ExtractMaskName(appearances[i + 1]);
+            string actorName = (actorNames != null && actorNames.Count > i + 1) ? actorNames[i + 1] : maskName;
+            _actorNames.Add(actorName);
 
-                // actorNames 使用原始角色名；若没有则回退为面具名
-                string actorName = (actorNames != null && actorNames.Count > i + 1)
-                    ? actorNames[i + 1]
-                    : maskName;
-
-                _actorNames.Add(actorName);
-                Debug.Log($"Set button {i + 1} text to: {maskName} (actor: {actorName})");
-                Debug.Log($"Actor {i + 1} appearance: {appearances[i + 1]}");
-            }
-            else
+            // 根据面具名设置按钮图像
+            if (buttonImages[i] != null)
             {
-                Debug.LogWarning($"Button {i + 1} text component is null");
+                Sprite maskSprite = LoadMaskSprite(maskName);
+                if (maskSprite != null)
+                {
+                    buttonImages[i].sprite = maskSprite;
+                }
+                else
+                {
+                    Debug.LogWarning($"Failed to load sprite for mask: {maskName}");
+                }
             }
         }
+    }
+
+    /// <summary>
+    /// 根据面具名加载对应的 Sprite 资源
+    /// 从预配置的 maskSprites 数组中查找
+    /// </summary>
+    private Sprite LoadMaskSprite(string maskName)
+    {
+        if (maskSprites == null || maskSprites.Length == 0)
+        {
+            Debug.LogWarning("maskSprites array is empty. Please configure it in Inspector.");
+            return null;
+        }
+
+        foreach (var entry in maskSprites)
+        {
+            if (entry.maskName == maskName && entry.sprite != null)
+            {
+                return entry.sprite;
+            }
+        }
+
+        Debug.LogWarning($"Mask sprite not found in maskSprites array: {maskName}");
+        return null;
     }
 
     // 新增：按钮回调（在 Inspector 中传入 0..5）
