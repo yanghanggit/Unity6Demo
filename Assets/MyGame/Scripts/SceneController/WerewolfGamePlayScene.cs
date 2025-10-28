@@ -24,7 +24,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public TMP_Text _button4Text;
     public TMP_Text _button5Text;
     public TMP_Text _button6Text;
-    
+
     // 下一阶段按钮的Text组件
     public TMP_Text _nextPhaseButtonText;
 
@@ -65,7 +65,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private bool _isKickOffComplete = false;
     private List<string> _actorNames = new List<string>();
-    
+
     // 游戏阶段状态枚举
     private enum GamePhase
     {
@@ -79,9 +79,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
         AfterVote,       // 完成投票
         AfterTimeAfterVote    // 完成投票后的时间推进（准备进入下一个夜晚）
     }
-    
+
     private GamePhase _currentGamePhase = GamePhase.NotStarted;
-    
+
     // 标记当前阶段是否成功完成
     private bool _currentPhaseCompleted = true;
     private string _lastErrorMessage = "";
@@ -917,10 +917,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
     private void RestartGame()
     {
         Debug.Log("Restarting game...");
-        
+
         // 重置游戏上下文中的所有数据
         WerewolfGameContext.Instance.Reset();
-        
+
         // 加载 Launch Scene
         UnityEngine.SceneManagement.SceneManager.LoadScene("WerewolfGameLaunchScene");
     }
@@ -931,13 +931,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public void OnClickNextPhase()
     {
         Debug.Log($"OnClickNextPhase - Current Phase: {_currentGamePhase}");
-        
+
         // 将按钮文字更改为"继续"
         if (_nextPhaseButtonText != null)
         {
             _nextPhaseButtonText.text = "继续";
         }
-        
+
         StartCoroutine(ExecuteNextPhase());
     }
 
@@ -952,22 +952,22 @@ public class WerewolfGamePlayScene : MonoBehaviour
             // 显示上次错误信息，但允许重试
             Debug.Log($"Retrying phase after previous failure: {_lastErrorMessage}");
             _mainText.text = $"重试上一阶段\n上次失败原因：{_lastErrorMessage}";
-            
+
             // 清除错误，准备重试
             _lastErrorMessage = "";
         }
-        
+
         // 重置完成标记（每次都重置，允许重试）
         _currentPhaseCompleted = false;
         _lastErrorMessage = "";
-        
+
         switch (_currentGamePhase)
         {
             case GamePhase.NotStarted:
                 // 1. 执行 KickOff 开局
                 Debug.Log("Next Phase: Executing KickOff...");
                 yield return KickOff();
-                
+
                 // 检查 KickOff 是否成功
                 if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
                 {
@@ -975,7 +975,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     _mainText.text = "开局失败，请重试";
                     yield break;
                 }
-                
+
                 _currentPhaseCompleted = true;
                 _currentGamePhase = GamePhase.AfterKickOff;
                 break;
@@ -984,7 +984,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 // 2. 执行第一次 Time 推进时间
                 Debug.Log("Next Phase: Executing Time (after KickOff)...");
                 yield return Time();
-                
+
                 // 检查 Time 是否成功
                 if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
                 {
@@ -992,11 +992,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     _mainText.text = "时间推进失败，请重试";
                     yield break;
                 }
-                
+
                 // 检查游戏是否结束
                 yield return UpdateGameStateInTime();
                 string victoryAfterKickOff = WerewolfGameContext.Instance.VictoryCondition;
-                
+
                 if (victoryAfterKickOff == "TOWN_VICTORY" || victoryAfterKickOff == "WEREWOLVES_VICTORY")
                 {
                     Debug.Log($"Game ended after first Time with condition: {victoryAfterKickOff}");
@@ -1016,7 +1016,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 // 3. 执行 Night 夜晚阶段
                 Debug.Log("Next Phase: Executing Night...");
                 yield return Night();
-                
+
                 // 检查 Night 是否成功
                 if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
                 {
@@ -1024,7 +1024,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     _mainText.text = "夜晚阶段失败，请重试";
                     yield break;
                 }
-                
+
                 _currentPhaseCompleted = true;
                 _currentGamePhase = GamePhase.AfterNight;
                 break;
@@ -1033,7 +1033,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 // 4. 执行 Time 推进时间（夜晚后）
                 Debug.Log("Next Phase: Executing Time (after Night)...");
                 yield return Time();
-                
+
                 // 检查 Time 是否成功
                 if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
                 {
@@ -1041,11 +1041,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     _mainText.text = "时间推进失败，请重试";
                     yield break;
                 }
-                
+
                 // 检查游戏是否结束
                 yield return UpdateGameStateInTime();
                 string victoryAfterNight = WerewolfGameContext.Instance.VictoryCondition;
-                
+
                 if (victoryAfterNight == "TOWN_VICTORY" || victoryAfterNight == "WEREWOLVES_VICTORY")
                 {
                     Debug.Log($"Game ended after Night Time with condition: {victoryAfterNight}");
@@ -1064,7 +1064,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 // 5. 执行 Day 白天讨论（可能需要多次）
                 Debug.Log("Next Phase: Executing Day...");
                 yield return Day();
-                
+
                 // 检查 Day 是否成功
                 if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
                 {
@@ -1072,13 +1072,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     _mainText.text = "白天讨论失败，请重试";
                     yield break;
                 }
-                
+
                 // 检查讨论是否完成
                 yield return UpdateGameStateInTime();
                 bool isDiscussionComplete = WerewolfGameContext.Instance.IsDiscussionComplete;
-                
+
                 _currentPhaseCompleted = true;
-                
+
                 if (isDiscussionComplete)
                 {
                     // 讨论完成，显示提示并等待玩家再次点击
@@ -1096,7 +1096,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             case GamePhase.DiscussionComplete:
                 // 6. 讨论完成后，玩家点击进入投票阶段
                 Debug.Log("Player confirmed discussion complete, proceeding to Vote...");
-                
+
                 // 隐藏角色详情图片，恢复字体颜色为白色
                 if (_actorDetailsImage != null)
                 {
@@ -1106,7 +1106,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 {
                     _mainText.color = Color.white;
                 }
-                
+
                 _currentGamePhase = GamePhase.AfterDay;
                 _mainText.text = "白天讨论已完成\n准备进入投票阶段...";
                 _currentPhaseCompleted = true;
@@ -1116,7 +1116,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 // 7. 执行 Vote 投票阶段
                 Debug.Log("Next Phase: Executing Vote...");
                 yield return Vote();
-                
+
                 // 检查 Vote 是否成功
                 if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
                 {
@@ -1124,7 +1124,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     _mainText.text = "投票阶段失败，请重试";
                     yield break;
                 }
-                
+
                 _currentPhaseCompleted = true;
                 _currentGamePhase = GamePhase.AfterVote;
                 break;
@@ -1133,7 +1133,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 // 7. 执行 Time 推进时间（投票后）
                 Debug.Log("Next Phase: Executing Time (after Vote)...");
                 yield return Time();
-                
+
                 // 检查 Time 是否成功
                 if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
                 {
@@ -1141,11 +1141,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     _mainText.text = "时间推进失败，请重试";
                     yield break;
                 }
-                
+
                 // 检查游戏是否结束
                 yield return UpdateGameStateInTime();
                 string victoryAfterVote = WerewolfGameContext.Instance.VictoryCondition;
-                
+
                 if (victoryAfterVote == "TOWN_VICTORY" || victoryAfterVote == "WEREWOLVES_VICTORY")
                 {
                     Debug.Log($"Game ended with victory condition: {victoryAfterVote}");
@@ -1161,9 +1161,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 }
                 break;
         }
-        
+
         Debug.Log($"Next Phase Complete - New Phase: {_currentGamePhase}, Completed: {_currentPhaseCompleted}");
-        
+
         // 重置按钮文字为当前阶段的提示文本
         ResetNextPhaseButtonText();
     }
