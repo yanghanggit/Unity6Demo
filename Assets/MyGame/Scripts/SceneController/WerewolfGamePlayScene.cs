@@ -96,10 +96,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 初始状态：隐藏 loading，显示主文本
         SetLoadingState(false);
 
-        SetupButtonTexts();
+        SetupButtonImages();
     }
 
-    private void SetupButtonTexts()
+    private void SetupButtonImages()
     {
         // 从 WerewolfGameContext 获取所有角色的 appearances 和原始名字
         List<string> appearances = WerewolfGameContext.Instance.GetAllActorAppearances();
@@ -573,7 +573,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         Debug.Log("Kickoff processed messages:\n" + string.Join("\n", processedMessages));
 
         _isKickOffComplete = true;
-        SetupButtonTexts(); // 更新按钮绑定的 actor 名称
+        SetupButtonImages(); // 更新按钮绑定的 actor 名称
 
         // 隐藏 loading，显示完成文本
         SetLoadingState(false);
