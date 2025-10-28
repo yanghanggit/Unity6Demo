@@ -847,10 +847,65 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 更新最后一个序列ID
         UpdateLastSequenceIdFromResponse();
 
+        // 处理所有消息（包括角色的内心想法等），记录到 GameContext 中
+        var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
+            _sessionMessagesAction.ResponseData.session_messages, "vote");
+        Debug.Log("Vote processed messages:\n" + string.Join("\n", processedMessages));
+
         SetLoadingState(false);
 
-        // 显示结果
-        UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+        // 只显示投票结果（EventHead.NONE 的消息）
+        ShowVoteResultOnly(_sessionMessagesAction.ResponseData.session_messages);
+    }
+
+    /// <summary>
+    /// 只显示投票结果（EventHead.NONE 类型的消息，即游戏事件如"谁被投票出局"）
+    /// 使用 WerewolfGameContext 的统一消息处理逻辑
+    /// </summary>
+    private void ShowVoteResultOnly(List<SessionMessage> messages)
+    {
+        if (messages == null || messages.Count == 0)
+        {
+            _mainText.text = "没有投票结果";
+            return;
+        }
+
+        // 筛选出 EventHead.NONE 类型的消息（游戏事件）
+        List<SessionMessage> voteEventMessages = new List<SessionMessage>();
+
+        foreach (var message in messages)
+        {
+            // 只处理 AGENT_EVENT 类型的消息
+            if (message.message_type == (int)MessageType.AGENT_EVENT && message.data != null)
+            {
+                // 检查是否为 EventHead.NONE（游戏事件消息）
+                if (message.data.ContainsKey("head"))
+                {
+                    object headObj = message.data["head"];
+                    
+                    // 转换 head 值并检查是否为 EventHead.NONE
+                    int headValue = headObj is int intHead ? intHead : 
+                                   headObj is long longHead ? (int)longHead : 
+                                   int.TryParse(headObj?.ToString(), out int parsedHead) ? parsedHead : -1;
+                    
+                    if (headValue == (int)EventHead.NONE)
+                    {
+                        voteEventMessages.Add(message);
+                    }
+                }
+            }
+        }
+
+        // 使用统一的消息处理方法显示结果
+        if (voteEventMessages.Count > 0)
+        {
+            var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(voteEventMessages);
+            _mainText.text = "投票阶段结果：\n" + string.Join("\n", processedMessages) + "\n\n点击角色按钮查看详细消息";
+        }
+        else
+        {
+            _mainText.text = "投票完成，但没有找到出局结果";
+        }
     }
 
     private void UpdateMainTextByClientMessages(List<SessionMessage> messages)
