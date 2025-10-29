@@ -49,7 +49,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public GameObject _dayBackgroundImage;
     public GameObject _nightBackgroundImage;
 
+    // 新增的界面和按钮
+    public GameObject _newPanel;  // 新的界面面板
     private bool _isKickOffComplete = false;
+    private bool _isPanelVisible = false;  // 记录新界面的显示状态
     private List<string> _actorNames = new List<string>();
 
     // 游戏阶段状态枚举
@@ -81,6 +84,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 初始状态：隐藏 loading，显示主文本
         SetLoadingState(false);
+
+        // 初始化新界面：默认隐藏
+        if (_newPanel != null)
+        {
+            _newPanel.SetActive(false);
+            _isPanelVisible = false;
+        }
 
         SetupButtonImages();
     }
@@ -352,12 +362,28 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     /// <summary>
     /// 点击关闭按钮时隐藏角色详情面板
-    /// 可以在 Unity Inspector 中绑定到按钮的 OnClick 事件
-    /// </summary>
     public void OnClickCloseActorDetails()
     {
         Debug.Log("OnClickCloseActorDetails - Hiding actor details panel");
         HideActorDetailsPanel();
+    }
+
+    /// <summary>
+    /// 切换新界面的显示/隐藏状态
+    /// </summary>
+    public void OnClickTogglePanel()
+    {
+        _isPanelVisible = !_isPanelVisible;
+        
+        if (_newPanel != null)
+        {
+            _newPanel.SetActive(_isPanelVisible);
+            Debug.Log($"Toggle panel - New state: {(_isPanelVisible ? "Visible" : "Hidden")}");
+        }
+        else
+        {
+            Debug.LogWarning("_newPanel is not assigned in Inspector");
+        }
     }
 
     /// <summary>
