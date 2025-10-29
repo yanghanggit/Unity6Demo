@@ -8,6 +8,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
 {
     public TMP_Text _mainText;
 
+    public TMP_Text _subText;
+
     public WerewolfGamePlayAction _werewolfGamePlayAction;
 
     public StagesStateAction _stagesStateAction;
@@ -18,38 +20,20 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     public SessionMessagesAction _sessionMessagesAction;
 
-    public TMP_Text _button1Text;
-    public TMP_Text _button2Text;
-    public TMP_Text _button3Text;
-    public TMP_Text _button4Text;
-    public TMP_Text _button5Text;
-    public TMP_Text _button6Text;
+    // 角色按钮相关组件数组（在 Inspector 中配置，长度为6）
+    public TMP_Text[] actorButtonTexts = new TMP_Text[6];
+    public Button[] actorButtons = new Button[6];
+    public Image[] actorButtonImages = new Image[6];
 
     // 下一阶段按钮的Text组件
     public TMP_Text _nextPhaseButtonText;
-
-    // 按钮组件引用
-    public Button _button1;
-    public Button _button2;
-    public Button _button3;
-    public Button _button4;
-    public Button _button5;
-    public Button _button6;
-
-    // 按钮图像组件引用（用于显示面具图片）
-    public Image _button1Image;
-    public Image _button2Image;
-    public Image _button3Image;
-    public Image _button4Image;
-    public Image _button5Image;
-    public Image _button6Image;
 
     // 面具图片资源的字典（在 Inspector 中配置）
     [System.Serializable]
     public class MaskSpriteEntry
     {
         public string maskName;  // 面具名称，如 "处女面具"
-        public Sprite sprite;    // 对应的 Sprite 资源
+        public Sprite maskImage;    // 对应的 Sprite 资源
     }
     public MaskSpriteEntry[] maskSprites;  // 面具图片数组
 
@@ -57,6 +41,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public GameObject _loadingImage;
 
     // 点击角色按钮时显示的图片
+    public GameObject _actorDetailsBackgroundImage;
+
     public GameObject _actorDetailsImage;
 
     // 白天和夜晚背景图片
@@ -105,28 +91,22 @@ public class WerewolfGamePlayScene : MonoBehaviour
         List<string> appearances = WerewolfGameContext.Instance.GetAllActorAppearances();
         List<string> actorNames = WerewolfGameContext.Instance.GetAllActorNames();
 
-        Image[] buttonImages = new Image[]
-        {
-            _button1Image, _button2Image, _button3Image,
-            _button4Image, _button5Image, _button6Image
-        };
-
         _actorNames.Clear();
 
         // 确保使用 appearances[i+1] 时不会越界（第0个为旁白）
-        for (int i = 0; i < buttonImages.Length && i + 1 < appearances.Count; i++)
+        for (int i = 0; i < actorButtonImages.Length && i + 1 < appearances.Count; i++)
         {
             string maskName = ExtractMaskName(appearances[i + 1]);
             string actorName = (actorNames != null && actorNames.Count > i + 1) ? actorNames[i + 1] : maskName;
             _actorNames.Add(actorName);
 
             // 根据面具名设置按钮图像
-            if (buttonImages[i] != null)
+            if (actorButtonImages[i] != null)
             {
                 Sprite maskSprite = LoadMaskSprite(maskName);
                 if (maskSprite != null)
                 {
-                    buttonImages[i].sprite = maskSprite;
+                    actorButtonImages[i].sprite = maskSprite;
                 }
                 else
                 {
@@ -150,9 +130,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         foreach (var entry in maskSprites)
         {
-            if (entry.maskName == maskName && entry.sprite != null)
+            if (entry.maskName == maskName && entry.maskImage != null)
             {
-                return entry.sprite;
+                return entry.maskImage;
             }
         }
 
@@ -177,15 +157,24 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         // 显示角色详情图片
-        if (_actorDetailsImage != null)
+        if (_actorDetailsBackgroundImage != null)
         {
-            _actorDetailsImage.SetActive(true);
+            _actorDetailsBackgroundImage.SetActive(true);
         }
 
-        // 修改主文本字体颜色为黑色
-        if (_mainText != null)
+        // 将角色详情图片换成对应按钮的图片
+        if (_actorDetailsImage != null && buttonIndex >= 0 && buttonIndex < actorButtonImages.Length)
         {
-            _mainText.color = Color.black;
+            Image detailsImage = _actorDetailsImage.GetComponent<Image>();
+            if (detailsImage != null && actorButtonImages[buttonIndex] != null)
+            {
+                detailsImage.sprite = actorButtonImages[buttonIndex].sprite;
+                Debug.Log($"Updated actor details image to match button {buttonIndex + 1}");
+            }
+            else
+            {
+                Debug.LogWarning($"Failed to update actor details image: detailsImage={detailsImage != null}, actorButtonImage={actorButtonImages[buttonIndex] != null}");
+            }
         }
 
         string actorName = _actorNames[buttonIndex];
@@ -201,7 +190,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         else
         {
             Debug.LogWarning("Current phase is not set");
-            _mainText.text = "当前阶段未设置";
+            _subText.text = "当前阶段未设置";
         }
     }
 
@@ -211,7 +200,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         var messages = WerewolfGameContext.Instance.GetMessagesByActorAndPhase(actorName, phase);
         if (messages == null || messages.Count == 0)
         {
-            _mainText.text = $"{actorName} 在 {GetPhaseFriendlyName(phase)} 阶段没有消息";
+            _subText.text = $"{actorName} 在 {GetPhaseFriendlyName(phase)} 阶段没有消息";
             return;
         }
 
@@ -220,7 +209,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         AppendMessagesWithPrefix(displayMessages, messages);
 
-        _mainText.text = string.Join("\n", displayMessages);
+        _subText.text = string.Join("\n", displayMessages);
     }
 
     // 显示新增的消息（从指定索引开始）
@@ -337,23 +326,38 @@ public class WerewolfGamePlayScene : MonoBehaviour
     /// </summary>
     private void UpdateButtonTextsWithRoles()
     {
-        TMP_Text[] buttonTexts = new TMP_Text[]
-        {
-            _button1Text, _button2Text, _button3Text,
-            _button4Text, _button5Text, _button6Text
-        };
-
         // 从索引1开始（跳过旁白），对应按钮索引0-5
-        for (int i = 0; i < buttonTexts.Length; i++)
+        for (int i = 0; i < actorButtonTexts.Length; i++)
         {
-            if (buttonTexts[i] != null)
+            if (actorButtonTexts[i] != null)
             {
                 int actorIndex = i + 1; // 角色实体索引（跳过索引0的旁白）
                 string role = WerewolfGameContext.Instance.GetActorRole(actorIndex);
-                buttonTexts[i].text = role;
+                actorButtonTexts[i].text = role;
                 Debug.Log($"Updated button {i + 1} to role: {role} (actorIndex: {actorIndex})");
             }
         }
+    }
+
+    /// <summary>
+    /// 隐藏角色详情面板
+    /// </summary>
+    private void HideActorDetailsPanel()
+    {
+        if (_actorDetailsBackgroundImage != null)
+        {
+            _actorDetailsBackgroundImage.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 点击关闭按钮时隐藏角色详情面板
+    /// 可以在 Unity Inspector 中绑定到按钮的 OnClick 事件
+    /// </summary>
+    public void OnClickCloseActorDetails()
+    {
+        Debug.Log("OnClickCloseActorDetails - Hiding actor details panel");
+        HideActorDetailsPanel();
     }
 
     /// <summary>
@@ -462,15 +466,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
     /// <param name="isAlive">是否存活</param>
     private void UpdateButtonState(int buttonIndex, bool isAlive)
     {
-        Button[] buttons = { _button1, _button2, _button3, _button4, _button5, _button6 };
-
-        if (buttonIndex < 0 || buttonIndex >= buttons.Length || buttons[buttonIndex] == null)
+        if (buttonIndex < 0 || buttonIndex >= actorButtons.Length || actorButtons[buttonIndex] == null)
         {
             Debug.LogWarning($"Invalid button at index: {buttonIndex}");
             return;
         }
 
-        Button button = buttons[buttonIndex];
+        Button button = actorButtons[buttonIndex];
         button.interactable = isAlive;
 
         // 修改按钮颜色
@@ -518,15 +520,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator KickOff()
     {
-        // 隐藏角色详情图片，恢复字体颜色为白色
-        if (_actorDetailsImage != null)
-        {
-            _actorDetailsImage.SetActive(false);
-        }
-        if (_mainText != null)
-        {
-            _mainText.color = Color.white;
-        }
+        // 隐藏角色详情图片
+        HideActorDetailsPanel();
 
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
@@ -584,15 +579,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Time()
     {
-        // 隐藏角色详情图片，恢复字体颜色为白色
-        if (_actorDetailsImage != null)
-        {
-            _actorDetailsImage.SetActive(false);
-        }
-        if (_mainText != null)
-        {
-            _mainText.color = Color.white;
-        }
+        // 隐藏角色详情图片
+        HideActorDetailsPanel();
 
         //
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
@@ -670,15 +658,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield break;
         }
 
-        // 隐藏角色详情图片，恢复字体颜色为白色
-        if (_actorDetailsImage != null)
-        {
-            _actorDetailsImage.SetActive(false);
-        }
-        if (_mainText != null)
-        {
-            _mainText.color = Color.white;
-        }
+        // 隐藏角色详情图片
+        HideActorDetailsPanel();
 
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
@@ -727,15 +708,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Day()
     {
-        // 隐藏角色详情图片，恢复字体颜色为白色
-        if (_actorDetailsImage != null)
-        {
-            _actorDetailsImage.SetActive(false);
-        }
-        if (_mainText != null)
-        {
-            _mainText.color = Color.white;
-        }
+        // 隐藏角色详情图片
+        HideActorDetailsPanel();
 
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
@@ -802,15 +776,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private IEnumerator Vote()
     {
-        // 隐藏角色详情图片，恢复字体颜色为白色
-        if (_actorDetailsImage != null)
-        {
-            _actorDetailsImage.SetActive(false);
-        }
-        if (_mainText != null)
-        {
-            _mainText.color = Color.white;
-        }
+        // 隐藏角色详情图片
+        HideActorDetailsPanel();
 
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
@@ -1152,15 +1119,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 // 6. 讨论完成后，玩家点击进入投票阶段
                 Debug.Log("Player confirmed discussion complete, proceeding to Vote...");
 
-                // 隐藏角色详情图片，恢复字体颜色为白色
-                if (_actorDetailsImage != null)
-                {
-                    _actorDetailsImage.SetActive(false);
-                }
-                if (_mainText != null)
-                {
-                    _mainText.color = Color.white;
-                }
+                // 隐藏角色详情图片
+                HideActorDetailsPanel();
 
                 _currentGamePhase = GamePhase.AfterDay;
                 _mainText.text = "白天讨论已完成\n准备进入投票阶段...";
