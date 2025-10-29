@@ -28,6 +28,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // 下一阶段按钮的Text组件
     public TMP_Text _nextPhaseButtonText;
 
+    // 角色选择 Dropdown 组件（在 Inspector 中配置）
+    public TMP_Dropdown _WolfDropdown1;
+    public TMP_Dropdown _WitchDropdown;
+    public TMP_Dropdown _WolfDropdown2;
+    public TMP_Dropdown _SeerDropdown;
+    public TMP_Text _guessResultText;
+
     // 面具图片资源的字典（在 Inspector 中配置）
     [System.Serializable]
     public class MaskSpriteEntry
@@ -350,6 +357,255 @@ public class WerewolfGamePlayScene : MonoBehaviour
     }
 
     /// <summary>
+    /// 初始化所有角色 Dropdown 组件，填充角色名选项（跳过旁白）
+    /// </summary>
+    private void InitializeActorDropdown()
+    {
+        // 获取所有角色名（跳过第一个，即旁白）
+        List<string> actorNames = WerewolfGameContext.Instance.GetAllActorNames();
+        
+        // 创建选项列表（从索引 1 开始，跳过旁白）
+        List<string> dropdownOptions = new List<string>();
+        for (int i = 1; i < actorNames.Count && i <= 6; i++)
+        {
+            dropdownOptions.Add(actorNames[i]);
+        }
+
+        // 初始化所有 Dropdown
+        InitializeSingleDropdown(_WolfDropdown1, dropdownOptions, "WolfDropdown1");
+        InitializeSingleDropdown(_WolfDropdown2, dropdownOptions, "WolfDropdown2");
+        InitializeSingleDropdown(_WitchDropdown, dropdownOptions, "WitchDropdown");
+        InitializeSingleDropdown(_SeerDropdown, dropdownOptions, "SeerDropdown");
+
+        Debug.Log($"All Dropdowns initialized with {dropdownOptions.Count} actors: {string.Join(", ", dropdownOptions)}");
+    }
+
+    /// <summary>
+    /// 初始化单个 Dropdown 组件
+    /// </summary>
+    private void InitializeSingleDropdown(TMP_Dropdown dropdown, List<string> options, string dropdownName)
+    {
+        if (dropdown == null)
+        {
+            Debug.LogWarning($"{dropdownName} is not assigned in Inspector");
+            return;
+        }
+
+        // 清空现有选项
+        dropdown.ClearOptions();
+
+        // 添加选项到 Dropdown
+        dropdown.AddOptions(options);
+
+        // 设置默认选中第一个角色
+        if (options.Count > 0)
+        {
+            dropdown.value = 0;
+        }
+
+        Debug.Log($"{dropdownName} initialized successfully");
+    }
+
+    /// <summary>
+    /// 获取指定 Dropdown 选中的角色名
+    /// </summary>
+    private string GetSelectedActorFromDropdown(TMP_Dropdown dropdown, string dropdownName)
+    {
+        if (dropdown == null)
+        {
+            Debug.LogWarning($"{dropdownName} is not assigned");
+            return string.Empty;
+        }
+
+        if (dropdown.options.Count == 0)
+        {
+            Debug.LogWarning($"{dropdownName} has no options");
+            return string.Empty;
+        }
+
+        int selectedIndex = dropdown.value;
+        if (selectedIndex >= 0 && selectedIndex < dropdown.options.Count)
+        {
+            return dropdown.options[selectedIndex].text;
+        }
+
+        return string.Empty;
+    }
+
+    /// <summary>
+    /// 获取狼人1 Dropdown 选中的角色名
+    /// </summary>
+    public string GetSelectedWolf1()
+    {
+        return GetSelectedActorFromDropdown(_WolfDropdown1, "WolfDropdown1");
+    }
+
+    /// <summary>
+    /// 获取狼人2 Dropdown 选中的角色名
+    /// </summary>
+    public string GetSelectedWolf2()
+    {
+        return GetSelectedActorFromDropdown(_WolfDropdown2, "WolfDropdown2");
+    }
+
+    /// <summary>
+    /// 获取女巫 Dropdown 选中的角色名
+    /// </summary>
+    public string GetSelectedWitch()
+    {
+        return GetSelectedActorFromDropdown(_WitchDropdown, "WitchDropdown");
+    }
+
+    /// <summary>
+    /// 获取预言家 Dropdown 选中的角色名
+    /// </summary>
+    public string GetSelectedSeer()
+    {
+        return GetSelectedActorFromDropdown(_SeerDropdown, "SeerDropdown");
+    }
+
+
+    /// <summary>
+    /// 打印所有 Dropdown 的当前选择（用于调试）
+    /// </summary>
+    public void LogAllDropdownSelections()
+    {
+        Debug.Log("=== Current Dropdown Selections ===");
+        Debug.Log($"Wolf1: {GetSelectedWolf1()}");
+        Debug.Log($"Wolf2: {GetSelectedWolf2()}");
+        Debug.Log($"Witch: {GetSelectedWitch()}");
+        Debug.Log($"Seer: {GetSelectedSeer()}");
+    }
+
+    /// <summary>
+    /// 点击检测结果按钮时调用：验证所有 Dropdown 中选择的角色身份是否正确
+    /// </summary>
+    public void OnClickGuessResult()
+    {
+        if (!_isKickOffComplete)
+        {
+            Debug.LogWarning("Please complete kick off before guessing");
+            if (_guessResultText != null)
+            {
+                _guessResultText.text = "请先完成游戏开局 (Kick Off)";
+            }
+            return;
+        }
+
+        // 获取所有角色名
+        List<string> actorNames = WerewolfGameContext.Instance.GetAllActorNames();
+        
+        // 验证结果列表
+        List<string> results = new List<string>();
+        
+        // 检测狼人1
+        string wolf1Name = GetSelectedWolf1();
+        bool wolf1Correct = CheckRoleGuess(wolf1Name, "狼人", actorNames);
+        results.Add($"狼人1: {(wolf1Correct ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {wolf1Name})");
+        
+        // 检测狼人2
+        string wolf2Name = GetSelectedWolf2();
+        bool wolf2Correct = CheckRoleGuess(wolf2Name, "狼人", actorNames);
+        results.Add($"狼人2: {(wolf2Correct ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {wolf2Name})");
+        
+        // 检测女巫
+        string witchName = GetSelectedWitch();
+        bool witchCorrect = CheckRoleGuess(witchName, "女巫", actorNames);
+        results.Add($"女巫: {(witchCorrect ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {witchName})");
+        
+        // 检测预言家
+        string seerName = GetSelectedSeer();
+        bool seerCorrect = CheckRoleGuess(seerName, "预言家", actorNames);
+        results.Add($"预言家: {(seerCorrect ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {seerName})");
+        
+        // 计算总体正确率
+        int correctCount = (wolf1Correct ? 1 : 0) + (wolf2Correct ? 1 : 0) + 
+                          (witchCorrect ? 1 : 0) + (seerCorrect ? 1 : 0);
+        
+        // 显示结果
+        string resultText = "=== 身份猜测结果 ===\n" + 
+                           string.Join("\n", results) + 
+                           $"\n\n总计: {correctCount}/4 正确";
+        
+        if (_guessResultText != null)
+        {
+            _guessResultText.text = resultText;
+        }
+        
+        Debug.Log(resultText);
+    }
+
+    /// <summary>
+    /// 检查角色名对应的身份是否匹配预期角色
+    /// </summary>
+    /// <param name="actorName">被选择的角色名</param>
+    /// <param name="expectedRole">预期的角色（如"狼人"、"女巫"、"预言家"）</param>
+    /// <param name="actorNames">所有角色名列表</param>
+    /// <returns>是否匹配</returns>
+    private bool CheckRoleGuess(string actorName, string expectedRole, List<string> actorNames)
+    {
+        if (string.IsNullOrEmpty(actorName))
+        {
+            Debug.LogWarning("Actor name is empty");
+            return false;
+        }
+
+        // 在角色列表中找到对应的索引
+        int actorIndex = actorNames.IndexOf(actorName);
+        if (actorIndex < 0)
+        {
+            Debug.LogWarning($"Actor not found: {actorName}");
+            return false;
+        }
+
+        // 获取该角色的真实身份
+        string actualRole = WerewolfGameContext.Instance.GetActorRole(actorIndex);
+        
+        Debug.Log($"Checking {actorName} (index {actorIndex}): Expected={expectedRole}, Actual={actualRole}");
+        
+        // 比较身份
+        return actualRole == expectedRole;
+    }
+
+    /// <summary>
+    /// Dropdown 值改变时的回调（可以在 Inspector 中绑定）
+    /// 通用回调，可以用于任何一个 Dropdown
+    /// </summary>
+    public void OnDropdownValueChanged(int dropdownIndex)
+    {
+        string selectedActor = string.Empty;
+        string dropdownName = string.Empty;
+
+        switch (dropdownIndex)
+        {
+            case 0: // Wolf1
+                selectedActor = GetSelectedWolf1();
+                dropdownName = "狼人1";
+                break;
+            case 1: // Wolf2
+                selectedActor = GetSelectedWolf2();
+                dropdownName = "狼人2";
+                break;
+            case 2: // Witch
+                selectedActor = GetSelectedWitch();
+                dropdownName = "女巫";
+                break;
+            case 3: // Seer
+                selectedActor = GetSelectedSeer();
+                dropdownName = "预言家";
+                break;
+        }
+
+        Debug.Log($"{dropdownName} Dropdown selection changed to: {selectedActor}");
+        
+        // 可以在这里添加其他逻辑，例如自动显示该角色的信息
+        // if (!string.IsNullOrEmpty(selectedActor))
+        // {
+        //     ShowActorMessagesForPhase(selectedActor, WerewolfGameContext.Instance.CurrentPhase);
+        // }
+    }
+
+    /// <summary>
     /// 隐藏角色详情面板
     /// </summary>
     private void HideActorDetailsPanel()
@@ -595,6 +851,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         _isKickOffComplete = true;
         SetupButtonImages(); // 更新按钮绑定的 actor 名称
+        
+        // 初始化 Dropdown 选项
+        InitializeActorDropdown();
 
         // 隐藏 loading，显示完成文本
         SetLoadingState(false);
@@ -966,11 +1225,42 @@ public class WerewolfGamePlayScene : MonoBehaviour
     {
         Debug.Log("Restarting game...");
 
+        // 清空所有 Dropdown
+        ClearAllDropdowns();
+
         // 重置游戏上下文中的所有数据
         WerewolfGameContext.Instance.Reset();
 
         // 加载 Launch Scene
         UnityEngine.SceneManagement.SceneManager.LoadScene("WerewolfGameLaunchScene");
+    }
+
+    /// <summary>
+    /// 清空所有 Dropdown 的选项
+    /// </summary>
+    private void ClearAllDropdowns()
+    {
+        if (_WolfDropdown1 != null)
+        {
+            _WolfDropdown1.ClearOptions();
+        }
+        
+        if (_WolfDropdown2 != null)
+        {
+            _WolfDropdown2.ClearOptions();
+        }
+        
+        if (_WitchDropdown != null)
+        {
+            _WitchDropdown.ClearOptions();
+        }
+        
+        if (_SeerDropdown != null)
+        {
+            _SeerDropdown.ClearOptions();
+        }
+        
+        Debug.Log("All dropdowns cleared");
     }
 
     /// <summary>
