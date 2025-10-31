@@ -48,9 +48,15 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // 猜测结果文本
     public TMP_Text _guessResultText;
     
+    // 消息过滤按钮和文本
+    public TMP_Text _toggleMessageFilterButtonText;  // 按钮上的文本
+    
     // 角色选择状态
     private int _currentSelectingGuessButtonIndex = -1;  // 当前正在选择的猜测按钮索引 (0=wolf1, 1=wolf2, 2=witch, 3=seer)
     private string[] _selectedActorNames = new string[4];  // 存储每个猜测按钮选择的角色名
+    
+    // 消息过滤状态
+    private bool _showAllMessages = false;  // false=只显示发言，true=显示所有消息（包括内心和夜晚行动）
 
     // 面具图片资源的字典（在 Inspector 中配置）
     [System.Serializable]
@@ -99,6 +105,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
     private bool _currentPhaseCompleted = true;
     private string _lastErrorMessage = "";
 
+    // 记录夜晚前的死亡状态，用于检测夜晚期间的新死亡
+    private Dictionary<string, bool> _deathStatusBeforeNight = new Dictionary<string, bool>();
+
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
@@ -125,6 +134,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 初始化选择状态
         InitializeGuessButtonTexts();
 
+        // 初始化消息过滤按钮文本
+        UpdateMessageFilterButtonText();
+
         SetupButtonImages();
     }
 
@@ -142,6 +154,37 @@ public class WerewolfGamePlayScene : MonoBehaviour
         for (int i = 0; i < _selectedActorNames.Length; i++)
         {
             _selectedActorNames[i] = null;
+        }
+    }
+
+    /// <summary>
+    /// 更新消息过滤按钮的文本
+    /// </summary>
+    private void UpdateMessageFilterButtonText()
+    {
+        if (_toggleMessageFilterButtonText != null)
+        {
+            _toggleMessageFilterButtonText.text = _showAllMessages ? "隐藏内心和行动" : "显示全部消息";
+        }
+    }
+
+    /// <summary>
+    /// 点击切换消息过滤按钮
+    /// </summary>
+    public void OnClickToggleMessageFilter()
+    {
+        _showAllMessages = !_showAllMessages;
+        UpdateMessageFilterButtonText();
+        
+        Debug.Log($"Message filter toggled: {(_showAllMessages ? "Show All" : "Show Discussion Only")}");
+        
+        // 如果当前有显示的角色消息，刷新显示
+        string currentPhase = WerewolfGameContext.Instance.CurrentPhase;
+        if (!string.IsNullOrEmpty(currentPhase) && _actorDetailsBackgroundImage != null && _actorDetailsBackgroundImage.activeSelf)
+        {
+            // 找到当前显示的角色（通过检查哪个按钮被选中）
+            // 这里简单地不刷新，让用户重新点击角色按钮查看
+            Debug.Log("Filter changed. Click actor button again to see updated messages.");
         }
     }
 
@@ -539,17 +582,32 @@ public class WerewolfGamePlayScene : MonoBehaviour
     {
         foreach (var msg in messages)
         {
+            // 根据 _showAllMessages 状态决定是否过滤消息
+            if (!_showAllMessages)
+            {
+                // 只显示发言消息，过滤掉内心消息和夜晚行动
+                if (msg.MessageType == WerewolfGameContext.MessageRecordType.Mind)
+                {
+                    continue;
+                }
+
+                if (msg.MessageType == WerewolfGameContext.MessageRecordType.NightActionEvent)
+                {
+                    continue;
+                }
+            }
+
             string prefix;
             switch (msg.MessageType)
             {
                 case WerewolfGameContext.MessageRecordType.NightActionEvent:
                     prefix = "[夜晚行动]";
                     break;
-                case WerewolfGameContext.MessageRecordType.Mind:
-                    prefix = "[内心]";
-                    break;
                 case WerewolfGameContext.MessageRecordType.Discussion:
                     prefix = "[发言]";
+                    break;
+                case WerewolfGameContext.MessageRecordType.Mind:
+                    prefix = "[内心]";
                     break;
                 default:
                     prefix = "[未知]";
@@ -820,6 +878,41 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 如果两个都没有,保持不变(不做任何操作)
     }
 
+    /// <summary>
+    /// 记录当前所有角色的死亡状态（在进入夜晚前调用）
+    /// </summary>
+    private IEnumerator RecordDeathStatusBeforeNight()
+    {
+        Debug.Log("=== 记录夜晚前的死亡状态 ===");
+
+        // 获取最新的角色实体数据
+        yield return _actorDetailsAction.Call(
+            WerewolfGameContext.Instance.ActorDetailsUrl,
+            WerewolfGameContext.Instance.GetAllActorNames()
+        );
+
+        if (_actorDetailsAction.ResponseData == null)
+        {
+            Debug.LogError("ActorDetailsAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新角色实体数据
+        WerewolfGameContext.Instance.UpdateActorEntities(
+            _actorDetailsAction.ResponseData.actor_entities_serialization
+        );
+
+        // 记录所有角色的死亡状态
+        _deathStatusBeforeNight.Clear();
+        var actorNames = WerewolfGameContext.Instance.GetAllActorNames();
+        for (int i = 1; i < actorNames.Count; i++)
+        {
+            bool hasDeath = WerewolfGameContext.Instance.HasDeathComponent(i);
+            _deathStatusBeforeNight[actorNames[i]] = hasDeath;
+            Debug.Log($"记录 {actorNames[i]}: {(hasDeath ? "已死亡" : "存活")}");
+        }
+    }
+
     private IEnumerator CheckActorDeathStatus()
     {
         Debug.Log("=== 检测角色死亡状态 ===");
@@ -854,6 +947,81 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 UpdateButtonState(i - 1, false);
             }
         }
+    }
+
+    /// <summary>
+    /// 检测夜晚期间的新死亡，并返回死亡消息
+    /// </summary>
+    private IEnumerator GetNightDeathMessage(System.Action<string> callback)
+    {
+        Debug.Log("=== 检测夜晚期间的新死亡 ===");
+
+        // 获取最新的角色实体数据
+        yield return _actorDetailsAction.Call(
+            WerewolfGameContext.Instance.ActorDetailsUrl,
+            WerewolfGameContext.Instance.GetAllActorNames()
+        );
+
+        if (_actorDetailsAction.ResponseData == null)
+        {
+            Debug.LogError("ActorDetailsAction ResponseData is null");
+            callback?.Invoke("");
+            yield break;
+        }
+
+        // 更新角色实体数据
+        WerewolfGameContext.Instance.UpdateActorEntities(
+            _actorDetailsAction.ResponseData.actor_entities_serialization
+        );
+
+        // 检测新死亡的角色
+        List<string> newDeaths = new List<string>();
+        var actorNames = WerewolfGameContext.Instance.GetAllActorNames();
+        
+        for (int i = 1; i < actorNames.Count; i++)
+        {
+            string actorName = actorNames[i];
+            bool currentlyDead = WerewolfGameContext.Instance.HasDeathComponent(i);
+            
+            // 如果之前记录的状态存在
+            if (_deathStatusBeforeNight.ContainsKey(actorName))
+            {
+                bool wasDeadBefore = _deathStatusBeforeNight[actorName];
+                
+                // 如果之前活着，现在死了，说明是夜晚期间死亡
+                if (!wasDeadBefore && currentlyDead)
+                {
+                    newDeaths.Add(actorName);
+                    Debug.Log($"检测到新死亡: {actorName}");
+                }
+            }
+            
+            // 更新按钮状态
+            if (currentlyDead && i - 1 < 6)
+            {
+                UpdateButtonState(i - 1, false);
+            }
+        }
+
+        // 生成死亡消息
+        string deathMessage;
+        if (newDeaths.Count > 0)
+        {
+            List<string> deathMessages = new List<string>();
+            foreach (string deadActor in newDeaths)
+            {
+                deathMessages.Add($"昨晚角色（{deadActor}）死了");
+            }
+            deathMessage = string.Join("\n", deathMessages);
+            Debug.Log($"夜晚死亡消息: {deathMessage}");
+        }
+        else
+        {
+            deathMessage = "昨晚是平安夜";
+            Debug.Log("昨晚是平安夜");
+        }
+
+        callback?.Invoke(deathMessage);
     }
 
     /// <summary>
@@ -979,6 +1147,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 隐藏角色详情图片
         HideActorDetailsPanel();
 
+        // 检查当前阶段是否是夜晚后（用于判断是否需要添加死亡信息）
+        string currentPhase = WerewolfGameContext.Instance.CurrentPhase;
+        bool isAfterNight = !string.IsNullOrEmpty(currentPhase) && currentPhase.StartsWith("night_");
+        Debug.Log($"Time called - Current Phase: {currentPhase}, IsAfterNight: {isAfterNight}");
+
         //
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
             WerewolfGameContext.Instance.UserName,
@@ -1021,7 +1194,30 @@ public class WerewolfGamePlayScene : MonoBehaviour
         Debug.Log($"=== Victory Condition Check ===");
         Debug.Log($"胜利情况: {(string.IsNullOrEmpty(victoryCondition) ? "None" : victoryCondition)}");
 
-        StartCoroutine(CheckActorDeathStatus());
+        // 如果是夜晚后的时间推进，检测死亡情况
+        string nightDeathMessage = "";
+        if (isAfterNight)
+        {
+            bool deathMessageReceived = false;
+            yield return GetNightDeathMessage((message) =>
+            {
+                nightDeathMessage = message;
+                deathMessageReceived = true;
+            });
+
+            // 等待回调完成
+            while (!deathMessageReceived)
+            {
+                yield return null;
+            }
+
+            Debug.Log($"Night death message: {nightDeathMessage}");
+        }
+        else
+        {
+            // 不是夜晚后的时间推进，只检测死亡状态（更新按钮）
+            StartCoroutine(CheckActorDeathStatus());
+        }
 
         // 根据胜利条件显示结果
         if (victoryCondition == "TOWN_VICTORY")
@@ -1041,7 +1237,17 @@ public class WerewolfGamePlayScene : MonoBehaviour
         else
         {
             // 没有胜利条件时显示正常消息
-            UpdateMainTextByClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+            string baseMessage = GetFormattedMainText(_sessionMessagesAction.ResponseData.session_messages);
+            
+            // 如果是夜晚后的时间推进，在消息前添加死亡信息
+            if (isAfterNight && !string.IsNullOrEmpty(nightDeathMessage))
+            {
+                _mainText.text = nightDeathMessage + "\n\n" + baseMessage;
+            }
+            else
+            {
+                _mainText.text = baseMessage;
+            }
         }
     }
 
@@ -1060,6 +1266,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 显示 loading 动画，隐藏文本
         SetLoadingState(true);
+
+        // 在进入夜晚前，记录所有角色的死亡状态
+        yield return RecordDeathStatusBeforeNight();
+
         // 
         yield return _werewolfGamePlayAction.Call(WerewolfGameContext.Instance.GameplayUrl,
            WerewolfGameContext.Instance.UserName,
@@ -1100,7 +1310,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 隐藏 loading，显示完成文本
         SetLoadingState(false);
-        _mainText.text = "夜晚行动已完成\n点击角色按钮查看夜晚行动细节";
+        _mainText.text = "夜晚行动已完成";
     }
 
     private IEnumerator Day()
@@ -1283,6 +1493,21 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(messages);
         _mainText.text = string.Join("\n", processedMessages);
+    }
+
+    /// <summary>
+    /// 获取格式化的消息文本（不直接设置到 _mainText）
+    /// </summary>
+    private string GetFormattedMainText(List<SessionMessage> messages)
+    {
+        for (int i = 0; i < messages.Count; i++)
+        {
+            var message = messages[i];
+            Debug.Log($"Client Message {i}: " + JsonUtility.ToJson(message));
+        }
+
+        var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(messages);
+        return string.Join("\n", processedMessages);
     }
 
     private void UpdateLastSequenceIdFromResponse()
