@@ -304,6 +304,19 @@ public partial class WerewolfGameContext
 
                 return $"{discussionEvent.actor} says: {discussionEvent.content}";
 
+            case EventHead.VOTE_EVENT:
+                VoteEvent voteEvent = dataToken.ToObject<VoteEvent>();
+                UnityEngine.Debug.Log($"VOTE_EVENT: {voteEvent.actor} 投票给 {voteEvent.target}");
+                _messageRecords.Add(new MessageRecord
+                {
+                    Actor = voteEvent.actor,
+                    Content = voteEvent.message,
+                    MessageType = MessageRecordType.Discussion,
+                    Phase = _currentPhase,
+                });
+
+                return $"{voteEvent.actor} 投票给 {voteEvent.target}";
+
             default:
                 UnityEngine.Debug.LogWarning("Unknown agent event head: " + eventHead);
                 break;

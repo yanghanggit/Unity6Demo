@@ -13,7 +13,8 @@ public enum EventHead
     COMBAT_KICK_OFF_EVENT = 7,
     COMBAT_COMPLETE_EVENT = 8,
     DISCUSSION_EVENT = 9,
-    NIGHT_ACTION_EVENT = 10
+    NIGHT_ACTION_EVENT = 10,
+    VOTE_EVENT = 11
 }
 
 /// <summary>
@@ -118,3 +119,12 @@ public sealed class NightActionEvent : AgentEvent
     //public new int head = (int)AgentEventHead.NIGHT_ACTION_EVENT;
     public string actor = "";
 } 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[System.Serializable]
+public sealed class VoteEvent : AgentEvent
+{
+    public string actor = "";
+    public string target = "";
+}
