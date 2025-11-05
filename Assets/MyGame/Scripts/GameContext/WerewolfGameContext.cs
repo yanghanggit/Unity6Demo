@@ -109,6 +109,14 @@ public partial class WerewolfGameContext
         }
     }
 
+    // 游戏模式：false=游玩模式(只显示discussion), true=调试模式(显示所有消息)
+    private bool _isDebugMode = false;
+    public bool IsDebugMode
+    {
+        get => _isDebugMode;
+        set => _isDebugMode = value;
+    }
+
 
     public void UpdateGameState(int gameTime, List<string> actors, string stageName, string victory_condition, bool is_discussion_complete)
     {

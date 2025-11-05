@@ -19,7 +19,9 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 
     public StagesStateAction _stagesStateAction;
 
-    public Button _nextButton;
+    // 游戏模式选择按钮
+    public Button _playModeButton;   // 游玩模式按钮
+    public Button _debugModeButton;  // 调试模式按钮
 
     void Start()
     {
@@ -28,21 +30,39 @@ public class WerewolfGameLaunchScene : MonoBehaviour
         Debug.Assert(_actorDetailsAction != null, "_werewolfGameActorDetailsAction is null");
         Debug.Assert(_werewolfGameStateAction != null, "_werewolfGameStateAction is null");
         Debug.Assert(_stagesStateAction != null, "_stagesStateAction is null");
-        Debug.Assert(_nextButton != null, "_nextButton is null");
+        Debug.Assert(_playModeButton != null, "_playModeButton is null");
+        Debug.Assert(_debugModeButton != null, "_debugModeButton is null");
 
-        _nextButton.gameObject.SetActive(false);
+        _playModeButton.gameObject.SetActive(false);
+        _debugModeButton.gameObject.SetActive(false);
         StartCoroutine(SetupGameApiServices());
     }
 
-    public void OnClickNext()
+    /// <summary>
+    /// 点击游玩模式按钮
+    /// </summary>
+    public void OnClickPlayMode()
     {
+        WerewolfGameContext.Instance.IsDebugMode = false;
+        Debug.Log("Selected Play Mode (只显示发言)");
+        StartCoroutine(LoadNextScene());
+    }
+
+    /// <summary>
+    /// 点击调试模式按钮
+    /// </summary>
+    public void OnClickDebugMode()
+    {
+        WerewolfGameContext.Instance.IsDebugMode = true;
+        Debug.Log("Selected Debug Mode (显示所有消息)");
         StartCoroutine(LoadNextScene());
     }
 
     private IEnumerator SetupGameApiServices()
     {
         //隐藏按钮
-        _nextButton.gameObject.SetActive(false);
+        _playModeButton.gameObject.SetActive(false);
+        _debugModeButton.gameObject.SetActive(false);
 
         // Pipeline: 分段逐步处理
         yield return LoadRootApiEndpoints();
@@ -54,8 +74,9 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 
         Debug.Log("Werewolf game setup complete.");
 
-        // 开界面,可以进行下一步
-        _nextButton.gameObject.SetActive(true);
+        // 显示模式选择按钮
+        _playModeButton.gameObject.SetActive(true);
+        _debugModeButton.gameObject.SetActive(true);
     }
 
     private IEnumerator LoadRootApiEndpoints()

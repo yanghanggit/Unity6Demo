@@ -48,14 +48,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // 猜测结果文本
     public TMP_Text _guessResultText;
     
-    // 消息过滤按钮和文本
-    public TMP_Text _toggleMessageFilterButtonText;  // 按钮上的文本
-    
     // 角色选择状态
     private int _currentSelectingGuessButtonIndex = -1;  // 当前正在选择的猜测按钮索引 (0=wolf1, 1=wolf2, 2=witch, 3=seer)
     private string[] _selectedActorNames = new string[4];  // 存储每个猜测按钮选择的角色名
     
-    // 消息过滤状态
+    // 消息过滤状态（从 WerewolfGameContext 读取，不再需要按钮切换）
     private bool _showAllMessages = false;  // false=只显示发言，true=显示所有消息（包括内心和夜晚行动）
 
     // 面具图片资源的字典（在 Inspector 中配置）
@@ -134,8 +131,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 初始化选择状态
         InitializeGuessButtonTexts();
 
-        // 初始化消息过滤按钮文本
-        UpdateMessageFilterButtonText();
+        // 从 Context 读取游戏模式，设置消息过滤状态
+        _showAllMessages = WerewolfGameContext.Instance.IsDebugMode;
+        Debug.Log($"Game mode: {(_showAllMessages ? "Debug Mode (显示所有消息)" : "Play Mode (只显示发言)")}");
 
         SetupButtonImages();
     }
@@ -154,37 +152,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
         for (int i = 0; i < _selectedActorNames.Length; i++)
         {
             _selectedActorNames[i] = null;
-        }
-    }
-
-    /// <summary>
-    /// 更新消息过滤按钮的文本
-    /// </summary>
-    private void UpdateMessageFilterButtonText()
-    {
-        if (_toggleMessageFilterButtonText != null)
-        {
-            _toggleMessageFilterButtonText.text = _showAllMessages ? "隐藏内心和行动" : "显示全部消息";
-        }
-    }
-
-    /// <summary>
-    /// 点击切换消息过滤按钮
-    /// </summary>
-    public void OnClickToggleMessageFilter()
-    {
-        _showAllMessages = !_showAllMessages;
-        UpdateMessageFilterButtonText();
-        
-        Debug.Log($"Message filter toggled: {(_showAllMessages ? "Show All" : "Show Discussion Only")}");
-        
-        // 如果当前有显示的角色消息，刷新显示
-        string currentPhase = WerewolfGameContext.Instance.CurrentPhase;
-        if (!string.IsNullOrEmpty(currentPhase) && _actorDetailsBackgroundImage != null && _actorDetailsBackgroundImage.activeSelf)
-        {
-            // 找到当前显示的角色（通过检查哪个按钮被选中）
-            // 这里简单地不刷新，让用户重新点击角色按钮查看
-            Debug.Log("Filter changed. Click actor button again to see updated messages.");
         }
     }
 
