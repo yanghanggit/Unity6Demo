@@ -82,6 +82,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
     private bool _isPanelVisible = false;  // 记录新界面的显示状态
     private List<string> _actorNames = new List<string>();
 
+    // 游戏介绍界面相关组件
+    public GameObject _gameIntroPanel;  // 游戏介绍面板
+    public TMP_Text _introStatusText;   // 介绍界面状态文本
+    public Button _introCloseButton;    // 介绍界面关闭按钮
+
     // 游戏阶段状态枚举
     private enum GamePhase
     {
@@ -136,6 +141,92 @@ public class WerewolfGamePlayScene : MonoBehaviour
         Debug.Log($"Game mode: {(_showAllMessages ? "Debug Mode (显示所有消息)" : "Play Mode (只显示发言)")}");
 
         SetupButtonImages();
+
+        // 初始化游戏介绍界面
+        InitializeGameIntroPanel();
+    }
+
+    /// <summary>
+    /// 初始化游戏介绍界面
+    /// </summary>
+    private void InitializeGameIntroPanel()
+    {
+        if (_gameIntroPanel == null)
+        {
+            Debug.LogWarning("_gameIntroPanel is not assigned");
+            return;
+        }
+
+        // 显示介绍界面
+        _gameIntroPanel.SetActive(true);
+
+        // 设置初始文本
+        if (_introStatusText != null)
+        {
+            _introStatusText.text = "玩家准备中......";
+        }
+
+        // 隐藏关闭按钮
+        if (_introCloseButton != null)
+        {
+            _introCloseButton.gameObject.SetActive(false);
+        }
+
+        // 自动开始 Kick Off
+        StartCoroutine(AutoKickOff());
+    }
+
+    /// <summary>
+    /// 自动执行 Kick Off
+    /// </summary>
+    private IEnumerator AutoKickOff()
+    {
+        Debug.Log("Auto KickOff started");
+
+        // 执行 KickOff 逻辑
+        yield return KickOff();
+
+        // 检查 KickOff 是否成功
+        if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
+        {
+            // KickOff 失败
+            if (_introStatusText != null)
+            {
+                _introStatusText.text = "准备失败，请重新启动游戏";
+            }
+            Debug.LogError("Auto KickOff failed");
+            yield break;
+        }
+
+        // KickOff 成功，更新游戏阶段
+        _currentGamePhase = GamePhase.AfterKickOff;
+        _currentPhaseCompleted = true;
+
+        // KickOff 完成后更新界面
+        if (_introStatusText != null)
+        {
+            _introStatusText.text = "准备已完成";
+        }
+
+        // 显示关闭按钮
+        if (_introCloseButton != null)
+        {
+            _introCloseButton.gameObject.SetActive(true);
+        }
+
+        Debug.Log("Auto KickOff completed - Game phase updated to AfterKickOff");
+    }
+
+    /// <summary>
+    /// 点击介绍界面的关闭按钮
+    /// </summary>
+    public void OnClickCloseIntroPanel()
+    {
+        if (_gameIntroPanel != null)
+        {
+            _gameIntroPanel.SetActive(false);
+            Debug.Log("Game intro panel closed");
+        }
     }
 
     /// <summary>
@@ -1019,11 +1110,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
         Debug.Log($"Button {buttonIndex + 1}: {(isAlive ? "Active" : "Dead (Disabled)")}");
     }
 
-    public void OnClickKickOff()
-    {
-        Debug.Log("OnClickKickOff");
-        StartCoroutine(KickOff());
-    }
+    // OnClickKickOff 方法已移除，因为 kick off 现在是自动执行的
+    // Kick off 会在场景启动时自动通过 AutoKickOff() 执行
 
     public void OnClickTime()
     {
@@ -1575,21 +1663,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
         switch (_currentGamePhase)
         {
             case GamePhase.NotStarted:
-                // 1. 执行 KickOff 开局
-                Debug.Log("Next Phase: Executing KickOff...");
-                yield return KickOff();
-
-                // 检查 KickOff 是否成功
-                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
-                {
-                    _lastErrorMessage = "开局失败";
-                    _mainText.text = "开局失败，请重试";
-                    yield break;
-                }
-
-                _currentPhaseCompleted = true;
-                _currentGamePhase = GamePhase.AfterKickOff;
-                break;
+                // Kick off 已经在场景启动时自动完成，这里不应该再被调用
+                Debug.LogWarning("Game phase is NotStarted, but kick off should have been completed automatically");
+                _lastErrorMessage = "游戏初始化错误";
+                _mainText.text = "游戏初始化错误，请重新启动场景";
+                yield break;
 
             case GamePhase.AfterKickOff:
                 // 2. 执行第一次 Time 推进时间
@@ -1780,7 +1858,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         switch (_currentGamePhase)
         {
             case GamePhase.NotStarted:
-                return "点击开始游戏 (KickOff)";
+                return "游戏正在初始化...";
             case GamePhase.AfterKickOff:
                 return "点击推进时间 (Time)";
             case GamePhase.AfterFirstTime:
