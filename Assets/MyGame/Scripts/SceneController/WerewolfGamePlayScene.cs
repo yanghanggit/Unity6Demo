@@ -28,29 +28,33 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // 下一阶段按钮的Text组件
     public TMP_Text _nextPhaseButtonText;
 
-    // 角色猜测按钮（替换原来的 Dropdown 组件）
-    public Button _wolf1GuessButton;
-    public Button _wolf2GuessButton;
-    public Button _witchGuessButton;
-    public Button _seerGuessButton;
+    // 角色详情界面中的身份猜测按钮（在角色详情界面中配置）
+    public Button _detailWolf1Button;      // 详情界面中的"狼人1"按钮
+    public Button _detailWolf2Button;      // 详情界面中的"狼人2"按钮
+    public Button _detailWitchButton;      // 详情界面中的"女巫"按钮
+    public Button _detailSeerButton;       // 详情界面中的"预言家"按钮
     
-    // 猜测按钮的文本组件
-    public TMP_Text _wolf1GuessButtonText;
-    public TMP_Text _wolf2GuessButtonText;
-    public TMP_Text _witchGuessButtonText;
-    public TMP_Text _seerGuessButtonText;
-    
-    // 角色选择界面
-    public GameObject _roleSelectionPanel;  // 角色选择面板
-    public Button[] _roleSelectionButtons = new Button[6];  // 6个角色选择按钮
-    public Button _roleSelectionReturnButton;  // 返回按钮
+    // 详情界面猜测按钮的文本组件
+    public TMP_Text _detailWolf1ButtonText;
+    public TMP_Text _detailWolf2ButtonText;
+    public TMP_Text _detailWitchButtonText;
+    public TMP_Text _detailSeerButtonText;
     
     // 猜测结果文本
     public TMP_Text _guessResultText;
     
-    // 角色选择状态
-    private int _currentSelectingGuessButtonIndex = -1;  // 当前正在选择的猜测按钮索引 (0=wolf1, 1=wolf2, 2=witch, 3=seer)
-    private string[] _selectedActorNames = new string[4];  // 存储每个猜测按钮选择的角色名
+    // 重置按钮（游戏结束时显示）
+    public Button _restartButton;
+    
+    // 角色猜测状态：存储每个身份对应的角色名
+    // 索引: 0=狼人1, 1=狼人2, 2=女巫, 3=预言家
+    private string[] _selectedActorNames = new string[4];
+    
+    // 记录哪些选择是在第一天做出的（第二天时这些选择将被锁定）
+    private bool[] _isLockedFromDay1 = new bool[4];
+    
+    // 当前正在查看的角色索引（用于详情界面）
+    private int _currentViewingActorIndex = -1;
     
     // 消息过滤状态（从 WerewolfGameContext 读取，不再需要按钮切换）
     private bool _showAllMessages = false;  // false=只显示发言，true=显示所有消息（包括内心和夜晚行动）
@@ -109,6 +113,12 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     // 记录夜晚前的死亡状态，用于检测夜晚期间的新死亡
     private Dictionary<string, bool> _deathStatusBeforeNight = new Dictionary<string, bool>();
+    
+    // 猜测功能是否可用的标记
+    private bool _isGuessingEnabled = false;
+    
+    // 游戏是否已结束
+    private bool _isGameEnded = false;
 
     void Start()
     {
@@ -127,14 +137,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
             _isPanelVisible = false;
         }
 
-        // 初始化角色选择界面：默认隐藏
-        if (_roleSelectionPanel != null)
-        {
-            _roleSelectionPanel.SetActive(false);
-        }
-
-        // 初始化选择状态
-        InitializeGuessButtonTexts();
+        // 初始化猜测按钮状态
+        InitializeGuessButtons();
 
         // 从 Context 读取游戏模式，设置消息过滤状态
         _showAllMessages = WerewolfGameContext.Instance.IsDebugMode;
@@ -144,6 +148,12 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 初始化游戏介绍界面
         InitializeGameIntroPanel();
+        
+        // 隐藏重置按钮（游戏结束前不显示）
+        if (_restartButton != null)
+        {
+            _restartButton.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -230,243 +240,328 @@ public class WerewolfGamePlayScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 初始化猜测按钮文本
+    /// 初始化猜测按钮状态
     /// </summary>
-    private void InitializeGuessButtonTexts()
+    private void InitializeGuessButtons()
     {
-        if (_wolf1GuessButtonText != null) _wolf1GuessButtonText.text = "选择狼人1";
-        if (_wolf2GuessButtonText != null) _wolf2GuessButtonText.text = "选择狼人2";
-        if (_witchGuessButtonText != null) _witchGuessButtonText.text = "选择女巫";
-        if (_seerGuessButtonText != null) _seerGuessButtonText.text = "选择预言家";
-
-        // 清空选择状态
+        // 清空选择状态和锁定状态
         for (int i = 0; i < _selectedActorNames.Length; i++)
         {
             _selectedActorNames[i] = null;
+            _isLockedFromDay1[i] = false;
         }
+
+        // 初始化详情界面中的猜测按钮文本
+        if (_detailWolf1ButtonText != null) _detailWolf1ButtonText.text = "狼人1";
+        if (_detailWolf2ButtonText != null) _detailWolf2ButtonText.text = "狼人2";
+        if (_detailWitchButtonText != null) _detailWitchButtonText.text = "女巫";
+        if (_detailSeerButtonText != null) _detailSeerButtonText.text = "预言家";
+        
+        // 注意：不在这里调用 UpdateGuessButtonsAvailability()
+        // 因为按钮状态会在打开角色详情界面时（OnClickActorButton）更新
     }
 
     /// <summary>
-    /// 点击猜测按钮（狼人1/狼人2/女巫/预言家）时打开角色选择界面
+    /// 判断当前是否可以进行猜测
+    /// 只在第1天和第2天的白天讨论开始到投票结束之间可以猜测
     /// </summary>
-    /// <param name="guessButtonIndex">0=wolf1, 1=wolf2, 2=witch, 3=seer</param>
-    public void OnClickGuessButton(int guessButtonIndex)
+    private bool CanGuessNow()
     {
-
-
-        if (guessButtonIndex < 0 || guessButtonIndex >= 4)
+        // 获取当前是第几个白天
+        int currentDay = GetCurrentDayNumber();
+        
+        // 只在第1天或第2天可以猜测
+        if (currentDay != 1 && currentDay != 2)
         {
-            Debug.LogWarning($"Invalid guess button index: {guessButtonIndex}");
+            return false;
+        }
+
+        // 只在白天讨论阶段、讨论完成阶段、投票阶段可以猜测
+        return _currentGamePhase == GamePhase.AfterDay ||
+               _currentGamePhase == GamePhase.DiscussionComplete ||
+               _currentGamePhase == GamePhase.AfterVote;
+    }
+
+    /// <summary>
+    /// 更新所有猜测按钮的可用性
+    /// </summary>
+    private void UpdateGuessButtonsAvailability()
+    {
+        _isGuessingEnabled = CanGuessNow();
+        
+        // 只在按钮存在时更新状态（按钮可能在角色详情界面未打开时不存在）
+        if (_detailWolf1Button != null) _detailWolf1Button.interactable = _isGuessingEnabled;
+        if (_detailWolf2Button != null) _detailWolf2Button.interactable = _isGuessingEnabled;
+        if (_detailWitchButton != null) _detailWitchButton.interactable = _isGuessingEnabled;
+        if (_detailSeerButton != null) _detailSeerButton.interactable = _isGuessingEnabled;
+
+        Debug.Log($"Guessing buttons availability updated: Enabled={_isGuessingEnabled}, Day={GetCurrentDayNumber()}, Phase={_currentGamePhase}");
+    }
+
+    /// <summary>
+    /// 点击角色详情界面中的猜测按钮
+    /// </summary>
+    /// <param name="roleTypeIndex">角色类型索引 (0=狼人1, 1=狼人2, 2=女巫, 3=预言家)</param>
+    public void OnClickDetailGuessButton(int roleTypeIndex)
+    {
+        // 检查猜测功能是否可用
+        if (!_isGuessingEnabled)
+        {
+            Debug.LogWarning("Guessing is not available at this phase");
+            if (_guessResultText != null)
+            {
+                _guessResultText.text = "当前阶段无法进行猜测\n只能在第1天或第2天的白天讨论和投票阶段进行猜测";
+            }
             return;
         }
 
-        _currentSelectingGuessButtonIndex = guessButtonIndex;
-        OpenRoleSelectionPanel();
-    }
-
-    /// <summary>
-    /// 打开角色选择界面
-    /// </summary>
-    private void OpenRoleSelectionPanel()
-    {
-        if (_roleSelectionPanel != null)
+        if (roleTypeIndex < 0 || roleTypeIndex >= 4)
         {
-            _roleSelectionPanel.SetActive(true);
-            SetupRoleSelectionButtonImages(); // 设置角色选择按钮的图片
-            UpdateRoleSelectionButtons();
-            Debug.Log($"Opened role selection panel for guess button {_currentSelectingGuessButtonIndex}");
+            Debug.LogWarning($"Invalid role type index: {roleTypeIndex}");
+            return;
         }
-    }
 
-    /// <summary>
-    /// 设置角色选择界面中所有按钮的面具图片
-    /// </summary>
-    private void SetupRoleSelectionButtonImages()
-    {
-        // 获取所有角色的 appearances
-        List<string> appearances = WerewolfGameContext.Instance.GetAllActorAppearances();
-
-        // 为每个角色选择按钮设置对应的面具图片（跳过旁白，从索引1开始）
-        for (int i = 0; i < _roleSelectionButtons.Length && i + 1 < appearances.Count; i++)
+        if (_currentViewingActorIndex < 0 || _currentViewingActorIndex >= _actorNames.Count)
         {
-            if (_roleSelectionButtons[i] == null) continue;
+            Debug.LogWarning($"Invalid current viewing actor index: {_currentViewingActorIndex}");
+            return;
+        }
 
-            // 提取面具名
-            string maskName = ExtractMaskName(appearances[i + 1]);
-            
-            // 加载对应的 Sprite
-            Sprite maskSprite = LoadMaskSprite(maskName);
-            
-            if (maskSprite != null)
+        string actorName = _actorNames[_currentViewingActorIndex];
+        string currentlyAssignedToRole = _selectedActorNames[roleTypeIndex];
+        int currentDay = GetCurrentDayNumber();
+
+        // 检查是否在第二天尝试修改第一天的选择
+        if (currentDay == 2 && _isLockedFromDay1[roleTypeIndex])
+        {
+            Debug.LogWarning($"{GetRoleTypeName(roleTypeIndex)} 已在第一天锁定，无法在第二天修改");
+            if (_guessResultText != null)
             {
-                // 获取按钮的 Image 组件并设置图片
-                Image buttonImage = _roleSelectionButtons[i].GetComponent<Image>();
-                if (buttonImage != null)
+                _guessResultText.text = $"{GetRoleTypeName(roleTypeIndex)} 已在第一天锁定\n无法修改";
+            }
+            return;
+        }
+
+        // 情况1: 点击的身份已经分配给当前角色 -> 取消选择（仅第一天可以）
+        if (currentlyAssignedToRole == actorName)
+        {
+            // 第二天不允许取消已锁定的选择
+            if (currentDay == 2 && _isLockedFromDay1[roleTypeIndex])
+            {
+                Debug.LogWarning($"第二天无法取消第一天的选择: {GetRoleTypeName(roleTypeIndex)}");
+                if (_guessResultText != null)
                 {
-                    buttonImage.sprite = maskSprite;
-                    Debug.Log($"Set role selection button {i} to mask: {maskName}");
+                    _guessResultText.text = $"{GetRoleTypeName(roleTypeIndex)} 已锁定\n无法取消";
                 }
-                else
-                {
-                    Debug.LogWarning($"Role selection button {i} has no Image component");
-                }
-            }
-            else
-            {
-                Debug.LogWarning($"Failed to load sprite for role selection button {i}, mask: {maskName}");
-            }
-        }
-    }
-
-    /// <summary>
-    /// 更新角色选择界面中按钮的状态（已选择的变暗）
-    /// </summary>
-    private void UpdateRoleSelectionButtons()
-    {
-        for (int i = 0; i < _roleSelectionButtons.Length; i++)
-        {
-            if (_roleSelectionButtons[i] == null) continue;
-
-            string actorName = (i < _actorNames.Count) ? _actorNames[i] : "";
-            bool isSelected = System.Array.IndexOf(_selectedActorNames, actorName) >= 0;
-
-            // 检查是否是当前正在选择的按钮已经选择的角色
-            bool isCurrentSelection = (_currentSelectingGuessButtonIndex >= 0 && 
-                                      _selectedActorNames[_currentSelectingGuessButtonIndex] == actorName);
-
-            // 更新按钮状态
-            UpdateRoleSelectionButtonState(_roleSelectionButtons[i], isSelected, isCurrentSelection);
-        }
-    }
-
-    /// <summary>
-    /// 更新单个角色选择按钮的状态
-    /// </summary>
-    private void UpdateRoleSelectionButtonState(Button button, bool isSelected, bool isCurrentSelection)
-    {
-        if (button == null) return;
-
-        // 获取按钮的 Image 组件
-        Image buttonImage = button.GetComponent<Image>();
-        if (buttonImage != null)
-        {
-            // 如果是当前选择的角色，显示为高亮；如果被其他按钮选择，显示为变暗
-            if (isCurrentSelection)
-            {
-                buttonImage.color = new Color(1f, 1f, 0.5f, 1f); // 黄色高亮
-            }
-            else if (isSelected)
-            {
-                buttonImage.color = new Color(0.5f, 0.5f, 0.5f, 1f); // 变暗
-            }
-            else
-            {
-                buttonImage.color = Color.white; // 正常
-            }
-        }
-    }
-
-    /// <summary>
-    /// 点击角色选择界面中的角色按钮
-    /// </summary>
-    /// <param name="roleButtonIndex">角色按钮索引 (0-5)</param>
-    public void OnClickRoleSelectionButton(int roleButtonIndex)
-    {
-        if (roleButtonIndex < 0 || roleButtonIndex >= _actorNames.Count)
-        {
-            Debug.LogWarning($"Invalid role button index: {roleButtonIndex}");
-            return;
-        }
-
-        if (_currentSelectingGuessButtonIndex < 0 || _currentSelectingGuessButtonIndex >= 4)
-        {
-            Debug.LogWarning($"Invalid current selecting guess button index: {_currentSelectingGuessButtonIndex}");
-            return;
-        }
-
-        string actorName = _actorNames[roleButtonIndex];
-        string currentSelection = _selectedActorNames[_currentSelectingGuessButtonIndex];
-
-        // 如果点击的是当前已选择的角色，取消选择
-        if (currentSelection == actorName)
-        {
-            _selectedActorNames[_currentSelectingGuessButtonIndex] = null;
-            UpdateGuessButtonText(_currentSelectingGuessButtonIndex, null);
-            Debug.Log($"Deselected {actorName} from guess button {_currentSelectingGuessButtonIndex}");
-        }
-        else
-        {
-            // 检查该角色是否已被其他按钮选择
-            int existingIndex = System.Array.IndexOf(_selectedActorNames, actorName);
-            if (existingIndex >= 0 && existingIndex != _currentSelectingGuessButtonIndex)
-            {
-                Debug.LogWarning($"{actorName} is already selected by guess button {existingIndex}");
-                _guessResultText.text = $"{actorName} 已被其他按钮选择";
                 return;
             }
 
-            // 选择该角色
-            _selectedActorNames[_currentSelectingGuessButtonIndex] = actorName;
-            UpdateGuessButtonText(_currentSelectingGuessButtonIndex, actorName);
-            Debug.Log($"Selected {actorName} for guess button {_currentSelectingGuessButtonIndex}");
+            _selectedActorNames[roleTypeIndex] = null;
+            Debug.Log($"Deselected {actorName} from {GetRoleTypeName(roleTypeIndex)}");
+            
+            if (_guessResultText != null)
+            {
+                _guessResultText.text = $"已取消 {actorName} 的身份选择";
+            }
+        }
+        // 情况2: 点击的身份已分配给其他角色 -> 不允许操作
+        else if (!string.IsNullOrEmpty(currentlyAssignedToRole))
+        {
+            Debug.LogWarning($"{GetRoleTypeName(roleTypeIndex)} 已分配给 {currentlyAssignedToRole}");
+            if (_guessResultText != null)
+            {
+                _guessResultText.text = $"{GetRoleTypeName(roleTypeIndex)} 已被 {currentlyAssignedToRole} 选择";
+            }
+        }
+        // 情况3: 身份未分配 -> 检查当前角色是否已选择其他身份
+        else
+        {
+            // 查找当前角色是否已经选择了其他身份
+            int previousRoleIndex = -1;
+            for (int i = 0; i < _selectedActorNames.Length; i++)
+            {
+                if (_selectedActorNames[i] == actorName)
+                {
+                    previousRoleIndex = i;
+                    break;
+                }
+            }
+
+            // 如果当前角色已选择其他身份，检查是否可以取消
+            if (previousRoleIndex >= 0)
+            {
+                // 第二天不允许取消第一天锁定的选择
+                if (currentDay == 2 && _isLockedFromDay1[previousRoleIndex])
+                {
+                    Debug.LogWarning($"第二天无法更改第一天的选择: {GetRoleTypeName(previousRoleIndex)}");
+                    if (_guessResultText != null)
+                    {
+                        _guessResultText.text = $"已在第一天选择 {GetRoleTypeName(previousRoleIndex)}\n无法更改";
+                    }
+                    return;
+                }
+
+                string previousRoleName = GetRoleTypeName(previousRoleIndex);
+                _selectedActorNames[previousRoleIndex] = null;
+                Debug.Log($"Removed {actorName} from {previousRoleName}");
+            }
+
+            // 分配新身份
+            _selectedActorNames[roleTypeIndex] = actorName;
+            
+            // 如果是第一天的选择，标记为锁定
+            if (currentDay == 1)
+            {
+                _isLockedFromDay1[roleTypeIndex] = true;
+                Debug.Log($"Locked {GetRoleTypeName(roleTypeIndex)} for {actorName} from Day 1");
+            }
+            
+            Debug.Log($"Assigned {actorName} as {GetRoleTypeName(roleTypeIndex)}");
+
+            if (_guessResultText != null)
+            {
+                if (previousRoleIndex >= 0)
+                {
+                    _guessResultText.text = $"{actorName}: {GetRoleTypeName(previousRoleIndex)} → {GetRoleTypeName(roleTypeIndex)}";
+                }
+                else
+                {
+                    _guessResultText.text = $"已选择 {actorName} 为 {GetRoleTypeName(roleTypeIndex)}";
+                }
+            }
         }
 
-        // 更新界面中所有按钮的状态
-        UpdateRoleSelectionButtons();
+        // 更新按钮状态
+        UpdateDetailGuessButtonsState();
     }
 
     /// <summary>
-    /// 更新猜测按钮的显示文本
+    /// 获取角色类型名称
     /// </summary>
-    private void UpdateGuessButtonText(int guessButtonIndex, string actorName)
+    private string GetRoleTypeName(int roleTypeIndex)
     {
-        TMP_Text textComponent = null;
-        string defaultText = "";
-
-        switch (guessButtonIndex)
+        switch (roleTypeIndex)
         {
-            case 0:
-                textComponent = _wolf1GuessButtonText;
-                defaultText = "选择狼人1";
-                break;
-            case 1:
-                textComponent = _wolf2GuessButtonText;
-                defaultText = "选择狼人2";
-                break;
-            case 2:
-                textComponent = _witchGuessButtonText;
-                defaultText = "选择女巫";
-                break;
-            case 3:
-                textComponent = _seerGuessButtonText;
-                defaultText = "选择预言家";
-                break;
-        }
-
-        if (textComponent != null)
-        {
-            textComponent.text = string.IsNullOrEmpty(actorName) ? defaultText : actorName;
+            case 0: return "狼人1";
+            case 1: return "狼人2";
+            case 2: return "女巫";
+            case 3: return "预言家";
+            default: return "未知";
         }
     }
 
     /// <summary>
-    /// 点击角色选择界面的返回按钮
+    /// 更新详情界面中猜测按钮的状态
     /// </summary>
-    public void OnClickRoleSelectionReturn()
+    private void UpdateDetailGuessButtonsState()
     {
-        CloseRoleSelectionPanel();
+        if (_currentViewingActorIndex < 0 || _currentViewingActorIndex >= _actorNames.Count)
+        {
+            return;
+        }
+
+        // 先更新猜测功能是否可用的状态
+        _isGuessingEnabled = CanGuessNow();
+
+        string currentActorName = _actorNames[_currentViewingActorIndex];
+
+        // 更新4个猜测按钮的状态
+        UpdateSingleDetailGuessButton(_detailWolf1Button, _detailWolf1ButtonText, 0, currentActorName);
+        UpdateSingleDetailGuessButton(_detailWolf2Button, _detailWolf2ButtonText, 1, currentActorName);
+        UpdateSingleDetailGuessButton(_detailWitchButton, _detailWitchButtonText, 2, currentActorName);
+        UpdateSingleDetailGuessButton(_detailSeerButton, _detailSeerButtonText, 3, currentActorName);
     }
 
     /// <summary>
-    /// 关闭角色选择界面
+    /// 更新单个详情猜测按钮的状态
     /// </summary>
-    private void CloseRoleSelectionPanel()
+    private void UpdateSingleDetailGuessButton(Button button, TMP_Text buttonText, int roleTypeIndex, string currentActorName)
     {
-        if (_roleSelectionPanel != null)
+        if (button == null) return;
+
+        string assignedActor = _selectedActorNames[roleTypeIndex];
+        bool isAssigned = !string.IsNullOrEmpty(assignedActor);
+        bool isCurrentActor = assignedActor == currentActorName;
+        int currentDay = GetCurrentDayNumber();
+        bool isLockedFromDay1 = _isLockedFromDay1[roleTypeIndex];
+
+        // 如果猜测功能不可用，禁用所有按钮
+        if (!_isGuessingEnabled)
         {
-            _roleSelectionPanel.SetActive(false);
-            _currentSelectingGuessButtonIndex = -1;
-            Debug.Log("Closed role selection panel");
+            button.interactable = false;
+            ColorBlock colors = button.colors;
+            colors.disabledColor = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+            button.colors = colors;
+
+            if (buttonText != null)
+            {
+                if (isAssigned)
+                {
+                    buttonText.text = $"{GetRoleTypeName(roleTypeIndex)}\n({assignedActor})\n[已锁定]";
+                }
+                else
+                {
+                    buttonText.text = $"{GetRoleTypeName(roleTypeIndex)}\n[已锁定]";
+                }
+            }
+            return;
+        }
+
+        // 特殊处理：第二天时，第一天锁定的选择显示为高亮+已锁定
+        if (currentDay == 2 && isLockedFromDay1 && isCurrentActor)
+        {
+            button.interactable = false; // 禁止交互
+            ColorBlock colors = button.colors;
+            colors.disabledColor = new Color(1f, 1f, 0.5f, 1f); // 黄色高亮
+            button.colors = colors;
+
+            if (buttonText != null)
+            {
+                buttonText.text = $"{GetRoleTypeName(roleTypeIndex)}\n(已选)\n[已锁定]";
+            }
+            return;
+        }
+
+        // 更新按钮的可交互状态和颜色（猜测功能可用时）
+        if (isAssigned && !isCurrentActor)
+        {
+            // 已被其他角色选择：禁用按钮，变灰
+            button.interactable = false;
+            ColorBlock colors = button.colors;
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            button.colors = colors;
+
+            // 更新文本显示已分配的角色
+            if (buttonText != null)
+            {
+                buttonText.text = $"{GetRoleTypeName(roleTypeIndex)}\n({assignedActor})";
+            }
+        }
+        else if (isCurrentActor)
+        {
+            // 当前角色已选择此身份：高亮显示（第一天可以修改）
+            button.interactable = true;
+            ColorBlock colors = button.colors;
+            colors.normalColor = new Color(1f, 1f, 0.5f, 1f); // 黄色高亮
+            button.colors = colors;
+
+            if (buttonText != null)
+            {
+                buttonText.text = $"{GetRoleTypeName(roleTypeIndex)}\n(已选)";
+            }
+        }
+        else
+        {
+            // 未分配：正常状态
+            button.interactable = true;
+            ColorBlock colors = button.colors;
+            colors.normalColor = Color.white;
+            button.colors = colors;
+
+            if (buttonText != null)
+            {
+                buttonText.text = GetRoleTypeName(roleTypeIndex);
+            }
         }
     }
 
@@ -541,6 +636,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
             return;
         }
 
+        // 记录当前查看的角色索引
+        _currentViewingActorIndex = buttonIndex;
+
         // 显示角色详情图片
         if (_actorDetailsBackgroundImage != null)
         {
@@ -577,22 +675,53 @@ public class WerewolfGamePlayScene : MonoBehaviour
             Debug.LogWarning("Current phase is not set");
             _subText.text = "当前阶段未设置";
         }
+
+        // 更新详情界面中的猜测按钮状态
+        UpdateDetailGuessButtonsState();
+        
+        // 如果猜测功能不可用，显示提示
+        if (!_isGuessingEnabled && _guessResultText != null)
+        {
+            _guessResultText.text = "当前阶段无法进行猜测";
+        }
     }
 
     // 显示特定阶段的角色消息
     private void ShowActorMessagesForPhase(string actorName, string phase)
     {
         var messages = WerewolfGameContext.Instance.GetMessagesByActorAndPhase(actorName, phase);
+        
+        List<string> displayMessages = new List<string>();
+        
+        // 检查角色是否已死亡
+        var actorNames = WerewolfGameContext.Instance.GetAllActorNames();
+        int actorIndex = actorNames.IndexOf(actorName);
+        bool isDead = false;
+        
+        if (actorIndex > 0)  // 跳过旁白（索引0）
+        {
+            isDead = WerewolfGameContext.Instance.HasDeathComponent(actorIndex);
+        }
+        
+        // 添加标题，如果角色已死亡则显示提示
+        if (isDead)
+        {
+            displayMessages.Add($"=== {actorName} 的 {GetPhaseFriendlyName(phase)} 阶段消息 ===");
+            displayMessages.Add("【该角色已死亡】");
+        }
+        else
+        {
+            displayMessages.Add($"=== {actorName} 的 {GetPhaseFriendlyName(phase)} 阶段消息 ===");
+        }
+        
         if (messages == null || messages.Count == 0)
         {
-            _subText.text = $"{actorName} 在 {GetPhaseFriendlyName(phase)} 阶段没有消息";
-            return;
+            displayMessages.Add($"{actorName} 在 {GetPhaseFriendlyName(phase)} 阶段没有消息");
         }
-
-        List<string> displayMessages = new List<string>();
-        displayMessages.Add($"=== {actorName} 的 {GetPhaseFriendlyName(phase)} 阶段消息 ===");
-
-        AppendMessagesWithPrefix(displayMessages, messages);
+        else
+        {
+            AppendMessagesWithPrefix(displayMessages, messages);
+        }
 
         _subText.text = string.Join("\n", displayMessages);
     }
@@ -704,6 +833,31 @@ public class WerewolfGamePlayScene : MonoBehaviour
         return phase; // 如果无法解析，返回原始phase
     }
 
+    /// <summary>
+    /// 获取当前是第几个白天（从1开始计数）
+    /// 如果不是白天阶段，返回0
+    /// </summary>
+    private int GetCurrentDayNumber()
+    {
+        string currentPhase = WerewolfGameContext.Instance.CurrentPhase;
+        
+        if (string.IsNullOrEmpty(currentPhase))
+        {
+            return 0;
+        }
+
+        if (currentPhase.StartsWith("day_"))
+        {
+            string turnStr = currentPhase.Substring(4); // 提取 turn number
+            if (int.TryParse(turnStr, out int turn))
+            {
+                return turn / 2; // 与 GetPhaseFriendlyName 中的逻辑一致
+            }
+        }
+
+        return 0;
+    }
+
     private string ExtractMaskName(string appearance)
     {
 
@@ -754,6 +908,58 @@ public class WerewolfGamePlayScene : MonoBehaviour
             return;
         }
 
+        // 检查游戏是否已结束
+        if (!_isGameEnded)
+        {
+            if (_guessResultText != null)
+            {
+                _guessResultText.text = "游戏未结束，无法检测结果";
+            }
+            Debug.Log("Game has not ended yet, cannot check guess result");
+            return;
+        }
+
+        // 游戏已结束，显示猜测结果
+        ShowGuessResult();
+    }
+
+    /// <summary>
+    /// 检查角色名对应的身份是否匹配预期角色
+    /// </summary>
+    /// <param name="actorName">被选择的角色名</param>
+    /// <param name="expectedRole">预期的角色（如"狼人"、"女巫"、"预言家"）</param>
+    /// <param name="actorNames">所有角色名列表</param>
+    /// <returns>是否匹配</returns>
+    private bool CheckRoleGuess(string actorName, string expectedRole, List<string> actorNames)
+    {
+        if (string.IsNullOrEmpty(actorName))
+        {
+            Debug.LogWarning("Actor name is empty");
+            return false;
+        }
+
+        // 在角色列表中找到对应的索引
+        int actorIndex = actorNames.IndexOf(actorName);
+        if (actorIndex < 0)
+        {
+            Debug.LogWarning($"Actor not found: {actorName}");
+            return false;
+        }
+
+        // 获取该角色的真实身份
+        string actualRole = WerewolfGameContext.Instance.GetActorRole(actorIndex);
+        
+        Debug.Log($"Checking {actorName} (index {actorIndex}): Expected={expectedRole}, Actual={actualRole}");
+        
+        // 比较身份
+        return actualRole == expectedRole;
+    }
+
+    /// <summary>
+    /// 显示猜测结果（游戏结束后调用）
+    /// </summary>
+    private void ShowGuessResult()
+    {
         // 获取所有角色名
         List<string> actorNames = WerewolfGameContext.Instance.GetAllActorNames();
         
@@ -795,38 +1001,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
         
         Debug.Log(resultText);
-    }
-
-    /// <summary>
-    /// 检查角色名对应的身份是否匹配预期角色
-    /// </summary>
-    /// <param name="actorName">被选择的角色名</param>
-    /// <param name="expectedRole">预期的角色（如"狼人"、"女巫"、"预言家"）</param>
-    /// <param name="actorNames">所有角色名列表</param>
-    /// <returns>是否匹配</returns>
-    private bool CheckRoleGuess(string actorName, string expectedRole, List<string> actorNames)
-    {
-        if (string.IsNullOrEmpty(actorName))
-        {
-            Debug.LogWarning("Actor name is empty");
-            return false;
-        }
-
-        // 在角色列表中找到对应的索引
-        int actorIndex = actorNames.IndexOf(actorName);
-        if (actorIndex < 0)
-        {
-            Debug.LogWarning($"Actor not found: {actorName}");
-            return false;
-        }
-
-        // 获取该角色的真实身份
-        string actualRole = WerewolfGameContext.Instance.GetActorRole(actorIndex);
-        
-        Debug.Log($"Checking {actorName} (index {actorIndex}): Expected={expectedRole}, Actual={actualRole}");
-        
-        // 比较身份
-        return actualRole == expectedRole;
     }
 
     /// <summary>
@@ -1083,7 +1257,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 更新按钮状态：禁用并变灰
+    /// 更新按钮状态：死亡时变灰但保持可点击
     /// </summary>
     /// <param name="buttonIndex">按钮索引 (0-5)</param>
     /// <param name="isAlive">是否存活</param>
@@ -1096,18 +1270,19 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         Button button = actorButtons[buttonIndex];
-        button.interactable = isAlive;
+        // 保持按钮可点击
+        button.interactable = true;
 
         // 修改按钮颜色
         ColorBlock colors = button.colors;
         Color targetColor = isAlive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
         colors.normalColor = targetColor;
-        colors.highlightedColor = isAlive ? new Color(0.9f, 0.9f, 0.9f, 1f) : targetColor;
-        colors.pressedColor = isAlive ? new Color(0.8f, 0.8f, 0.8f, 1f) : targetColor;
+        colors.highlightedColor = isAlive ? new Color(0.9f, 0.9f, 0.9f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
+        colors.pressedColor = isAlive ? new Color(0.8f, 0.8f, 0.8f, 1f) : new Color(0.4f, 0.4f, 0.4f, 1f);
         colors.disabledColor = targetColor;
         button.colors = colors;
 
-        Debug.Log($"Button {buttonIndex + 1}: {(isAlive ? "Active" : "Dead (Disabled)")}");
+        Debug.Log($"Button {buttonIndex + 1}: {(isAlive ? "Active" : "Dead (Grayed but Clickable)")}");
     }
 
     // OnClickKickOff 方法已移除，因为 kick off 现在是自动执行的
@@ -1278,16 +1453,34 @@ public class WerewolfGamePlayScene : MonoBehaviour
         if (victoryCondition == "TOWN_VICTORY")
         {
             UpdateButtonTextsWithRoles(); // 显示真实身份
-            _mainText.text = "村民胜利！\n游戏将在10秒后重新开始...";
-            yield return new WaitForSeconds(10f);
-            RestartGame();
+            _isGameEnded = true; // 标记游戏已结束
+            
+            // 显示重置按钮
+            if (_restartButton != null)
+            {
+                _restartButton.gameObject.SetActive(true);
+            }
+            
+            // 自动显示猜测结果
+            ShowGuessResult();
+            
+            _mainText.text = "村民胜利！\n游戏已结束，请点击重置按钮重新开始";
         }
         else if (victoryCondition == "WEREWOLVES_VICTORY")
         {
             UpdateButtonTextsWithRoles(); // 显示真实身份
-            _mainText.text = "狼人胜利！\n游戏将在10秒后重新开始...";
-            yield return new WaitForSeconds(10f);
-            RestartGame();
+            _isGameEnded = true; // 标记游戏已结束
+            
+            // 显示重置按钮
+            if (_restartButton != null)
+            {
+                _restartButton.gameObject.SetActive(true);
+            }
+            
+            // 自动显示猜测结果
+            ShowGuessResult();
+            
+            _mainText.text = "狼人胜利！\n游戏已结束，请点击重置按钮重新开始";
         }
         else
         {
@@ -1619,9 +1812,28 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 重置游戏上下文中的所有数据
         WerewolfGameContext.Instance.Reset();
+        
+        // 重置本地游戏状态
+        _isGuessingEnabled = false;
+        _isGameEnded = false;
+        
+        // 重置猜测选择和锁定状态
+        for (int i = 0; i < _selectedActorNames.Length; i++)
+        {
+            _selectedActorNames[i] = null;
+            _isLockedFromDay1[i] = false;
+        }
 
         // 加载 Launch Scene
         UnityEngine.SceneManagement.SceneManager.LoadScene("WerewolfGameLaunchScene");
+    }
+
+    /// <summary>
+    /// 点击重置按钮时调用（公共方法）
+    /// </summary>
+    public void OnClickRestartGame()
+    {
+        RestartGame();
     }
 
     /// <summary>
@@ -1752,6 +1964,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
             case GamePhase.AfterTimeAfterNight:
                 // 5. 执行 Day 白天讨论（可能需要多次）
                 Debug.Log("Next Phase: Executing Day...");
+                
+                // 记录进入白天讨论阶段
+                int currentDay = GetCurrentDayNumber();
+                Debug.Log($"=== Day {currentDay} starts ===");
+                
                 yield return Day();
 
                 // 检查 Day 是否成功
@@ -1780,6 +1997,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     // 讨论未完成，保持在当前阶段，等待再次点击继续 Day
                     _currentGamePhase = GamePhase.AfterTimeAfterNight;
                 }
+                
+                // 更新猜测按钮可用性（进入白天讨论阶段）
+                UpdateGuessButtonsAvailability();
                 break;
 
             case GamePhase.DiscussionComplete:
@@ -1841,6 +2061,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     // 进入下一个循环：回到夜晚阶段
                     _currentGamePhase = GamePhase.AfterTimeAfterVote;
                 }
+                
+                // 投票后禁用猜测功能（离开白天阶段）
+                UpdateGuessButtonsAvailability();
                 break;
         }
 
