@@ -40,12 +40,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public TMP_Text _detailWitchButtonText;
     public TMP_Text _detailSeerButtonText;
     
-    // 猜测结果文本
-    public TMP_Text _guessResultText;
-    
-    // 重置按钮（游戏结束时显示）
-    public Button _restartButton;
-    
     // 角色猜测状态：存储每个身份对应的角色名
     // 索引: 0=狼人1, 1=狼人2, 2=女巫, 3=预言家
     private string[] _selectedActorNames = new string[4];
@@ -152,12 +146,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 初始化游戏介绍界面
         InitializeGameIntroPanel();
-        
-        // 隐藏重置按钮（游戏结束前不显示）
-        if (_restartButton != null)
-        {
-            _restartButton.gameObject.SetActive(false);
-        }
     }
 
     /// <summary>
@@ -352,10 +340,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
         if (!_isGuessingEnabled)
         {
             Debug.LogWarning("Guessing is not available at this phase");
-            if (_guessResultText != null)
-            {
-                _guessResultText.text = "当前阶段无法进行猜测\n只能在第1天或第2天的白天讨论和投票阶段进行猜测";
-            }
             return;
         }
 
@@ -379,10 +363,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
         if (currentDay == 2 && _isLockedFromDay1[roleTypeIndex])
         {
             Debug.LogWarning($"{GetRoleTypeName(roleTypeIndex)} 已在第一天锁定，无法在第二天修改");
-            if (_guessResultText != null)
-            {
-                _guessResultText.text = $"{GetRoleTypeName(roleTypeIndex)} 已在第一天锁定\n无法修改";
-            }
             return;
         }
 
@@ -393,10 +373,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             if (currentDay == 2 && _isLockedFromDay1[roleTypeIndex])
             {
                 Debug.LogWarning($"第二天无法取消第一天的选择: {GetRoleTypeName(roleTypeIndex)}");
-                if (_guessResultText != null)
-                {
-                    _guessResultText.text = $"{GetRoleTypeName(roleTypeIndex)} 已锁定\n无法取消";
-                }
                 return;
             }
 
@@ -411,20 +387,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
             }
             
             Debug.Log($"Deselected {actorName} from {GetRoleTypeName(roleTypeIndex)}");
-            
-            if (_guessResultText != null)
-            {
-                _guessResultText.text = $"已取消 {actorName} 的身份选择";
-            }
         }
         // 情况2: 点击的身份已分配给其他角色 -> 不允许操作
         else if (!string.IsNullOrEmpty(currentlyAssignedToRole))
         {
             Debug.LogWarning($"{GetRoleTypeName(roleTypeIndex)} 已分配给 {currentlyAssignedToRole}");
-            if (_guessResultText != null)
-            {
-                _guessResultText.text = $"{GetRoleTypeName(roleTypeIndex)} 已被 {currentlyAssignedToRole} 选择";
-            }
         }
         // 情况3: 身份未分配 -> 检查当前角色是否已选择其他身份
         else
@@ -447,10 +414,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 if (currentDay == 2 && _isLockedFromDay1[previousRoleIndex])
                 {
                     Debug.LogWarning($"第二天无法更改第一天的选择: {GetRoleTypeName(previousRoleIndex)}");
-                    if (_guessResultText != null)
-                    {
-                        _guessResultText.text = $"已在第一天选择 {GetRoleTypeName(previousRoleIndex)}\n无法更改";
-                    }
                     return;
                 }
 
@@ -478,18 +441,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
             }
             
             Debug.Log($"Assigned {actorName} as {GetRoleTypeName(roleTypeIndex)}");
-
-            if (_guessResultText != null)
-            {
-                if (previousRoleIndex >= 0)
-                {
-                    _guessResultText.text = $"{actorName}: {GetRoleTypeName(previousRoleIndex)} → {GetRoleTypeName(roleTypeIndex)}";
-                }
-                else
-                {
-                    _guessResultText.text = $"已选择 {actorName} 为 {GetRoleTypeName(roleTypeIndex)}";
-                }
-            }
         }
 
         // 更新按钮状态
@@ -551,7 +502,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         {
             button.interactable = false;
             ColorBlock colors = button.colors;
-            colors.disabledColor = new Color(0.3f, 0.3f, 0.3f, 0.5f);
+            colors.disabledColor = new Color(0.3f, 0.3f, 0.3f, 1f);
             button.colors = colors;
 
             if (buttonText != null)
@@ -589,7 +540,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             // 已被其他角色选择：禁用按钮，变灰
             button.interactable = false;
             ColorBlock colors = button.colors;
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 1f);
             button.colors = colors;
 
             // 更新文本显示已分配的角色
@@ -603,7 +554,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             // 当前角色已选择此身份：高亮显示（第一天可以修改）
             button.interactable = true;
             ColorBlock colors = button.colors;
-            colors.normalColor = new Color(1f, 1f, 0.5f, 1f); // 黄色高亮
+            colors.normalColor = new Color(0.9f, 0.8f, 0.3f, 1f); // 黄色高亮
             button.colors = colors;
 
             if (buttonText != null)
@@ -739,12 +690,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新详情界面中的猜测按钮状态
         UpdateDetailGuessButtonsState();
-        
-        // 如果猜测功能不可用，显示提示
-        if (!_isGuessingEnabled && _guessResultText != null)
-        {
-            _guessResultText.text = "当前阶段无法进行猜测";
-        }
     }
 
     // 显示特定阶段的角色消息
@@ -955,36 +900,6 @@ public class WerewolfGamePlayScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 点击检测结果按钮时调用：验证所有猜测按钮中选择的角色身份是否正确
-    /// </summary>
-    public void OnClickGuessResult()
-    {
-        if (!_isKickOffComplete)
-        {
-            Debug.LogWarning("Please complete kick off before guessing");
-            if (_guessResultText != null)
-            {
-                _guessResultText.text = "请先完成游戏开局 (Kick Off)";
-            }
-            return;
-        }
-
-        // 检查游戏是否已结束
-        if (!_isGameEnded)
-        {
-            if (_guessResultText != null)
-            {
-                _guessResultText.text = "游戏未结束，无法检测结果";
-            }
-            Debug.Log("Game has not ended yet, cannot check guess result");
-            return;
-        }
-
-        // 游戏已结束，显示猜测结果
-        ShowGuessResult();
-    }
-
-    /// <summary>
     /// 检查角色名对应的身份是否匹配预期角色
     /// </summary>
     /// <param name="actorName">被选择的角色名</param>
@@ -1019,7 +934,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
     /// <summary>
     /// 显示猜测结果（游戏结束后调用）
     /// </summary>
-    private void ShowGuessResult()
+    private string GetGuessResultText()
     {
         // 获取所有角色名
         List<string> actorNames = WerewolfGameContext.Instance.GetAllActorNames();
@@ -1051,17 +966,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
         int correctCount = (wolf1Correct ? 1 : 0) + (wolf2Correct ? 1 : 0) + 
                           (witchCorrect ? 1 : 0) + (seerCorrect ? 1 : 0);
         
-        // 显示结果
-        string resultText = "=== 身份猜测结果 ===\n" + 
+        // 生成结果文本
+        string resultText = "\n\n=== 身份猜测结果 ===\n" + 
                            string.Join("\n", results) + 
                            $"\n\n总计: {correctCount}/4 正确";
         
-        if (_guessResultText != null)
-        {
-            _guessResultText.text = resultText;
-        }
-        
         Debug.Log(resultText);
+        return resultText;
     }
 
     /// <summary>
@@ -1516,32 +1427,30 @@ public class WerewolfGamePlayScene : MonoBehaviour
             UpdateButtonTextsWithRoles(); // 显示真实身份
             _isGameEnded = true; // 标记游戏已结束
             
-            // 显示重置按钮
-            if (_restartButton != null)
+            // 获取猜测结果并添加到主文本
+            string guessResultText = GetGuessResultText();
+            _mainText.text = "村民胜利！\n游戏已结束，点击继续按钮重新开始" + guessResultText;
+            
+            // 更新按钮文本为"重新开始"
+            if (_nextPhaseButtonText != null)
             {
-                _restartButton.gameObject.SetActive(true);
+                _nextPhaseButtonText.text = "重新开始";
             }
-            
-            // 自动显示猜测结果
-            ShowGuessResult();
-            
-            _mainText.text = "村民胜利！\n游戏已结束，请点击重置按钮重新开始";
         }
         else if (victoryCondition == "WEREWOLVES_VICTORY")
         {
             UpdateButtonTextsWithRoles(); // 显示真实身份
             _isGameEnded = true; // 标记游戏已结束
             
-            // 显示重置按钮
-            if (_restartButton != null)
+            // 获取猜测结果并添加到主文本
+            string guessResultText = GetGuessResultText();
+            _mainText.text = "狼人胜利！\n游戏已结束，点击继续按钮重新开始" + guessResultText;
+            
+            // 更新按钮文本为"重新开始"
+            if (_nextPhaseButtonText != null)
             {
-                _restartButton.gameObject.SetActive(true);
+                _nextPhaseButtonText.text = "重新开始";
             }
-            
-            // 自动显示猜测结果
-            ShowGuessResult();
-            
-            _mainText.text = "狼人胜利！\n游戏已结束，请点击重置按钮重新开始";
         }
         else
         {
@@ -1890,19 +1799,19 @@ public class WerewolfGamePlayScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 点击重置按钮时调用（公共方法）
-    /// </summary>
-    public void OnClickRestartGame()
-    {
-        RestartGame();
-    }
-
-    /// <summary>
     /// 下一阶段按钮：根据当前游戏阶段执行相应的操作
+    /// 如果游戏已结束，则重启游戏
     /// </summary>
     public void OnClickNextPhase()
     {
-        Debug.Log($"OnClickNextPhase - Current Phase: {_currentGamePhase}");
+        Debug.Log($"OnClickNextPhase - Current Phase: {_currentGamePhase}, IsGameEnded: {_isGameEnded}");
+
+        // 如果游戏已结束，重启游戏
+        if (_isGameEnded)
+        {
+            RestartGame();
+            return;
+        }
 
         // 将按钮文字更改为"继续"
         if (_nextPhaseButtonText != null)
@@ -2142,7 +2051,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         switch (_currentGamePhase)
         {
             case GamePhase.NotStarted:
-                return "游戏正在初始化...";
+                return "点击重新开始 (Restart)";
             case GamePhase.AfterKickOff:
                 return "点击推进时间 (Time)";
             case GamePhase.AfterFirstTime:
