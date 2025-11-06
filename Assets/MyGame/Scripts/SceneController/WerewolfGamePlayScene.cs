@@ -120,6 +120,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
     // 游戏是否已结束
     private bool _isGameEnded = false;
 
+    // 自动重试相关配置
+    private const int MAX_KICKOFF_RETRY_COUNT = 3;  // 最大重试次数
+    private const float RETRY_DELAY_SECONDS = 2f;   // 重试延迟（秒）
+
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
@@ -187,24 +191,64 @@ public class WerewolfGamePlayScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 自动执行 Kick Off
+    /// 自动执行 Kick Off（带重试机制）
     /// </summary>
     private IEnumerator AutoKickOff()
     {
         Debug.Log("Auto KickOff started");
 
-        // 执行 KickOff 逻辑
-        yield return KickOff();
+        int retryCount = 0;
+        bool success = false;
 
-        // 检查 KickOff 是否成功
-        if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
+        // 重试循环
+        while (retryCount < MAX_KICKOFF_RETRY_COUNT && !success)
         {
-            // KickOff 失败
+            if (retryCount > 0)
+            {
+                Debug.Log($"Retrying KickOff... Attempt {retryCount + 1}/{MAX_KICKOFF_RETRY_COUNT}");
+                if (_introStatusText != null)
+                {
+                    _introStatusText.text = $"玩家准备中... (重新尝试 {retryCount + 1}/{MAX_KICKOFF_RETRY_COUNT})";
+                }
+                
+                // 等待一段时间后重试
+                yield return new WaitForSeconds(RETRY_DELAY_SECONDS);
+            }
+            else
+            {
+                if (_introStatusText != null)
+                {
+                    _introStatusText.text = "玩家准备中......";
+                }
+            }
+
+            // 执行 KickOff 逻辑
+            yield return KickOff();
+
+            // 检查 KickOff 是否成功
+            if (_werewolfGamePlayAction.ResponseData != null && _sessionMessagesAction.ResponseData != null)
+            {
+                // KickOff 成功
+                success = true;
+                Debug.Log($"Auto KickOff succeeded on attempt {retryCount + 1}");
+            }
+            else
+            {
+                // KickOff 失败，准备重试
+                retryCount++;
+                Debug.LogWarning($"Auto KickOff failed on attempt {retryCount}");
+            }
+        }
+
+        // 检查最终结果
+        if (!success)
+        {
+            // 所有重试都失败了
             if (_introStatusText != null)
             {
-                _introStatusText.text = "准备失败，请重新启动游戏";
+                _introStatusText.text = $"玩家准备失败（已重试{MAX_KICKOFF_RETRY_COUNT}次）\n请检查网络连接或重新启动游戏";
             }
-            Debug.LogError("Auto KickOff failed");
+            Debug.LogError($"Auto KickOff failed after {MAX_KICKOFF_RETRY_COUNT} attempts");
             yield break;
         }
 
@@ -356,7 +400,16 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 return;
             }
 
+            // 取消选择
             _selectedActorNames[roleTypeIndex] = null;
+            
+            // 如果是在第一天取消选择，也需要清除锁定标记
+            if (currentDay == 1)
+            {
+                _isLockedFromDay1[roleTypeIndex] = false;
+                Debug.Log($"Cleared lock for {GetRoleTypeName(roleTypeIndex)} (Day 1 cancellation)");
+            }
+            
             Debug.Log($"Deselected {actorName} from {GetRoleTypeName(roleTypeIndex)}");
             
             if (_guessResultText != null)
@@ -403,6 +456,14 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
                 string previousRoleName = GetRoleTypeName(previousRoleIndex);
                 _selectedActorNames[previousRoleIndex] = null;
+                
+                // 如果是在第一天更改选择，清除之前的锁定标记
+                if (currentDay == 1)
+                {
+                    _isLockedFromDay1[previousRoleIndex] = false;
+                    Debug.Log($"Cleared lock for {previousRoleName} (Day 1 role change)");
+                }
+                
                 Debug.Log($"Removed {actorName} from {previousRoleName}");
             }
 
