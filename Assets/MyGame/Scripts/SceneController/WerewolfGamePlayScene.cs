@@ -33,19 +33,23 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public Button _detailWolf2Button;      // 详情界面中的"狼人2"按钮
     public Button _detailWitchButton;      // 详情界面中的"女巫"按钮
     public Button _detailSeerButton;       // 详情界面中的"预言家"按钮
+    public Button _detailWolf3Button;      // 详情界面中的"狼人3"按钮
+    public Button _detailHunterButton;     // 详情界面中的"猎人"按钮
     
     // 详情界面猜测按钮的文本组件
     public TMP_Text _detailWolf1ButtonText;
     public TMP_Text _detailWolf2ButtonText;
     public TMP_Text _detailWitchButtonText;
     public TMP_Text _detailSeerButtonText;
+    public TMP_Text _detailWolf3ButtonText;
+    public TMP_Text _detailHunterButtonText;
     
     // 角色猜测状态：存储每个身份对应的角色名
-    // 索引: 0=狼人1, 1=狼人2, 2=女巫, 3=预言家
-    private string[] _selectedActorNames = new string[4];
+    // 索引: 0=狼人1, 1=狼人2, 2=狼人3, 3=女巫, 4=预言家, 5=猎人
+    private string[] _selectedActorNames = new string[6];
     
     // 记录哪些选择是在第一天做出的（第二天时这些选择将被锁定）
-    private bool[] _isLockedFromDay1 = new bool[4];
+    private bool[] _isLockedFromDay1 = new bool[6];
     
     // 当前正在查看的角色索引（用于详情界面）
     private int _currentViewingActorIndex = -1;
@@ -289,8 +293,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 初始化详情界面中的猜测按钮文本
         if (_detailWolf1ButtonText != null) _detailWolf1ButtonText.text = "狼人1";
         if (_detailWolf2ButtonText != null) _detailWolf2ButtonText.text = "狼人2";
+        if (_detailWolf3ButtonText != null) _detailWolf3ButtonText.text = "狼人3";
         if (_detailWitchButtonText != null) _detailWitchButtonText.text = "女巫";
         if (_detailSeerButtonText != null) _detailSeerButtonText.text = "预言家";
+        if (_detailHunterButtonText != null) _detailHunterButtonText.text = "猎人";
         
         // 注意：不在这里调用 UpdateGuessButtonsAvailability()
         // 因为按钮状态会在打开角色详情界面时（OnClickActorButton）更新
@@ -329,6 +335,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
         if (_detailWolf2Button != null) _detailWolf2Button.interactable = _isGuessingEnabled;
         if (_detailWitchButton != null) _detailWitchButton.interactable = _isGuessingEnabled;
         if (_detailSeerButton != null) _detailSeerButton.interactable = _isGuessingEnabled;
+        if (_detailWolf3Button != null) _detailWolf3Button.interactable = _isGuessingEnabled;
+        if (_detailHunterButton != null) _detailHunterButton.interactable = _isGuessingEnabled;
 
         Debug.Log($"Guessing buttons availability updated: Enabled={_isGuessingEnabled}, Day={GetCurrentDayNumber()}, Phase={_currentGamePhase}");
     }
@@ -346,7 +354,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             return;
         }
 
-        if (roleTypeIndex < 0 || roleTypeIndex >= 4)
+        if (roleTypeIndex < 0 || roleTypeIndex >= 6)
         {
             Debug.LogWarning($"Invalid role type index: {roleTypeIndex}");
             return;
@@ -459,8 +467,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
         {
             case 0: return "狼人1";
             case 1: return "狼人2";
-            case 2: return "女巫";
-            case 3: return "预言家";
+            case 2: return "狼人3";
+            case 3: return "女巫";
+            case 4: return "预言家";
+            case 5: return "猎人";
             default: return "未知";
         }
     }
@@ -480,11 +490,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         string currentActorName = _actorNames[_currentViewingActorIndex];
 
-        // 更新4个猜测按钮的状态
+        // 更新6个猜测按钮的状态（按新顺序）
         UpdateSingleDetailGuessButton(_detailWolf1Button, _detailWolf1ButtonText, 0, currentActorName);
         UpdateSingleDetailGuessButton(_detailWolf2Button, _detailWolf2ButtonText, 1, currentActorName);
-        UpdateSingleDetailGuessButton(_detailWitchButton, _detailWitchButtonText, 2, currentActorName);
-        UpdateSingleDetailGuessButton(_detailSeerButton, _detailSeerButtonText, 3, currentActorName);
+        UpdateSingleDetailGuessButton(_detailWolf3Button, _detailWolf3ButtonText, 2, currentActorName);
+        UpdateSingleDetailGuessButton(_detailWitchButton, _detailWitchButtonText, 3, currentActorName);
+        UpdateSingleDetailGuessButton(_detailSeerButton, _detailSeerButtonText, 4, currentActorName);
+        UpdateSingleDetailGuessButton(_detailHunterButton, _detailHunterButtonText, 5, currentActorName);
     }
 
     /// <summary>
@@ -955,24 +967,39 @@ public class WerewolfGamePlayScene : MonoBehaviour
         bool wolf2Correct = CheckRoleGuess(wolf2Name, "狼人", actorNames);
         results.Add($"狼人2: {(wolf2Correct ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {(string.IsNullOrEmpty(wolf2Name) ? "未选择" : wolf2Name)})");
         
+        // 检测狼人3
+        string wolf3Name = _selectedActorNames[2];
+        bool wolf3Correct = CheckRoleGuess(wolf3Name, "狼人", actorNames);
+        results.Add($"狼人3: {(wolf3Correct ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {(string.IsNullOrEmpty(wolf3Name) ? "未选择" : wolf3Name)})");
+        
         // 检测女巫
-        string witchName = _selectedActorNames[2];
+        string witchName = _selectedActorNames[3];
         bool witchCorrect = CheckRoleGuess(witchName, "女巫", actorNames);
         results.Add($"女巫: {(witchCorrect ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {(string.IsNullOrEmpty(witchName) ? "未选择" : witchName)})");
         
         // 检测预言家
-        string seerName = _selectedActorNames[3];
+        string seerName = _selectedActorNames[4];
         bool seerCorrect = CheckRoleGuess(seerName, "预言家", actorNames);
         results.Add($"预言家: {(seerCorrect ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {(string.IsNullOrEmpty(seerName) ? "未选择" : seerName)})");
         
-        // 计算总体正确率
-        int correctCount = (wolf1Correct ? 1 : 0) + (wolf2Correct ? 1 : 0) + 
-                          (witchCorrect ? 1 : 0) + (seerCorrect ? 1 : 0);
+        // 检测猎人
+        string hunterName = _selectedActorNames[5];
+        bool hunterCorrect = CheckRoleGuess(hunterName, "猎人", actorNames);
+        results.Add($"猎人: {(hunterCorrect ? "✓ 猜测成功" : "✗ 猜测失败")} (选择了 {(string.IsNullOrEmpty(hunterName) ? "未选择" : hunterName)})");
+        
+        // 计算总分
+        int correctCount = 0;
+        if (wolf1Correct) correctCount++;
+        if (wolf2Correct) correctCount++;
+        if (wolf3Correct) correctCount++;
+        if (witchCorrect) correctCount++;
+        if (seerCorrect) correctCount++;
+        if (hunterCorrect) correctCount++;
         
         // 生成结果文本
         string resultText = "\n\n=== 身份猜测结果 ===\n" + 
                            string.Join("\n", results) + 
-                           $"\n\n总计: {correctCount}/4 正确";
+                           $"\n\n总计: {correctCount}/6 正确";
         
         Debug.Log(resultText);
         return resultText;
