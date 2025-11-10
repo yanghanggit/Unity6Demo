@@ -20,10 +20,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     public SessionMessagesAction _sessionMessagesAction;
 
-    // 角色按钮相关组件数组（在 Inspector 中配置，长度为6）
-    public TMP_Text[] actorButtonTexts = new TMP_Text[6];
-    public Button[] actorButtons = new Button[6];
-    public Image[] actorButtonImages = new Image[6];
+    // 角色按钮相关组件数组（在 Inspector 中配置，长度为8）
+    public TMP_Text[] actorButtonTexts = new TMP_Text[8];
+    public Button[] actorButtons = new Button[8];
+    public Image[] actorButtonImages = new Image[8];
 
     // 下一阶段按钮的Text组件
     public TMP_Text _nextPhaseButtonText;
@@ -113,6 +113,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
     
     // 游戏是否已结束
     private bool _isGameEnded = false;
+    
+    // 保存夜晚阶段的猎人击杀消息（在 Time 阶段显示）
+    private string _hunterKillMessageFromNight = "";
 
     // 自动重试相关配置
     private const int MAX_KICKOFF_RETRY_COUNT = 3;  // 最大重试次数
@@ -893,7 +896,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             {
                 int actorIndex = i + 1; // 角色实体索引（跳过索引0的旁白）
                 string role = WerewolfGameContext.Instance.GetActorRole(actorIndex);
-                actorButtonTexts[i].text = role;
+                actorButtonTexts[i].text += "\n" + role;
                 Debug.Log($"Updated button {i + 1} to role: {role} (actorIndex: {actorIndex})");
             }
         }
@@ -1146,7 +1149,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             Debug.Log($"{actorNames[i]}: {(hasDeath ? "已死亡 ☠" : "存活 ✓")}");
 
             // 更新对应按钮的状态（i-1 是因为按钮索引从0开始，而角色从1开始）
-            if (hasDeath && i - 1 < 6)
+            if (hasDeath && i - 1 < actorButtons.Length)
             {
                 UpdateButtonState(i - 1, false);
             }
@@ -1199,9 +1202,15 @@ public class WerewolfGamePlayScene : MonoBehaviour
                     Debug.Log($"检测到新死亡: {actorName}");
                 }
             }
+            else if (currentlyDead)
+            {
+                // 如果字典中没有记录（第一个夜晚的情况），但角色已死亡，也算作新死亡
+                newDeaths.Add(actorName);
+                Debug.Log($"检测到新死亡（首次记录）: {actorName}");
+            }
             
-            // 更新按钮状态
-            if (currentlyDead && i - 1 < 6)
+            // 更新按钮状态 - 无论是否是新死亡，只要已死亡就更新按钮颜色
+            if (currentlyDead && i - 1 < actorButtons.Length)
             {
                 UpdateButtonState(i - 1, false);
             }
@@ -1214,7 +1223,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             List<string> deathMessages = new List<string>();
             foreach (string deadActor in newDeaths)
             {
-                deathMessages.Add($"昨晚角色（{deadActor}）死了");
+                deathMessages.Add($"昨晚（{deadActor}）死了");
             }
             deathMessage = string.Join("\n", deathMessages);
             Debug.Log($"夜晚死亡消息: {deathMessage}");
@@ -1226,6 +1235,66 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         callback?.Invoke(deathMessage);
+    }
+
+    /// <summary>
+    /// 从会话消息中提取猎人击杀消息（EventHead.NONE 类型的消息）
+    /// </summary>
+    /// <param name="messages">会话消息列表</param>
+    /// <returns>猎人击杀消息，如果没有则返回空字符串</returns>
+    private string GetHunterKillMessage(List<SessionMessage> messages)
+    {
+        if (messages == null || messages.Count == 0)
+        {
+            return "";
+        }
+
+        // 筛选出 EventHead.NONE 类型的消息（游戏事件）
+        List<string> hunterMessages = new List<string>();
+
+        foreach (var message in messages)
+        {
+            // 只处理 AGENT_EVENT 类型的消息
+            if (message.message_type == (int)MessageType.AGENT_EVENT && message.data != null)
+            {
+                // 检查是否为 EventHead.NONE（游戏事件消息）
+                if (message.data.ContainsKey("head"))
+                {
+                    object headObj = message.data["head"];
+                    
+                    // 转换 head 值并检查是否为 EventHead.NONE
+                    int headValue = headObj is int intHead ? intHead : 
+                                   headObj is long longHead ? (int)longHead : 
+                                   int.TryParse(headObj?.ToString(), out int parsedHead) ? parsedHead : -1;
+                    
+                    if (headValue == (int)EventHead.NONE)
+                    {
+                        // 获取消息内容
+                        if (message.data.ContainsKey("message"))
+                        {
+                            string messageContent = message.data["message"]?.ToString() ?? "";
+                            
+                            // 检查消息是否包含猎人击杀相关的关键词
+                            if (messageContent.Contains("猎人") && 
+                                (messageContent.Contains("击杀") || messageContent.Contains("开枪") || 
+                                 messageContent.Contains("带走") || messageContent.Contains("射杀")))
+                            {
+                                hunterMessages.Add(messageContent);
+                                Debug.Log($"检测到猎人击杀消息: {messageContent}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 如果找到猎人击杀消息，返回合并后的消息
+        if (hunterMessages.Count > 0)
+        {
+            return string.Join("\n", hunterMessages);
+        }
+
+        return "";
     }
 
     /// <summary>
@@ -1421,15 +1490,42 @@ public class WerewolfGamePlayScene : MonoBehaviour
             StartCoroutine(CheckActorDeathStatus());
         }
 
+        // 先获取正常的游戏消息（说明上一阶段发生了什么）
+        string baseMessage = GetFormattedMainText(_sessionMessagesAction.ResponseData.session_messages);
+        
+        // 如果是夜晚后的时间推进，在消息前添加死亡信息和猎人击杀消息
+        string stageMessage;
+        if (isAfterNight && !string.IsNullOrEmpty(nightDeathMessage))
+        {
+            // 如果有猎人击杀消息（从夜晚阶段保存的），添加到死亡消息之后
+            if (!string.IsNullOrEmpty(_hunterKillMessageFromNight))
+            {
+                stageMessage = nightDeathMessage + "\n" + _hunterKillMessageFromNight + "\n\n" + baseMessage;
+                Debug.Log($"添加猎人击杀消息到 Time 阶段: {_hunterKillMessageFromNight}");
+                // 清空猎人击杀消息，避免重复显示
+                _hunterKillMessageFromNight = "";
+            }
+            else
+            {
+                stageMessage = nightDeathMessage + "\n\n" + baseMessage;
+            }
+        }
+        else
+        {
+            stageMessage = baseMessage;
+        }
+        
         // 根据胜利条件显示结果
         if (victoryCondition == "TOWN_VICTORY")
         {
             UpdateButtonTextsWithRoles(); // 显示真实身份
             _isGameEnded = true; // 标记游戏已结束
             
-            // 获取猜测结果并添加到主文本
+            // 获取猜测结果
             string guessResultText = GetGuessResultText();
-            _mainText.text = "村民胜利！\n游戏已结束，点击继续按钮重新开始" + guessResultText;
+            
+            // 组合显示：阶段消息 + 胜利信息 + 猜测结果
+            _mainText.text = stageMessage + "\n\n=== 游戏结束 ===\n村民胜利！\n点击继续按钮重新开始" + guessResultText;
             
             // 更新按钮文本为"重新开始"
             if (_nextPhaseButtonText != null)
@@ -1442,9 +1538,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
             UpdateButtonTextsWithRoles(); // 显示真实身份
             _isGameEnded = true; // 标记游戏已结束
             
-            // 获取猜测结果并添加到主文本
+            // 获取猜测结果
             string guessResultText = GetGuessResultText();
-            _mainText.text = "狼人胜利！\n游戏已结束，点击继续按钮重新开始" + guessResultText;
+            
+            // 组合显示：阶段消息 + 胜利信息 + 猜测结果
+            _mainText.text = stageMessage + "\n\n=== 游戏结束 ===\n狼人胜利！\n点击继续按钮重新开始" + guessResultText;
             
             // 更新按钮文本为"重新开始"
             if (_nextPhaseButtonText != null)
@@ -1454,18 +1552,8 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
         else
         {
-            // 没有胜利条件时显示正常消息
-            string baseMessage = GetFormattedMainText(_sessionMessagesAction.ResponseData.session_messages);
-            
-            // 如果是夜晚后的时间推进，在消息前添加死亡信息
-            if (isAfterNight && !string.IsNullOrEmpty(nightDeathMessage))
-            {
-                _mainText.text = nightDeathMessage + "\n\n" + baseMessage;
-            }
-            else
-            {
-                _mainText.text = baseMessage;
-            }
+            // 没有胜利条件时只显示阶段消息
+            _mainText.text = stageMessage;
         }
     }
 
@@ -1525,6 +1613,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
             _sessionMessagesAction.ResponseData.session_messages, "night");
         Debug.Log("Night processed messages:\n" + string.Join("\n", processedMessages));
+
+        // 检测并保存猎人击杀消息（在下一个 Time 阶段显示）
+        _hunterKillMessageFromNight = GetHunterKillMessage(_sessionMessagesAction.ResponseData.session_messages);
+        if (!string.IsNullOrEmpty(_hunterKillMessageFromNight))
+        {
+            Debug.Log($"在夜晚阶段检测到猎人击杀消息: {_hunterKillMessageFromNight}");
+        }
 
         // 隐藏 loading，显示完成文本
         SetLoadingState(false);

@@ -468,6 +468,7 @@ public partial class WerewolfGameContext
     public bool HasWerewolfComponent(int actorIndex) => HasComponent(actorIndex, "WerewolfComponent");
     public bool HasSeerComponent(int actorIndex) => HasComponent(actorIndex, "SeerComponent");
     public bool HasWitchComponent(int actorIndex) => HasComponent(actorIndex, "WitchComponent");
+    public bool HasHunterComponent(int actorIndex) => HasComponent(actorIndex, "HunterComponent");
     public bool HasVillagerComponent(int actorIndex) => HasComponent(actorIndex, "VillagerComponent");
 
     public string GetActorRole(int actorIndex)
@@ -477,6 +478,7 @@ public partial class WerewolfGameContext
         if (HasWerewolfComponent(actorIndex)) return "狼人";
         if (HasSeerComponent(actorIndex)) return "预言家";
         if (HasWitchComponent(actorIndex)) return "女巫";
+        if (HasHunterComponent(actorIndex)) return "猎人";
         if (HasVillagerComponent(actorIndex)) return "村民";
 
         return "未知";

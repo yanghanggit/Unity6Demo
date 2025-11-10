@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 public class BaseRequestAction : MonoBehaviour
 {
     [Header("配置")]
-    [SerializeField] private float requestTimeout = 30f; // 请求超时时间（秒）
+    [SerializeField] private float requestTimeout = 120f; // 请求超时时间（秒）
 
     // 请求结果结构
     [Serializable]
