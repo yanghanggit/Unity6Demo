@@ -29,5 +29,8 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/MyGame/Scenes/DungeonScene.unity
     guid: f9b8bdbc826aa47f7993b4a428d989d6
+  - enabled: 1
+    path: Assets/MyGame/Scenes/WerewolfGamePlayScene-test.unity
+    guid: 9c69d74af86d1384dafbcb9e39cf06fe
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
