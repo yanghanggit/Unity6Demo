@@ -519,7 +519,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92692539bebe448bb92e561662cea152, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WerewolfGame
-  serverUrl: http://192.168.192.54:8000/
+  serverUrl: http://192.168.192.40:8000/
   _rootAction: {fileID: 399892902}
   _werewolfGameStartAction: {fileID: 399892903}
   _werewolfGameStateAction: {fileID: 399892906}
@@ -871,8 +871,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 8218737870641932965, guid: b02be1ec25d5b2446a9d43d4690b779a,
-    type: 3}
+  m_Sprite: {fileID: 644001823344769962, guid: fb55a525c96969f4bbbfdd0c6fe02278, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
