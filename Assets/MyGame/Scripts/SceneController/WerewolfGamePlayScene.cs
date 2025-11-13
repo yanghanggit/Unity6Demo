@@ -24,6 +24,10 @@ public class WerewolfGamePlayScene : MonoBehaviour
     public TMP_Text[] actorButtonTexts = new TMP_Text[8];
     public Button[] actorButtons = new Button[8];
     public Image[] actorButtonImages = new Image[8];
+    
+    // 死亡覆盖图片数组（在 Inspector 中配置，长度为8）
+    // 这些图片会在角色死亡时显示在原有图片上方
+    public Image[] actorDeathOverlayImages = new Image[8];
 
     // 下一阶段按钮的Text组件
     public TMP_Text _nextPhaseButtonText;
@@ -150,6 +154,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
         Debug.Log($"Game mode: {(_showAllMessages ? "Debug Mode (显示所有消息)" : "Play Mode (只显示发言)")}");
 
         SetupButtonImages();
+        
+        // 初始化死亡覆盖图片为隐藏状态
+        InitializeDeathOverlayImages();
 
         // 初始化游戏介绍界面
         InitializeGameIntroPanel();
@@ -592,6 +599,28 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 初始化死亡覆盖图片：默认全部隐藏
+    /// </summary>
+    private void InitializeDeathOverlayImages()
+    {
+        if (actorDeathOverlayImages == null)
+        {
+            Debug.LogWarning("actorDeathOverlayImages array is not assigned");
+            return;
+        }
+        
+        for (int i = 0; i < actorDeathOverlayImages.Length; i++)
+        {
+            if (actorDeathOverlayImages[i] != null)
+            {
+                actorDeathOverlayImages[i].gameObject.SetActive(false);
+            }
+        }
+        
+        Debug.Log("Initialized death overlay images (all hidden)");
+    }
+    
     private void SetupButtonImages()
     {
         // 从 WerewolfGameContext 获取所有角色的 appearances 和原始名字
@@ -1325,9 +1354,9 @@ public class WerewolfGamePlayScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 更新按钮状态：死亡时变灰但保持可点击
+    /// 更新按钮状态：死亡时文字变红色、显示死亡覆盖图片，但保持可点击
     /// </summary>
-    /// <param name="buttonIndex">按钮索引 (0-5)</param>
+    /// <param name="buttonIndex">按钮索引 (0-7)</param>
     /// <param name="isAlive">是否存活</param>
     private void UpdateButtonState(int buttonIndex, bool isAlive)
     {
@@ -1341,7 +1370,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         // 保持按钮可点击
         button.interactable = true;
 
-        // 修改按钮颜色
+        // 修改按钮颜色（保持原样）
         ColorBlock colors = button.colors;
         Color targetColor = isAlive ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
         colors.normalColor = targetColor;
@@ -1349,8 +1378,20 @@ public class WerewolfGamePlayScene : MonoBehaviour
         colors.pressedColor = isAlive ? new Color(0.8f, 0.8f, 0.8f, 1f) : new Color(0.4f, 0.4f, 0.4f, 1f);
         colors.disabledColor = targetColor;
         button.colors = colors;
+        
+        // 修改文字颜色：死亡时变红色
+        if (buttonIndex < actorButtonTexts.Length && actorButtonTexts[buttonIndex] != null)
+        {
+            actorButtonTexts[buttonIndex].color = isAlive ? Color.white : Color.red;
+        }
+        
+        // 显示/隐藏死亡覆盖图片
+        if (buttonIndex < actorDeathOverlayImages.Length && actorDeathOverlayImages[buttonIndex] != null)
+        {
+            actorDeathOverlayImages[buttonIndex].gameObject.SetActive(!isAlive);
+        }
 
-        Debug.Log($"Button {buttonIndex + 1}: {(isAlive ? "Active" : "Dead (Grayed but Clickable)")}");
+        Debug.Log($"Button {buttonIndex + 1}: {(isAlive ? "Active" : "Dead (Red Text + Overlay Image, but Clickable)")}");
     }
 
     // OnClickKickOff 方法已移除，因为 kick off 现在是自动执行的
