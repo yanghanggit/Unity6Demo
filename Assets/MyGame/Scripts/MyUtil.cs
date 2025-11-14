@@ -208,11 +208,16 @@ public static class MyUtils
         Vector3 screenPos = camera.WorldToScreenPoint(bubbleWorldPos);
 
         // 步骤4：屏幕坐标 → Canvas坐标
+        // 关键修复：根据Canvas渲染模式选择正确的相机参数
+        // Screen Space - Overlay 模式使用 null
+        // Screen Space - Camera 或 World Space 模式使用对应的相机
+        Camera canvasCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : camera;
+        
         Vector2 canvasPos;
         bool success = RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvas.GetComponent<RectTransform>(),
             screenPos,
-            canvas.worldCamera,
+            canvasCamera,
             out canvasPos
         );
 
@@ -221,7 +226,7 @@ public static class MyUtils
             Debug.LogWarning("Failed to convert screen point to canvas coordinates");
         }
 
-        Debug.Log($"坐标转换: 世界({spriteWorldPos}) → 屏幕({screenPos}) → Canvas({canvasPos})");
+        Debug.Log($"坐标转换: 世界({spriteWorldPos}) → 屏幕({screenPos}) → Canvas({canvasPos}), Canvas模式: {canvas.renderMode}");
 
         return canvasPos;
     }

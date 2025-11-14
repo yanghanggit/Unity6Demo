@@ -10,7 +10,7 @@ public class CampScene : MonoBehaviour
     public string _preScene = "MainScene2";
     public GameObject _backgroundImage;
     public SpriteRenderer _templateActor;
-    public float _spacingOffset = 2.0f; // 额外间距（可调整）
+    public float _spacingOffset = 0.5f; // 额外间距（可调整）
     public GameObject _inputBackground;
     public TMP_InputField _inputField;
     public GameObject _speechBubblePrefab;
@@ -435,7 +435,7 @@ public class CampScene : MonoBehaviour
         }
 
         // 🔥 动态计算部分：使用提取的坐标转换函数
-        Vector2 canvasPos = MyUtils.ConvertSpriteToCanvasPosition(targetSprite, _canvas, _mainCamera, 0.5f);
+        Vector2 canvasPos = MyUtils.ConvertSpriteToCanvasPosition(targetSprite, _canvas, _mainCamera, 1.5f);
 
         // 设置UI位置 - 使用动态计算的坐标
         rectTransform.anchoredPosition = canvasPos;
