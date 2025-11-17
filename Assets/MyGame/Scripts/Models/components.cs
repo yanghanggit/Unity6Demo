@@ -203,11 +203,11 @@ public sealed class DeathComponent
 /// 新版本的重构！
 /// </summary>
 [System.Serializable]
-public sealed class RPGCharacterProfileComponent
+public sealed class CombatStatsComponent
 {
     public string name = "";
-    public RPGCharacterProfile rpg_character_profile = new RPGCharacterProfile();
-    public List<StatusEffect> status_effects = new List<StatusEffect>();
+    public CharacterStats stats = new CharacterStats();
+    public List<StatusEffect> effects = new List<StatusEffect>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,9 +217,9 @@ public sealed class RPGCharacterProfileComponent
 /// <summary>
 /// 问号牌
 /// </summary>
-[System.Serializable]
-public sealed class XCardPlayerComponent
-{
-    public string name = "";
-    public Skill skill = new Skill();
-}
+// [System.Serializable]
+// public sealed class XCardPlayerComponent
+// {
+//     public string name = "";
+//     public Skill skill = new Skill();
+// }

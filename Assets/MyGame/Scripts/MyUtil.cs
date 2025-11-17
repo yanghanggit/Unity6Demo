@@ -41,9 +41,9 @@ public static class MyUtils
     public static string DungeonCombatDisplayText(Dungeon dungeon)
     {
         var dungeon_text = "";
-        if (dungeon.engagement.combats.Count > 0)
+        if (dungeon.combat_sequence.combats.Count > 0)
         {
-            var last_combat = dungeon.engagement.combats[dungeon.engagement.combats.Count - 1];
+            var last_combat = dungeon.combat_sequence.combats[dungeon.combat_sequence.combats.Count - 1];
             dungeon_text += "Last Combat: " + last_combat.name + "\n";
             dungeon_text += "Phase: " + last_combat.phase.ToString() + "\n";
             dungeon_text += "Result: " + last_combat.result.ToString() + "\n";
@@ -100,10 +100,10 @@ public static class MyUtils
                 continue;
             }
 
-            if (component.name == typeof(RPGCharacterProfileComponent).Name)
+            if (component.name == typeof(CombatStatsComponent).Name)
             {
-                var rpgCharacterProfileComponent = JsonConvert.DeserializeObject<RPGCharacterProfileComponent>(JsonConvert.SerializeObject(component.data));
-                var rpgCharacterProfile = rpgCharacterProfileComponent.rpg_character_profile;
+                var rpgCharacterProfileComponent = JsonConvert.DeserializeObject<CombatStatsComponent>(JsonConvert.SerializeObject(component.data));
+                var rpgCharacterProfile = rpgCharacterProfileComponent.stats;
                 var rpgCharacterProfileText = $"{actorEntitySerialization.name} = HP:{rpgCharacterProfile.hp}/{rpgCharacterProfile.max_hp}," +
                         $" Strength:{rpgCharacterProfile.strength}," +
                         $" Dexterity:{rpgCharacterProfile.dexterity}," +
@@ -113,14 +113,14 @@ public static class MyUtils
                         $" Magic Attack:{rpgCharacterProfile.magic_attack}," +
                         $" Magic Defense:{rpgCharacterProfile.magic_defense}\n";
 
-                if (rpgCharacterProfileComponent.status_effects.Count > 0)
+                if (rpgCharacterProfileComponent.effects.Count > 0)
                 {
                     rpgCharacterProfileText += "Status Effects: ";
-                    for (int j = 0; j < rpgCharacterProfileComponent.status_effects.Count; j++)
+                    for (int j = 0; j < rpgCharacterProfileComponent.effects.Count; j++)
                     {
-                        var statusEffect = rpgCharacterProfileComponent.status_effects[j];
+                        var statusEffect = rpgCharacterProfileComponent.effects[j];
                         rpgCharacterProfileText += $"{statusEffect.name} ({statusEffect.description}, {statusEffect.duration})";
-                        if (j < rpgCharacterProfileComponent.status_effects.Count - 1)
+                        if (j < rpgCharacterProfileComponent.effects.Count - 1)
                         {
                             rpgCharacterProfileText += ", ";
                         }

@@ -82,7 +82,7 @@ public sealed class Combat
 /// 战斗参与
 /// </summary>
 [System.Serializable]
-public sealed class Engagement
+public sealed class CombatSequence
 {
     public List<Combat> combats = new List<Combat>();
 }
@@ -96,7 +96,7 @@ public sealed class Dungeon
 {
     public string name = "";
     public List<Stage> stages = new List<Stage>();
-    public Engagement engagement = new Engagement();
+    public CombatSequence combat_sequence = new CombatSequence();
     public int current_stage_index = -1;
 }
 

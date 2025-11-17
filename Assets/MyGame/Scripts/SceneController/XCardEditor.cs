@@ -44,51 +44,51 @@ public class XCardEditor : MonoBehaviour
         this.gameObject.SetActive(false);
     }
 
-    public void OnClickConfirm()
-    {
-        Debug.Log("OnClickConfirm");
-        if (_editNameInputField.text == "")
-        {
-            Debug.LogError("Name is empty");
-            return;
-        }
-        if (_editDescriptionInputField.text == "")
-        {
-            Debug.LogError("Description is empty");
-            return;
-        }
-        if (_editEffectInputField.text == "")
-        {
-            Debug.LogError("Effect is empty");
-            return;
-        }
-        StartCoroutine(ExecuteXCard(_editNameInputField.text, _editDescriptionInputField.text, _editEffectInputField.text));
-    }
+    // public void OnClickConfirm()
+    // {
+    //     Debug.Log("OnClickConfirm");
+    //     if (_editNameInputField.text == "")
+    //     {
+    //         Debug.LogError("Name is empty");
+    //         return;
+    //     }
+    //     if (_editDescriptionInputField.text == "")
+    //     {
+    //         Debug.LogError("Description is empty");
+    //         return;
+    //     }
+    //     if (_editEffectInputField.text == "")
+    //     {
+    //         Debug.LogError("Effect is empty");
+    //         return;
+    //     }
+    //     StartCoroutine(ExecuteXCard(_editNameInputField.text, _editDescriptionInputField.text, _editEffectInputField.text));
+    // }
 
-    private IEnumerator ExecuteXCard(string skillName, string skillDescription, string skillEffect)
-    {
-        Dictionary<string, string> data = new Dictionary<string, string>();
-        data["name"] = skillName;
-        data["description"] = skillDescription;
-        data["effect"] = skillEffect;
-        yield return _dungeonGamePlayAction.Call(
-            GameContext.Instance.DungeonGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "x_card", data);
-        if (_dungeonGamePlayAction.ResponseData == null)
-        {
-            Debug.LogError("ExecuteXCard request failed");
-            yield break;
-        }
+    // private IEnumerator ExecuteXCard(string skillName, string skillDescription, string skillEffect)
+    // {
+    //     Dictionary<string, string> data = new Dictionary<string, string>();
+    //     data["name"] = skillName;
+    //     data["description"] = skillDescription;
+    //     data["effect"] = skillEffect;
+    //     yield return _dungeonGamePlayAction.Call(
+    //         GameContext.Instance.DungeonGameplayUrl,
+    //         GameContext.Instance.UserName,
+    //         GameContext.Instance.GameName,
+    //         "x_card", data);
+    //     if (_dungeonGamePlayAction.ResponseData == null)
+    //     {
+    //         Debug.LogError("ExecuteXCard request failed");
+    //         yield break;
+    //     }
 
-        //
-        GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
+    //     //
+    //     GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
 
-        //
-        //Debug.Log("ExecuteXCard request success");
+    //     //
+    //     //Debug.Log("ExecuteXCard request success");
 
-        // 自动关闭。
-        OnClickClose();
-    }
+    //     // 自动关闭。
+    //     OnClickClose();
+    // }
 }

@@ -22,7 +22,7 @@ public class StageType
 }
 
 [System.Serializable]
-public class RPGCharacterProfile
+public class CharacterStats
 {
     public int experience = 0;
     public int fixed_level = 1;
@@ -75,7 +75,7 @@ public class Actor
     public ActorCharacterSheet character_sheet = new ActorCharacterSheet();
     public string system_message = "";
     public string kick_off_message = "";
-    public RPGCharacterProfile rpg_character_profile = new RPGCharacterProfile();
+    public CharacterStats character_stats = new CharacterStats();
 }
 
 /**

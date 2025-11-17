@@ -201,7 +201,7 @@ public class DungeonScene : MonoBehaviour
 
         GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
 
-        UpdateActorDisplay(new HashSet<string> { typeof(RPGCharacterProfileComponent).Name });
+        UpdateActorDisplay(new HashSet<string> { typeof(CombatStatsComponent).Name });
     }
 
     private IEnumerator ExecuteAdvanceNextDungeon()
