@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using TMPro;
 using System.Linq;
 
-public class CampScene : MonoBehaviour
+public class RestaurantScene : MonoBehaviour
 {
     public string _preScene = "MainScene2";
     public GameObject _backgroundImage;
@@ -53,13 +53,11 @@ public class CampScene : MonoBehaviour
             clickHandler.OnSpriteClicked += OnSpriteClicked;
         }
 
-        //var imagePaths = new Dictionary<string, string>();
-
         List<string> actors = new List<string>();
-        GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors);
-        if (actors == null || GameContext.Instance.Root == null)
+        bool hasMapping = GameContext.Instance.Mapping.TryGetValue(GameContext.RestaurantName, out actors);
+        if (!hasMapping || actors == null || actors.Count == 0 || GameContext.Instance.Root == null)
         {
-            Debug.LogWarning("GameContext is not set up. Using debug actors.");
+            Debug.LogWarning($"GameContext is not set up. hasMapping={hasMapping}, actors={(actors == null ? "null" : actors.Count.ToString())}, Root={(GameContext.Instance.Root == null ? "null" : "exists")}. Using debug actors.");
             actors = new List<string>
             {
                 GameContext.WarriorName,
@@ -73,11 +71,8 @@ public class CampScene : MonoBehaviour
         // 隐藏原始的sampleSprite，因为第一个创建的精灵会覆盖它的位置
         _templateActor.gameObject.SetActive(false);
 
-        // 测试：为第一个精灵创建对话泡泡
-        if (_createdSprites.Count > 0)
-        {
-            //DisplaySpeechBubbleAtTarget(_createdSprites[0], "Hello World! This is a speech bubble using prefab!");
-        }
+        // 通知服务器场景转换到餐馆
+        StartCoroutine(ExecuteTransRestaurant());
     }
 
     public void OnClickBack()
@@ -142,8 +137,41 @@ public class CampScene : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Game is not set up. Staying in CampScene.");
+            Debug.LogWarning("Game is not set up. Staying in RestaurantScene.");
         }
+    }
+
+    /// <summary>
+    /// 通知服务器场景转换到餐馆
+    /// </summary>
+    private IEnumerator ExecuteTransRestaurant()
+    {
+        yield return _homeGamePlayAction.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "/trans_home",
+            new Dictionary<string, string>
+            {
+                ["stage_name"] = GameContext.RestaurantName
+            });
+
+        Debug.Log("场景转换至餐馆");
+        
+        if (_homeGamePlayAction.ResponseData == null)
+        {
+            Debug.LogError("TransRestaurant request failed");
+            yield break;
+        }
+
+        // 处理服务器返回的消息
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
+
+        string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
+        Debug.Log(joinedLogs);
+
+        // 显示对话
+        DisplayAllDialogues();
     }
 
     /// <summary>
@@ -222,7 +250,7 @@ public class CampScene : MonoBehaviour
     /// 从图片资源创建精灵（复制sampleSprite的设置），仅负责外观
     /// </summary>
     /// <param name="spriteName">精灵名称</param>
-    /// <param name="imagePath">图片完整路径</param>
+    /// <param name="cachedSprite">缓存的精灵资源</param>
     /// <returns>创建的GameObject</returns>
     private GameObject CreateSprite(string spriteName, Sprite cachedSprite)
     {
@@ -246,7 +274,6 @@ public class CampScene : MonoBehaviour
         Debug.Log($"Copied sprite settings: drawMode={spriteRenderer.drawMode}, size={spriteRenderer.size}");
 
         // 直接使用传入的完整路径加载图片资源
-        // Texture2D texture = LoadImageFromPath(imagePath);
         Texture2D texture = cachedSprite.texture;
         if (texture != null)
         {
@@ -255,12 +282,9 @@ public class CampScene : MonoBehaviour
 
             // 只替换sprite，保持所有其他设置不变
             spriteRenderer.sprite = newSprite;
-
-            //Debug.Log($"Successfully loaded image from {imagePath} for {spriteName}, Original texture size: {texture.width}x{texture.height}");
         }
         else
         {
-            //Debug.LogError($"Failed to load image from path: {imagePath}");
             // 如果加载失败，创建一个简单的替代纹理
             Texture2D fallbackTexture = MyUtils.CreateSimpleTexture(64, 64, Color.gray);
             Sprite fallbackSprite = Sprite.Create(fallbackTexture, new Rect(0, 0, 64, 64), new Vector2(0.5f, 0.5f));
@@ -273,50 +297,12 @@ public class CampScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 从指定路径加载图片
-    /// </summary>
-    /// <param name="imagePath">图片完整路径</param>
-    /// <returns>加载的纹理</returns>
-    private Texture2D LoadImageFromPath(string imagePath)
-    {
-        try
-        {
-            if (System.IO.File.Exists(imagePath))
-            {
-                byte[] imageData = System.IO.File.ReadAllBytes(imagePath);
-                Texture2D loadedTexture = new Texture2D(2, 2);
-                if (loadedTexture.LoadImage(imageData))
-                {
-                    Debug.Log($"Successfully loaded image from path: {imagePath}");
-                    return loadedTexture;
-                }
-                else
-                {
-                    Debug.LogError($"Failed to decode image data from: {imagePath}");
-                }
-            }
-            else
-            {
-                Debug.LogWarning($"Image file not found at path: {imagePath}");
-            }
-
-            return null;
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Error loading image from {imagePath}: {ex.Message}");
-            return null;
-        }
-    }
-
-    /// <summary>
     /// InputField (TMP) - On Value Changed 事件处理器
     /// </summary>
     /// <param name="value">输入字段的当前值</param>
     public void OnInputFieldValueChanged(string value)
     {
         Debug.Log($"InputField value changed: {value}");
-        // 在这里添加您的值改变处理逻辑
         Debug.Log("OnValueChanged: " + _inputField.text);
         Debug.Log($"你(/speak = @{_currentSpriteName} " + _inputField.text);
     }
@@ -328,7 +314,6 @@ public class CampScene : MonoBehaviour
     public void OnInputFieldEndEdit(string value)
     {
         Debug.Log($"InputField end edit: {value}");
-        // 在这里添加您的编辑结束处理逻辑
     }
 
     /// <summary>
@@ -338,7 +323,6 @@ public class CampScene : MonoBehaviour
     public void OnInputFieldSelect(string value)
     {
         Debug.Log($"InputField selected: {value}");
-        // 在这里添加您的选中处理逻辑
     }
 
     /// <summary>
@@ -348,12 +332,10 @@ public class CampScene : MonoBehaviour
     public void OnInputFieldDeselect(string value)
     {
         Debug.Log($"InputField deselected: {value}");
-        // 在这里添加您的取消选中处理逻辑
     }
 
     private GameObject GetCurrentSprite()
     {
-        //return _createdSprites.FirstOrDefault(sprite => sprite.name == _currentSpriteName);
         return GetCreatedSprite(_currentSpriteName);
     }
 
@@ -399,14 +381,12 @@ public class CampScene : MonoBehaviour
             });
 
         Debug.Log("Speak action executed");
-        //if (!_homeGamePlayAction.LastRequestSuccess)
         if (_homeGamePlayAction.ResponseData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
 
-        //
         GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
 
         HideInputBackground();
@@ -421,6 +401,7 @@ public class CampScene : MonoBehaviour
     /// 创建测试用的UI对话泡泡（使用预制体）
     /// </summary>
     /// <param name="targetSprite">目标精灵</param>
+    /// <param name="message">对话内容</param>
     private void DisplaySpeechBubbleAtTarget(GameObject targetSprite, string message)
     {
         // 激活预制体
@@ -434,7 +415,7 @@ public class CampScene : MonoBehaviour
             return;
         }
 
-        // 🔥 动态计算部分：使用提取的坐标转换函数
+        // 动态计算部分：使用提取的坐标转换函数
         Vector2 canvasPos = MyUtils.ConvertSpriteToCanvasPosition(targetSprite, _canvas, _mainCamera, 1.5f);
 
         // 设置UI位置 - 使用动态计算的坐标
@@ -453,9 +434,6 @@ public class CampScene : MonoBehaviour
         }
 
         Debug.Log($"Positioned speech bubble prefab at canvas position {canvasPos}");
-
-        // 延时隐藏泡泡
-        //StartCoroutine(HideSpeechBubblePrefabAfterDelay(_hideBubbleDuration));
     }
 
     /// <summary>
@@ -486,9 +464,8 @@ public class CampScene : MonoBehaviour
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-
             "/advancing");
-        //if (!_homeGamePlayAction.LastRequestSuccess)
+        
         if (_homeGamePlayAction.ResponseData == null)
         {
             Debug.LogError("RunHomeAction request failed");
@@ -497,8 +474,6 @@ public class CampScene : MonoBehaviour
 
         GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
 
-        //
-        //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
         Debug.Log(joinedLogs);
 
@@ -572,7 +547,7 @@ public class CampScene : MonoBehaviour
                 case EventHead.NIGHT_ACTION_EVENT:
                 case EventHead.VOTE_EVENT:
                 case EventHead.QUERY_EVENT:
-                    // 这些事件类型在营地场景中不需要显示对话泡泡
+                    // 这些事件类型在餐厅场景中不需要显示对话泡泡
                     break;
 
                 default:

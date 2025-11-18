@@ -203,6 +203,12 @@ public partial class GameContext
                 AgentEvents.Add(combatCompleteEvent);
                 break;
 
+            case EventHead.TRANS_STAGE_EVENT:
+                AgentEvent transStageEvent = dataToken.ToObject<AgentEvent>();
+                UnityEngine.Debug.Log($"TRANS_STAGE_EVENT: {transStageEvent.message}");
+                AgentEventLogs.Add($"[场景转换] {transStageEvent.message}");
+                AgentEvents.Add(transStageEvent);
+                break;
 
             default:
                 UnityEngine.Debug.LogWarning("Unknown agent event head: " + eventHead);

@@ -49,6 +49,17 @@ public class MainScene2 : MonoBehaviour
         SceneManager.LoadScene("CampScene");
     }
 
+        public void OnClickRestaurant()
+    {
+        Debug.Log("OnClickRestaurant");
+        StartCoroutine(OpenRestaurantScene());
+    }
+
+    IEnumerator OpenRestaurantScene()
+    {
+        yield return new WaitForSeconds(0);
+        SceneManager.LoadScene("RestaurantScene");
+    }
     public void OnClickDungeon()
     {
         Debug.Log("OnClickDungeon");
