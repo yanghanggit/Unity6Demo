@@ -186,7 +186,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -8765846003301459409, guid: e42b82b77466f4f6cad9a117c3203f9d,
+  m_Sprite: {fileID: -977078167790804878, guid: b2037a048a0730f43b1ba4e021ae37ce,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -208,7 +208,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 5, y: 5, z: 10}
-  m_LocalScale: {x: 0.47917947, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -274,11 +274,11 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 2.3}
+  m_Offset: {x: 0, y: 2}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 15.36, y: 10.24}
+    oldSize: {x: 10.24, y: 15.36}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -582,8 +582,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: CampScene, Assembly-CSharp
+      - m_Target: {fileID: 399892903}
+        m_TargetAssemblyTypeName: RestaurantScene, Assembly-CSharp
         m_MethodName: OnClickBack
         m_Mode: 1
         m_Arguments:
@@ -641,7 +641,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 399892900}
-  - component: {fileID: 399892901}
+  - component: {fileID: 399892903}
   - component: {fileID: 399892902}
   m_Layer: 0
   m_Name: Controller
@@ -665,27 +665,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &399892901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50120895d8fa04412ae8a0d670541a32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _preScene: MainScene2
-  _backgroundImage: {fileID: 95948007}
-  _templateActor: {fileID: 809303518}
-  _spacingOffset: 1
-  _inputBackground: {fileID: 1654066303}
-  _inputField: {fileID: 2076775056}
-  _speechBubblePrefab: {fileID: 1266498991}
-  _hideBubbleDuration: 5
-  _homeGamePlayAction: {fileID: 399892902}
 --- !u!114 &399892902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -700,6 +679,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   requestTimeout: 30
   useAsyncVersion: 1
+--- !u!114 &399892903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d7a3d0dccc8fc6429972f9628fce4df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RestaurantScene
+  _preScene: MainScene2
+  _backgroundImage: {fileID: 95948007}
+  _templateActor: {fileID: 809303518}
+  _spacingOffset: 1
+  _inputBackground: {fileID: 1654066303}
+  _inputField: {fileID: 2076775056}
+  _speechBubblePrefab: {fileID: 1266498991}
+  _hideBubbleDuration: 5
+  _homeGamePlayAction: {fileID: 399892902}
 --- !u!1 &428044658
 GameObject:
   m_ObjectHideFlags: 0
@@ -855,7 +855,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -40, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &575808462
 MonoBehaviour:
@@ -908,8 +908,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 25
+  m_fontSizeBase: 25
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1440,7 +1440,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 500, y: 400}
+  m_SizeDelta: {x: 500, y: 600}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1430379584
 GameObject:
@@ -1949,8 +1949,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: CampScene, Assembly-CSharp
+      - m_Target: {fileID: 399892903}
+        m_TargetAssemblyTypeName: RestaurantScene, Assembly-CSharp
         m_MethodName: OnClickNext
         m_Mode: 1
         m_Arguments:
@@ -2219,8 +2219,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: CampScene, Assembly-CSharp
+      - m_Target: {fileID: 399892903}
+        m_TargetAssemblyTypeName: RestaurantScene, Assembly-CSharp
         m_MethodName: OnClickSendMessage
         m_Mode: 1
         m_Arguments:
@@ -2408,8 +2408,8 @@ MonoBehaviour:
   m_OnEndEdit:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: CampScene, Assembly-CSharp
+      - m_Target: {fileID: 399892903}
+        m_TargetAssemblyTypeName: RestaurantScene, Assembly-CSharp
         m_MethodName: OnInputFieldEndEdit
         m_Mode: 5
         m_Arguments:
@@ -2426,8 +2426,8 @@ MonoBehaviour:
   m_OnSelect:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: CampScene, Assembly-CSharp
+      - m_Target: {fileID: 399892903}
+        m_TargetAssemblyTypeName: RestaurantScene, Assembly-CSharp
         m_MethodName: OnInputFieldSelect
         m_Mode: 5
         m_Arguments:
@@ -2441,8 +2441,8 @@ MonoBehaviour:
   m_OnDeselect:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: CampScene, Assembly-CSharp
+      - m_Target: {fileID: 399892903}
+        m_TargetAssemblyTypeName: RestaurantScene, Assembly-CSharp
         m_MethodName: OnInputFieldDeselect
         m_Mode: 5
         m_Arguments:
@@ -2462,8 +2462,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: CampScene, Assembly-CSharp
+      - m_Target: {fileID: 399892903}
+        m_TargetAssemblyTypeName: RestaurantScene, Assembly-CSharp
         m_MethodName: OnInputFieldValueChanged
         m_Mode: 5
         m_Arguments:
