@@ -23,6 +23,8 @@ public class DungeonScene : MonoBehaviour
 
     public XCardEditor _XCardEditor;
 
+    public SessionMessagesAction _sessionMessagesAction;
+
 
     void Start()
     {
@@ -33,6 +35,7 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
+        Debug.Assert(_sessionMessagesAction != null, "_sessionMessagesAction is null");
 
         _XCardEditor.gameObject.SetActive(false);
 
@@ -106,8 +109,8 @@ public class DungeonScene : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
-
+        //GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
+        yield return FetchAndProcessSessionMessages();
         yield return ExecuteViewDungeon();
     }
 
@@ -117,7 +120,6 @@ public class DungeonScene : MonoBehaviour
             GameContext.Instance.DungeonGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-
             "draw_cards");
         if (_dungeonGamePlayAction.ResponseData == null)
         {
@@ -125,7 +127,8 @@ public class DungeonScene : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
+        //GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
+        yield return FetchAndProcessSessionMessages();
 
         yield return _viewActorAction.Call(
             GameContext.Instance.ActorDetailsUrl,
@@ -157,8 +160,8 @@ public class DungeonScene : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
-
+        //GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
+        yield return FetchAndProcessSessionMessages();
         Debug.Log("ExecutePlayCards request success");
         UpdateTextFromAgentLogs();
     }
@@ -279,5 +282,48 @@ public class DungeonScene : MonoBehaviour
         currentMapping[currentActorStage] = GameContext.Instance.Mapping[currentActorStage];
 
         return currentMapping;
+    }
+
+    private IEnumerator FetchAndProcessSessionMessages()
+    {
+        // 获取会话消息
+        _sessionMessagesAction.Setup(
+            GameContext.Instance.SessionMessagesUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            GameContext.Instance.LastSequenceId
+        );
+
+        yield return _sessionMessagesAction.Call();
+        if (_sessionMessagesAction.ResponseData == null)
+        {
+            Debug.LogError("SessionMessagesAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
+
+        //
+        GameContext.Instance.ProcessClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+    }
+
+    private void UpdateLastSequenceIdFromResponse()
+    {
+        if (_sessionMessagesAction.ResponseData == null)
+        {
+            Debug.LogWarning("SessionMessagesAction ResponseData is null");
+            Debug.Assert(false, "SessionMessagesAction ResponseData is null");
+            return;
+        }
+
+        if (_sessionMessagesAction.ResponseLastSequenceId < 0)
+        {
+            Debug.LogWarning("Invalid last sequence ID");
+            return;
+        }
+
+        // 设置 LastSequenceId
+        GameContext.Instance.LastSequenceId = _sessionMessagesAction.ResponseLastSequenceId;
     }
 }

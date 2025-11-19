@@ -16,7 +16,6 @@ public class ViewDungeonScene : MonoBehaviour
 
     public TransDungeonAction _transDungeonAction;
 
-
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
@@ -40,7 +39,6 @@ public class ViewDungeonScene : MonoBehaviour
             yield break;
         }
         yield return _transDungeonAction.Call(GameContext.Instance.HomeTransDungeonUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
-        //if (!_transDungeonAction.LastRequestSuccess)
         if (_transDungeonAction.ResponseData == null)
         {
             yield break;

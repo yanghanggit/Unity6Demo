@@ -32,13 +32,18 @@ public partial class GameContext
 
     private RootResponse _rootResponse = new RootResponse();
 
-    // private bool _setupGame = false;
-
-    // public bool SetupGame
-    // {
-    //     get { return _setupGame; }
-    //     set { _setupGame = value; }
-    // }
+    private int _lastSequenceId = 0;
+    public int LastSequenceId
+    {
+        get
+        {
+            return _lastSequenceId;
+        }
+        set
+        {
+            _lastSequenceId = value;
+        }
+    }
 
     public string UserName
     {
@@ -187,6 +192,15 @@ public partial class GameContext
         get
         {
             return _rootResponse.endpoints["dungeon_trans_home"];
+        }
+    }
+
+    public string SessionMessagesUrl
+    {
+        get
+        {
+            var baseUrl = _rootResponse.endpoints["session_messages"];
+            return $"{baseUrl}{UserName}/{GameName}/since";
         }
     }
 }

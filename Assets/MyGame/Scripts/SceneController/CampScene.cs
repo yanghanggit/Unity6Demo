@@ -16,6 +16,7 @@ public class CampScene : MonoBehaviour
     public GameObject _speechBubblePrefab;
     public float _hideBubbleDuration = 5.0f;
     public HomeGamePlayAction _homeGamePlayAction;
+    public SessionMessagesAction _sessionMessagesAction;
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
     // UI系统组件
@@ -30,6 +31,7 @@ public class CampScene : MonoBehaviour
         Debug.Assert(_inputField != null, "inputField is null");
         Debug.Assert(_homeGamePlayAction != null, "_homeRunAction is null");
         Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
+        Debug.Assert(_sessionMessagesAction != null, "_sessionMessagesAction is null");
 
         // 隐藏输入背景
         HideInputBackground();
@@ -399,15 +401,32 @@ public class CampScene : MonoBehaviour
             });
 
         Debug.Log("Speak action executed");
-        //if (!_homeGamePlayAction.LastRequestSuccess)
         if (_homeGamePlayAction.ResponseData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
 
+        // 获取会话消息
+        _sessionMessagesAction.Setup(
+            GameContext.Instance.SessionMessagesUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            GameContext.Instance.LastSequenceId
+        );
+
+        yield return _sessionMessagesAction.Call();
+        if (_sessionMessagesAction.ResponseData == null)
+        {
+            Debug.LogError("SessionMessagesAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
+
         //
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
+        GameContext.Instance.ProcessClientMessages(_sessionMessagesAction.ResponseData.session_messages);
 
         HideInputBackground();
 
@@ -495,8 +514,26 @@ public class CampScene : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
+        // 获取会话消息
+        _sessionMessagesAction.Setup(
+            GameContext.Instance.SessionMessagesUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            GameContext.Instance.LastSequenceId
+        );
 
+        yield return _sessionMessagesAction.Call();
+        if (_sessionMessagesAction.ResponseData == null)
+        {
+            Debug.LogError("SessionMessagesAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
+
+        //
+        GameContext.Instance.ProcessClientMessages(_sessionMessagesAction.ResponseData.session_messages);
         //
         //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
@@ -591,5 +628,24 @@ public class CampScene : MonoBehaviour
                 DisplaySpeechBubbleAtTarget(GetCreatedSprite(speaker), combinedDialogue);
             }
         }
+    }
+
+    private void UpdateLastSequenceIdFromResponse()
+    {
+        if (_sessionMessagesAction.ResponseData == null)
+        {
+            Debug.LogWarning("SessionMessagesAction ResponseData is null");
+            Debug.Assert(false, "SessionMessagesAction ResponseData is null");
+            return;
+        }
+
+        if (_sessionMessagesAction.ResponseLastSequenceId < 0)
+        {
+            Debug.LogWarning("Invalid last sequence ID");
+            return;
+        }
+
+        // 设置 LastSequenceId
+        GameContext.Instance.LastSequenceId = _sessionMessagesAction.ResponseLastSequenceId;
     }
 }
