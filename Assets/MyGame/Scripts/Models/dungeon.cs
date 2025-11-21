@@ -28,7 +28,7 @@ public enum CombatResult
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>
-/// 技能产生的影响
+/// 状态效果：增益 / 减益，持续伤害 / 持续治疗等
 /// </summary>
 [System.Serializable]
 public sealed class StatusEffect
@@ -40,14 +40,14 @@ public sealed class StatusEffect
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>
-/// 技能是一种特殊的道具，它有一个额外的效果
+/// 代表一张卡牌
 /// </summary>
 [System.Serializable]
-public sealed class Skill
+public sealed class Card
 {
-    public string name = "";        // 此技能名称
-    public string description = ""; // 此技能描述
-    public string target = "";      // 目标
+    public string name = "";        // 卡牌名称
+    public string description = ""; // 卡牌效果、作用方式及使用代价
+    public string target = "";      // 目标对象
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,11 +57,10 @@ public sealed class Skill
 [System.Serializable]
 public sealed class Round
 {
-    public string tag = "";
-    public List<string> action_order = new List<string>();
-    public string environment = "";
-    public string calculation = "";
-    public string performance = "";
+    public string tag = "";                                // 回合标签，记录回合序号等信息
+    public List<string> action_order = new List<string>(); // 行动顺序，按顺序记录角色名称
+    public string combat_log = "";                         // 战斗计算日志
+    public string narrative = "";                          // 叙事文本/演出描述
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

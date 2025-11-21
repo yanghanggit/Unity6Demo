@@ -52,7 +52,7 @@ public static class MyUtils
             {
                 var last_round = last_combat.rounds[last_combat.rounds.Count - 1];
                 dungeon_text += "Last Round: " + last_round.tag + "\n";
-                dungeon_text += "Stage Environment: " + last_round.environment + "\n";
+                //dungeon_text += "Stage Environment: " + last_round.environment + "\n";
                 dungeon_text += "Action Order: " + string.Join("-->", last_round.action_order) + "\n";
             }
         }
@@ -134,20 +134,20 @@ public static class MyUtils
             {
                 var handComponent = JsonConvert.DeserializeObject<HandComponent>(JsonConvert.SerializeObject(component.data));
                 var handCompText = $"{actorEntitySerialization.name} Hand: ";
-                for (int j = 0; j < handComponent.skills.Count; j++)
+                for (int j = 0; j < handComponent.cards.Count; j++)
                 {
-                    var skill = handComponent.skills[j];
-                    handCompText += $"{skill.name} ({skill.description})";
-                    if (j < handComponent.skills.Count - 1)
+                    var card = handComponent.cards[j];
+                    handCompText += $"{card.name} ({card.description})";
+                    if (j < handComponent.cards.Count - 1)
                     {
                         handCompText += ", ";
                     }
                 }
                 handCompText += "\n";
-                for (int j = 0; j < handComponent.skills.Count; j++)
+                for (int j = 0; j < handComponent.cards.Count; j++)
                 {
-                    var plan = handComponent.skills[j];
-                    handCompText += $"Skill: {plan.name}, Targets: {plan.target}\n";
+                    var card = handComponent.cards[j];
+                    handCompText += $"Card: {card.name}, Targets: {card.target}\n";
                 }
                 ret += handCompText + "\n";
             }

@@ -24,13 +24,3 @@ public class StageCharacterSheet
     public string type = "";
     public string profile = "";
 }
-
-/**
- * 
- */
-[System.Serializable]
-public class DataBase
-{
-    public Dictionary<string, ActorCharacterSheet> actors = new Dictionary<string, ActorCharacterSheet>();
-    public Dictionary<string, StageCharacterSheet> stages = new Dictionary<string, StageCharacterSheet>();
-}
