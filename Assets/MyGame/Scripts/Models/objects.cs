@@ -88,7 +88,7 @@ public class Skill
 public class CharacterStats
 {
     public int experience = 0;
-    public int fixed_level = 1;
+    public int initial_level = 1;
     public int hp = 0;
 
     // 基础属性
@@ -112,7 +112,7 @@ public class CharacterStats
     
     public int progression_level => experience / 1000;
 
-    public int level => fixed_level + progression_level;
+    public int level => initial_level + progression_level;
 
     public int strength => base_strength + (strength_per_level * progression_level);
 
