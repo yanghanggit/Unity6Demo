@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class BootScene : MonoBehaviour
 {
+    public string _baseUrl = "http://192.168.2.121:8000/";
+
     public string _nextScene = "LoginScene";
 
     public RootAction _rootAction;
@@ -32,7 +34,7 @@ public class BootScene : MonoBehaviour
 
     private IEnumerator InitializeApiEndpoints()
     {
-        yield return _rootAction.Call(_gameConfig.LocalNet);
+        yield return _rootAction.Call(_baseUrl);
         if (_rootAction.ResponseData != null)
         {
             _nextButton.gameObject.SetActive(true);
@@ -41,14 +43,14 @@ public class BootScene : MonoBehaviour
             yield break;
         }
 
-        yield return _rootAction.Call(_gameConfig.LocalHost);
-        if (_rootAction.ResponseData != null)
-        {
-            _nextButton.gameObject.SetActive(true);
-            GameContext.Instance.Root = _rootAction.ResponseData;
-            Debug.Log("Using LocalHost for API endpoints");
-            yield break;
-        }
+        // yield return _rootAction.Call(_gameConfig.LocalHost);
+        // if (_rootAction.ResponseData != null)
+        // {
+        //     _nextButton.gameObject.SetActive(true);
+        //     GameContext.Instance.Root = _rootAction.ResponseData;
+        //     Debug.Log("Using LocalHost for API endpoints");
+        //     yield break;
+        // }
     }
 
     private IEnumerator LoadNextScene()
@@ -56,5 +58,4 @@ public class BootScene : MonoBehaviour
         yield return new WaitForSeconds(0.0f);
         SceneManager.LoadScene(_nextScene);
     }
-
 }

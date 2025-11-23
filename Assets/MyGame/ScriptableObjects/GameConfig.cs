@@ -6,6 +6,6 @@ public class GameConfig : ScriptableObject
     public string GameName;
     public string ActorName;
     public string AllyName;
-    public string LocalHost;
+    //public string LocalHost;
     public string LocalNet;
 }
