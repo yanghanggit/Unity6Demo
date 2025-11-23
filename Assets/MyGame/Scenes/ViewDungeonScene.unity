@@ -440,7 +440,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   requestTimeout: 30
-  useAsyncVersion: 1
 --- !u!114 &399892902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -457,7 +456,7 @@ MonoBehaviour:
   _nextScene: DungeonScene
   _mainText: {fileID: 3871845}
   _dungeonStateApi: {fileID: 399892901}
-  _transDungeonAction: {fileID: 399892903}
+  _transDungeonApi: {fileID: 399892903}
 --- !u!114 &399892903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -471,7 +470,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   requestTimeout: 30
-  useAsyncVersion: 1
 --- !u!1 &433063512
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,13 +14,13 @@ public class ViewDungeonScene : MonoBehaviour
 
     public DungeonStateApi _dungeonStateApi;
 
-    public TransDungeonAction _transDungeonAction;
+    public TransDungeonApi _transDungeonApi;
 
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
-        Debug.Assert(_transDungeonAction != null, "_transDungeonAction is null");
+        Debug.Assert(_transDungeonApi != null, "_transDungeonAction is null");
 
         // Start the coroutine to view the dungeon
         StartCoroutine(ExecuteViewDungeon());
@@ -34,12 +34,12 @@ public class ViewDungeonScene : MonoBehaviour
 
     IEnumerator ExecuteTransDungeon()
     {
-        if (_transDungeonAction == null)
+        if (_transDungeonApi == null)
         {
             yield break;
         }
-        yield return _transDungeonAction.Call(GameContext.Instance.HomeTransDungeonUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
-        if (_transDungeonAction.ResponseData == null)
+        yield return _transDungeonApi.Call(GameContext.Instance.HomeTransDungeonUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
+        if (_transDungeonApi.RespData == null)
         {
             yield break;
         }
