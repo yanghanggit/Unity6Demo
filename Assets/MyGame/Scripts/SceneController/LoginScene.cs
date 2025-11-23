@@ -15,7 +15,7 @@ public class LoginScene : MonoBehaviour
 
     public LoginApi _loginApi;
 
-    public StartAction _startAction;
+    public StartApi _startApi;
 
     public GameConfig _gameConfig;
 
@@ -28,7 +28,7 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_textGameName != null, "_textGameName is null");
         Debug.Assert(_textActorName != null, "_textActorName is null");
         Debug.Assert(_loginApi != null, "_loginAction is null");
-        Debug.Assert(_startAction != null, "_startAction is null");
+        Debug.Assert(_startApi != null, "_startAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
 
         _playerIdentifier = CreateRandomPlayerIdentifier();
@@ -65,8 +65,8 @@ public class LoginScene : MonoBehaviour
         GameContext.Instance.GameName = gameName;
         GameContext.Instance.ActorName = "";
 
-        yield return _startAction.Call(GameContext.Instance.StartUrl, userName, gameName, actorName);
-        if (_startAction.ReqResult == null || !_startAction.ReqResult.isSuccess)
+        yield return _startApi.Call(GameContext.Instance.StartUrl, userName, gameName, actorName);
+        if (_startApi.ReqResult == null || !_startApi.ReqResult.isSuccess)
         {
             Debug.LogError("Start new game failed");
             yield break;

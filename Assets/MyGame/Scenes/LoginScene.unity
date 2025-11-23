@@ -444,7 +444,7 @@ MonoBehaviour:
   _textActorName: {fileID: 1310098622}
   _nextScene: MainScene2
   _loginApi: {fileID: 399892902}
-  _startAction: {fileID: 399892903}
+  _startApi: {fileID: 399892903}
   _gameConfig: {fileID: 11400000, guid: 54707035bd7b4439aa2c9b6d574b5a61, type: 2}
 --- !u!114 &399892902
 MonoBehaviour:

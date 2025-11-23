@@ -1,0 +1,141 @@
+using UnityEngine;
+using System.Collections;
+using Newtonsoft.Json;
+
+/// <summary>
+/// Start API 客户端，用于处理开始游戏请求
+/// </summary>
+public class StartApi : BaseApiClient
+{
+    /// <summary>
+    /// 请求 URL
+    /// </summary>
+    private string _url;
+
+    /// <summary>
+    /// 用户名
+    /// </summary>
+    private string _userName;
+
+    /// <summary>
+    /// 游戏名
+    /// </summary>
+    private string _gameName;
+
+    /// <summary>
+    /// 角色名
+    /// </summary>
+    private string _actorName;
+
+    /// <summary>
+    /// 请求结果
+    /// </summary>
+    private RequestResult _requestResult;
+
+    /// <summary>
+    /// 获取请求结果
+    /// </summary>
+    public RequestResult ReqResult => _requestResult;
+
+    /// <summary>
+    /// 响应数据
+    /// </summary>
+    private StartResponse _responseData;
+
+    /// <summary>
+    /// 获取响应数据
+    /// </summary>
+    public StartResponse RespData => _responseData;
+
+    /// <summary>
+    /// 初始化开始游戏请求
+    /// </summary>
+    /// <param name="url">请求 URL</param>
+    /// <param name="userName">用户名</param>
+    /// <param name="gameName">游戏名</param>
+    /// <param name="actorName">角色名</param>
+    private void Initialize(string url, string userName, string gameName, string actorName)
+    {
+        _url = url;
+        _userName = userName;
+        _gameName = gameName;
+        _actorName = actorName;
+        _requestResult = null;
+        _responseData = null;
+
+        Debug.Log($"StartApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, ActorName: {_actorName}");
+    }
+
+    /// <summary>
+    /// 调用开始游戏 API
+    /// </summary>
+    /// <param name="url">请求 URL</param>
+    /// <param name="user">用户名</param>
+    /// <param name="game">游戏名</param>
+    /// <param name="actor">角色名</param>
+    /// <returns>协程枚举器</returns>
+    public IEnumerator Call(string url, string user, string game, string actor)
+    {
+        Initialize(url, user, game, actor);
+
+        // 检查网络连接
+        if (!IsNetworkReachable())
+        {
+            Debug.LogError("No network connection available");
+            yield break;
+        }
+
+        // 创建请求数据
+        var requestData = new StartRequest
+        {
+            user_name = _userName,
+            game_name = _gameName,
+            actor_name = _actorName
+        };
+        var jsonData = JsonConvert.SerializeObject(requestData);
+
+        // 发送请求
+        var task = PostRequestAsync(_url, jsonData);
+        yield return new WaitUntil(() => task.IsCompleted);
+
+        if (task.IsFaulted)
+        {
+            Debug.LogError($"Request exception: {task.Exception?.GetBaseException().Message}");
+            yield break;
+        }
+
+        _requestResult = task.Result;
+
+        // 处理请求结果
+        if (!_requestResult.isSuccess)
+        {
+            Debug.LogError($"Request failed: {_requestResult.error}");
+            yield break;
+        }
+
+        // 解析响应数据
+        if (string.IsNullOrEmpty(_requestResult.responseText))
+        {
+            Debug.LogError("Response text is empty");
+            yield break;
+        }
+
+        try
+        {
+            _responseData = JsonConvert.DeserializeObject<StartResponse>(_requestResult.responseText);
+
+            if (_responseData == null)
+            {
+                Debug.LogError("Deserialized response data is null");
+                yield break;
+            }
+
+            Debug.Log($"Start game successful. Message: {_responseData.message}");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Failed to parse response data: {ex.Message}");
+        }
+    }
+
+}
