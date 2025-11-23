@@ -11,7 +11,7 @@ public class DungeonScene : MonoBehaviour
 
     public TMP_Text _mainText;
 
-    public DungeonGamePlayAction _dungeonGamePlayAction;
+    public DungeonGamePlayApi _dungeonGamePlayApi;
 
     public DungeonStateApi _dungeonStateApi;
 
@@ -29,7 +29,7 @@ public class DungeonScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        Debug.Assert(_dungeonGamePlayAction != null, "_dungeonAction is null");
+        Debug.Assert(_dungeonGamePlayApi != null, "_dungeonAction is null");
         Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
         Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
@@ -99,12 +99,12 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteDungeonCombatKickOff()
     {
-        yield return _dungeonGamePlayAction.Call(
+        yield return _dungeonGamePlayApi.Call(
             GameContext.Instance.DungeonGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "dungeon_combat_kick_off");
-        if (_dungeonGamePlayAction.ResponseData == null)
+        if (_dungeonGamePlayApi.RespData == null)
         {
             yield break;
         }
@@ -116,12 +116,12 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteDrawCards()
     {
-        yield return _dungeonGamePlayAction.Call(
+        yield return _dungeonGamePlayApi.Call(
             GameContext.Instance.DungeonGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "draw_cards");
-        if (_dungeonGamePlayAction.ResponseData == null)
+        if (_dungeonGamePlayApi.RespData == null)
         {
             Debug.LogError("ExecuteDrawCards request failed");
             yield break;
@@ -148,13 +148,13 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecutePlayCards()
     {
-        yield return _dungeonGamePlayAction.Call(
+        yield return _dungeonGamePlayApi.Call(
             GameContext.Instance.DungeonGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "play_cards");
 
-        if (_dungeonGamePlayAction.ResponseData == null)
+        if (_dungeonGamePlayApi.RespData == null)
         {
             Debug.LogError("ExecutePlayCards request failed");
             yield break;
@@ -209,14 +209,14 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteAdvanceNextDungeon()
     {
-        yield return _dungeonGamePlayAction.Call(
+        yield return _dungeonGamePlayApi.Call(
             GameContext.Instance.DungeonGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "advance_next_dungeon");
-        if (_dungeonGamePlayAction.ResponseData == null)
+        if (_dungeonGamePlayApi.RespData == null)
         {
-            _mainText.text = _dungeonGamePlayAction.ReqResult.responseText;
+            _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
             yield break;
         }
 

@@ -1060,7 +1060,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _preScene: MainScene2
   _mainText: {fileID: 129710570}
-  _dungeonGamePlayAction: {fileID: 399892903}
+  _dungeonGamePlayApi: {fileID: 399892903}
   _dungeonStateApi: {fileID: 399892904}
   _actorDetailApi: {fileID: 399892905}
   _transHomeAction: {fileID: 399892906}
@@ -1096,7 +1096,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   requestTimeout: 30
-  useAsyncVersion: 1
 --- !u!114 &399892905
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -10,7 +10,7 @@ using System.Collections;
 
 public class XCardEditor : MonoBehaviour
 {
-    public DungeonGamePlayAction _dungeonGamePlayAction;
+    public DungeonGamePlayApi _dungeonGamePlayAction;
     public XCardPlayer _xCardPlayer;
     public TMP_InputField _editNameInputField;
     public TMP_InputField _editDescriptionInputField;
