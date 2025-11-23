@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// 用户登录操作，使用改进的 BaseRequestAction
+/// 转换到地下城操作，使用改进的 BaseRequestAction
 /// </summary>
-public class LoginAction : BaseRequestAction
+public class TransDungeonAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
@@ -14,50 +14,53 @@ public class LoginAction : BaseRequestAction
     private string _url;
     private string _userName;
     private string _gameName;
-    private RequestResult _requestResult = null;
-    public RequestResult ReqResult => _requestResult;
+    private HomeTransDungeonResponse _responseData;
+    public HomeTransDungeonResponse ResponseData => _responseData;
 
-    private LoginResponse _responseData = null;
-    public LoginResponse ResponseData => _responseData;
-  
-
-    void Setup(string url, string userName, string gameName)
+    public void Setup(string url, string userName, string gameName)
     {
         _url = url;
         _userName = userName;
         _gameName = gameName;
-        _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"LoginAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+        Debug.Log($"TransDungeonAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
     }
 
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
-    /// 用户登录（协程版本）
+    /// 转换到地下城（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
+        Debug.Log("Trans to dungeon request started");
+
+        //_lastRequestSuccess = false;
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for login");
+            Debug.LogError("No network connection available for trans dungeon");
             yield break;
         }
 
         // 创建请求数据
-        var requestData = new LoginRequest { user_name = _userName, game_name = _gameName };
+        var requestData = new HomeTransDungeonRequest
+        {
+            user_name = _userName,
+            game_name = _gameName
+        };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-        //RequestResult result = null;
+        RequestResult result = null;
 
         // 发送请求
         yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
-            _requestResult = response;
+            result = response;
             requestCompleted = true;
         });
 
@@ -65,20 +68,20 @@ public class LoginAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (_requestResult != null && _requestResult.isSuccess)
+        if (result != null && result.isSuccess)
         {
-            if (TryParseResponse(_requestResult.responseText))
+            if (TryParseResponse(result.responseText))
             {
-                Debug.Log("Login successful");
+                Debug.Log("Trans to dungeon successful");
             }
             else
             {
-                Debug.LogError("Failed to parse login response");
+                Debug.LogError("Failed to parse trans dungeon response");
             }
         }
         else
         {
-            Debug.LogError($"Login failed: {_requestResult?.error ?? "Unknown error"}");
+            Debug.LogError($"Trans to dungeon failed: {result?.error ?? "Unknown error"}");
         }
     }
 
@@ -87,47 +90,55 @@ public class LoginAction : BaseRequestAction
     #region Async 版本（推荐用于 Unity 6）
 
     /// <summary>
-    /// 用户登录（Async 版本）
+    /// 转换到地下城（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
+        Debug.Log("Trans to dungeon request async started");
+
+        //_lastRequestSuccess = false;
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for login");
+            Debug.LogError("No network connection available for trans dungeon");
             return false;
         }
 
         try
         {
             // 创建请求数据
-            var requestData = new LoginRequest { user_name = _userName, game_name = _gameName };
+            var requestData = new HomeTransDungeonRequest
+            {
+                user_name = _userName,
+                game_name = _gameName
+            };
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            _requestResult = await PostRequestAsync(_url, jsonData);
+            var result = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
-            if (_requestResult.isSuccess)
+            if (result.isSuccess)
             {
-                if (TryParseResponse(_requestResult.responseText))
+                if (TryParseResponse(result.responseText))
                 {
-                    Debug.Log("Login successful");
+                    Debug.Log("Trans to dungeon successful");
                     return true;
                 }
                 else
                 {
-                    Debug.LogError("Failed to parse login response");
+                    Debug.LogError("Failed to parse trans dungeon response");
                 }
             }
             else
             {
-                Debug.LogError($"Login failed: {_requestResult.error}");
+                Debug.LogError($"Trans to dungeon failed: {result.error}");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Exception during login request: {ex.Message}");
+            Debug.LogError($"Exception during trans dungeon request: {ex.Message}");
         }
 
         return false;
@@ -152,7 +163,7 @@ public class LoginAction : BaseRequestAction
 
             if (task.IsFaulted)
             {
-                Debug.LogError($"Async login call failed: {task.Exception?.GetBaseException().Message}");
+                Debug.LogError($"Async trans dungeon call failed: {task.Exception?.GetBaseException().Message}");
             }
         }
         else
@@ -167,27 +178,33 @@ public class LoginAction : BaseRequestAction
     #region 私有方法
 
     /// <summary>
-    /// 尝试解析登录响应数据
+    /// 尝试解析转换到地下城响应数据
     /// </summary>
     private bool TryParseResponse(string responseText)
     {
+        if (string.IsNullOrEmpty(responseText))
+        {
+            Debug.LogError("Trans dungeon response text is empty");
+            return false;
+        }
+
         try
         {
-            var response = JsonConvert.DeserializeObject<LoginResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<HomeTransDungeonResponse>(responseText);
+
             if (response == null)
             {
-                Debug.LogError("LoginAction response is null");
+                Debug.LogError("TransDungeonAction response is null");
                 return false;
             }
 
-            Debug.Log($"LoginAction.message = {response.message}");
-
+            Debug.Log($"TransDungeonAction.message = {response.message}");
             _responseData = response;
             return true;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Failed to parse login response: {ex.Message}");
+            Debug.LogError($"Failed to parse trans dungeon response: {ex.Message}");
             return false;
         }
     }

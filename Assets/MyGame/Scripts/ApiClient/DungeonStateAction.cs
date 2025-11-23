@@ -4,59 +4,52 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// 查看家园操作，使用改进的 BaseRequestAction
+/// 查看地下城操作，使用改进的 BaseRequestAction
 /// </summary>
-public class WerewolfGameStateAction : BaseRequestAction
+public class DungeonStateAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    // 响应数据
-    private WerewolfGameStateResponse _responseData = null;
-
-    private RequestResult _requestResult = null;
-
-    public WerewolfGameStateResponse ResponseData => _responseData;
-
-    public RequestResult ReqResult => _requestResult;
-
     private string _url;
-    private string _userName;
-    private string _gameName;
 
-    public void Setup(string url, string userName, string gameName)
+    private DungeonStateResponse _responseData;
+
+    public DungeonStateResponse ResponseData => _responseData;
+
+    public void Setup(string url)
     {
         _url = url;
-        _userName = userName;
-        _gameName = gameName;
-        _requestResult = null;
         _responseData = null;
-
-        Debug.Log($"WerewolfGameStateAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+        Debug.Log($"DungeonStateAction URL set to: {_url}");
     }
+
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
-    /// 查看家园（协程版本）
+    /// 查看地下城（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
-        Debug.Log("View home request started");
+        Debug.Log("View dungeon request started");
+
+        //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for view home");
+            Debug.LogError("No network connection available for view dungeon");
             yield break;
         }
 
         bool requestCompleted = false;
+        RequestResult result = null;
 
         // 发送请求
         yield return GetRequestCoroutine(_url, (response) =>
         {
-            _requestResult = response;
+            result = response;
             requestCompleted = true;
         });
 
@@ -64,20 +57,21 @@ public class WerewolfGameStateAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (_requestResult != null && _requestResult.isSuccess)
+        if (result != null && result.isSuccess)
         {
-            if (TryParseResponse(_requestResult.responseText))
+            if (TryParseResponse(result.responseText))
             {
-                Debug.Log("View home successful");
+                //_lastRequestSuccess = true;
+                Debug.Log("View dungeon successful");
             }
             else
             {
-                Debug.LogError("Failed to parse view home response");
+                Debug.LogError("Failed to parse view dungeon response");
             }
         }
         else
         {
-            Debug.LogError($"View home failed: {_requestResult?.error ?? "Unknown error"}");
+            Debug.LogError($"View dungeon failed: {result?.error ?? "Unknown error"}");
         }
     }
 
@@ -86,47 +80,48 @@ public class WerewolfGameStateAction : BaseRequestAction
     #region Async 版本（推荐用于 Unity 6）
 
     /// <summary>
-    /// 查看家园（Async 版本）
+    /// 查看地下城（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
-        Debug.Log("View home request async started");
+        Debug.Log("View dungeon request async started");
 
         //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for view home");
+            Debug.LogError("No network connection available for view dungeon");
             return false;
         }
 
         try
         {
             // 发送请求
-            _requestResult = await GetRequestAsync(_url);
+            var result = await GetRequestAsync(_url);
 
             // 处理结果
-            if (_requestResult.isSuccess)
+            if (result.isSuccess)
             {
-                if (TryParseResponse(_requestResult.responseText))
+                if (TryParseResponse(result.responseText))
                 {
-                    Debug.Log("View home successful");
+                    // _lastRequestSuccess = true;
+                    Debug.Log("View dungeon successful");
                     return true;
                 }
                 else
                 {
-                    Debug.LogError("Failed to parse view home response");
+                    Debug.LogError("Failed to parse view dungeon response");
                 }
             }
             else
             {
-                Debug.LogError($"View home failed: {_requestResult.error}");
+                Debug.LogError($"View dungeon failed: {result.error}");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Exception during view home request: {ex.Message}");
+            Debug.LogError($"Exception during view dungeon request: {ex.Message}");
         }
 
         return false;
@@ -139,9 +134,9 @@ public class WerewolfGameStateAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string url, string userName, string gameName)
+    public IEnumerator Call(string url)
     {
-        Setup(url, userName, gameName);
+        Setup(url);
 
         if (useAsyncVersion)
         {
@@ -151,7 +146,7 @@ public class WerewolfGameStateAction : BaseRequestAction
 
             if (task.IsFaulted)
             {
-                Debug.LogError($"Async view home call failed: {task.Exception?.GetBaseException().Message}");
+                Debug.LogError($"Async view dungeon call failed: {task.Exception?.GetBaseException().Message}");
             }
         }
         else
@@ -166,33 +161,31 @@ public class WerewolfGameStateAction : BaseRequestAction
     #region 私有方法
 
     /// <summary>
-    /// 尝试解析查看家园响应数据
+    /// 尝试解析查看地下城响应数据
     /// </summary>
     private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
-            Debug.LogError("View home response text is empty");
+            Debug.LogError("View dungeon response text is empty");
             return false;
         }
 
         try
         {
-            var response = JsonConvert.DeserializeObject<WerewolfGameStateResponse>(responseText);
-
+            var response = JsonConvert.DeserializeObject<DungeonStateResponse>(responseText);
             if (response == null)
             {
-                Debug.LogError("ViewHomeAction response is null");
+                Debug.LogError("ViewDungeonAction response is null");
                 return false;
             }
 
-            // 赋值响应数据
             _responseData = response;
             return true;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Failed to parse view home response: {ex.Message}");
+            Debug.LogError($"Failed to parse view dungeon response: {ex.Message}");
             return false;
         }
     }

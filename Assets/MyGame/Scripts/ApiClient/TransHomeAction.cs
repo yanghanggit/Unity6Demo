@@ -4,50 +4,66 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// 查看地下城操作，使用改进的 BaseRequestAction
+/// 转换到家园操作，使用改进的 BaseRequestAction
 /// </summary>
-public class DungeonStateAction : BaseRequestAction
+public class TransHomeAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
+    // private bool _lastRequestSuccess = false;
+
+    // public bool LastRequestSuccess => _lastRequestSuccess;
+
+    //DungeonTransHomeResponse
+
     private string _url;
+    private string _userName;
+    private string _gameName;
+    private DungeonTransHomeResponse _responseData;
+    public DungeonTransHomeResponse ResponseData => _responseData;
 
-    private DungeonStateResponse _responseData;
-
-    public DungeonStateResponse ResponseData => _responseData;
-
-    public void Setup(string url)
+    public void Setup(string url, string userName, string gameName)
     {
         _url = url;
+        _userName = userName;
+        _gameName = gameName;
         _responseData = null;
-        Debug.Log($"DungeonStateAction URL set to: {_url}");
-    }
 
+        Debug.Log($"TransHomeAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+    }
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
-    /// 查看地下城（协程版本）
+    /// 转换到家园（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
-        Debug.Log("View dungeon request started");
+        Debug.Log("Trans to home request started");
 
         //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for view dungeon");
+            Debug.LogError("No network connection available for trans home");
             yield break;
         }
+
+        // 创建请求数据
+        var requestData = new DungeonTransHomeRequest
+        {
+            user_name = _userName,
+            game_name = _gameName
+        };
+        var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
         RequestResult result = null;
 
         // 发送请求
-        yield return GetRequestCoroutine(_url, (response) =>
+        yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
             result = response;
             requestCompleted = true;
@@ -62,16 +78,16 @@ public class DungeonStateAction : BaseRequestAction
             if (TryParseResponse(result.responseText))
             {
                 //_lastRequestSuccess = true;
-                Debug.Log("View dungeon successful");
+                Debug.Log("Trans to home successful");
             }
             else
             {
-                Debug.LogError("Failed to parse view dungeon response");
+                Debug.LogError("Failed to parse trans home response");
             }
         }
         else
         {
-            Debug.LogError($"View dungeon failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Trans to home failed: {result?.error ?? "Unknown error"}");
         }
     }
 
@@ -80,48 +96,56 @@ public class DungeonStateAction : BaseRequestAction
     #region Async 版本（推荐用于 Unity 6）
 
     /// <summary>
-    /// 查看地下城（Async 版本）
+    /// 转换到家园（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
-        Debug.Log("View dungeon request async started");
+        Debug.Log("Trans to home request async started");
 
         //_lastRequestSuccess = false;
 
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for view dungeon");
+            Debug.LogError("No network connection available for trans home");
             return false;
         }
 
         try
         {
+            // 创建请求数据
+            var requestData = new DungeonTransHomeRequest
+            {
+                user_name = _userName,
+                game_name = _gameName
+            };
+            var jsonData = JsonConvert.SerializeObject(requestData);
+
             // 发送请求
-            var result = await GetRequestAsync(_url);
+            var result = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
             if (result.isSuccess)
             {
                 if (TryParseResponse(result.responseText))
                 {
-                    // _lastRequestSuccess = true;
-                    Debug.Log("View dungeon successful");
+                    //_lastRequestSuccess = true;
+                    Debug.Log("Trans to home successful");
                     return true;
                 }
                 else
                 {
-                    Debug.LogError("Failed to parse view dungeon response");
+                    Debug.LogError("Failed to parse trans home response");
                 }
             }
             else
             {
-                Debug.LogError($"View dungeon failed: {result.error}");
+                Debug.LogError($"Trans to home failed: {result.error}");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Exception during view dungeon request: {ex.Message}");
+            Debug.LogError($"Exception during trans home request: {ex.Message}");
         }
 
         return false;
@@ -134,9 +158,10 @@ public class DungeonStateAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string url)
+    public IEnumerator Call(string url, string user, string game)
     {
-        Setup(url);
+        Setup(url, user, game);
+
 
         if (useAsyncVersion)
         {
@@ -146,7 +171,7 @@ public class DungeonStateAction : BaseRequestAction
 
             if (task.IsFaulted)
             {
-                Debug.LogError($"Async view dungeon call failed: {task.Exception?.GetBaseException().Message}");
+                Debug.LogError($"Async trans home call failed: {task.Exception?.GetBaseException().Message}");
             }
         }
         else
@@ -161,31 +186,33 @@ public class DungeonStateAction : BaseRequestAction
     #region 私有方法
 
     /// <summary>
-    /// 尝试解析查看地下城响应数据
+    /// 尝试解析转换到家园响应数据
     /// </summary>
     private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
-            Debug.LogError("View dungeon response text is empty");
+            Debug.LogError("Trans home response text is empty");
             return false;
         }
 
         try
         {
-            var response = JsonConvert.DeserializeObject<DungeonStateResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<DungeonTransHomeResponse>(responseText);
+
             if (response == null)
             {
-                Debug.LogError("ViewDungeonAction response is null");
+                Debug.LogError("TransHomeAction response is null");
                 return false;
             }
 
+            Debug.Log($"TransHomeAction.message = {response.message}");
             _responseData = response;
             return true;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Failed to parse view dungeon response: {ex.Message}");
+            Debug.LogError($"Failed to parse trans home response: {ex.Message}");
             return false;
         }
     }

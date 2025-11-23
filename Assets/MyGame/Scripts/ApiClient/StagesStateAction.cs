@@ -4,69 +4,54 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// 开始游戏操作，使用改进的 BaseRequestAction
+/// 查看家园操作，使用改进的 BaseRequestAction
 /// </summary>
-public class StartAction : BaseRequestAction
+public class StagesStateAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
     private string _url;
-    private string _userName;
-    private string _gameName;
-    private string _actorName;
-    private RequestResult _requestResult = null;
-    public RequestResult ReqResult => _requestResult;
-    private StartResponse _responseData = null;
-    public StartResponse ResponseData => _responseData;
 
-    void Setup(string url, string userName, string gameName, string actorName)
+    private StagesStateResponse _responseData;
+
+    public StagesStateResponse ResponseData => _responseData;
+
+    private RequestResult _requestResult = null;
+
+    public RequestResult ReqResult => _requestResult;
+
+
+    public void Setup(string url)
     {
         _url = url;
-        _userName = userName;
-        _gameName = gameName;
-        _actorName = actorName;
-        _requestResult = null;
         _responseData = null;
-
-        Debug.Log($"StartAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, ActorName: {_actorName}");
+        _requestResult = null;
+        Debug.Log($"HomeStateAction URL set to: {_url}");
     }
-
 
 
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
-    /// 开始游戏（协程版本）
+    /// 查看家园（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
-        //Debug.Log($"Start game request for actor: {actorName}");
-
-        //_lastRequestSuccess = false;
+        Debug.Log("View home request started");
 
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for start game");
+            Debug.LogError("No network connection available for view home");
             yield break;
         }
 
-        // 创建请求数据
-        var requestData = new StartRequest
-        {
-            user_name = _userName,
-            game_name = _gameName,
-            actor_name = _actorName
-        };
-        var jsonData = JsonConvert.SerializeObject(requestData);
-
         bool requestCompleted = false;
-        //RequestResult result = null;
 
         // 发送请求
-        yield return PostRequestCoroutine(_url, jsonData, (response) =>
+        yield return GetRequestCoroutine(_url, (response) =>
         {
             _requestResult = response;
             requestCompleted = true;
@@ -80,16 +65,16 @@ public class StartAction : BaseRequestAction
         {
             if (TryParseResponse(_requestResult.responseText))
             {
-                Debug.Log("Start game successful");
+                Debug.Log("View home successful");
             }
             else
             {
-                Debug.LogError("Failed to parse start game response");
+                Debug.LogError("Failed to parse view home response");
             }
         }
         else
         {
-            Debug.LogError($"Start game failed: {_requestResult?.error ?? "Unknown error"}");
+            Debug.LogError($"View home failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -98,56 +83,45 @@ public class StartAction : BaseRequestAction
     #region Async 版本（推荐用于 Unity 6）
 
     /// <summary>
-    /// 开始游戏（Async 版本）
+    /// 查看家园（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
-        // Debug.Log($"Start game request async for actor: {actorName}");
-
-        //_lastRequestSuccess = false;
+        Debug.Log("View home request async started");
 
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for start game");
+            Debug.LogError("No network connection available for view home");
             return false;
         }
 
         try
         {
-            // 创建请求数据
-            var requestData = new StartRequest
-            {
-                user_name = _userName,
-                game_name = _gameName,
-                actor_name = _actorName
-            };
-            var jsonData = JsonConvert.SerializeObject(requestData);
-
             // 发送请求
-            _requestResult = await PostRequestAsync(_url, jsonData);
+            _requestResult = await GetRequestAsync(_url);
 
             // 处理结果
             if (_requestResult.isSuccess)
             {
                 if (TryParseResponse(_requestResult.responseText))
                 {
-                    Debug.Log("Start game successful");
+                    Debug.Log("View home successful");
                     return true;
                 }
                 else
                 {
-                    Debug.LogError("Failed to parse start game response");
+                    Debug.LogError("Failed to parse view home response");
                 }
             }
             else
             {
-                Debug.LogError($"Start game failed: {_requestResult.error}");
+                Debug.LogError($"View home failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Exception during start game request: {ex.Message}");
+            Debug.LogError($"Exception during view home request: {ex.Message}");
         }
 
         return false;
@@ -160,9 +134,9 @@ public class StartAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string url, string user, string game, string actor)
+    public IEnumerator Call(string url)
     {
-        Setup(url, user, game, actor);
+        Setup(url);
 
         if (useAsyncVersion)
         {
@@ -172,7 +146,7 @@ public class StartAction : BaseRequestAction
 
             if (task.IsFaulted)
             {
-                Debug.LogError($"Async start game call failed: {task.Exception?.GetBaseException().Message}");
+                Debug.LogError($"Async view home call failed: {task.Exception?.GetBaseException().Message}");
             }
         }
         else
@@ -187,34 +161,33 @@ public class StartAction : BaseRequestAction
     #region 私有方法
 
     /// <summary>
-    /// 尝试解析开始游戏响应数据
+    /// 尝试解析查看家园响应数据
     /// </summary>
     private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
-            Debug.LogError("Start game response text is empty");
+            Debug.LogError("View home response text is empty");
             return false;
         }
 
         try
         {
-            var response = JsonConvert.DeserializeObject<StartResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<StagesStateResponse>(responseText);
 
             if (response == null)
             {
-                Debug.LogError("StartAction response is null");
+                Debug.LogError("ViewHomeAction response is null");
                 return false;
             }
 
-            Debug.Log($"StartAction.message = {response.message}");
-
+            // 设置游戏上下文
             _responseData = response;
             return true;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Failed to parse start game response: {ex.Message}");
+            Debug.LogError($"Failed to parse view home response: {ex.Message}");
             return false;
         }
     }

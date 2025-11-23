@@ -2,70 +2,76 @@ using UnityEngine;
 using System.Collections;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
-/// <summary>
-/// 转换到家园操作，使用改进的 BaseRequestAction
-/// </summary>
-public class TransHomeAction : BaseRequestAction
+public class WerewolfGamePlayAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    // private bool _lastRequestSuccess = false;
+    private WerewolfGamePlayResponse _responseData = null;
 
-    // public bool LastRequestSuccess => _lastRequestSuccess;
+    private RequestResult _requestResult = null;
 
-    //DungeonTransHomeResponse
+    public WerewolfGamePlayResponse ResponseData => _responseData;
+
+    public RequestResult ReqResult => _requestResult;
 
     private string _url;
-    private string _userName;
-    private string _gameName;
-    private DungeonTransHomeResponse _responseData;
-    public DungeonTransHomeResponse ResponseData => _responseData;
 
-    public void Setup(string url, string userName, string gameName)
+    private string _userName;
+
+    private string _gameName;
+
+    private Dictionary<string, string> _data;
+
+    public void Setup(string url, string userName, string gameName, Dictionary<string, string> data)
     {
         _url = url;
         _userName = userName;
         _gameName = gameName;
+        _data = data;
+        _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"TransHomeAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+        Debug.Log($"WerewolfGamePlayAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, Data count: {_data.Count}");
+
+        // 打印一下data
+        foreach (var kvp in _data)
+        {
+            Debug.Log($"Data Key: {kvp.Key}, Value: {kvp.Value}");
+        }
     }
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
-    /// 转换到家园（协程版本）
+    /// 家园游戏玩法（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
-        Debug.Log("Trans to home request started");
-
-        //_lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for trans home");
+            Debug.LogError("No network connection available for home gameplay");
             yield break;
         }
 
         // 创建请求数据
-        var requestData = new DungeonTransHomeRequest
+        var requestData = new WerewolfGamePlayRequest
         {
             user_name = _userName,
-            game_name = _gameName
+            game_name = _gameName,
+            data = _data
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-        RequestResult result = null;
 
         // 发送请求
         yield return PostRequestCoroutine(_url, jsonData, (response) =>
         {
-            result = response;
+            _requestResult = response;
             requestCompleted = true;
         });
 
@@ -73,21 +79,20 @@ public class TransHomeAction : BaseRequestAction
         yield return new WaitUntil(() => requestCompleted);
 
         // 处理结果
-        if (result != null && result.isSuccess)
+        if (_requestResult != null && _requestResult.isSuccess)
         {
-            if (TryParseResponse(result.responseText))
+            if (TryParseResponse(_requestResult.responseText))
             {
-                //_lastRequestSuccess = true;
-                Debug.Log("Trans to home successful");
+                Debug.Log("Home gameplay successful");
             }
             else
             {
-                Debug.LogError("Failed to parse trans home response");
+                Debug.LogError("Failed to parse home gameplay response");
             }
         }
         else
         {
-            Debug.LogError($"Trans to home failed: {result?.error ?? "Unknown error"}");
+            Debug.LogError($"Home gameplay failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -96,56 +101,52 @@ public class TransHomeAction : BaseRequestAction
     #region Async 版本（推荐用于 Unity 6）
 
     /// <summary>
-    /// 转换到家园（Async 版本）
+    /// 家园游戏玩法（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
-        Debug.Log("Trans to home request async started");
-
-        //_lastRequestSuccess = false;
-
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for trans home");
+            Debug.LogError("No network connection available for home gameplay");
             return false;
         }
 
         try
         {
             // 创建请求数据
-            var requestData = new DungeonTransHomeRequest
+            var requestData = new WerewolfGamePlayRequest
             {
                 user_name = _userName,
-                game_name = _gameName
+                game_name = _gameName,
+                data = _data
             };
             var jsonData = JsonConvert.SerializeObject(requestData);
 
             // 发送请求
-            var result = await PostRequestAsync(_url, jsonData);
+            _requestResult = await PostRequestAsync(_url, jsonData);
 
             // 处理结果
-            if (result.isSuccess)
+            if (_requestResult.isSuccess)
             {
-                if (TryParseResponse(result.responseText))
+                if (TryParseResponse(_requestResult.responseText))
                 {
-                    //_lastRequestSuccess = true;
-                    Debug.Log("Trans to home successful");
+                    Debug.Log("Home gameplay successful");
                     return true;
                 }
                 else
                 {
-                    Debug.LogError("Failed to parse trans home response");
+                    Debug.LogError("Failed to parse home gameplay response");
                 }
             }
             else
             {
-                Debug.LogError($"Trans to home failed: {result.error}");
+                Debug.LogError($"Home gameplay failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Exception during trans home request: {ex.Message}");
+            Debug.LogError($"Exception during home gameplay request: {ex.Message}");
         }
 
         return false;
@@ -158,10 +159,9 @@ public class TransHomeAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string url, string user, string game)
+    public IEnumerator Call(string url, string userName, string gameName, Dictionary<string, string> data)
     {
-        Setup(url, user, game);
-
+        Setup(url, userName, gameName, data);
 
         if (useAsyncVersion)
         {
@@ -171,7 +171,7 @@ public class TransHomeAction : BaseRequestAction
 
             if (task.IsFaulted)
             {
-                Debug.LogError($"Async trans home call failed: {task.Exception?.GetBaseException().Message}");
+                Debug.LogError($"Async home gameplay call failed: {task.Exception?.GetBaseException().Message}");
             }
         }
         else
@@ -186,33 +186,33 @@ public class TransHomeAction : BaseRequestAction
     #region 私有方法
 
     /// <summary>
-    /// 尝试解析转换到家园响应数据
+    /// 尝试解析家园游戏玩法响应数据
     /// </summary>
     private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
-            Debug.LogError("Trans home response text is empty");
+            Debug.LogError("Home gameplay response text is empty");
             return false;
         }
 
         try
         {
-            var response = JsonConvert.DeserializeObject<DungeonTransHomeResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<WerewolfGamePlayResponse>(responseText);
 
             if (response == null)
             {
-                Debug.LogError("TransHomeAction response is null");
+                Debug.LogError("HomeGamePlayAction response is null");
                 return false;
             }
 
-            Debug.Log($"TransHomeAction.message = {response.message}");
+            // 设置游戏状态
             _responseData = response;
             return true;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Failed to parse trans home response: {ex.Message}");
+            Debug.LogError($"Failed to parse home gameplay response: {ex.Message}");
             return false;
         }
     }

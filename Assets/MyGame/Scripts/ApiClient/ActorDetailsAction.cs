@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 查看角色操作，使用改进的 BaseRequestAction
 /// </summary>
-public class ActorDetailsAction : BaseRequestAction
+public class ActorDetailsAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本

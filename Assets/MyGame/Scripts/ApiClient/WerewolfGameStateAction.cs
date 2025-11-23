@@ -6,31 +6,34 @@ using Newtonsoft.Json;
 /// <summary>
 /// 查看家园操作，使用改进的 BaseRequestAction
 /// </summary>
-public class StagesStateAction : BaseRequestAction
+public class WerewolfGameStateAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
-    private string _url;
-
-    private StagesStateResponse _responseData;
-
-    public StagesStateResponse ResponseData => _responseData;
+    // 响应数据
+    private WerewolfGameStateResponse _responseData = null;
 
     private RequestResult _requestResult = null;
 
+    public WerewolfGameStateResponse ResponseData => _responseData;
+
     public RequestResult ReqResult => _requestResult;
 
+    private string _url;
+    private string _userName;
+    private string _gameName;
 
-    public void Setup(string url)
+    public void Setup(string url, string userName, string gameName)
     {
         _url = url;
-        _responseData = null;
+        _userName = userName;
+        _gameName = gameName;
         _requestResult = null;
-        Debug.Log($"HomeStateAction URL set to: {_url}");
+        _responseData = null;
+
+        Debug.Log($"WerewolfGameStateAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
     }
-
-
 
     #region 协程版本（兼容现有代码）
 
@@ -89,6 +92,8 @@ public class StagesStateAction : BaseRequestAction
     {
         Debug.Log("View home request async started");
 
+        //_lastRequestSuccess = false;
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
@@ -134,9 +139,9 @@ public class StagesStateAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string url)
+    public IEnumerator Call(string url, string userName, string gameName)
     {
-        Setup(url);
+        Setup(url, userName, gameName);
 
         if (useAsyncVersion)
         {
@@ -173,7 +178,7 @@ public class StagesStateAction : BaseRequestAction
 
         try
         {
-            var response = JsonConvert.DeserializeObject<StagesStateResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<WerewolfGameStateResponse>(responseText);
 
             if (response == null)
             {
@@ -181,7 +186,7 @@ public class StagesStateAction : BaseRequestAction
                 return false;
             }
 
-            // 设置游戏上下文
+            // 赋值响应数据
             _responseData = response;
             return true;
         }

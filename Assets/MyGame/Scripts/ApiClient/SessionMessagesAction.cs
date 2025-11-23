@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 查看家园操作，使用改进的 BaseRequestAction
 /// </summary>
-public class SessionMessagesAction : BaseRequestAction
+public class SessionMessagesAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本

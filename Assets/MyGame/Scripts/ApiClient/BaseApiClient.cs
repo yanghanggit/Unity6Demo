@@ -6,32 +6,67 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 
-/**
- * ImprovedRequestAction.cs
- * 
- * 改进的 HTTP 请求处理类，针对 Unity 6 和 WebGL 优化
- * 
- * 主要改进：
- * - 资源管理（using 语句）
- * - 更好的错误处理
- * - 超时设置
- * - 支持 async/await（Unity 6+）
- * - WebGL 兼容性
- */
-public class BaseRequestAction : MonoBehaviour
+/// <summary>
+/// BaseApiClient - API 请求基类
+/// 
+/// 为所有具体的 API 操作类（如 LoginAction、StartAction 等）提供统一的 HTTP 请求能力。
+/// 针对 Unity 6 和 WebGL 平台进行了优化。
+/// 
+/// 主要特性：
+/// - 支持 GET/POST 请求
+/// - 提供协程和 async/await 两种调用方式
+/// - 自动资源管理（using 语句）
+/// - 完善的错误处理和超时控制
+/// - WebGL 平台兼容性处理
+/// - 统一的请求头设置
+/// 
+/// 使用方式：
+/// 1. 继承此类创建具体的 API 操作类
+/// 2. 在子类中调用 GetRequestCoroutine/PostRequestCoroutine 或 GetRequestAsync/PostRequestAsync
+/// 3. 处理返回的 RequestResult 结构
+/// 
+/// 作者：Unity6Demo Team
+/// 日期：2025-01-23
+/// </summary>
+public class BaseApiClient : MonoBehaviour
 {
-    [Header("配置")]
-    [SerializeField] private float requestTimeout = 120f; // 请求超时时间（秒）
+    #region 配置字段
 
-    // 请求结果结构
+    [Header("请求配置")]
+    [SerializeField] 
+    [Tooltip("HTTP 请求超时时间（秒），默认 30 秒")]
+    private float requestTimeout = 30.0f;
+
+    #endregion
+
+    #region 数据结构
+
+    /// <summary>
+    /// HTTP 请求结果封装类
+    /// 统一封装请求的成功状态、响应内容、状态码和错误信息
+    /// </summary>
     [Serializable]
     public class RequestResult
     {
+        /// <summary>请求是否成功</summary>
         public bool isSuccess;
+
+        /// <summary>响应文本内容（JSON 字符串）</summary>
         public string responseText;
+
+        /// <summary>HTTP 响应状态码（如 200, 404, 500 等）</summary>
         public long responseCode;
+
+        /// <summary>错误信息（仅在失败时有值）</summary>
         public string error;
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="success">请求是否成功</param>
+        /// <param name="response">响应文本</param>
+        /// <param name="code">HTTP 状态码</param>
+        /// <param name="errorMsg">错误信息</param>
         public RequestResult(bool success, string response = "", long code = 0, string errorMsg = "")
         {
             isSuccess = success;
@@ -41,11 +76,17 @@ public class BaseRequestAction : MonoBehaviour
         }
     }
 
-    #region 协程版本（兼容现有代码）
+    #endregion
+
+    #region 协程版本 API（兼容现有代码）
 
     /// <summary>
     /// 发送 GET 请求（协程版本）
+    /// 适用于传统的 Unity 协程调用方式，兼容 Unity 所有版本
     /// </summary>
+    /// <param name="url">请求的完整 URL</param>
+    /// <param name="onComplete">请求完成后的回调函数，接收 RequestResult 参数</param>
+    /// <returns>协程迭代器</returns>
     public IEnumerator GetRequestCoroutine(string url, System.Action<RequestResult> onComplete = null)
     {
         using (var request = UnityWebRequest.Get(url))
@@ -69,7 +110,12 @@ public class BaseRequestAction : MonoBehaviour
 
     /// <summary>
     /// 发送 POST 请求（协程版本）
+    /// 适用于传统的 Unity 协程调用方式，兼容 Unity 所有版本
     /// </summary>
+    /// <param name="url">请求的完整 URL</param>
+    /// <param name="jsonData">要发送的 JSON 数据字符串</param>
+    /// <param name="onComplete">请求完成后的回调函数，接收 RequestResult 参数</param>
+    /// <returns>协程迭代器</returns>
     public IEnumerator PostRequestCoroutine(string url, string jsonData, System.Action<RequestResult> onComplete = null)
     {
         using (var request = CreatePostRequest(url, jsonData))
@@ -87,11 +133,14 @@ public class BaseRequestAction : MonoBehaviour
 
     #endregion
 
-    #region Async/Await 版本（Unity 6 推荐）
+    #region Async/Await 版本 API（Unity 6 推荐）
 
     /// <summary>
     /// 发送 GET 请求（Async 版本）
+    /// 推荐在 Unity 6+ 中使用，支持现代异步编程模式
     /// </summary>
+    /// <param name="url">请求的完整 URL</param>
+    /// <returns>包含请求结果的 Task</returns>
     public async Task<RequestResult> GetRequestAsync(string url)
     {
         using (var request = UnityWebRequest.Get(url))
@@ -115,7 +164,11 @@ public class BaseRequestAction : MonoBehaviour
 
     /// <summary>
     /// 发送 POST 请求（Async 版本）
+    /// 推荐在 Unity 6+ 中使用，支持现代异步编程模式
     /// </summary>
+    /// <param name="url">请求的完整 URL</param>
+    /// <param name="jsonData">要发送的 JSON 数据字符串</param>
+    /// <returns>包含请求结果的 Task</returns>
     public async Task<RequestResult> PostRequestAsync(string url, string jsonData)
     {
         using (var request = CreatePostRequest(url, jsonData))
@@ -139,8 +192,12 @@ public class BaseRequestAction : MonoBehaviour
     #region 私有辅助方法
 
     /// <summary>
-    /// 创建 POST 请求
+    /// 创建 POST 请求对象
+    /// 封装 UnityWebRequest 的创建逻辑，设置请求体、下载处理器和超时
     /// </summary>
+    /// <param name="url">请求的完整 URL</param>
+    /// <param name="jsonData">要发送的 JSON 数据字符串</param>
+    /// <returns>配置好的 UnityWebRequest 对象</returns>
     private UnityWebRequest CreatePostRequest(string url, string jsonData)
     {
         var request = new UnityWebRequest(url, "POST");
@@ -161,7 +218,10 @@ public class BaseRequestAction : MonoBehaviour
 
     /// <summary>
     /// 设置通用请求头
+    /// 为所有请求添加标准的 HTTP 头部，包括 Content-Type 和 User-Agent
+    /// WebGL 平台会跳过某些可能被浏览器阻止的头部
     /// </summary>
+    /// <param name="request">要设置头部的 UnityWebRequest 对象</param>
     private void SetCommonHeaders(UnityWebRequest request)
     {
         request.SetRequestHeader("Content-Type", "application/json");
@@ -176,8 +236,11 @@ public class BaseRequestAction : MonoBehaviour
     }
 
     /// <summary>
-    /// 处理响应
+    /// 处理 HTTP 响应
+    /// 统一处理各种错误类型（连接错误、协议错误、数据处理错误）并记录日志
     /// </summary>
+    /// <param name="request">已完成的 UnityWebRequest 对象</param>
+    /// <returns>封装好的 RequestResult 对象</returns>
     private RequestResult ProcessResponse(UnityWebRequest request)
     {
         // 检查网络错误
@@ -212,11 +275,17 @@ public class BaseRequestAction : MonoBehaviour
 
     #endregion
 
-    #region 工具方法
+    #region 静态工具方法
 
     /// <summary>
     /// 构建带查询参数的 URL
+    /// 将参数列表拼接到基础 URL 后面，自动进行 URL 编码
+    /// 例如：BuildUrlWithQueryParams("http://api.com/users", [{"name", "张三"}]) 
+    ///       返回 "http://api.com/users?name=%E5%BC%A0%E4%B8%89"
     /// </summary>
+    /// <param name="baseUrl">基础 URL（不含查询参数）</param>
+    /// <param name="parameters">查询参数列表</param>
+    /// <returns>拼接好的完整 URL</returns>
     public static string BuildUrlWithQueryParams(string baseUrl, List<KeyValuePair<string, string>> parameters)
     {
         if (parameters == null || parameters.Count == 0)
@@ -243,7 +312,10 @@ public class BaseRequestAction : MonoBehaviour
 
     /// <summary>
     /// 检查网络可达性（WebGL 友好）
+    /// 在 WebGL 平台中始终返回 true（因为浏览器环境本身就需要网络）
+    /// 在其他平台检查实际的网络连接状态
     /// </summary>
+    /// <returns>true 表示网络可用，false 表示无网络连接</returns>
     public static bool IsNetworkReachable()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR

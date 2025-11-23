@@ -2,65 +2,62 @@ using UnityEngine;
 using System.Collections;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
 /// <summary>
-/// 家园游戏玩法操作，使用改进的 BaseRequestAction
+/// 开始游戏操作，使用改进的 WerewolfGameStartAction
 /// </summary>
-public class HomeGamePlayAction : BaseRequestAction
+public class WerewolfGameStartAction : BaseApiClient
 {
     [Header("配置")]
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
+    private WerewolfGameStartResponse _responseData = null;
+
+    private RequestResult _requestResult = null;
+
+    public WerewolfGameStartResponse ResponseData => _responseData;
+
+    public RequestResult ReqResult => _requestResult;
+
     private string _url;
     private string _userName;
     private string _gameName;
-    private string _userInputTag;
-    private Dictionary<string, string> _data;
-    private RequestResult _requestResult = null;
-    public RequestResult ReqResult => _requestResult;
-    private HomeGamePlayResponse _responseData = null;
-    public HomeGamePlayResponse ResponseData => _responseData;
 
-    public void Setup(string url, string userName, string gameName, string userInputTag, Dictionary<string, string> data = null)
+    public void Setup(string url, string userName, string gameName)
     {
         _url = url;
         _userName = userName;
         _gameName = gameName;
-        _userInputTag = userInputTag;
-        _data = data ?? new Dictionary<string, string>();
         _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"HomeGamePlayAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, UserInputTag: {_userInputTag}");
-        Debug.Log($"HomeGamePlayAction initialized with Data: {JsonConvert.SerializeObject(_data)}");
+        Debug.Log($"WerewolfGameStartAction initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
     }
+
 
     #region 协程版本（兼容现有代码）
 
     /// <summary>
-    /// 家园游戏玩法（协程版本）
+    /// 开始游戏（协程版本）
     /// </summary>
     public IEnumerator CallCoroutine()
     {
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for home gameplay");
+            Debug.LogError("No network connection available for start game");
             yield break;
         }
 
         // 创建请求数据
-        var requestData = new HomeGamePlayRequest
+        var requestData = new WerewolfGameStartRequest
         {
             user_name = _userName,
             game_name = _gameName,
-            user_input = new HomeGamePlayUserInput { tag = _userInputTag, data = _data }
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         bool requestCompleted = false;
-
 
         // 发送请求
         yield return PostRequestCoroutine(_url, jsonData, (response) =>
@@ -77,17 +74,17 @@ public class HomeGamePlayAction : BaseRequestAction
         {
             if (TryParseResponse(_requestResult.responseText))
             {
-                //_lastRequestSuccess = true;
-                Debug.Log("Home gameplay successful");
+                //_werewolfGameStartResponse = new WerewolfGameStartResponse
+                Debug.Log("Start game successful");
             }
             else
             {
-                Debug.LogError("Failed to parse home gameplay response");
+                Debug.LogError("Failed to parse start game response");
             }
         }
         else
         {
-            Debug.LogError($"Home gameplay failed: {_requestResult?.error ?? "Unknown error"}");
+            Debug.LogError($"Start game failed: {_requestResult?.error ?? "Unknown error"}");
         }
     }
 
@@ -96,25 +93,29 @@ public class HomeGamePlayAction : BaseRequestAction
     #region Async 版本（推荐用于 Unity 6）
 
     /// <summary>
-    /// 家园游戏玩法（Async 版本）
+    /// 开始游戏（Async 版本）
     /// </summary>
     public async Task<bool> CallAsync()
     {
+        //Debug.Log($"Start game request async for actor: {actorName}");
+
+        //_response = null;
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
-            Debug.LogError("No network connection available for home gameplay");
+            Debug.LogError("No network connection available for start game");
             return false;
         }
 
         try
         {
             // 创建请求数据
-            var requestData = new HomeGamePlayRequest
+            var requestData = new WerewolfGameStartRequest
             {
                 user_name = _userName,
-                game_name = _gameName,
-                user_input = new HomeGamePlayUserInput { tag = _userInputTag, data = _data }
+                game_name = _gameName
+                //actor_name = actorName
             };
             var jsonData = JsonConvert.SerializeObject(requestData);
 
@@ -127,22 +128,22 @@ public class HomeGamePlayAction : BaseRequestAction
                 if (TryParseResponse(_requestResult.responseText))
                 {
                     //_lastRequestSuccess = true;
-                    Debug.Log("Home gameplay successful");
+                    Debug.Log("Start game successful");
                     return true;
                 }
                 else
                 {
-                    Debug.LogError("Failed to parse home gameplay response");
+                    Debug.LogError("Failed to parse start game response");
                 }
             }
             else
             {
-                Debug.LogError($"Home gameplay failed: {_requestResult.error}");
+                Debug.LogError($"Start game failed: {_requestResult.error}");
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Exception during home gameplay request: {ex.Message}");
+            Debug.LogError($"Exception during start game request: {ex.Message}");
         }
 
         return false;
@@ -155,10 +156,9 @@ public class HomeGamePlayAction : BaseRequestAction
     /// <summary>
     /// 统一的调用接口，根据配置选择协程或 Async 版本
     /// </summary>
-    public IEnumerator Call(string url, string userName, string gameName, string userInputTag, Dictionary<string, string> data = null)
+    public IEnumerator Call(string url, string userName, string gameName)
     {
-        Setup(url, userName, gameName, userInputTag, data);
-
+        Setup(url, userName, gameName);
 
         if (useAsyncVersion)
         {
@@ -168,7 +168,7 @@ public class HomeGamePlayAction : BaseRequestAction
 
             if (task.IsFaulted)
             {
-                Debug.LogError($"Async home gameplay call failed: {task.Exception?.GetBaseException().Message}");
+                Debug.LogError($"Async start game call failed: {task.Exception?.GetBaseException().Message}");
             }
         }
         else
@@ -183,33 +183,35 @@ public class HomeGamePlayAction : BaseRequestAction
     #region 私有方法
 
     /// <summary>
-    /// 尝试解析家园游戏玩法响应数据
+    /// 尝试解析开始游戏响应数据
     /// </summary>
     private bool TryParseResponse(string responseText)
     {
         if (string.IsNullOrEmpty(responseText))
         {
-            Debug.LogError("Home gameplay response text is empty");
+            Debug.LogError("Start game response text is empty");
             return false;
         }
 
         try
         {
-            var response = JsonConvert.DeserializeObject<HomeGamePlayResponse>(responseText);
+            var response = JsonConvert.DeserializeObject<WerewolfGameStartResponse>(responseText);
 
             if (response == null)
             {
-                Debug.LogError("HomeGamePlayAction response is null");
+                Debug.LogError("StartAction response is null");
                 return false;
             }
 
-            // 设置游戏状态
+            Debug.Log($"StartAction.message = {response.message}");
+
+            // 设置角色名称
             _responseData = response;
             return true;
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Failed to parse home gameplay response: {ex.Message}");
+            Debug.LogError($"Failed to parse start game response: {ex.Message}");
             return false;
         }
     }

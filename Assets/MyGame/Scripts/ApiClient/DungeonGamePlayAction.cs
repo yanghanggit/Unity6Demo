@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 地下城游戏玩法操作，使用改进的 BaseRequestAction
 /// </summary>
-public class DungeonGamePlayAction : BaseRequestAction
+public class DungeonGamePlayAction : BaseApiClient
 {
     [SerializeField] private bool useAsyncVersion = true; // 是否使用 async 版本
 
