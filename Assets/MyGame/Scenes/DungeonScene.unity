@@ -1062,7 +1062,7 @@ MonoBehaviour:
   _mainText: {fileID: 129710570}
   _dungeonGamePlayAction: {fileID: 399892903}
   _viewDungeonAction: {fileID: 399892904}
-  _viewActorAction: {fileID: 399892905}
+  _actorDetailApi: {fileID: 399892905}
   _transHomeAction: {fileID: 399892906}
   _XCardPlayer: {fileID: 11400000, guid: 3199971a30b1d4064a76867ed8c535f4, type: 2}
   _XCardEditor: {fileID: 1254172618}
@@ -1110,7 +1110,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   requestTimeout: 30
-  useAsyncVersion: 1
 --- !u!114 &399892906
 MonoBehaviour:
   m_ObjectHideFlags: 0

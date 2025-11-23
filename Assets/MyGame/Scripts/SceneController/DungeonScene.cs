@@ -15,7 +15,7 @@ public class DungeonScene : MonoBehaviour
 
     public DungeonStateAction _viewDungeonAction;
 
-    public ActorDetailsApi _viewActorAction;
+    public ActorDetailsApi _actorDetailApi;
 
     public TransHomeAction _transHomeAction;
 
@@ -31,7 +31,7 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_dungeonGamePlayAction != null, "_dungeonAction is null");
         Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
-        Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
+        Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
@@ -130,17 +130,17 @@ public class DungeonScene : MonoBehaviour
         //GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
         yield return FetchAndProcessSessionMessages();
 
-        yield return _viewActorAction.Call(
+        yield return _actorDetailApi.Call(
             GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_viewActorAction.RespData == null)
+        if (_actorDetailApi.RespData == null)
         {
             Debug.LogError("ViewActorAction request failed");
             yield break;
         }
 
-        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.RespData.actor_entities_serialization;
+        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
 
         Debug.Log("ExecuteDrawCards request success");
         UpdateActorDisplay(new HashSet<string> { typeof(HandComponent).Name });
@@ -177,32 +177,32 @@ public class DungeonScene : MonoBehaviour
         GameContext.Instance.Mapping = _viewDungeonAction.ResponseData.mapping;
         GameContext.Instance.Dungeon = _viewDungeonAction.ResponseData.dungeon;
 
-        yield return _viewActorAction.Call(
+        yield return _actorDetailApi.Call(
             GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_viewActorAction.RespData == null)
+        if (_actorDetailApi.RespData == null)
         {
             yield break;
         }
 
-        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.RespData.actor_entities_serialization;
+        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
 
         UpdateDungeonDisplay();
     }
 
     private IEnumerator ExecuteViewActor()
     {
-        yield return _viewActorAction.Call(
+        yield return _actorDetailApi.Call(
             GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_viewActorAction.RespData == null)
+        if (_actorDetailApi.RespData == null)
         {
             yield break;
         }
 
-        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.RespData.actor_entities_serialization;
+        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
 
         UpdateActorDisplay(new HashSet<string> { typeof(CombatStatsComponent).Name });
     }
