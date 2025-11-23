@@ -30,10 +30,10 @@ public class BootScene : MonoBehaviour
     private IEnumerator InitializeApiEndpoints()
     {
         yield return _rootApi.Call(_baseUrl);
-        if (_rootApi.ResponseData != null)
+        if (_rootApi.RespData != null)
         {
             _nextButton.gameObject.SetActive(true);
-            GameContext.Instance.Root = _rootApi.ResponseData;
+            GameContext.Instance.Root = _rootApi.RespData;
             Debug.Log("Using LocalNet for API endpoints");
             yield break;
         }

@@ -1,122 +1,109 @@
 using UnityEngine;
 using System.Collections;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// 改进的 URL 配置获取操作，使用新的 ImprovedRequestAction
+/// Root API 客户端，用于获取服务器根配置信息
 /// </summary>
 public class RootApi : BaseApiClient
 {
+    /// <summary>
+    /// 响应数据
+    /// </summary>
     private RootResponse _responseData;
 
-    public RootResponse ResponseData => _responseData;
+    /// <summary>
+    /// 获取响应数据
+    /// </summary>
+    public RootResponse RespData => _responseData;
 
-    private RequestResult _requestResult = null;
+    /// <summary>
+    /// 请求结果
+    /// </summary>
+    private RequestResult _requestResult;
 
+    /// <summary>
+    /// 获取请求结果
+    /// </summary>
     public RequestResult ReqResult => _requestResult;
 
+    /// <summary>
+    /// 请求 URL
+    /// </summary>
     private string _url;
 
-    public void Setup(string url)
+    /// <summary>
+    /// 初始化 API 请求
+    /// </summary>
+    /// <param name="url">请求的根 URL</param>
+    private void Initialize(string url)
     {
         _url = url;
         _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"RootAction initialized with URL: {_url}");
+        Debug.Log($"RootApi initialized with URL: {_url}");
     }
 
 
     /// <summary>
-    /// 获取 URL 配置（Async 版本）
+    /// 调用 Root API 获取配置信息
     /// </summary>
-    public async Task<bool> CallAsync()
+    /// <param name="rootUrl">根 URL 地址</param>
+    /// <returns>协程枚举器</returns>
+    public IEnumerator Call(string rootUrl)
     {
+        // 初始化
+        Initialize(rootUrl);
+
         // 检查网络连接
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
-            return false;
+            yield break;
         }
 
-        try
-        {
-            // 发送请求
-            _requestResult = await GetRequestAsync(_url);
-
-            // 处理结果
-            if (_requestResult.isSuccess)
-            {
-                if (TryParseResponse(_requestResult.responseText))
-                {
-                    Debug.Log("URL Configuration loaded successfully");
-                    return true;
-                }
-                else
-                {
-                    Debug.LogError("Failed to parse URL configuration response");
-                }
-            }
-            else
-            {
-                Debug.LogError($"Failed to get URL configuration: {_requestResult.error}");
-            }
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"Exception during URL configuration request: {ex.Message}");
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// 统一的调用接口，根据配置选择协程或 Async 版本
-    /// </summary>
-    public IEnumerator Call(string rootUrl)
-    {
-        // 初始化
-        Setup(rootUrl);
-
-        // 调用 Async 版本
-        var task = CallAsync();
+        // 发送请求
+        var task = GetRequestAsync(_url);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)
         {
-            Debug.LogError($"Async call failed: {task.Exception?.GetBaseException().Message}");
+            Debug.LogError($"Request exception: {task.Exception?.GetBaseException().Message}");
+            yield break;
         }
-    }
 
-    /// <summary>
-    /// 尝试解析响应数据
-    /// </summary>
-    private bool TryParseResponse(string responseText)
-    {
-        if (string.IsNullOrEmpty(responseText))
+        _requestResult = task.Result;
+
+        // 处理请求结果
+        if (!_requestResult.isSuccess)
+        {
+            Debug.LogError($"Request failed: {_requestResult.error}");
+            yield break;
+        }
+
+        // 解析响应数据
+        if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
-            return false;
+            yield break;
         }
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<RootResponse>(responseText);
-
+            _responseData = JsonConvert.DeserializeObject<RootResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
-                Debug.LogError("Deserialized URL configuration is null");
-                return false;
+                Debug.LogError("Deserialized response data is null");
+                yield break;
             }
 
-            Debug.Log($"URL Configuration parsed successfully. API Version: {_responseData.version}");
-            return true;
+            Debug.Log($"Root configuration loaded successfully. API Version: {_responseData.version}");
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"Failed to parse URL configuration: {ex.Message}");
-            return false;
+            Debug.LogError($"Failed to parse response data: {ex.Message}");
         }
     }
+
 }
