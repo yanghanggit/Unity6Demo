@@ -15,7 +15,7 @@ public class CampScene : MonoBehaviour
     public TMP_InputField _inputField;
     public GameObject _speechBubblePrefab;
     public float _hideBubbleDuration = 5.0f;
-    public HomeGamePlayAction _homeGamePlayAction;
+    public HomeGamePlayApi _homeGamePlayApi;
     public SessionMessagesApi _sessionMessagesApi;
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
@@ -29,7 +29,7 @@ public class CampScene : MonoBehaviour
         Debug.Assert(_backgroundImage != null, "background is null");
         Debug.Assert(_inputBackground != null, "inputBackground is null");
         Debug.Assert(_inputField != null, "inputField is null");
-        Debug.Assert(_homeGamePlayAction != null, "_homeRunAction is null");
+        Debug.Assert(_homeGamePlayApi != null, "_homeRunAction is null");
         Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
         Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesAction is null");
 
@@ -390,7 +390,7 @@ public class CampScene : MonoBehaviour
 
     private IEnumerator ExecuteSpeakAction(string target, string content)
     {
-        yield return _homeGamePlayAction.Call(
+        yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
@@ -401,7 +401,7 @@ public class CampScene : MonoBehaviour
             });
 
         Debug.Log("Speak action executed");
-        if (_homeGamePlayAction.ResponseData == null)
+        if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
@@ -504,14 +504,14 @@ public class CampScene : MonoBehaviour
 
     private IEnumerator ExecuteHomeAdvancing()
     {
-        yield return _homeGamePlayAction.Call(
+        yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
 
             "/advancing");
         //if (!_homeGamePlayAction.LastRequestSuccess)
-        if (_homeGamePlayAction.ResponseData == null)
+        if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;

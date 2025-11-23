@@ -15,7 +15,7 @@ public class RestaurantScene : MonoBehaviour
     public TMP_InputField _inputField;
     public GameObject _speechBubblePrefab;
     public float _hideBubbleDuration = 5.0f;
-    public HomeGamePlayAction _homeGamePlayAction;
+    public HomeGamePlayApi _homeGamePlayApi;
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
     // UI系统组件
@@ -28,7 +28,7 @@ public class RestaurantScene : MonoBehaviour
         Debug.Assert(_backgroundImage != null, "background is null");
         Debug.Assert(_inputBackground != null, "inputBackground is null");
         Debug.Assert(_inputField != null, "inputField is null");
-        Debug.Assert(_homeGamePlayAction != null, "_homeRunAction is null");
+        Debug.Assert(_homeGamePlayApi != null, "_homeRunAction is null");
         Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
 
         // 隐藏输入背景
@@ -146,7 +146,7 @@ public class RestaurantScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteTransRestaurant()
     {
-        yield return _homeGamePlayAction.Call(
+        yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
@@ -158,14 +158,14 @@ public class RestaurantScene : MonoBehaviour
 
         Debug.Log("场景转换至餐馆");
         
-        if (_homeGamePlayAction.ResponseData == null)
+        if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("TransRestaurant request failed");
             yield break;
         }
 
         // 处理服务器返回的消息
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
 
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
         Debug.Log(joinedLogs);
@@ -370,7 +370,7 @@ public class RestaurantScene : MonoBehaviour
 
     private IEnumerator ExecuteSpeakAction(string target, string content)
     {
-        yield return _homeGamePlayAction.Call(
+        yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
@@ -381,13 +381,13 @@ public class RestaurantScene : MonoBehaviour
             });
 
         Debug.Log("Speak action executed");
-        if (_homeGamePlayAction.ResponseData == null)
+        if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
 
         HideInputBackground();
 
@@ -460,19 +460,19 @@ public class RestaurantScene : MonoBehaviour
 
     private IEnumerator ExecuteHomeAdvancing()
     {
-        yield return _homeGamePlayAction.Call(
+        yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "/advancing");
         
-        if (_homeGamePlayAction.ResponseData == null)
+        if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("RunHomeAction request failed");
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayAction.ResponseData.client_messages);
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
 
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
         Debug.Log(joinedLogs);
