@@ -687,7 +687,7 @@ MonoBehaviour:
   _speechBubblePrefab: {fileID: 1266498991}
   _hideBubbleDuration: 5
   _homeGamePlayAction: {fileID: 399892902}
-  _sessionMessagesAction: {fileID: 399892903}
+  _sessionMessagesApi: {fileID: 399892903}
 --- !u!114 &399892902
 MonoBehaviour:
   m_ObjectHideFlags: 0

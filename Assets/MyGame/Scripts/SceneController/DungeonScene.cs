@@ -23,7 +23,7 @@ public class DungeonScene : MonoBehaviour
 
     public XCardEditor _XCardEditor;
 
-    public SessionMessagesAction _sessionMessagesAction;
+    public SessionMessagesApi _sessionMessagesApi;
 
 
     void Start()
@@ -35,7 +35,7 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
-        Debug.Assert(_sessionMessagesAction != null, "_sessionMessagesAction is null");
+        Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesAction is null");
 
         _XCardEditor.gameObject.SetActive(false);
 
@@ -287,15 +287,18 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator FetchAndProcessSessionMessages()
     {
         // 获取会话消息
-        _sessionMessagesAction.Setup(
-            GameContext.Instance.SessionMessagesUrl,
+        // _sessionMessagesApi.Initialize(
+        //     GameContext.Instance.SessionMessagesUrl,
+        //     GameContext.Instance.UserName,
+        //     GameContext.Instance.GameName,
+        //     GameContext.Instance.LastSequenceId
+        // );
+
+        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-            GameContext.Instance.LastSequenceId
-        );
-
-        yield return _sessionMessagesAction.Call();
-        if (_sessionMessagesAction.ResponseData == null)
+            GameContext.Instance.LastSequenceId);
+        if (_sessionMessagesApi.RespData == null)
         {
             Debug.LogError("SessionMessagesAction ResponseData is null");
             yield break;
@@ -305,25 +308,25 @@ public class DungeonScene : MonoBehaviour
         UpdateLastSequenceIdFromResponse();
 
         //
-        GameContext.Instance.ProcessClientMessages(_sessionMessagesAction.ResponseData.session_messages);
+        GameContext.Instance.ProcessClientMessages(_sessionMessagesApi.RespData.session_messages);
     }
 
     private void UpdateLastSequenceIdFromResponse()
     {
-        if (_sessionMessagesAction.ResponseData == null)
+        if (_sessionMessagesApi.RespData == null)
         {
             Debug.LogWarning("SessionMessagesAction ResponseData is null");
             Debug.Assert(false, "SessionMessagesAction ResponseData is null");
             return;
         }
 
-        if (_sessionMessagesAction.ResponseLastSequenceId < 0)
+        if (_sessionMessagesApi.RespLastSequenceId < 0)
         {
             Debug.LogWarning("Invalid last sequence ID");
             return;
         }
 
         // 设置 LastSequenceId
-        GameContext.Instance.LastSequenceId = _sessionMessagesAction.ResponseLastSequenceId;
+        GameContext.Instance.LastSequenceId = _sessionMessagesApi.RespLastSequenceId;
     }
 }

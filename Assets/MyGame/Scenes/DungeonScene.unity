@@ -1066,7 +1066,7 @@ MonoBehaviour:
   _transHomeAction: {fileID: 399892906}
   _XCardPlayer: {fileID: 11400000, guid: 3199971a30b1d4064a76867ed8c535f4, type: 2}
   _XCardEditor: {fileID: 1254172618}
-  _sessionMessagesAction: {fileID: 399892907}
+  _sessionMessagesApi: {fileID: 399892907}
 --- !u!114 &399892903
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -18,7 +18,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     public ActorDetailsApi _actorDetailsAction;
 
-    public SessionMessagesAction _sessionMessagesAction;
+    public SessionMessagesApi _sessionMessagesAction;
 
     // 角色按钮相关组件数组（在 Inspector 中配置，长度为8）
     public TMP_Text[] actorButtonTexts = new TMP_Text[8];
@@ -228,7 +228,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             yield return KickOff();
 
             // 检查 KickOff 是否成功
-            if (_werewolfGamePlayAction.ResponseData != null && _sessionMessagesAction.ResponseData != null)
+            if (_werewolfGamePlayAction.ResponseData != null && _sessionMessagesAction.RespData != null)
             {
                 // KickOff 成功
                 success = true;
@@ -1446,15 +1446,18 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         // 获取会话消息
-        _sessionMessagesAction.Setup(
-            WerewolfGameContext.Instance.SessionMessagesUrl,
+        // _sessionMessagesAction.Initialize(
+        //     WerewolfGameContext.Instance.SessionMessagesUrl,
+        //     WerewolfGameContext.Instance.UserName,
+        //     WerewolfGameContext.Instance.GameName,
+        //     WerewolfGameContext.Instance.LastSequenceId
+        // );
+
+        yield return _sessionMessagesAction.Call(WerewolfGameContext.Instance.SessionMessagesUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
-            WerewolfGameContext.Instance.LastSequenceId
-        );
-
-        yield return _sessionMessagesAction.Call();
-        if (_sessionMessagesAction.ResponseData == null)
+            WerewolfGameContext.Instance.LastSequenceId);
+        if (_sessionMessagesAction.RespData == null)
         {
             Debug.LogError("SessionMessagesAction ResponseData is null");
             // 出错时也要隐藏 loading
@@ -1468,7 +1471,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 处理消息（记录已在 GameContext 中做），但 UI 显示为"开局已完成"
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
-            _sessionMessagesAction.ResponseData.session_messages, "kickoff");
+            _sessionMessagesAction.RespData.session_messages, "kickoff");
         Debug.Log("Kickoff processed messages:\n" + string.Join("\n", processedMessages));
 
         _isKickOffComplete = true;
@@ -1505,15 +1508,18 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         // 获取会话消息
-        _sessionMessagesAction.Setup(
-            WerewolfGameContext.Instance.SessionMessagesUrl,
+        // _sessionMessagesAction.Initialize(
+        //     WerewolfGameContext.Instance.SessionMessagesUrl,
+        //     WerewolfGameContext.Instance.UserName,
+        //     WerewolfGameContext.Instance.GameName,
+        //     WerewolfGameContext.Instance.LastSequenceId
+        // );
+
+        yield return _sessionMessagesAction.Call( WerewolfGameContext.Instance.SessionMessagesUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
-            WerewolfGameContext.Instance.LastSequenceId
-        );
-
-        yield return _sessionMessagesAction.Call();
-        if (_sessionMessagesAction.ResponseData == null)
+            WerewolfGameContext.Instance.LastSequenceId);
+        if (_sessionMessagesAction.RespData == null)
         {
             Debug.LogError("SessionMessagesAction ResponseData is null");
             yield break;
@@ -1523,7 +1529,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         UpdateLastSequenceIdFromResponse();
 
         // 根据消息内容切换背景图片
-        SwitchBackgroundByMessages(_sessionMessagesAction.ResponseData.session_messages);
+        SwitchBackgroundByMessages(_sessionMessagesAction.RespData.session_messages);
 
         // 获取并更新游戏状态（包括胜利条件）
         yield return UpdateGameStateInTime();
@@ -1559,7 +1565,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         // 先获取正常的游戏消息（说明上一阶段发生了什么）
-        string baseMessage = GetFormattedMainText(_sessionMessagesAction.ResponseData.session_messages);
+        string baseMessage = GetFormattedMainText(_sessionMessagesAction.RespData.session_messages);
         
         // 如果是夜晚后的时间推进，在消息前添加死亡信息和猎人击杀消息
         string stageMessage;
@@ -1659,15 +1665,18 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         // 获取会话消息
-        _sessionMessagesAction.Setup(
-            WerewolfGameContext.Instance.SessionMessagesUrl,
+        // _sessionMessagesAction.Initialize(
+        //     WerewolfGameContext.Instance.SessionMessagesUrl,
+        //     WerewolfGameContext.Instance.UserName,
+        //     WerewolfGameContext.Instance.GameName,
+        //     WerewolfGameContext.Instance.LastSequenceId
+        // );
+
+        yield return _sessionMessagesAction.Call(WerewolfGameContext.Instance.SessionMessagesUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
-            WerewolfGameContext.Instance.LastSequenceId
-        );
-
-        yield return _sessionMessagesAction.Call();
-        if (_sessionMessagesAction.ResponseData == null)
+            WerewolfGameContext.Instance.LastSequenceId);
+        if (_sessionMessagesAction.RespData == null)
         {
             SetLoadingState(false);
             Debug.LogError("SessionMessagesAction ResponseData is null");
@@ -1679,11 +1688,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 处理消息
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
-            _sessionMessagesAction.ResponseData.session_messages, "night");
+            _sessionMessagesAction.RespData.session_messages, "night");
         Debug.Log("Night processed messages:\n" + string.Join("\n", processedMessages));
 
         // 检测并保存猎人击杀消息（在下一个 Time 阶段显示）
-        _hunterKillMessageFromNight = GetHunterKillMessage(_sessionMessagesAction.ResponseData.session_messages);
+        _hunterKillMessageFromNight = GetHunterKillMessage(_sessionMessagesAction.RespData.session_messages);
         if (!string.IsNullOrEmpty(_hunterKillMessageFromNight))
         {
             Debug.Log($"在夜晚阶段检测到猎人击杀消息: {_hunterKillMessageFromNight}");
@@ -1731,15 +1740,18 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         // 获取会话消息
-        _sessionMessagesAction.Setup(
-            WerewolfGameContext.Instance.SessionMessagesUrl,
+        // _sessionMessagesAction.Initialize(
+        //     WerewolfGameContext.Instance.SessionMessagesUrl,
+        //     WerewolfGameContext.Instance.UserName,
+        //     WerewolfGameContext.Instance.GameName,
+        //     WerewolfGameContext.Instance.LastSequenceId
+        //);
+
+        yield return _sessionMessagesAction.Call(WerewolfGameContext.Instance.SessionMessagesUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
-            WerewolfGameContext.Instance.LastSequenceId
-        );
-
-        yield return _sessionMessagesAction.Call();
-        if (_sessionMessagesAction.ResponseData == null)
+            WerewolfGameContext.Instance.LastSequenceId);
+        if (_sessionMessagesAction.RespData == null)
         {
             SetLoadingState(false);
             Debug.LogError("SessionMessagesAction ResponseData is null");
@@ -1754,7 +1766,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 处理消息以更新阶段信息（会添加到记录中）
         WerewolfGameContext.Instance.ConvertClientMessagesToText(
-            _sessionMessagesAction.ResponseData.session_messages, "day");
+            _sessionMessagesAction.RespData.session_messages, "day");
 
         SetLoadingState(false);
 
@@ -1784,15 +1796,18 @@ public class WerewolfGamePlayScene : MonoBehaviour
         }
 
         // 获取会话消息
-        _sessionMessagesAction.Setup(
-            WerewolfGameContext.Instance.SessionMessagesUrl,
+        // _sessionMessagesAction.Initialize(
+        //     WerewolfGameContext.Instance.SessionMessagesUrl,
+        //     WerewolfGameContext.Instance.UserName,
+        //     WerewolfGameContext.Instance.GameName,
+        //     WerewolfGameContext.Instance.LastSequenceId
+        // );
+
+        yield return _sessionMessagesAction.Call(WerewolfGameContext.Instance.SessionMessagesUrl,
             WerewolfGameContext.Instance.UserName,
             WerewolfGameContext.Instance.GameName,
-            WerewolfGameContext.Instance.LastSequenceId
-        );
-
-        yield return _sessionMessagesAction.Call();
-        if (_sessionMessagesAction.ResponseData == null)
+            WerewolfGameContext.Instance.LastSequenceId);
+        if (_sessionMessagesAction.RespData == null)
         {
             SetLoadingState(false);
             Debug.LogError("SessionMessagesAction ResponseData is null");
@@ -1804,13 +1819,13 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 处理所有消息（包括角色的内心想法等），记录到 GameContext 中
         var processedMessages = WerewolfGameContext.Instance.ConvertClientMessagesToText(
-            _sessionMessagesAction.ResponseData.session_messages, "vote");
+            _sessionMessagesAction.RespData.session_messages, "vote");
         Debug.Log("Vote processed messages:\n" + string.Join("\n", processedMessages));
 
         SetLoadingState(false);
 
         // 只显示投票结果（EventHead.NONE 的消息）
-        ShowVoteResultOnly(_sessionMessagesAction.ResponseData.session_messages);
+        ShowVoteResultOnly(_sessionMessagesAction.RespData.session_messages);
     }
 
     /// <summary>
@@ -1893,20 +1908,20 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     private void UpdateLastSequenceIdFromResponse()
     {
-        if (_sessionMessagesAction.ResponseData == null)
+        if (_sessionMessagesAction.RespData == null)
         {
             Debug.LogWarning("SessionMessagesAction ResponseData is null");
             Debug.Assert(false, "SessionMessagesAction ResponseData is null");
             return;
         }
 
-        if (_sessionMessagesAction.ResponseLastSequenceId < 0)
+        if (_sessionMessagesAction.RespLastSequenceId < 0)
         {
             Debug.LogWarning("Invalid last sequence ID");
             return;
         }
 
-        WerewolfGameContext.Instance.LastSequenceId = _sessionMessagesAction.ResponseLastSequenceId;
+        WerewolfGameContext.Instance.LastSequenceId = _sessionMessagesAction.RespLastSequenceId;
     }
 
     private IEnumerator UpdateGameStateInTime()
@@ -2020,7 +2035,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 yield return Time();
 
                 // 检查 Time 是否成功
-                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
+                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.RespData == null)
                 {
                     _lastErrorMessage = "时间推进失败";
                     _mainText.text = "时间推进失败，请重试";
@@ -2052,7 +2067,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 yield return Night();
 
                 // 检查 Night 是否成功
-                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
+                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.RespData == null)
                 {
                     _lastErrorMessage = "夜晚阶段失败";
                     _mainText.text = "夜晚阶段失败，请重试";
@@ -2069,7 +2084,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 yield return Time();
 
                 // 检查 Time 是否成功
-                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
+                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.RespData == null)
                 {
                     _lastErrorMessage = "时间推进失败（夜晚后）";
                     _mainText.text = "时间推进失败，请重试";
@@ -2105,7 +2120,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 yield return Day();
 
                 // 检查 Day 是否成功
-                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
+                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.RespData == null)
                 {
                     _lastErrorMessage = "白天讨论失败";
                     _mainText.text = "白天讨论失败，请重试";
@@ -2153,7 +2168,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 yield return Vote();
 
                 // 检查 Vote 是否成功
-                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
+                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.RespData == null)
                 {
                     _lastErrorMessage = "投票阶段失败";
                     _mainText.text = "投票阶段失败，请重试";
@@ -2170,7 +2185,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
                 yield return Time();
 
                 // 检查 Time 是否成功
-                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.ResponseData == null)
+                if (_werewolfGamePlayAction.ResponseData == null || _sessionMessagesAction.RespData == null)
                 {
                     _lastErrorMessage = "时间推进失败（投票后）";
                     _mainText.text = "时间推进失败，请重试";
