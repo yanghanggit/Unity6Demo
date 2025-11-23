@@ -17,7 +17,7 @@ public class DungeonScene : MonoBehaviour
 
     public ActorDetailsApi _actorDetailApi;
 
-    public TransHomeAction _transHomeAction;
+    public TransHomeApi _transHomeApi;
 
     public XCardPlayer _XCardPlayer;
 
@@ -32,7 +32,7 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_dungeonGamePlayApi != null, "_dungeonAction is null");
         Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
         Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
-        Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
+        Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
         Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesAction is null");
@@ -227,9 +227,9 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteBackHome()
     {
         Debug.Log("ExecuteBackHome");
-        yield return _transHomeAction.Call(GameContext.Instance.DungeonTransHomeUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
+        yield return _transHomeApi.Call(GameContext.Instance.DungeonTransHomeUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
         //if (!_transHomeAction.LastRequestSuccess)
-        if (_transHomeAction.ResponseData == null)
+        if (_transHomeApi.RespData == null)
         {
             Debug.LogError("TransHomeAction request failed");
             yield break;
