@@ -9,7 +9,7 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 {
     public string serverUrl = "http://192.168.192.54:8000/";
 
-    public RootAction _rootAction;
+    public RootApi _rootAction;
 
     public WerewolfGameStartAction _werewolfGameStartAction;
 

@@ -9,18 +9,13 @@ public class BootScene : MonoBehaviour
 
     public string _nextScene = "LoginScene";
 
-    public RootAction _rootAction;
-
-    public GameConfig _gameConfig;
+    public RootApi _rootApi;
 
     public Button _nextButton;
 
     void Start()
     {
-        //GameContext.Instance.SetupGame = true;
-
-        Debug.Assert(_rootAction != null, "_bootAction is null");
-        Debug.Assert(_gameConfig != null, "_gameConfig is null");
+        Debug.Assert(_rootApi != null, "_rootApi is null");
         Debug.Assert(_nextButton != null, "_nextButton is null");
 
         _nextButton.gameObject.SetActive(false);
@@ -34,23 +29,14 @@ public class BootScene : MonoBehaviour
 
     private IEnumerator InitializeApiEndpoints()
     {
-        yield return _rootAction.Call(_baseUrl);
-        if (_rootAction.ResponseData != null)
+        yield return _rootApi.Call(_baseUrl);
+        if (_rootApi.ResponseData != null)
         {
             _nextButton.gameObject.SetActive(true);
-            GameContext.Instance.Root = _rootAction.ResponseData;
+            GameContext.Instance.Root = _rootApi.ResponseData;
             Debug.Log("Using LocalNet for API endpoints");
             yield break;
         }
-
-        // yield return _rootAction.Call(_gameConfig.LocalHost);
-        // if (_rootAction.ResponseData != null)
-        // {
-        //     _nextButton.gameObject.SetActive(true);
-        //     GameContext.Instance.Root = _rootAction.ResponseData;
-        //     Debug.Log("Using LocalHost for API endpoints");
-        //     yield break;
-        // }
     }
 
     private IEnumerator LoadNextScene()
