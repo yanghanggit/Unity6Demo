@@ -456,7 +456,7 @@ MonoBehaviour:
   _preScene: MainScene2
   _nextScene: DungeonScene
   _mainText: {fileID: 3871845}
-  _viewDungeonAction: {fileID: 399892901}
+  _dungeonStateApi: {fileID: 399892901}
   _transDungeonAction: {fileID: 399892903}
 --- !u!114 &399892903
 MonoBehaviour:

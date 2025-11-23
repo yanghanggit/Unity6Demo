@@ -12,14 +12,14 @@ public class ViewDungeonScene : MonoBehaviour
 
     public TMP_Text _mainText;
 
-    public DungeonStateAction _viewDungeonAction;
+    public DungeonStateApi _dungeonStateApi;
 
     public TransDungeonAction _transDungeonAction;
 
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
+        Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
         Debug.Assert(_transDungeonAction != null, "_transDungeonAction is null");
 
         // Start the coroutine to view the dungeon
@@ -50,14 +50,14 @@ public class ViewDungeonScene : MonoBehaviour
 
     IEnumerator ExecuteViewDungeon()
     {
-        yield return _viewDungeonAction.Call(GameContext.Instance.DungeonStateUrl);
-        if (_viewDungeonAction.ResponseData == null)
+        yield return _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
+        if (_dungeonStateApi.RespData == null)
         {
             yield break;
         }
 
-        GameContext.Instance.Mapping = _viewDungeonAction.ResponseData.mapping;
-        GameContext.Instance.Dungeon = _viewDungeonAction.ResponseData.dungeon;
+        GameContext.Instance.Mapping = _dungeonStateApi.RespData.mapping;
+        GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
 
         _mainText.text = DungeonOverviewDisplayText(GameContext.Instance.Dungeon);
     }

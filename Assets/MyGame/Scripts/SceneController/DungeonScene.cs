@@ -13,7 +13,7 @@ public class DungeonScene : MonoBehaviour
 
     public DungeonGamePlayAction _dungeonGamePlayAction;
 
-    public DungeonStateAction _viewDungeonAction;
+    public DungeonStateApi _dungeonStateApi;
 
     public ActorDetailsApi _actorDetailApi;
 
@@ -30,7 +30,7 @@ public class DungeonScene : MonoBehaviour
     {
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_dungeonGamePlayAction != null, "_dungeonAction is null");
-        Debug.Assert(_viewDungeonAction != null, "_viewDungeonAction is null");
+        Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
         Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_transHomeAction != null, "_transHomeAction is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
@@ -168,14 +168,14 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteViewDungeon()
     {
-        yield return _viewDungeonAction.Call(GameContext.Instance.DungeonStateUrl);
-        if (_viewDungeonAction.ResponseData == null)
+        yield return _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
+        if (_dungeonStateApi.RespData == null)
         {
             yield break;
         }
 
-        GameContext.Instance.Mapping = _viewDungeonAction.ResponseData.mapping;
-        GameContext.Instance.Dungeon = _viewDungeonAction.ResponseData.dungeon;
+        GameContext.Instance.Mapping = _dungeonStateApi.RespData.mapping;
+        GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
 
         yield return _actorDetailApi.Call(
             GameContext.Instance.ActorDetailsUrl,
