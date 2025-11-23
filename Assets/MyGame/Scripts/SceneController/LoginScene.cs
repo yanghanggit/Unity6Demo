@@ -13,7 +13,7 @@ public class LoginScene : MonoBehaviour
 
     public string _nextScene = "MainScene2";
 
-    public LoginAction _loginAction;
+    public LoginApi _loginApi;
 
     public StartAction _startAction;
 
@@ -27,7 +27,7 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_textUserName != null, "_textUserName is null");
         Debug.Assert(_textGameName != null, "_textGameName is null");
         Debug.Assert(_textActorName != null, "_textActorName is null");
-        Debug.Assert(_loginAction != null, "_loginAction is null");
+        Debug.Assert(_loginApi != null, "_loginAction is null");
         Debug.Assert(_startAction != null, "_startAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
 
@@ -53,8 +53,8 @@ public class LoginScene : MonoBehaviour
 
     private IEnumerator LoginThenStartNewGame(string userName, string gameName, string actorName)
     {
-        yield return _loginAction.Call(GameContext.Instance.LoginUrl, userName, gameName);
-        if (_loginAction.ReqResult == null || !_loginAction.ReqResult.isSuccess)
+        yield return _loginApi.Call(GameContext.Instance.LoginUrl, userName, gameName);
+        if (_loginApi.ReqResult == null || !_loginApi.ReqResult.isSuccess)
         {
             Debug.LogError("Login failed");
             yield break;
