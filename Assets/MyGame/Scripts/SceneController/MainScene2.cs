@@ -10,17 +10,17 @@ public class MainScene2 : MonoBehaviour
 
     public LogoutApi _logoutApi;
 
-    public StagesStateAction _viewHomeAction;
+    public StagesStateApi _stageStateApi;
 
-    public ActorDetailsAction _viewActorAction;
+    public ActorDetailsApi _actorDetailApi;
 
     public GameObject _dungeonButton;
 
     void Start()
     {
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
-        Debug.Assert(_viewHomeAction != null, "_viewHomeAction is null");
-        Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
+        Debug.Assert(_stageStateApi != null, "_stageStateApi is null");
+        Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
 
         StartCoroutine(LoadHomeAndActorData());
@@ -49,7 +49,7 @@ public class MainScene2 : MonoBehaviour
         SceneManager.LoadScene("CampScene");
     }
 
-        public void OnClickRestaurant()
+    public void OnClickRestaurant()
     {
         Debug.Log("OnClickRestaurant");
         StartCoroutine(OpenRestaurantScene());
@@ -91,13 +91,13 @@ public class MainScene2 : MonoBehaviour
 
     private IEnumerator LoadHomeAndActorData()
     {
-        yield return _viewHomeAction.Call(GameContext.Instance.HomeStateUrl);
-        if (_viewHomeAction.ResponseData == null)
+        yield return _stageStateApi.Call(GameContext.Instance.HomeStateUrl);
+        if (_stageStateApi.RespData == null)
         {
             yield break;
         }
 
-        GameContext.Instance.Mapping = _viewHomeAction.ResponseData.mapping;
+        GameContext.Instance.Mapping = _stageStateApi.RespData.mapping;
 
         //提取Mapping中所有的values组成一个List
         List<string> allActors = new List<string>();
@@ -107,13 +107,13 @@ public class MainScene2 : MonoBehaviour
         }
         //打印 allActors
         Debug.Log("All Actors: " + string.Join(", ", allActors));
-        yield return _viewActorAction.Call(GameContext.Instance.ActorDetailsUrl, allActors);
-        if (_viewActorAction.ResponseData == null)
+        yield return _actorDetailApi.Call(GameContext.Instance.ActorDetailsUrl, allActors);
+        if (_actorDetailApi.RespData == null)
         {
             yield break;
         }
 
-        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
+        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
 
         Debug.Log("Home and Actor views updated");
 

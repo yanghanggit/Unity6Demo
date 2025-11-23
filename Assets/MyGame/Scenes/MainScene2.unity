@@ -921,8 +921,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _preScene: LoginScene
   _logoutApi: {fileID: 399892902}
-  _viewHomeAction: {fileID: 399892904}
-  _viewActorAction: {fileID: 399892903}
+  _stageStateApi: {fileID: 399892904}
+  _actorDetailApi: {fileID: 399892903}
   _dungeonButton: {fileID: 1416183366}
 --- !u!114 &399892902
 MonoBehaviour:
@@ -937,7 +937,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   requestTimeout: 30
-  useAsyncVersion: 1
 --- !u!114 &399892903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -951,7 +950,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   requestTimeout: 30
-  useAsyncVersion: 1
 --- !u!114 &399892904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -965,7 +963,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   requestTimeout: 30
-  useAsyncVersion: 1
 --- !u!1 &524838950
 GameObject:
   m_ObjectHideFlags: 0

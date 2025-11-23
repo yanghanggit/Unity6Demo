@@ -15,7 +15,7 @@ public class DungeonScene : MonoBehaviour
 
     public DungeonStateAction _viewDungeonAction;
 
-    public ActorDetailsAction _viewActorAction;
+    public ActorDetailsApi _viewActorAction;
 
     public TransHomeAction _transHomeAction;
 
@@ -134,13 +134,13 @@ public class DungeonScene : MonoBehaviour
             GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_viewActorAction.ResponseData == null)
+        if (_viewActorAction.RespData == null)
         {
             Debug.LogError("ViewActorAction request failed");
             yield break;
         }
 
-        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
+        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.RespData.actor_entities_serialization;
 
         Debug.Log("ExecuteDrawCards request success");
         UpdateActorDisplay(new HashSet<string> { typeof(HandComponent).Name });
@@ -181,12 +181,12 @@ public class DungeonScene : MonoBehaviour
             GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_viewActorAction.ResponseData == null)
+        if (_viewActorAction.RespData == null)
         {
             yield break;
         }
 
-        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
+        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.RespData.actor_entities_serialization;
 
         UpdateDungeonDisplay();
     }
@@ -197,12 +197,12 @@ public class DungeonScene : MonoBehaviour
             GameContext.Instance.ActorDetailsUrl,
             MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_viewActorAction.ResponseData == null)
+        if (_viewActorAction.RespData == null)
         {
             yield break;
         }
 
-        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.ResponseData.actor_entities_serialization;
+        GameContext.Instance.ActorEntitiesSerialization = _viewActorAction.RespData.actor_entities_serialization;
 
         UpdateActorDisplay(new HashSet<string> { typeof(CombatStatsComponent).Name });
     }

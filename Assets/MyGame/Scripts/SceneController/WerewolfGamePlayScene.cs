@@ -12,11 +12,11 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     public WerewolfGamePlayAction _werewolfGamePlayAction;
 
-    public StagesStateAction _stagesStateAction;
+    public StagesStateApi _stagesStateAction;
 
     public WerewolfGameStateAction _werewolfGameStateAction;
 
-    public ActorDetailsAction _actorDetailsAction;
+    public ActorDetailsApi _actorDetailsAction;
 
     public SessionMessagesAction _sessionMessagesAction;
 
@@ -1154,7 +1154,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             WerewolfGameContext.Instance.GetAllActorNames()
         );
 
-        if (_actorDetailsAction.ResponseData == null)
+        if (_actorDetailsAction.RespData == null)
         {
             Debug.LogError("ActorDetailsAction ResponseData is null");
             yield break;
@@ -1162,7 +1162,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新角色实体数据
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _actorDetailsAction.ResponseData.actor_entities_serialization
+            _actorDetailsAction.RespData.actor_entities_serialization
         );
 
         // 记录所有角色的死亡状态
@@ -1186,7 +1186,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             WerewolfGameContext.Instance.GetAllActorNames()
         );
 
-        if (_actorDetailsAction.ResponseData == null)
+        if (_actorDetailsAction.RespData == null)
         {
             Debug.LogError("ActorDetailsAction ResponseData is null");
             yield break;
@@ -1194,7 +1194,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新角色实体数据
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _actorDetailsAction.ResponseData.actor_entities_serialization
+            _actorDetailsAction.RespData.actor_entities_serialization
         );
 
         // 检测每个角色的死亡状态（从索引1开始，跳过旁白）
@@ -1225,7 +1225,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
             WerewolfGameContext.Instance.GetAllActorNames()
         );
 
-        if (_actorDetailsAction.ResponseData == null)
+        if (_actorDetailsAction.RespData == null)
         {
             Debug.LogError("ActorDetailsAction ResponseData is null");
             callback?.Invoke("");
@@ -1234,7 +1234,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新角色实体数据
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _actorDetailsAction.ResponseData.actor_entities_serialization
+            _actorDetailsAction.RespData.actor_entities_serialization
         );
 
         // 检测新死亡的角色
