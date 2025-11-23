@@ -920,7 +920,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _preScene: LoginScene
-  _logoutAction: {fileID: 399892902}
+  _logoutApi: {fileID: 399892902}
   _viewHomeAction: {fileID: 399892904}
   _viewActorAction: {fileID: 399892903}
   _dungeonButton: {fileID: 1416183366}

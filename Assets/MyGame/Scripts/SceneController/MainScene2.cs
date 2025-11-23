@@ -8,7 +8,7 @@ public class MainScene2 : MonoBehaviour
 {
     public string _preScene = "LoginScene";
 
-    public LogoutAction _logoutAction;
+    public LogoutApi _logoutApi;
 
     public StagesStateAction _viewHomeAction;
 
@@ -18,7 +18,7 @@ public class MainScene2 : MonoBehaviour
 
     void Start()
     {
-        Debug.Assert(_logoutAction != null, "_logoutAction is null");
+        Debug.Assert(_logoutApi != null, "_logoutApi is null");
         Debug.Assert(_viewHomeAction != null, "_viewHomeAction is null");
         Debug.Assert(_viewActorAction != null, "_viewActorAction is null");
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
@@ -74,8 +74,8 @@ public class MainScene2 : MonoBehaviour
 
     IEnumerator ReturnToLoginScene()
     {
-        yield return _logoutAction.Call(GameContext.Instance.LogoutUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
-        if (_logoutAction.ReqResult == null || !_logoutAction.ReqResult.isSuccess)
+        yield return _logoutApi.Call(GameContext.Instance.LogoutUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
+        if (_logoutApi.ReqResult == null || !_logoutApi.ReqResult.isSuccess)
         {
             Debug.LogError("LogoutAction request failed");
             yield break;
