@@ -16,6 +16,8 @@ public class RestaurantScene : MonoBehaviour
     public GameObject _speechBubblePrefab;
     public float _hideBubbleDuration = 5.0f;
     public HomeGamePlayApi _homeGamePlayApi;
+    public SessionMessagesApi _sessionMessagesApi;
+    private StagesStateApi _stagesStateApi;
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
     // UI系统组件
@@ -30,6 +32,17 @@ public class RestaurantScene : MonoBehaviour
         Debug.Assert(_inputField != null, "inputField is null");
         Debug.Assert(_homeGamePlayApi != null, "_homeRunAction is null");
         Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
+
+        // 确保 SessionMessagesApi 存在
+        if (_sessionMessagesApi == null)
+        {
+            _sessionMessagesApi = GetComponent<SessionMessagesApi>();
+            if (_sessionMessagesApi == null)
+            {
+                _sessionMessagesApi = gameObject.AddComponent<SessionMessagesApi>();
+            }
+        }
+        Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesAction is null");
 
         // 隐藏输入背景
         HideInputBackground();
@@ -53,26 +66,44 @@ public class RestaurantScene : MonoBehaviour
             clickHandler.OnSpriteClicked += OnSpriteClicked;
         }
 
+        // 添加 StagesStateApi 组件
+        _stagesStateApi = gameObject.AddComponent<StagesStateApi>();
+
+        // 隐藏模板
+        _templateActor.gameObject.SetActive(false);
+
+        // 开始初始化序列
+        StartCoroutine(InitializeSceneSequence());
+    }
+
+    private IEnumerator InitializeSceneSequence()
+    {
+        // 1. 通知服务器场景转换到餐馆
+        yield return ExecuteTransRestaurant();
+
+        // 2. 获取最新的 Mapping 信息
+        yield return FetchMapping();
+
+        // 3. 根据最新的 Mapping 创建精灵
         List<string> actors = new List<string>();
         bool hasMapping = GameContext.Instance.Mapping.TryGetValue(GameContext.RestaurantName, out actors);
         if (!hasMapping || actors == null || actors.Count == 0 || GameContext.Instance.Root == null)
         {
             Debug.LogWarning($"GameContext is not set up. hasMapping={hasMapping}, actors={(actors == null ? "null" : actors.Count.ToString())}, Root={(GameContext.Instance.Root == null ? "null" : "exists")}. Using debug actors.");
-            actors = new List<string>
-            {
-                GameContext.WarriorName,
-                GameContext.WizardName
-            };
         }
 
         // 创建精灵（自动根据尺寸计算位置）
         _createdSprites = InstantiateAndPositionSprites(actors);
+    }
 
-        // 隐藏原始的sampleSprite，因为第一个创建的精灵会覆盖它的位置
-        _templateActor.gameObject.SetActive(false);
-
-        // 通知服务器场景转换到餐馆
-        StartCoroutine(ExecuteTransRestaurant());
+    private IEnumerator FetchMapping()
+    {
+        yield return _stagesStateApi.Call(GameContext.Instance.HomeStateUrl);
+        if (_stagesStateApi.RespData != null)
+        {
+            GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
+            Debug.Log("Mapping updated in RestaurantScene");
+        }
     }
 
     public void OnClickBack()
@@ -155,14 +186,15 @@ public class RestaurantScene : MonoBehaviour
             {
                 ["stage_name"] = GameContext.RestaurantName
             });
-
-        Debug.Log("场景转换至餐馆");
         
         if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("TransRestaurant request failed");
             yield break;
         }
+
+        Debug.Log("场景转换至餐馆");
+
 
         // 处理服务器返回的消息
         GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
@@ -256,6 +288,7 @@ public class RestaurantScene : MonoBehaviour
     {
         // 复制sampleSprite的GameObject
         GameObject spriteObject = Instantiate(_templateActor.gameObject);
+        spriteObject.SetActive(true);
 
         // 重命名（位置在外部设置）
         spriteObject.name = spriteName;
@@ -387,7 +420,20 @@ public class RestaurantScene : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
+        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            GameContext.Instance.LastSequenceId);
+        if (_sessionMessagesApi.RespData == null)
+        {
+            Debug.LogError("SessionMessagesAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
+
+        GameContext.Instance.ProcessClientMessages(_sessionMessagesApi.RespData.session_messages);
 
         HideInputBackground();
 
@@ -460,6 +506,10 @@ public class RestaurantScene : MonoBehaviour
 
     private IEnumerator ExecuteHomeAdvancing()
     {
+        // 更新 Mapping 并刷新精灵（更新上一次的画面）
+        yield return FetchMapping();
+        RefreshSprites();
+
         yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
@@ -472,13 +522,55 @@ public class RestaurantScene : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
+        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            GameContext.Instance.LastSequenceId);
+        if (_sessionMessagesApi.RespData == null)
+        {
+            Debug.LogError("SessionMessagesAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
+
+        GameContext.Instance.ProcessClientMessages(_sessionMessagesApi.RespData.session_messages);
 
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
         Debug.Log(joinedLogs);
 
         // 一次性显示所有对话
         DisplayAllDialogues();
+    }
+
+    private void RefreshSprites()
+    {
+        // 清除旧精灵
+        if (_createdSprites != null)
+        {
+            foreach (var sprite in _createdSprites)
+            {
+                if (sprite != null) Destroy(sprite);
+            }
+            _createdSprites.Clear();
+        }
+        else
+        {
+            _createdSprites = new List<GameObject>();
+        }
+
+        // 获取当前场景的角色列表
+        List<string> actors = new List<string>();
+        if (GameContext.Instance.Mapping.TryGetValue(GameContext.RestaurantName, out actors) && actors != null)
+        {
+            // 创建新精灵
+            _createdSprites = InstantiateAndPositionSprites(actors);
+        }
+        else
+        {
+            Debug.Log($"No actors found for {GameContext.RestaurantName} or mapping missing.");
+        }
     }
 
     /// <summary>
@@ -566,5 +658,24 @@ public class RestaurantScene : MonoBehaviour
                 DisplaySpeechBubbleAtTarget(GetCreatedSprite(speaker), combinedDialogue);
             }
         }
+    }
+
+    private void UpdateLastSequenceIdFromResponse()
+    {
+        if (_sessionMessagesApi.RespData == null)
+        {
+            Debug.LogWarning("SessionMessagesAction ResponseData is null");
+            Debug.Assert(false, "SessionMessagesAction ResponseData is null");
+            return;
+        }
+
+        if (_sessionMessagesApi.RespLastSequenceId < 0)
+        {
+            Debug.LogWarning("Invalid last sequence ID");
+            return;
+        }
+
+        // 设置 LastSequenceId
+        GameContext.Instance.LastSequenceId = _sessionMessagesApi.RespLastSequenceId;
     }
 }
