@@ -78,10 +78,10 @@ public class LoginScene : MonoBehaviour
         GameContext.Instance.ActorName = actorName;
 
         // 测试一次！
-        yield return _gameStateSync.RefreshStagesAndActorsFromServer();
+        //yield return _gameStateSync.RefreshStagesAndActorsFromServer();
 
         // 刷新地下城数据！
-        yield return _gameStateSync.RefreshDungeonFromServer();
+        //yield return _gameStateSync.RefreshDungeonFromServer();
 
         // 切换场景
         yield return new WaitForSeconds(0.0f);

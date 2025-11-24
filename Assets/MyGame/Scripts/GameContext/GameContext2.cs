@@ -12,8 +12,6 @@ public partial class GameContext
 
     private List<EntitySerialization> _actorEntitiesSerialization = new List<EntitySerialization>();
 
-    //private List<AgentChatHistory> _agentShortTermMemories = new List<AgentChatHistory>();
-
     private Dungeon _dungeon = new Dungeon();
 
     public List<string> AgentEventLogs
@@ -123,23 +121,6 @@ public partial class GameContext
             _actorEntitiesSerialization = value;
         }
     }
-
-    // public List<AgentChatHistory> AgentShortTermMemories
-    // {
-    //     get
-    //     {
-    //         return _agentShortTermMemories;
-    //     }
-    //     set
-    //     {
-    //         if (value == null)
-    //         {
-    //             UnityEngine.Debug.LogError("AgentShortTermMemories is null");
-    //             return;
-    //         }
-    //         _agentShortTermMemories = value;
-    //     }
-    // }
 
     public void ProcessClientMessages(List<SessionMessage> client_messages)
     {

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Newtonsoft.Json;
 
 /// <summary>
 /// 游戏状态同步管理器
@@ -95,6 +96,23 @@ public class GameStateSync : MonoBehaviour
         GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
 
         Debug.Log("[GameStateSync] Successfully refreshed game state from server");
+
+        // 打印 GameContext.Instance.ActorEntitiesSerialization 的详细信息
+        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+        for (int i = 0; i < actorEntitiesSerialization.Count; i++)
+        {
+            var entitySerialization = actorEntitiesSerialization[i];
+            try
+            {
+                // 直接将 EntitySerialization 序列化为 JSON 字符串
+                string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
+                Debug.Log($"Actor[{i}] JSON:\n{jsonString}");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Failed to serialize Actor[{i}] to JSON: {ex.Message}");
+            }
+        }
     }
 
     /// <summary>

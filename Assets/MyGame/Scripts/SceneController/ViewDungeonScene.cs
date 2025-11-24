@@ -12,17 +12,18 @@ public class ViewDungeonScene : MonoBehaviour
 
     public TMP_Text _mainText;
 
-    public DungeonStateApi _dungeonStateApi;
+    //public DungeonStateApi _dungeonStateApi;
 
     public TransDungeonApi _transDungeonApi;
 
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
+        //Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
         Debug.Assert(_transDungeonApi != null, "_transDungeonAction is null");
 
         // Start the coroutine to view the dungeon
+        _mainText.text = "Loading dungeon data...";
         StartCoroutine(ExecuteViewDungeon());
     }
 
@@ -50,14 +51,16 @@ public class ViewDungeonScene : MonoBehaviour
 
     IEnumerator ExecuteViewDungeon()
     {
-        yield return _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
-        if (_dungeonStateApi.RespData == null)
-        {
-            yield break;
-        }
+        // yield return _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
+        // if (_dungeonStateApi.RespData == null)
+        // {
+        //     yield break;
+        // }
 
-        GameContext.Instance.Mapping = _dungeonStateApi.RespData.mapping;
-        GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
+        // GameContext.Instance.Mapping = _dungeonStateApi.RespData.mapping;
+        // GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
+
+        yield return GameStateSync.Instance.RefreshDungeonFromServer();
 
         _mainText.text = DungeonOverviewDisplayText(GameContext.Instance.Dungeon);
     }

@@ -1,8 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
+//using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 //using UnityEngine.UI;
 public class MainScene2 : MonoBehaviour
 {
@@ -23,7 +23,8 @@ public class MainScene2 : MonoBehaviour
         Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
 
-        StartCoroutine(LoadHomeAndActorData());
+        // 直接刷新
+        StartCoroutine(GameStateSync.Instance.RefreshStagesAndActorsFromServer());
     }
 
     void Update()
@@ -86,52 +87,5 @@ public class MainScene2 : MonoBehaviour
         GameContext.Instance.ActorName = "";
 
         SceneManager.LoadScene(_preScene);
-    }
-
-
-    private IEnumerator LoadHomeAndActorData()
-    {
-        yield return _stageStateApi.Call(GameContext.Instance.HomeStateUrl);
-        if (_stageStateApi.RespData == null)
-        {
-            yield break;
-        }
-
-        GameContext.Instance.Mapping = _stageStateApi.RespData.mapping;
-
-        //提取Mapping中所有的values组成一个List
-        List<string> allActors = new List<string>();
-        foreach (var kvp in GameContext.Instance.Mapping)
-        {
-            allActors.AddRange(kvp.Value);
-        }
-        //打印 allActors
-        Debug.Log("All Actors: " + string.Join(", ", allActors));
-        yield return _actorDetailApi.Call(GameContext.Instance.ActorDetailsUrl, allActors);
-        if (_actorDetailApi.RespData == null)
-        {
-            yield break;
-        }
-
-        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
-
-        Debug.Log("Home and Actor views updated");
-
-        // 打印 GameContext.Instance.ActorEntitiesSerialization 的详细信息
-        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
-        for (int i = 0; i < actorEntitiesSerialization.Count; i++)
-        {
-            var entitySerialization = actorEntitiesSerialization[i];
-            try
-            {
-                // 直接将 EntitySerialization 序列化为 JSON 字符串
-                string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
-                Debug.Log($"Actor[{i}] JSON:\n{jsonString}");
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogError($"Failed to serialize Actor[{i}] to JSON: {ex.Message}");
-            }
-        }
     }
 }
