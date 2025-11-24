@@ -17,11 +17,13 @@ public class CampScene : MonoBehaviour
     public float _hideBubbleDuration = 5.0f;
     public HomeGamePlayApi _homeGamePlayApi;
     public SessionMessagesApi _sessionMessagesApi;
+    private StagesStateApi _stagesStateApi;
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
     // UI系统组件
     private Canvas _canvas;
     private Camera _mainCamera;
+    private static bool _isFirstVisit = true;
 
     void Start()
     {
@@ -55,30 +57,58 @@ public class CampScene : MonoBehaviour
             clickHandler.OnSpriteClicked += OnSpriteClicked;
         }
 
-        //var imagePaths = new Dictionary<string, string>();
+        // 添加 StagesStateApi 组件
+        _stagesStateApi = gameObject.AddComponent<StagesStateApi>();
+
+        // 隐藏模板
+        _templateActor.gameObject.SetActive(false);
+
+        // 开始初始化序列
+        StartCoroutine(InitializeSceneSequence());
+    }
+
+    private IEnumerator InitializeSceneSequence()
+    {
+        // 通知服务器场景转换到营地（除了第一次）
+        if (!_isFirstVisit)
+        {
+            yield return ExecuteTransCamp();
+            yield return FetchMapping();
+        }
+        else
+        {
+            _isFirstVisit = false;
+        }
 
         List<string> actors = new List<string>();
         GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors);
         if (actors == null || GameContext.Instance.Root == null)
         {
-            Debug.LogWarning("GameContext is not set up. Using debug actors.");
-            actors = new List<string>
-            {
-                GameContext.WarriorName,
-                GameContext.WizardName
-            };
+            Debug.LogWarning("GameContext is not set up.");
+            // actors = new List<string>
+            // {
+            //     GameContext.WarriorName,
+            //     GameContext.WizardName
+            // };
         }
 
         // 创建精灵（自动根据尺寸计算位置）
         _createdSprites = InstantiateAndPositionSprites(actors);
 
-        // 隐藏原始的sampleSprite，因为第一个创建的精灵会覆盖它的位置
-        _templateActor.gameObject.SetActive(false);
-
         // 测试：为第一个精灵创建对话泡泡
         if (_createdSprites.Count > 0)
         {
             //DisplaySpeechBubbleAtTarget(_createdSprites[0], "Hello World! This is a speech bubble using prefab!");
+        }
+    }
+
+    private IEnumerator FetchMapping()
+    {
+        yield return _stagesStateApi.Call(GameContext.Instance.HomeStateUrl);
+        if (_stagesStateApi.RespData != null)
+        {
+            GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
+            Debug.Log("Mapping updated in CampScene");
         }
     }
 
@@ -146,6 +176,40 @@ public class CampScene : MonoBehaviour
         {
             Debug.LogWarning("Game is not set up. Staying in CampScene.");
         }
+    }
+
+    /// <summary>
+    /// 通知服务器场景转换到营地
+    /// </summary>
+    private IEnumerator ExecuteTransCamp()
+    {
+        yield return _homeGamePlayApi.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "/trans_home",
+            new Dictionary<string, string>
+            {
+                ["stage_name"] = GameContext.CampName
+            });
+        
+        if (_homeGamePlayApi.RespData == null)
+        {
+            Debug.LogError("TransCamp request failed");
+            yield break;
+        }
+
+        Debug.Log("场景转换至营地");
+        
+        // 处理服务器返回的消息
+        GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
+
+
+        string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
+        Debug.Log(joinedLogs);
+
+        // 显示对话
+        DisplayAllDialogues();
     }
 
     /// <summary>
@@ -230,6 +294,7 @@ public class CampScene : MonoBehaviour
     {
         // 复制sampleSprite的GameObject
         GameObject spriteObject = Instantiate(_templateActor.gameObject);
+        spriteObject.SetActive(true);
 
         // 重命名（位置在外部设置）
         spriteObject.name = spriteName;
@@ -504,13 +569,17 @@ public class CampScene : MonoBehaviour
 
     private IEnumerator ExecuteHomeAdvancing()
     {
+        // 更新 Mapping 并刷新精灵（更新上一次的画面）
+        yield return FetchMapping();
+        RefreshSprites();
+
         yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
 
             "/advancing");
-        //if (!_homeGamePlayAction.LastRequestSuccess)
+        
         if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("RunHomeAction request failed");
@@ -547,6 +616,35 @@ public class CampScene : MonoBehaviour
 
         // 一次性显示所有对话
         DisplayAllDialogues();
+    }
+
+    private void RefreshSprites()
+    {
+        // 清除旧精灵
+        if (_createdSprites != null)
+        {
+            foreach (var sprite in _createdSprites)
+            {
+                if (sprite != null) Destroy(sprite);
+            }
+            _createdSprites.Clear();
+        }
+        else
+        {
+            _createdSprites = new List<GameObject>();
+        }
+
+        // 获取当前场景的角色列表
+        List<string> actors = new List<string>();
+        if (GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors) && actors != null)
+        {
+            // 创建新精灵
+            _createdSprites = InstantiateAndPositionSprites(actors);
+        }
+        else
+        {
+            Debug.Log($"No actors found for {GameContext.CampName} or mapping missing.");
+        }
     }
 
     /// <summary>
