@@ -16,6 +16,7 @@ public class RestaurantScene : MonoBehaviour
     public GameObject _speechBubblePrefab;
     public float _hideBubbleDuration = 5.0f;
     public HomeGamePlayApi _homeGamePlayApi;
+    public SessionMessagesApi _sessionMessagesApi;
     private StagesStateApi _stagesStateApi;
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
@@ -31,6 +32,17 @@ public class RestaurantScene : MonoBehaviour
         Debug.Assert(_inputField != null, "inputField is null");
         Debug.Assert(_homeGamePlayApi != null, "_homeRunAction is null");
         Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
+
+        // 确保 SessionMessagesApi 存在
+        if (_sessionMessagesApi == null)
+        {
+            _sessionMessagesApi = GetComponent<SessionMessagesApi>();
+            if (_sessionMessagesApi == null)
+            {
+                _sessionMessagesApi = gameObject.AddComponent<SessionMessagesApi>();
+            }
+        }
+        Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesAction is null");
 
         // 隐藏输入背景
         HideInputBackground();
@@ -408,7 +420,20 @@ public class RestaurantScene : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
+        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            GameContext.Instance.LastSequenceId);
+        if (_sessionMessagesApi.RespData == null)
+        {
+            Debug.LogError("SessionMessagesAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
+
+        GameContext.Instance.ProcessClientMessages(_sessionMessagesApi.RespData.session_messages);
 
         HideInputBackground();
 
@@ -497,7 +522,20 @@ public class RestaurantScene : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
+        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            GameContext.Instance.LastSequenceId);
+        if (_sessionMessagesApi.RespData == null)
+        {
+            Debug.LogError("SessionMessagesAction ResponseData is null");
+            yield break;
+        }
+
+        // 更新最后一个序列ID
+        UpdateLastSequenceIdFromResponse();
+
+        GameContext.Instance.ProcessClientMessages(_sessionMessagesApi.RespData.session_messages);
 
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
         Debug.Log(joinedLogs);
@@ -620,5 +658,24 @@ public class RestaurantScene : MonoBehaviour
                 DisplaySpeechBubbleAtTarget(GetCreatedSprite(speaker), combinedDialogue);
             }
         }
+    }
+
+    private void UpdateLastSequenceIdFromResponse()
+    {
+        if (_sessionMessagesApi.RespData == null)
+        {
+            Debug.LogWarning("SessionMessagesAction ResponseData is null");
+            Debug.Assert(false, "SessionMessagesAction ResponseData is null");
+            return;
+        }
+
+        if (_sessionMessagesApi.RespLastSequenceId < 0)
+        {
+            Debug.LogWarning("Invalid last sequence ID");
+            return;
+        }
+
+        // 设置 LastSequenceId
+        GameContext.Instance.LastSequenceId = _sessionMessagesApi.RespLastSequenceId;
     }
 }
