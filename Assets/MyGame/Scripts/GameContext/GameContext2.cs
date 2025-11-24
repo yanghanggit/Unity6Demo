@@ -68,6 +68,27 @@ public partial class GameContext
         }
     }
 
+    public List<string> AllActors
+    {
+        get
+        {
+            List<string> allActors = new List<string>();
+            foreach (var kvp in _mapping)
+            {
+                allActors.AddRange(kvp.Value);
+            }
+            return allActors;
+        }
+    }
+
+    public List<string> AllStages
+    {
+        get
+        {
+            return new List<string>(_mapping.Keys);
+        }
+    }
+
     public Dungeon Dungeon
     {
         get

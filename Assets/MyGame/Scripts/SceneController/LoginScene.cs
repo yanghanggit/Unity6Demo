@@ -19,6 +19,8 @@ public class LoginScene : MonoBehaviour
 
     public GameConfig _gameConfig;
 
+    public GameStateSync _gameStateSync;
+
     private string _playerIdentifier;
 
 
@@ -30,6 +32,7 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_loginApi != null, "_loginAction is null");
         Debug.Assert(_startApi != null, "_startAction is null");
         Debug.Assert(_gameConfig != null, "_gameConfig is null");
+        Debug.Assert(_gameStateSync != null, "_gameStateSync is null");
 
         _playerIdentifier = CreateRandomPlayerIdentifier();
         _textUserName.text = "ID = " + _playerIdentifier;
@@ -74,6 +77,13 @@ public class LoginScene : MonoBehaviour
 
         GameContext.Instance.ActorName = actorName;
 
+        // 测试一次！
+        yield return _gameStateSync.RefreshStagesAndActorsFromServer();
+
+        // 刷新地下城数据！
+        yield return _gameStateSync.RefreshDungeonFromServer();
+
+        // 切换场景
         yield return new WaitForSeconds(0.0f);
         //_nextScene = "MainScene2";
         SceneManager.LoadScene(_nextScene);
