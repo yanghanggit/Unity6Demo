@@ -77,3 +77,13 @@ crashlytics-build.properties
 # 临时忽略。
 /WebApp/
 .VSCodeCounter
+
+# Node.js 相关
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# 自定义服务器文件(可选,如果想提交可以移除此行)
+# webgl-server.js
