@@ -31,7 +31,10 @@ public class GameStateSync : MonoBehaviour
     /// </summary>
     public DungeonStateApi _dungeonStateApi;
 
-
+    /// <summary>
+    /// 会话消息API接口
+    /// 用于从服务器获取游戏会话消息列表，支持基于序列ID的增量拉取
+    /// </summary>
     public SessionMessagesApi _sessionMessagesApi;
 
     private void Awake()

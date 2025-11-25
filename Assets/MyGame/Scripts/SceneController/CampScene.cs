@@ -16,8 +16,7 @@ public class CampScene : MonoBehaviour
     public GameObject _speechBubblePrefab;
     public float _hideBubbleDuration = 5.0f;
     public HomeGamePlayApi _homeGamePlayApi;
-    public SessionMessagesApi _sessionMessagesApi;
-    private StagesStateApi _stagesStateApi;
+    //private StagesStateApi _stagesStateApi;
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
     // UI系统组件
@@ -33,7 +32,6 @@ public class CampScene : MonoBehaviour
         Debug.Assert(_inputField != null, "inputField is null");
         Debug.Assert(_homeGamePlayApi != null, "_homeRunAction is null");
         Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
-        Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesAction is null");
 
         // 隐藏输入背景
         HideInputBackground();
@@ -58,7 +56,7 @@ public class CampScene : MonoBehaviour
         }
 
         // 添加 StagesStateApi 组件
-        _stagesStateApi = gameObject.AddComponent<StagesStateApi>();
+        //_stagesStateApi = gameObject.AddComponent<StagesStateApi>();
 
         // 隐藏模板
         _templateActor.gameObject.SetActive(false);
@@ -473,29 +471,7 @@ public class CampScene : MonoBehaviour
             yield break;
         }
 
-        // 获取会话消息
-        // _sessionMessagesApi.Initialize(
-        //     GameContext.Instance.SessionMessagesUrl,
-        //     GameContext.Instance.UserName,
-        //     GameContext.Instance.GameName,
-        //     GameContext.Instance.LastSequenceId
-        // );
-
-        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            GameContext.Instance.LastSequenceId);
-        if (_sessionMessagesApi.RespData == null)
-        {
-            Debug.LogError("SessionMessagesAction ResponseData is null");
-            yield break;
-        }
-
-        // 更新最后一个序列ID
-        UpdateLastSequenceIdFromResponse();
-
-        //
-        GameContext.Instance.ProcessClientMessages(_sessionMessagesApi.RespData.session_messages);
+        yield return FetchAndProcessSessionMessages();
 
         HideInputBackground();
 
@@ -588,28 +564,7 @@ public class CampScene : MonoBehaviour
         }
 
         // 获取会话消息
-        // _sessionMessagesApi.Initialize(
-        //     GameContext.Instance.SessionMessagesUrl,
-        //     GameContext.Instance.UserName,
-        //     GameContext.Instance.GameName,
-        //     GameContext.Instance.LastSequenceId
-        // );
-
-        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            GameContext.Instance.LastSequenceId);
-        if (_sessionMessagesApi.RespData == null)
-        {
-            Debug.LogError("SessionMessagesAction ResponseData is null");
-            yield break;
-        }
-
-        // 更新最后一个序列ID
-        UpdateLastSequenceIdFromResponse();
-
-        //
-        GameContext.Instance.ProcessClientMessages(_sessionMessagesApi.RespData.session_messages);
+        yield return FetchAndProcessSessionMessages();
         //
         //请注意 List<string> GameContext.AgentEventLogs 的定义，将其用join('\n')连接成字符串
         string joinedLogs = string.Join("\n", GameContext.Instance.AgentEventLogs);
@@ -735,22 +690,16 @@ public class CampScene : MonoBehaviour
         }
     }
 
-    private void UpdateLastSequenceIdFromResponse()
+    /// <summary>
+    /// 获取并处理会话消息的统一方法
+    /// </summary>
+    private IEnumerator FetchAndProcessSessionMessages()
     {
-        if (_sessionMessagesApi.RespData == null)
-        {
-            Debug.LogWarning("SessionMessagesAction ResponseData is null");
-            Debug.Assert(false, "SessionMessagesAction ResponseData is null");
-            return;
-        }
-
-        if (_sessionMessagesApi.RespLastSequenceId < 0)
-        {
-            Debug.LogWarning("Invalid last sequence ID");
-            return;
-        }
-
-        // 设置 LastSequenceId
-        GameContext.Instance.LastSequenceId = _sessionMessagesApi.RespLastSequenceId;
+        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
+            (sessionMessages) =>
+            {
+                GameContext.Instance.ProcessClientMessages(sessionMessages);
+            }
+        );
     }
 }

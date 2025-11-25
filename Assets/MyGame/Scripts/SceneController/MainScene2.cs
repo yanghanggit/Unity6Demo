@@ -10,17 +10,17 @@ public class MainScene2 : MonoBehaviour
 
     public LogoutApi _logoutApi;
 
-    public StagesStateApi _stageStateApi;
+    //public StagesStateApi _stageStateApi;
 
-    public ActorDetailsApi _actorDetailApi;
+   // public ActorDetailsApi _actorDetailApi;
 
     public GameObject _dungeonButton;
 
     void Start()
     {
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
-        Debug.Assert(_stageStateApi != null, "_stageStateApi is null");
-        Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
+        //Debug.Assert(_stageStateApi != null, "_stageStateApi is null");
+        //Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
 
         // 直接刷新
