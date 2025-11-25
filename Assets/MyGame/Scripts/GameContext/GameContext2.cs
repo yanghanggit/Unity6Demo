@@ -87,6 +87,29 @@ public partial class GameContext
         }
     }
 
+    // 一个函数，输入一个ActorName，就能返回所在的StageName
+    public string GetActorStage(string actorName)
+    {
+        foreach (var kvp in _mapping)
+        {
+            if (kvp.Value.Contains(actorName))
+            {
+                return kvp.Key;
+            }
+        }
+        return "";
+    }
+
+    // 一个函数，输入一个StageName，就能返回该Stage下的所有ActorName列表
+    public List<string> GetActorsInStage(string stageName)
+    {
+        if (_mapping.ContainsKey(stageName))
+        {
+            return _mapping[stageName];
+        }
+        return new List<string>();
+    }
+
     public Dungeon Dungeon
     {
         get

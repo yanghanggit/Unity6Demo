@@ -128,19 +128,21 @@ public class DungeonScene : MonoBehaviour
         }
 
         //GameContext.Instance.ProcessClientMessages(_dungeonGamePlayAction.ResponseData.client_messages);
-        yield return FetchAndProcessSessionMessages();
+        // yield return FetchAndProcessSessionMessages();
 
-        yield return _actorDetailApi.Call(
-            GameContext.Instance.ActorDetailsUrl,
-            MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
+        // yield return _actorDetailApi.Call(
+        //     GameContext.Instance.ActorDetailsUrl,
+        //     MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_actorDetailApi.RespData == null)
-        {
-            Debug.LogError("ViewActorAction request failed");
-            yield break;
-        }
+        // if (_actorDetailApi.RespData == null)
+        // {
+        //     Debug.LogError("ViewActorAction request failed");
+        //     yield break;
+        // }
 
-        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
+        // GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
+
+        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
         Debug.Log("ExecuteDrawCards request success");
         UpdateActorDisplay(new HashSet<string> { typeof(HandComponent).Name });
@@ -168,42 +170,45 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator ExecuteViewDungeon()
     {
-        yield return _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
-        if (_dungeonStateApi.RespData == null)
-        {
-            yield break;
-        }
+        // yield return _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
+        // if (_dungeonStateApi.RespData == null)
+        // {
+        //     yield break;
+        // }
 
-        GameContext.Instance.Mapping = _dungeonStateApi.RespData.mapping;
-        GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
+        // GameContext.Instance.Mapping = _dungeonStateApi.RespData.mapping;
+        // GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
 
-        yield return _actorDetailApi.Call(
-            GameContext.Instance.ActorDetailsUrl,
-            MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
+        // yield return _actorDetailApi.Call(
+        //     GameContext.Instance.ActorDetailsUrl,
+        //     MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_actorDetailApi.RespData == null)
-        {
-            yield break;
-        }
+        // if (_actorDetailApi.RespData == null)
+        // {
+        //     yield break;
+        // }
 
-        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
+        // GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
+
+        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
         UpdateDungeonDisplay();
     }
 
     private IEnumerator ExecuteViewActor()
     {
-        yield return _actorDetailApi.Call(
-            GameContext.Instance.ActorDetailsUrl,
-            MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
+        // yield return _actorDetailApi.Call(
+        //     GameContext.Instance.ActorDetailsUrl,
+        //     MyUtils.RetrieveActorsForStage(GameContext.Instance.ActorName, GameContext.Instance.Mapping));
 
-        if (_actorDetailApi.RespData == null)
-        {
-            yield break;
-        }
+        // if (_actorDetailApi.RespData == null)
+        // {
+        //     yield break;
+        // }
 
-        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
+        // GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
 
+        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
         UpdateActorDisplay(new HashSet<string> { typeof(CombatStatsComponent).Name });
     }
 
@@ -271,18 +276,37 @@ public class DungeonScene : MonoBehaviour
 
     private void UpdateDungeonDisplay()
     {
-        _mainText.text = MyUtils.MappingDisplayText(CurrentMapping()) + "\n" + MyUtils.DungeonCombatDisplayText(GameContext.Instance.Dungeon);
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
+        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        var currentMapping = new Dictionary<string, List<string>> { { stageName, actorsInStage } };
+
+
+        _mainText.text = MyUtils.MappingDisplayText(currentMapping) + "\n" + MyUtils.DungeonCombatDisplayText(GameContext.Instance.Dungeon);
     }
 
-    private Dictionary<string, List<string>> CurrentMapping()
-    {
-        Dictionary<string, List<string>> currentMapping = new Dictionary<string, List<string>>();
+    // private Dictionary<string, List<string>> CurrentMapping()
+    // {
 
-        var currentActorStage = MyUtils.GetActorLocation(GameContext.Instance.ActorName, GameContext.Instance.Mapping);
-        currentMapping[currentActorStage] = GameContext.Instance.Mapping[currentActorStage];
+    //     var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+    //     Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
 
-        return currentMapping;
-    }
+    //     var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+    //     // if (actorsInStage.Count == 0)
+    //     // {
+    //     //     Debug.LogError("[GameStateSync] No actors found in the current actor's stage");
+    //     //     yield break;
+    //     // }
+
+    //     return new Dictionary<string, List<string>> { { stageName, actorsInStage } };
+
+    //     // Dictionary<string, List<string>> currentMapping = new Dictionary<string, List<string>>();
+
+    //     // var currentActorStage = MyUtils.GetActorLocation(GameContext.Instance.ActorName, GameContext.Instance.Mapping);
+    //     // currentMapping[currentActorStage] = GameContext.Instance.Mapping[currentActorStage];
+
+    //     // return currentMapping;
+    // }
 
     private IEnumerator FetchAndProcessSessionMessages()
     {

@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System;
 
 /// <summary>
 /// 游戏状态同步管理器
@@ -29,6 +31,9 @@ public class GameStateSync : MonoBehaviour
     /// </summary>
     public DungeonStateApi _dungeonStateApi;
 
+
+    public SessionMessagesApi _sessionMessagesApi;
+
     private void Awake()
     {
         // 单例模式处理
@@ -44,28 +49,29 @@ public class GameStateSync : MonoBehaviour
         Debug.Assert(_stagesStateApi != null, "_stagesStateApi is null");
         Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_dungeonStateApi != null, "_dungeonStateApi is null");
+        Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesApi is null");
     }
 
     /// <summary>
-    /// 从服务器刷新场景与演员数据
-    /// 依次获取：1. 场景与演员的映射关系  2. 所有演员的详细信息
+    /// 从服务器刷新场景映射关系
+    /// 获取场景与演员的映射关系并更新到GameContext
     /// </summary>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator RefreshStagesAndActorsFromServer()
+    /// <returns>协程迭代器，成功返回true，失败返回false</returns>
+    public IEnumerator RefreshStagesMappingFromServer()
     {
-        if (_stagesStateApi == null || _actorDetailApi == null)
+        if (_stagesStateApi == null)
         {
-            Debug.LogError("[GameStateSync] APIs are not initialized");
+            Debug.LogError("[GameStateSync] StagesStateApi is not initialized");
             yield break;
         }
 
-        if (GameContext.Instance.UserName == "" || GameContext.Instance.GameName == "" || GameContext.Instance.ActorName == "")
+        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.ActorName))
         {
             Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
             yield break;
         }
 
-        // 步骤1: 获取场景与演员映射关系
+        // 获取场景与演员映射关系
         yield return _stagesStateApi.Call(GameContext.Instance.HomeStateUrl);
         if (_stagesStateApi.RespData == null)
         {
@@ -75,17 +81,31 @@ public class GameStateSync : MonoBehaviour
 
         // 更新全局映射关系
         GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
+        Debug.Log("[GameStateSync] Successfully refreshed stages mapping from server");
+    }
 
-        // 临时测试，将  GameContext.Instance.Mapping 与 GameContext.Instance.AllActors 打印出来
-        Debug.Log("[GameStateSync] Current Mapping:");
-        foreach (var kvp in GameContext.Instance.Mapping)
+    /// <summary>
+    /// 从服务器刷新指定演员列表的详情数据
+    /// 获取演员详情并更新到GameContext
+    /// </summary>
+    /// <param name="actors">需要获取详情的演员名称列表</param>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator RefreshActorDetailsFromServer(System.Collections.Generic.List<string> actors)
+    {
+        if (_actorDetailApi == null)
         {
-            Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
+            Debug.LogError("[GameStateSync] ActorDetailsApi is not initialized");
+            yield break;
         }
-        Debug.Log("[GameStateSync] All Actors: " + string.Join(", ", GameContext.Instance.AllActors));
 
-        // 步骤2: 获取所有演员的详情数据
-        yield return _actorDetailApi.Call(GameContext.Instance.ActorDetailsUrl, GameContext.Instance.AllActors);
+        if (actors == null || actors.Count == 0)
+        {
+            Debug.LogWarning("[GameStateSync] Actor list is empty, skip fetching actor details");
+            yield break;
+        }
+
+        // 获取演员详情数据
+        yield return _actorDetailApi.Call(GameContext.Instance.ActorDetailsUrl, actors);
         if (_actorDetailApi.RespData == null)
         {
             Debug.LogError("[GameStateSync] Failed to fetch actor details from server");
@@ -95,9 +115,9 @@ public class GameStateSync : MonoBehaviour
         // 更新全局演员详情数据
         GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
 
-        Debug.Log("[GameStateSync] Successfully refreshed game state from server");
+        Debug.Log($"[GameStateSync] Successfully refreshed {actors.Count} actor details from server");
 
-        // 打印 GameContext.Instance.ActorEntitiesSerialization 的详细信息
+        // 打印演员详情的调试信息
         var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
         for (int i = 0; i < actorEntitiesSerialization.Count; i++)
         {
@@ -116,6 +136,28 @@ public class GameStateSync : MonoBehaviour
     }
 
     /// <summary>
+    /// 从服务器刷新场景与演员数据
+    /// 依次获取：1. 场景与演员的映射关系  2. 所有演员的详细信息
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator RefreshStagesAndActorsFromServer()
+    {
+        // 步骤1: 刷新场景映射关系
+        yield return RefreshStagesMappingFromServer();
+
+        // 临时测试，将  GameContext.Instance.Mapping 与 GameContext.Instance.AllActors 打印出来
+        Debug.Log("[GameStateSync] Current Mapping:");
+        foreach (var kvp in GameContext.Instance.Mapping)
+        {
+            Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
+        }
+        Debug.Log("[GameStateSync] All Actors: " + string.Join(", ", GameContext.Instance.AllActors));
+
+        // 步骤2: 刷新所有演员的详情数据
+        yield return RefreshActorDetailsFromServer(GameContext.Instance.AllActors);
+    }
+
+    /// <summary>
     /// 从服务器刷新地下城数据
     /// 获取地下城的映射关系和地下城详细信息
     /// </summary>
@@ -128,7 +170,7 @@ public class GameStateSync : MonoBehaviour
             yield break;
         }
 
-        if (GameContext.Instance.UserName == "" || GameContext.Instance.GameName == "" || GameContext.Instance.ActorName == "")
+        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.ActorName))
         {
             Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
             yield break;
@@ -146,5 +188,83 @@ public class GameStateSync : MonoBehaviour
         GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
 
         Debug.Log("[GameStateSync] Successfully refreshed dungeon state from server");
+    }
+
+    /// <summary>
+    /// 从服务器刷新地下城与演员数据
+    /// 依次获取：1. 地下城状态和映射关系  2. 当前场景中所有演员的详细信息
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator RefreshDungeonAndActorsFromServer()
+    {
+        // 步骤1: 刷新地下城数据
+        yield return RefreshDungeonFromServer();
+
+        // 步骤2: 获取当前演员所在场景的所有演员列表
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        if (string.IsNullOrEmpty(stageName))
+        {
+            Debug.LogError("[GameStateSync] Current actor's stage not found in mapping");
+            yield break;
+        }
+
+        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        if (actorsInStage.Count == 0)
+        {
+            Debug.LogWarning("[GameStateSync] No actors found in the current actor's stage");
+            yield break;
+        }
+
+        // 步骤3: 刷新当前场景中所有演员的详情数据
+        yield return RefreshActorDetailsFromServer(actorsInStage);
+    }
+
+
+    /// <summary>
+    /// 从服务器获取会话消息
+    /// 获取最新的会话消息列表并更新序列ID
+    /// </summary>
+    /// <param name="onMessagesReceived">回调函数，用于接收获取到的会话消息列表</param>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator FetchSessionMessagesFromServer(Action<List<SessionMessage>> onMessagesReceived)
+    {
+        if (_sessionMessagesApi == null)
+        {
+            Debug.LogError("[GameStateSync] SessionMessagesApi is not initialized");
+            yield break;
+        }
+
+        if (string.IsNullOrEmpty(GameContext.Instance.UserName) ||
+            string.IsNullOrEmpty(GameContext.Instance.GameName))
+        {
+            Debug.LogError("[GameStateSync] UserName or GameName is not set in GameContext");
+            yield break;
+        }
+
+        // 获取会话消息
+        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            GameContext.Instance.LastSequenceId);
+
+        if (_sessionMessagesApi.RespData == null)
+        {
+            Debug.LogError("[GameStateSync] Failed to fetch session messages from server");
+            yield break;
+        }
+
+        // 更新最后一个序列ID
+        if (_sessionMessagesApi.RespLastSequenceId >= 0)
+        {
+            GameContext.Instance.LastSequenceId = _sessionMessagesApi.RespLastSequenceId;
+        }
+
+        // 复制会话消息列表
+        var sessionMessages = new List<SessionMessage>(_sessionMessagesApi.RespData.session_messages);
+
+        Debug.Log($"[GameStateSync] Successfully fetched {sessionMessages.Count} session messages from server");
+
+        // 通过回调返回消息列表
+        onMessagesReceived?.Invoke(sessionMessages);
     }
 }
