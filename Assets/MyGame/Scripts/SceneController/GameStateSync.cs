@@ -85,6 +85,19 @@ public class GameStateSync : MonoBehaviour
         // 更新全局映射关系
         GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
         Debug.Log("[GameStateSync] Successfully refreshed stages mapping from server");
+
+
+        // yield return _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, GameContext.Instance.AllStages);
+        // if (_entityDetailsApi.RespData == null)
+        // {
+        //     Debug.LogError("[GameStateSync] Failed to fetch actor details from server");
+        //     yield break;
+        // }
+
+        // // 更新全局演员详情数据
+        // var stageEntitiesSerialization = _entityDetailsApi.RespData.entities_serialization;
+        // Debug.Log($"[GameStateSync] Successfully refreshed {stageEntitiesSerialization.Count} stage details from server");
+
     }
 
     /// <summary>
