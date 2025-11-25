@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 
 /// <summary>
-/// ActorDetails API 客户端，用于获取角色详细信息
+/// EntityDetailsApi API 客户端，用于获取角色详细信息
 /// </summary>
-public class ActorDetailsApi : BaseApiClient
+public class EntityDetailsApi : BaseApiClient
 {
     /// <summary>
     /// 基础请求 URL
@@ -14,9 +14,9 @@ public class ActorDetailsApi : BaseApiClient
     private string _url;
 
     /// <summary>
-    /// 角色名称列表
+    /// 实体名称列表
     /// </summary>
-    private List<string> _actors;
+    private List<string> _entitiyNames;
 
     /// <summary>
     /// 包含查询参数的完整请求 URL
@@ -26,12 +26,12 @@ public class ActorDetailsApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private ActorDetailsResponse _responseData;
+    private EntitiesDetailsResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public ActorDetailsResponse RespData => _responseData;
+    public EntitiesDetailsResponse RespData => _responseData;
 
     /// <summary>
     /// 请求结果
@@ -44,36 +44,36 @@ public class ActorDetailsApi : BaseApiClient
     public RequestResult ReqResult => _requestResult;
 
     /// <summary>
-    /// 初始化角色详情请求
+    /// 初始化实体详情请求
     /// </summary>
     /// <param name="url">基础请求 URL</param>
-    /// <param name="actors">角色名称列表</param>
-    private void Initialize(string url, List<string> actors)
+    /// <param name="entityNames">实体名称列表</param>
+    private void Initialize(string url, List<string> entityNames)
     {
         _url = url;
-        _actors = actors;
+        _entitiyNames = entityNames;
         _responseData = null;
         _requestResult = null;
 
-        Debug.Log($"ActorDetailsApi initialized with URL: {_url} and {actors?.Count ?? 0} actors");
-        for (int i = 0; i < actors.Count; i++)
+        Debug.Log($"EntityDetailsApi initialized with URL: {_url} and {entityNames?.Count ?? 0} entities");
+        for (int i = 0; i < entityNames.Count; i++)
         {
-            Debug.Log($"Actor {i}: {actors[i]}");
+            Debug.Log($"Entity {i}: {entityNames[i]}");
         }
-        _requestUrl = BuildRequestUrl(_actors);
+        _requestUrl = BuildRequestUrl(_entitiyNames);
     }
 
     /// <summary>
-    /// 调用获取角色详情 API
+    /// 调用获取实体详情 API
     /// </summary>
     /// <param name="url">请求 URL</param>
-    /// <param name="actors">角色名称列表</param>
+    /// <param name="actors">实体名称列表</param>
     /// <returns>协程枚举器</returns>
     public IEnumerator Call(string url, List<string> actors)
     {
         if (actors == null || actors.Count == 0)
         {
-            Debug.LogWarning("No actors provided for request");
+            Debug.LogWarning("No entities provided for request");
             yield break;
         }
 
@@ -114,14 +114,14 @@ public class ActorDetailsApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<ActorDetailsResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<EntitiesDetailsResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
                 yield break;
             }
 
-            Debug.Log("Actor details loaded successfully");
+            Debug.Log("Entity details loaded successfully");
         }
         catch (System.Exception ex)
         {
@@ -130,16 +130,16 @@ public class ActorDetailsApi : BaseApiClient
     }
 
     /// <summary>
-    /// 构建包含查询参数的角色请求 URL
+    /// 构建包含查询参数的实体请求 URL
     /// </summary>
-    /// <param name="actors">角色名称列表</param>
+    /// <param name="actors">实体名称列表</param>
     /// <returns>完整的请求 URL</returns>
     private string BuildRequestUrl(List<string> actors)
     {
         var parameters = new List<KeyValuePair<string, string>>();
         foreach (var actor in actors)
         {
-            parameters.Add(new KeyValuePair<string, string>("actors", actor));
+            parameters.Add(new KeyValuePair<string, string>("entities", actor));
         }
         return BuildUrlWithQueryParams(_url, parameters);
     }

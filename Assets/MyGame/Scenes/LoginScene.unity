@@ -1454,7 +1454,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameStateSync
   _stagesStateApi: {fileID: 2047208670}
-  _actorDetailApi: {fileID: 2047208669}
+  _entityDetailsApi: {fileID: 2047208669}
   _dungeonStateApi: {fileID: 2047208671}
   _sessionMessagesApi: {fileID: 2047208672}
 --- !u!114 &2047208669

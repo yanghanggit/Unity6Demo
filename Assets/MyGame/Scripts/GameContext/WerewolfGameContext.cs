@@ -173,7 +173,7 @@ public partial class WerewolfGameContext
     {
         get
         {
-            var baseUrl = _rootResponse.endpoints["actor_details"];
+            var baseUrl = _rootResponse.endpoints["entity_details"];
             return $"{baseUrl}{UserName}/{GameName}/details";
         }
     }

@@ -24,7 +24,7 @@ public class GameStateSync : MonoBehaviour
     /// <summary>
     /// 演员详情API接口
     /// </summary>
-    public ActorDetailsApi _actorDetailApi;
+    public EntityDetailsApi _entityDetailsApi;
 
     /// <summary>
     /// 地下城状态API接口
@@ -50,7 +50,7 @@ public class GameStateSync : MonoBehaviour
     private void Start()
     {
         Debug.Assert(_stagesStateApi != null, "_stagesStateApi is null");
-        Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
+        Debug.Assert(_entityDetailsApi != null, "_actorDetailApi is null");
         Debug.Assert(_dungeonStateApi != null, "_dungeonStateApi is null");
         Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesApi is null");
     }
@@ -75,7 +75,7 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 获取场景与演员映射关系
-        yield return _stagesStateApi.Call(GameContext.Instance.HomeStateUrl);
+        yield return _stagesStateApi.Call(GameContext.Instance.StagesStateUrl);
         if (_stagesStateApi.RespData == null)
         {
             Debug.LogError("[GameStateSync] Failed to fetch stages state from server");
@@ -93,9 +93,9 @@ public class GameStateSync : MonoBehaviour
     /// </summary>
     /// <param name="actors">需要获取详情的演员名称列表</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator RefreshActorDetailsFromServer(System.Collections.Generic.List<string> actors)
+    public IEnumerator RefreshActorDetailsFromServer(List<string> actors)
     {
-        if (_actorDetailApi == null)
+        if (_entityDetailsApi == null)
         {
             Debug.LogError("[GameStateSync] ActorDetailsApi is not initialized");
             yield break;
@@ -108,15 +108,15 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 获取演员详情数据
-        yield return _actorDetailApi.Call(GameContext.Instance.ActorDetailsUrl, actors);
-        if (_actorDetailApi.RespData == null)
+        yield return _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, actors);
+        if (_entityDetailsApi.RespData == null)
         {
             Debug.LogError("[GameStateSync] Failed to fetch actor details from server");
             yield break;
         }
 
         // 更新全局演员详情数据
-        GameContext.Instance.ActorEntitiesSerialization = _actorDetailApi.RespData.actor_entities_serialization;
+        GameContext.Instance.ActorEntitiesSerialization = _entityDetailsApi.RespData.entities_serialization;
 
         Debug.Log($"[GameStateSync] Successfully refreshed {actors.Count} actor details from server");
 
@@ -131,7 +131,7 @@ public class GameStateSync : MonoBehaviour
                 string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
                 Debug.Log($"Actor[{i}] JSON:\n{jsonString}");
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Debug.LogError($"Failed to serialize Actor[{i}] to JSON: {ex.Message}");
             }

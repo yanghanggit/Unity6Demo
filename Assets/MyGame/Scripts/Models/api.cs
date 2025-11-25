@@ -197,9 +197,9 @@ public class StagesStateResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [System.Serializable]
-public class ActorDetailsResponse
+public class EntitiesDetailsResponse
 {
-    public List<EntitySerialization> actor_entities_serialization = new List<EntitySerialization>();
+    public List<EntitySerialization> entities_serialization = new List<EntitySerialization>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

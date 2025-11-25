@@ -15,7 +15,7 @@ public class WerewolfGameLaunchScene : MonoBehaviour
 
     public WerewolfGameStateAction _werewolfGameStateAction;
 
-    public ActorDetailsApi _actorDetailsAction;
+    public EntityDetailsApi _actorDetailsAction;
 
     public StagesStateApi _stagesStateAction;
 
@@ -185,7 +185,7 @@ public class WerewolfGameLaunchScene : MonoBehaviour
     {
         // 设置角色实体到游戏上下文
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _actorDetailsAction.RespData.actor_entities_serialization
+            _actorDetailsAction.RespData.entities_serialization
         );
 
         yield return null;

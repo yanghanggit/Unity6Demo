@@ -16,7 +16,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
     public WerewolfGameStateAction _werewolfGameStateAction;
 
-    public ActorDetailsApi _actorDetailsAction;
+    public EntityDetailsApi _actorDetailsAction;
 
     public SessionMessagesApi _sessionMessagesAction;
 
@@ -1162,7 +1162,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新角色实体数据
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _actorDetailsAction.RespData.actor_entities_serialization
+            _actorDetailsAction.RespData.entities_serialization
         );
 
         // 记录所有角色的死亡状态
@@ -1194,7 +1194,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新角色实体数据
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _actorDetailsAction.RespData.actor_entities_serialization
+            _actorDetailsAction.RespData.entities_serialization
         );
 
         // 检测每个角色的死亡状态（从索引1开始，跳过旁白）
@@ -1234,7 +1234,7 @@ public class WerewolfGamePlayScene : MonoBehaviour
 
         // 更新角色实体数据
         WerewolfGameContext.Instance.UpdateActorEntities(
-            _actorDetailsAction.RespData.actor_entities_serialization
+            _actorDetailsAction.RespData.entities_serialization
         );
 
         // 检测新死亡的角色

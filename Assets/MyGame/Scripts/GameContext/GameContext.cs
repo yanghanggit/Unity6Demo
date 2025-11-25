@@ -104,7 +104,7 @@ public partial class GameContext
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_gameplay"), "endpoints does not contain home_gameplay");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("stages_state"), "endpoints does not contain stages_state");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_state"), "endpoints does not contain dungeon_state");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("actor_details"), "endpoints does not contain actor_details");
+            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("entity_details"), "endpoints does not contain entity_details");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("start"), "endpoints does not contain start");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_trans_dungeon"), "endpoints does not contain home_trans_dungeon");
             UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_gameplay"), "endpoints does not contain dungeon_gameplay");
@@ -136,7 +136,7 @@ public partial class GameContext
         }
     }
 
-    public string HomeStateUrl
+    public string StagesStateUrl
     {
         get
         {
@@ -154,11 +154,11 @@ public partial class GameContext
         }
     }
 
-    public string ActorDetailsUrl
+    public string EntityDetailsUrl
     {
         get
         {
-            var baseUrl = _rootResponse.endpoints["actor_details"];
+            var baseUrl = _rootResponse.endpoints["entity_details"];
             return $"{baseUrl}{UserName}/{GameName}/details";
         }
     }
