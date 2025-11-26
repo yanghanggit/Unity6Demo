@@ -92,7 +92,7 @@ public class RestaurantScene : MonoBehaviour
         //     GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
         //     Debug.Log("Mapping updated in RestaurantScene");
         // }
-        yield return GameStateSync.Instance.RefreshStagesAndActorsFromServer();
+        yield return GameStateSync.Instance.RefreshStagesMappingAndActorsFromServer();
     }
 
     public void OnClickBack()

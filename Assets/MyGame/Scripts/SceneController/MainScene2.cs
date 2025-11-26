@@ -24,7 +24,7 @@ public class MainScene2 : MonoBehaviour
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
 
         // 直接刷新
-        StartCoroutine(GameStateSync.Instance.RefreshStagesAndActorsFromServer());
+        StartCoroutine(GameStateSync.Instance.RefreshStagesMappingAndEntitiesFromServer());
     }
 
     void Update()

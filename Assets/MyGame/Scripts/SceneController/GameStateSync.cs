@@ -85,19 +85,55 @@ public class GameStateSync : MonoBehaviour
         // 更新全局映射关系
         GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
         Debug.Log("[GameStateSync] Successfully refreshed stages mapping from server");
+    }
 
+    /// <summary>
+    /// 从服务器刷新指定场景列表的详情数据
+    /// 获取场景详情并更新到GameContext
+    /// </summary>
+    /// <param name="stages">需要获取详情的场景名称列表</param>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator RefreshStageDetailsFromServer(List<string> stages)
+    {
+        if (_entityDetailsApi == null)
+        {
+            Debug.LogError("[GameStateSync] EntityDetailsApi is not initialized");
+            yield break;
+        }
 
-        // yield return _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, GameContext.Instance.AllStages);
-        // if (_entityDetailsApi.RespData == null)
-        // {
-        //     Debug.LogError("[GameStateSync] Failed to fetch actor details from server");
-        //     yield break;
-        // }
+        if (stages == null || stages.Count == 0)
+        {
+            Debug.LogWarning("[GameStateSync] Stage list is empty, skip fetching stage details");
+            yield break;
+        }
 
-        // // 更新全局演员详情数据
-        // var stageEntitiesSerialization = _entityDetailsApi.RespData.entities_serialization;
-        // Debug.Log($"[GameStateSync] Successfully refreshed {stageEntitiesSerialization.Count} stage details from server");
+        // 获取场景详情数据
+        yield return _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, stages);
+        if (_entityDetailsApi.RespData == null)
+        {
+            Debug.LogError("[GameStateSync] Failed to fetch stage details from server");
+            yield break;
+        }
 
+        // 更新全局场景详情数据
+        GameContext.Instance.StageEntitiesSerialization = _entityDetailsApi.RespData.entities_serialization;
+
+        Debug.Log($"[GameStateSync] Successfully refreshed {stages.Count} stage details from server");
+        var stageEntitiesSerialization = GameContext.Instance.StageEntitiesSerialization;
+        for (int i = 0; i < stageEntitiesSerialization.Count; i++)
+        {
+            var entitySerialization = stageEntitiesSerialization[i];
+            try
+            {
+                // 直接将 EntitySerialization 序列化为 JSON 字符串
+                string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
+                Debug.Log($"Stage[{i}] JSON:\n{jsonString}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to serialize Stage[{i}] to JSON: {ex.Message}");
+            }
+        }
     }
 
     /// <summary>
@@ -152,11 +188,44 @@ public class GameStateSync : MonoBehaviour
     }
 
     /// <summary>
-    /// 从服务器刷新场景与演员数据
-    /// 依次获取：1. 场景与演员的映射关系  2. 所有演员的详细信息
+    /// 从服务器刷新场景映射关系及所有实体详情数据
+    /// 执行完整的游戏状态同步，依次获取：
+    /// 1. 场景与演员的映射关系(Mapping)
+    /// 2. 所有演员的详细信息(ActorEntitiesSerialization)
+    /// 3. 所有场景的详细信息(StageEntitiesSerialization)
+    /// 适用于需要获取完整游戏状态的场景，如初始化、场景切换等
     /// </summary>
     /// <returns>协程迭代器</returns>
-    public IEnumerator RefreshStagesAndActorsFromServer()
+    public IEnumerator RefreshStagesMappingAndEntitiesFromServer()
+    {
+        // 步骤1: 刷新场景映射关系
+        yield return RefreshStagesMappingFromServer();
+
+        // 临时测试，将  GameContext.Instance.Mapping 与 GameContext.Instance.AllActors 打印出来
+        Debug.Log("[GameStateSync] Current Mapping:");
+        foreach (var kvp in GameContext.Instance.Mapping)
+        {
+            Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
+        }
+        Debug.Log("[GameStateSync] All Actors: " + string.Join(", ", GameContext.Instance.AllActors));
+
+        // 步骤2: 刷新所有演员的详情数据
+        yield return RefreshActorDetailsFromServer(GameContext.Instance.AllActors);
+
+        // 步骤3: 获取场景详情数据
+        yield return RefreshStageDetailsFromServer(GameContext.Instance.AllStages);
+    }
+
+
+    /// <summary>
+    /// 从服务器刷新场景映射关系及演员详情数据
+    /// 执行部分游戏状态同步，依次获取：
+    /// 1. 场景与演员的映射关系(Mapping)
+    /// 2. 所有演员的详细信息(ActorEntitiesSerialization)
+    /// 相比RefreshStagesMappingAndEntitiesFromServer，此方法不获取场景详情，适用于只需要演员数据的场景
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator RefreshStagesMappingAndActorsFromServer()
     {
         // 步骤1: 刷新场景映射关系
         yield return RefreshStagesMappingFromServer();
@@ -172,6 +241,7 @@ public class GameStateSync : MonoBehaviour
         // 步骤2: 刷新所有演员的详情数据
         yield return RefreshActorDetailsFromServer(GameContext.Instance.AllActors);
     }
+
 
     /// <summary>
     /// 从服务器刷新地下城数据
