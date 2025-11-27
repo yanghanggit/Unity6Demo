@@ -1,6 +1,6 @@
 //using System;
 using System.Collections.Generic;
-using System.Linq;
+//using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -25,19 +25,6 @@ public static class MyUtils
         return mapping_text;
     }
 
-    // public static string DungeonOverviewDisplayText(Dungeon dungeon)
-    // {
-    //     var dungeon_text = "";
-    //     dungeon_text += "地下城 = " + dungeon.name + "\n";
-    //     for (int i = 0; i < dungeon.stages.Count; i++)
-    //     {
-    //         dungeon_text += "第" + (i + 1) + "关 = " + dungeon.stages[i].name + "\n";
-    //         dungeon_text += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => a.name)) + "\n";
-    //     }
-
-    //     return dungeon_text;
-    // }
-
     public static string DungeonCombatDisplayText(Dungeon dungeon)
     {
         var dungeon_text = "";
@@ -59,35 +46,6 @@ public static class MyUtils
 
         return dungeon_text;
     }
-
-    // public static string GetActorLocation(string actor, Dictionary<string, List<string>> mapping)
-    // {
-    //     // 在 mapping 遍历每一个 key-value 对, 在value中如果存在 actor, 则返回 key
-    //     foreach (var kvp in mapping)
-    //     {
-    //         if (kvp.Value.Contains(actor))
-    //         {
-    //             return kvp.Key;
-    //         }
-    //     }
-    //     return "";
-    // }
-
-    // public static List<string> RetrieveActorsForStage(string actor, Dictionary<string, List<string>> mapping)
-    // {
-    //     var locateActorStageName = GetActorLocation(actor, mapping);
-    //     if (locateActorStageName == "")
-    //     {
-    //         return new List<string>();
-    //     }
-    //     // 在 mapping 中找到 locateActorStageName 对应的 value
-    //     if (mapping.TryGetValue(locateActorStageName, out var actors))
-    //     {
-    //         return actors;
-    //     }
-
-    //     return new List<string>();
-    // }
 
     public static string ActorDisplayText(EntitySerialization actorEntitySerialization, HashSet<string> includedComponentNames = null)
     {
@@ -147,7 +105,7 @@ public static class MyUtils
                 for (int j = 0; j < handComponent.cards.Count; j++)
                 {
                     var card = handComponent.cards[j];
-                    handCompText += $"Card: {card.name}, Targets: {card.target}\n";
+                    handCompText += $"Card: {card.name}, Targets: {string.Join(", ", card.targets)}\n";
                 }
                 ret += handCompText + "\n";
             }
@@ -212,7 +170,7 @@ public static class MyUtils
         // Screen Space - Overlay 模式使用 null
         // Screen Space - Camera 或 World Space 模式使用对应的相机
         Camera canvasCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : camera;
-        
+
         Vector2 canvasPos;
         bool success = RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvas.GetComponent<RectTransform>(),

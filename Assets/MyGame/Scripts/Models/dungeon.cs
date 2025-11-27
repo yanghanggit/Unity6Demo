@@ -47,7 +47,7 @@ public sealed class Card
 {
     public string name = "";        // 卡牌名称
     public string description = ""; // 卡牌效果、作用方式及使用代价
-    public string target = "";      // 目标对象
+    public List<string> targets = new List<string>();      // 目标对象
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
