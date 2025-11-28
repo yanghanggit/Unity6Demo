@@ -773,11 +773,11 @@ RectTransform:
   - {fileID: 1741426818}
   m_Father: {fileID: 2110898355}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 160}
-  m_Pivot: {x: 0, y: 1}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -20, y: 20}
+  m_SizeDelta: {x: 303.3016, y: 100}
+  m_Pivot: {x: 1, y: 0}
 --- !u!114 &389859354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -921,8 +921,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _preScene: LoginScene
   _logoutApi: {fileID: 399892902}
-  _stageStateApi: {fileID: 399892904}
-  _actorDetailApi: {fileID: 399892903}
   _dungeonButton: {fileID: 1416183366}
 --- !u!114 &399892902
 MonoBehaviour:
