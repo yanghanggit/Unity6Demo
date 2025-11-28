@@ -1,30 +1,24 @@
 using System.Collections;
-//using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-//using Newtonsoft.Json;
-//using UnityEngine.UI;
+using Newtonsoft.Json;
+using System;
+
 public class MainScene2 : MonoBehaviour
 {
     public string _preScene = "LoginScene";
 
     public LogoutApi _logoutApi;
 
-    //public StagesStateApi _stageStateApi;
-
-   // public ActorDetailsApi _actorDetailApi;
-
     public GameObject _dungeonButton;
 
     void Start()
     {
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
-        //Debug.Assert(_stageStateApi != null, "_stageStateApi is null");
-        //Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
 
         // 直接刷新
-        StartCoroutine(GameStateSync.Instance.RefreshStagesMappingAndActorsFromServer());
+        StartCoroutine(RefreshGameState());
     }
 
     void Update()
@@ -76,7 +70,7 @@ public class MainScene2 : MonoBehaviour
     IEnumerator ReturnToLoginScene()
     {
         yield return _logoutApi.Call(GameContext.Instance.LogoutUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
-        if (_logoutApi.ReqResult == null || !_logoutApi.ReqResult.isSuccess)
+        if (_logoutApi.RespData == null)
         {
             Debug.LogError("LogoutAction request failed");
             yield break;
@@ -87,5 +81,30 @@ public class MainScene2 : MonoBehaviour
         GameContext.Instance.ActorName = "";
 
         SceneManager.LoadScene(_preScene);
+    }
+
+    private IEnumerator RefreshGameState()
+    {
+        // 必须先走这个一步，本质上是全局状态的刷新！
+        yield return GameStateSync.Instance.RefreshStagesMappingAndActorsFromServer();
+
+        // 测试一下是否可以正确获取玩家角色的 EntitySerialization 并序列化为 JSON。
+        var playerActorEntitySerialization = GameContext.Instance.getActorEntitySerialization(GameContext.Instance.ActorName);
+        if (playerActorEntitySerialization == null)
+        {
+            Debug.LogError($"Player actor entity serialization not found for actor: {GameContext.Instance.ActorName}");
+            yield break;
+        }
+
+        try
+        {
+            // 直接将 EntitySerialization 序列化为 JSON 字符串
+            string jsonString = JsonConvert.SerializeObject(playerActorEntitySerialization, Formatting.Indented);
+            Debug.Log($"Actor[{GameContext.Instance.ActorName}] JSON:\n{jsonString}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Failed to serialize Actor[{GameContext.Instance.ActorName}] to JSON: {ex.Message}");
+        }
     }
 }

@@ -122,4 +122,28 @@ public partial class GameContext
             _stageEntitiesSerialization = value;
         }
     }
+
+    public EntitySerialization getActorEntitySerialization(string actorName)
+    {
+        foreach (var entitySerialization in _actorEntitiesSerialization)
+        {
+            if (entitySerialization.name == actorName)
+            {
+                return entitySerialization;
+            }
+        }
+        return null;
+    }
+
+    public EntitySerialization getStageEntitySerialization(string stageName)
+    {
+        foreach (var entitySerialization in _stageEntitiesSerialization)
+        {
+            if (entitySerialization.name == stageName)
+            {
+                return entitySerialization;
+            }
+        }
+        return null;
+    }
 }
