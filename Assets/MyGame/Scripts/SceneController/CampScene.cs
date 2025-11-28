@@ -7,6 +7,7 @@ using System.Linq;
 
 public class CampScene : MonoBehaviour
 {
+    public string _stageName = "场景.安全屋";
     public string _preScene = "MainScene2";
     public GameObject _backgroundImage;
     public SpriteRenderer _templateActor;
@@ -78,26 +79,8 @@ public class CampScene : MonoBehaviour
             _isFirstVisit = false;
         }
 
-        List<string> actors = new List<string>();
-        GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors);
-        if (actors == null || GameContext.Instance.Root == null)
-        {
-            Debug.LogWarning("GameContext is not set up.");
-            // actors = new List<string>
-            // {
-            //     GameContext.WarriorName,
-            //     GameContext.WizardName
-            // };
-        }
-
         // 创建精灵（自动根据尺寸计算位置）
-        _createdSprites = InstantiateAndPositionSprites(actors);
-
-        // 测试：为第一个精灵创建对话泡泡
-        if (_createdSprites.Count > 0)
-        {
-            //DisplaySpeechBubbleAtTarget(_createdSprites[0], "Hello World! This is a speech bubble using prefab!");
-        }
+        RefreshSprites();
     }
 
     private IEnumerator FetchMapping()
@@ -183,9 +166,9 @@ public class CampScene : MonoBehaviour
             "/trans_home",
             new Dictionary<string, string>
             {
-                ["stage_name"] = GameContext.CampName
+                ["stage_name"] = _stageName
             });
-        
+
         if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("TransCamp request failed");
@@ -193,7 +176,7 @@ public class CampScene : MonoBehaviour
         }
 
         Debug.Log("场景转换至营地");
-        
+
         // 处理服务器返回的消息
         GameContext.Instance.ProcessClientMessages(_homeGamePlayApi.RespData.client_messages);
 
@@ -550,7 +533,7 @@ public class CampScene : MonoBehaviour
             GameContext.Instance.GameName,
 
             "/advancing");
-        
+
         if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("RunHomeAction request failed");
@@ -584,16 +567,19 @@ public class CampScene : MonoBehaviour
             _createdSprites = new List<GameObject>();
         }
 
-        // 获取当前场景的角色列表
-        List<string> actors = new List<string>();
-        if (GameContext.Instance.Mapping.TryGetValue(GameContext.CampName, out actors) && actors != null)
+
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
+        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        actorsInStage.Remove(GameContext.Instance.ActorName);
+        if (actorsInStage.Count > 0)
         {
-            // 创建新精灵
-            _createdSprites = InstantiateAndPositionSprites(actors);
+            Debug.Log($"Actors in current stage ({stageName}): {string.Join(", ", actorsInStage)}");
+            _createdSprites = InstantiateAndPositionSprites(actorsInStage);
         }
         else
         {
-            Debug.Log($"No actors found for {GameContext.CampName} or mapping missing.");
+            Debug.Log($"No other actors found in current stage ({stageName})");
         }
     }
 

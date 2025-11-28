@@ -7,6 +7,7 @@ using System.Linq;
 
 public class RestaurantScene : MonoBehaviour
 {
+    public string _stageName = "场景.餐馆";
     public string _preScene = "MainScene2";
     public GameObject _backgroundImage;
     public SpriteRenderer _templateActor;
@@ -72,16 +73,8 @@ public class RestaurantScene : MonoBehaviour
         // 2. 获取最新的 Mapping 信息
         yield return FetchMapping();
 
-        // 3. 根据最新的 Mapping 创建精灵
-        List<string> actors = new List<string>();
-        bool hasMapping = GameContext.Instance.Mapping.TryGetValue(GameContext.RestaurantName, out actors);
-        if (!hasMapping || actors == null || actors.Count == 0 || GameContext.Instance.Root == null)
-        {
-            Debug.LogWarning($"GameContext is not set up. hasMapping={hasMapping}, actors={(actors == null ? "null" : actors.Count.ToString())}, Root={(GameContext.Instance.Root == null ? "null" : "exists")}. Using debug actors.");
-        }
-
-        // 创建精灵（自动根据尺寸计算位置）
-        _createdSprites = InstantiateAndPositionSprites(actors);
+        // 3. 刷新精灵显示
+        RefreshSprites();
     }
 
     private IEnumerator FetchMapping()
@@ -167,9 +160,9 @@ public class RestaurantScene : MonoBehaviour
             "/trans_home",
             new Dictionary<string, string>
             {
-                ["stage_name"] = GameContext.RestaurantName
+                ["stage_name"] = _stageName
             });
-        
+
         if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("TransRestaurant request failed");
@@ -485,7 +478,7 @@ public class RestaurantScene : MonoBehaviour
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "/advancing");
-        
+
         if (_homeGamePlayApi.RespData == null)
         {
             Debug.LogError("RunHomeAction request failed");
@@ -518,15 +511,18 @@ public class RestaurantScene : MonoBehaviour
         }
 
         // 获取当前场景的角色列表
-        List<string> actors = new List<string>();
-        if (GameContext.Instance.Mapping.TryGetValue(GameContext.RestaurantName, out actors) && actors != null)
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
+        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        actorsInStage.Remove(GameContext.Instance.ActorName);
+        if (actorsInStage.Count > 0)
         {
-            // 创建新精灵
-            _createdSprites = InstantiateAndPositionSprites(actors);
+            Debug.Log($"Actors in current stage ({stageName}): {string.Join(", ", actorsInStage)}");
+            _createdSprites = InstantiateAndPositionSprites(actorsInStage);
         }
         else
         {
-            Debug.Log($"No actors found for {GameContext.RestaurantName} or mapping missing.");
+            Debug.Log($"No other actors found in current stage ({stageName})");
         }
     }
 
