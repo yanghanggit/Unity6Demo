@@ -5,45 +5,47 @@ using TMPro;
 
 public class LoginScene : MonoBehaviour
 {
-    public TMP_Text _textUserName;
+    [Header("UI Components")]
+    [SerializeField] private TMP_Text _userNameText;
+    [SerializeField] private TMP_Text _gameNameText;
+    [SerializeField] private TMP_Text _actorNameText;
 
-    public TMP_Text _textGameName;
+    [Header("Scene Settings")]
+    [SerializeField] private string _nextSceneName = "MainScene2";
 
-    public TMP_Text _textActorName;
+    [Header("API Components")]
+    [SerializeField] private LoginApi _loginApi;
+    [SerializeField] private StartApi _startApi;
+    [SerializeField] private GameStateSync _gameStateSync;
 
-    public string _nextScene = "MainScene2";
-
-    public LoginApi _loginApi;
-
-    public StartApi _startApi;
-
-    public string _actorName;
-
-    public string _gameName;
-
-    public GameStateSync _gameStateSync;
+    [Header("Game Data")]
+    [SerializeField] private string _actorName;
+    [SerializeField] private string _gameName;
 
     private string _playerIdentifier;
 
     void Start()
     {
-        Debug.Assert(_textUserName != null, "_textUserName is null");
-        Debug.Assert(_textGameName != null, "_textGameName is null");
-        Debug.Assert(_textActorName != null, "_textActorName is null");
-        Debug.Assert(_loginApi != null, "_loginAction is null");
-        Debug.Assert(_startApi != null, "_startAction is null");
+        Debug.Assert(_userNameText != null, "_userNameText is null");
+        Debug.Assert(_gameNameText != null, "_gameNameText is null");
+        Debug.Assert(_actorNameText != null, "_actorNameText is null");
+        Debug.Assert(_loginApi != null, "_loginApi is null");
+        Debug.Assert(_startApi != null, "_startApi is null");
         Debug.Assert(_gameStateSync != null, "_gameStateSync is null");
         Debug.Assert(!string.IsNullOrEmpty(_actorName), "_actorName is null");
         Debug.Assert(!string.IsNullOrEmpty(_gameName), "_gameName is null");
-        Debug.Assert(!string.IsNullOrEmpty(_nextScene), "_nextScene is null");
+        Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
 
-        _playerIdentifier = CreateRandomPlayerIdentifier();
-        _textUserName.text = "Player ID = " + _playerIdentifier;
-        _textGameName.text = "测试的游戏 = " + _gameName;
-        _textActorName.text = "扮演角色 = " + _actorName;
+        _playerIdentifier = GeneratePlayerId();
+        _userNameText.text = "Player ID = " + _playerIdentifier;
+        _gameNameText.text = "测试的游戏 = " + _gameName;
+        _actorNameText.text = "扮演角色 = " + _actorName;
     }
 
-    private string CreateRandomPlayerIdentifier()
+    /// <summary>
+    /// 根据当前时间戳生成唯一的玩家ID
+    /// </summary>
+    private string GeneratePlayerId()
     {
         System.DateTime now = System.DateTime.Now;
         string timestamp = now.ToString("yyyyMMddHHmmss");
@@ -51,12 +53,18 @@ public class LoginScene : MonoBehaviour
         return randomUserName;
     }
 
-    public void OnClickLoginThenStartNewGame()
+    /// <summary>
+    /// 点击开始游戏按钮的回调
+    /// </summary>
+    public void OnStartGameClicked()
     {
-        StartCoroutine(LoginThenStartNewGame(_playerIdentifier, _gameName, _actorName));
+        StartCoroutine(StartGameFlow(_playerIdentifier, _gameName, _actorName));
     }
 
-    private IEnumerator LoginThenStartNewGame(string userName, string gameName, string actorName)
+    /// <summary>
+    /// 执行登录并开始游戏的完整流程：登录 -> 开始游戏 -> 同步状态 -> 加载场景
+    /// </summary>
+    private IEnumerator StartGameFlow(string userName, string gameName, string actorName)
     {
         yield return _loginApi.Call(GameContext.Instance.LoginUrl, userName, gameName);
         if (_loginApi.ReqResult == null || !_loginApi.ReqResult.isSuccess)
@@ -86,6 +94,6 @@ public class LoginScene : MonoBehaviour
         yield return _gameStateSync.RefreshDungeonFromServer();
 
         // 切换场景
-        SceneManager.LoadScene(_nextScene);
+        SceneManager.LoadScene(_nextSceneName);
     }
 }

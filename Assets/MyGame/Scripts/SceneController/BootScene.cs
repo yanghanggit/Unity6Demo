@@ -5,13 +5,17 @@ using UnityEngine.UI;
 
 public class BootScene : MonoBehaviour
 {
-    public string _baseUrl = "http://192.168.2.121:8000/";
+    [Header("Network Settings")]
+    [SerializeField] private string _baseUrl = "http://192.168.2.121:8000/";
 
-    public string _nextScene = "LoginScene";
+    [Header("Scene Settings")]
+    [SerializeField] private string _nextSceneName = "LoginScene";
 
-    public RootApi _rootApi;
+    [Header("API Components")]
+    [SerializeField] private RootApi _rootApi;
 
-    public Button _nextButton;
+    [Header("UI Components")]
+    [SerializeField] private Button _loginButton;
 
     /// <summary>
     /// Unity生命周期方法：初始化启动场景
@@ -20,11 +24,11 @@ public class BootScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_rootApi != null, "_rootApi is null");
-        Debug.Assert(_nextButton != null, "_nextButton is null");
+        Debug.Assert(_loginButton != null, "_loginButton is null");
         Debug.Assert(!string.IsNullOrEmpty(_baseUrl), "_baseUrl is null");
-        Debug.Assert(!string.IsNullOrEmpty(_nextScene), "_nextScene is null");
+        Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
 
-        _nextButton.gameObject.SetActive(false);
+        _loginButton.gameObject.SetActive(false);
         StartCoroutine(InitializeApiEndpoints());
     }
 
@@ -51,7 +55,7 @@ public class BootScene : MonoBehaviour
             yield break;
         }
 
-        _nextButton.gameObject.SetActive(true);
+        _loginButton.gameObject.SetActive(true);
         GameContext.Instance.Root = _rootApi.RespData;
         Debug.Log($"API endpoints initialized successfully from {_baseUrl}");
     }
@@ -64,7 +68,7 @@ public class BootScene : MonoBehaviour
     private IEnumerator LoadLoginScene()
     {
         yield return new WaitForSeconds(0.0f);
-        SceneManager.LoadScene(_nextScene);
+        SceneManager.LoadScene(_nextSceneName);
     }
 }
 

@@ -439,15 +439,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f2b0f004be5242e3b16d31060718289, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _textUserName: {fileID: 470425677}
-  _textGameName: {fileID: 143863052}
-  _textActorName: {fileID: 1310098622}
-  _nextScene: MainScene2
+  _userNameText: {fileID: 470425677}
+  _gameNameText: {fileID: 143863052}
+  _actorNameText: {fileID: 1310098622}
+  _nextSceneName: MainScene2
   _loginApi: {fileID: 399892902}
   _startApi: {fileID: 399892903}
+  _gameStateSync: {fileID: 2047208668}
   _actorName: "\u89D2\u8272.\u6218\u58EB.\u5361\u6069"
   _gameName: Game1
-  _gameStateSync: {fileID: 2047208668}
 --- !u!114 &399892902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -764,7 +764,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 399892901}
         m_TargetAssemblyTypeName: LoginScene, Assembly-CSharp
-        m_MethodName: OnClickLoginThenStartNewGame
+        m_MethodName: OnStartGameClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
