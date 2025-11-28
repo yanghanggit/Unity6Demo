@@ -103,12 +103,6 @@ public class CampScene : MonoBehaviour
     private IEnumerator FetchMapping()
     {
         yield return GameStateSync.Instance.RefreshStagesMappingAndActorsFromServer();
-        // yield return _stagesStateApi.Call(GameContext.Instance.HomeStateUrl);
-        // if (_stagesStateApi.RespData != null)
-        // {
-        //     GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
-        //     Debug.Log("Mapping updated in CampScene");
-        // }
     }
 
     public void OnClickBack()

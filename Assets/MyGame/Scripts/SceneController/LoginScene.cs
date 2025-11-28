@@ -17,12 +17,13 @@ public class LoginScene : MonoBehaviour
 
     public StartApi _startApi;
 
-    public GameConfig _gameConfig;
+    public string _actorName;
+
+    public string _gameName;
 
     public GameStateSync _gameStateSync;
 
     private string _playerIdentifier;
-
 
     void Start()
     {
@@ -31,27 +32,28 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_textActorName != null, "_textActorName is null");
         Debug.Assert(_loginApi != null, "_loginAction is null");
         Debug.Assert(_startApi != null, "_startAction is null");
-        Debug.Assert(_gameConfig != null, "_gameConfig is null");
         Debug.Assert(_gameStateSync != null, "_gameStateSync is null");
+        Debug.Assert(!string.IsNullOrEmpty(_actorName), "_actorName is null");
+        Debug.Assert(!string.IsNullOrEmpty(_gameName), "_gameName is null");
+        Debug.Assert(!string.IsNullOrEmpty(_nextScene), "_nextScene is null");
 
         _playerIdentifier = CreateRandomPlayerIdentifier();
-        _textUserName.text = "ID = " + _playerIdentifier;
-        _textGameName.text = "测试的游戏 = " + _gameConfig.GameName;
-        _textActorName.text = "扮演角色 = " + _gameConfig.ActorName;
+        _textUserName.text = "Player ID = " + _playerIdentifier;
+        _textGameName.text = "测试的游戏 = " + _gameName;
+        _textActorName.text = "扮演角色 = " + _actorName;
     }
 
     private string CreateRandomPlayerIdentifier()
     {
         System.DateTime now = System.DateTime.Now;
         string timestamp = now.ToString("yyyyMMddHHmmss");
-        string randomUserName = "Player" + timestamp + Random.Range(100, 999).ToString();
+        string randomUserName = "unity-player-" + timestamp;
         return randomUserName;
     }
 
     public void OnClickLoginThenStartNewGame()
     {
-        Debug.Log("OnClickLoginThenStartNewGame");
-        StartCoroutine(LoginThenStartNewGame(_playerIdentifier, _gameConfig.GameName, _gameConfig.ActorName));
+        StartCoroutine(LoginThenStartNewGame(_playerIdentifier, _gameName, _actorName));
     }
 
     private IEnumerator LoginThenStartNewGame(string userName, string gameName, string actorName)
@@ -77,15 +79,13 @@ public class LoginScene : MonoBehaviour
 
         GameContext.Instance.ActorName = actorName;
 
-        // 测试一次！
-        //yield return _gameStateSync.RefreshStagesAndActorsFromServer();
+        // 刷新全局游戏状态
+        yield return _gameStateSync.RefreshStagesMappingAndActorsFromServer();
 
         // 刷新地下城数据！
-        //yield return _gameStateSync.RefreshDungeonFromServer();
+        yield return _gameStateSync.RefreshDungeonFromServer();
 
         // 切换场景
-        yield return new WaitForSeconds(0.0f);
-        //_nextScene = "MainScene2";
         SceneManager.LoadScene(_nextScene);
     }
 }

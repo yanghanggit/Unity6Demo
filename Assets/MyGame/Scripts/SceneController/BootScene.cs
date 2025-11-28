@@ -13,37 +13,58 @@ public class BootScene : MonoBehaviour
 
     public Button _nextButton;
 
+    /// <summary>
+    /// Unity生命周期方法：初始化启动场景
+    /// 验证必要组件的有效性，隐藏登录按钮并开始API端点初始化
+    /// </summary>
     void Start()
     {
         Debug.Assert(_rootApi != null, "_rootApi is null");
         Debug.Assert(_nextButton != null, "_nextButton is null");
+        Debug.Assert(!string.IsNullOrEmpty(_baseUrl), "_baseUrl is null");
+        Debug.Assert(!string.IsNullOrEmpty(_nextScene), "_nextScene is null");
 
         _nextButton.gameObject.SetActive(false);
         StartCoroutine(InitializeApiEndpoints());
     }
 
-    public void OnClickNextSceneLogin()
+    /// <summary>
+    /// 处理登录按钮点击事件
+    /// 启动登录场景加载流程
+    /// </summary>
+    public void OnLoginButtonClick()
     {
-        StartCoroutine(LoadNextScene());
+        StartCoroutine(LoadLoginScene());
     }
 
+    /// <summary>
+    /// 异步初始化API端点配置
+    /// 从指定的基础URL获取根API配置，成功后激活登录按钮
+    /// </summary>
+    /// <returns>协程迭代器</returns>
     private IEnumerator InitializeApiEndpoints()
     {
         yield return _rootApi.Call(_baseUrl);
         if (_rootApi.RespData == null)
         {
-            Debug.LogError("Failed to initialize API endpoints from " + _baseUrl);
+            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}");
             yield break;
         }
 
         _nextButton.gameObject.SetActive(true);
         GameContext.Instance.Root = _rootApi.RespData;
-        Debug.Log("Using LocalNet for API endpoints");
+        Debug.Log($"API endpoints initialized successfully from {_baseUrl}");
     }
 
-    private IEnumerator LoadNextScene()
+    /// <summary>
+    /// 异步加载登录场景
+    /// 使用协程实现场景切换，确保流畅的用户体验
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator LoadLoginScene()
     {
         yield return new WaitForSeconds(0.0f);
         SceneManager.LoadScene(_nextScene);
     }
 }
+

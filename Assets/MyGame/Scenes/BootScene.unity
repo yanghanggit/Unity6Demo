@@ -514,7 +514,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f08fca2d85854c409f7591e5632b09f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseUrl: http://192.168.2.121:8000/
+  _baseUrl: http://192.168.192.113:8000/
   _nextScene: LoginScene
   _rootApi: {fileID: 399892903}
   _nextButton: {fileID: 1202936521}
@@ -741,7 +741,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 399892901}
         m_TargetAssemblyTypeName: BootScene, Assembly-CSharp
-        m_MethodName: OnClickNextSceneLogin
+        m_MethodName: OnLoginButtonClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

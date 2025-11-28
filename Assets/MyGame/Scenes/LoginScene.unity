@@ -445,7 +445,8 @@ MonoBehaviour:
   _nextScene: MainScene2
   _loginApi: {fileID: 399892902}
   _startApi: {fileID: 399892903}
-  _gameConfig: {fileID: 11400000, guid: 54707035bd7b4439aa2c9b6d574b5a61, type: 2}
+  _actorName: "\u89D2\u8272.\u6218\u58EB.\u5361\u6069"
+  _gameName: Game1
   _gameStateSync: {fileID: 2047208668}
 --- !u!114 &399892902
 MonoBehaviour:
@@ -944,7 +945,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u767B\u5F55/\u65B0\u6E38\u620F"
+  m_text: "\u65B0\u6E38\u620F"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,

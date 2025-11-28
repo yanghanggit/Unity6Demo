@@ -86,12 +86,6 @@ public class RestaurantScene : MonoBehaviour
 
     private IEnumerator FetchMapping()
     {
-        // yield return _stagesStateApi.Call(GameContext.Instance.HomeStateUrl);
-        // if (_stagesStateApi.RespData != null)
-        // {
-        //     GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
-        //     Debug.Log("Mapping updated in RestaurantScene");
-        // }
         yield return GameStateSync.Instance.RefreshStagesMappingAndActorsFromServer();
     }
 
