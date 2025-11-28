@@ -89,7 +89,7 @@ public class MainScene2 : MonoBehaviour
         yield return GameStateSync.Instance.RefreshStagesMappingAndActorsFromServer();
 
         // 测试一下是否可以正确获取玩家角色的 EntitySerialization 并序列化为 JSON。
-        var playerActorEntitySerialization = GameContext.Instance.getActorEntitySerialization(GameContext.Instance.ActorName);
+        var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
         if (playerActorEntitySerialization == null)
         {
             Debug.LogError($"Player actor entity serialization not found for actor: {GameContext.Instance.ActorName}");

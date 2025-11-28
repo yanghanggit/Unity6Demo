@@ -37,8 +37,8 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
 
         _playerIdentifier = GeneratePlayerId();
-        _userNameText.text = "Player ID = " + _playerIdentifier;
-        _gameNameText.text = "测试的游戏 = " + _gameName;
+        _userNameText.text = "临时ID = " + _playerIdentifier;
+        _gameNameText.text = "测试游戏 = " + _gameName;
         _actorNameText.text = "扮演角色 = " + _actorName;
     }
 
@@ -87,11 +87,21 @@ public class LoginScene : MonoBehaviour
 
         GameContext.Instance.ActorName = actorName;
 
-        // 刷新全局游戏状态
+        // 刷新全局游戏状态, 全部刷新！
         yield return _gameStateSync.RefreshStagesMappingAndEntitiesFromServer();
 
         // 刷新地下城数据！
         yield return _gameStateSync.RefreshDungeonFromServer();
+
+        //这里加一个测试,打印所有的actor entity，确保都能取到贴图
+        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+        for (int i = 0; i < actorEntitiesSerialization.Count; i++)
+        {
+            var entity = actorEntitiesSerialization[i];
+            Debug.Log("Actor Entity " + i + ": " + entity.ToString());
+            var actorSprite = TextureManager.Instance.GetSprite(entity.name);
+            Debug.Assert(actorSprite != null, "Actor sprite is null for entity: " + entity.name);
+        }
 
         // 切换场景
         SceneManager.LoadScene(_nextSceneName);

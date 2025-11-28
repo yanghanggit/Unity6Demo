@@ -123,7 +123,7 @@ public partial class GameContext
         }
     }
 
-    public EntitySerialization getActorEntitySerialization(string actorName)
+    public EntitySerialization GetActorEntitySerialization(string actorName)
     {
         foreach (var entitySerialization in _actorEntitiesSerialization)
         {
@@ -135,7 +135,7 @@ public partial class GameContext
         return null;
     }
 
-    public EntitySerialization getStageEntitySerialization(string stageName)
+    public EntitySerialization GetStageEntitySerialization(string stageName)
     {
         foreach (var entitySerialization in _stageEntitiesSerialization)
         {
