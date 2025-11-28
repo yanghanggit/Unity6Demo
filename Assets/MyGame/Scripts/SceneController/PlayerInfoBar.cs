@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class PlayerInfoBar : MonoBehaviour
 {
@@ -9,11 +10,28 @@ public class PlayerInfoBar : MonoBehaviour
     [SerializeField] private Button _headIconButton;
     [SerializeField] private TMP_Text _playerInfoText;
 
+    // 头像点击回调
+    public event Action OnHeadIconClickedCallback;
+
     void Start()
     {
         Debug.Assert(_headIconButton != null, "_headIconButton is null");
         Debug.Assert(_playerInfoText != null, "_playerInfoText is null");
 
+        // 先清除！
+        _playerInfoText.text = "";
+
+        // 后刷新！
+        RefreshPlayerInfo();
+    }
+
+    void Update()
+    {
+
+    }
+
+    private void RefreshPlayerInfo()
+    {
         // 设置图片
         var playerActor = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
         Debug.Assert(playerActor != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.ActorName);
@@ -31,13 +49,9 @@ public class PlayerInfoBar : MonoBehaviour
         _playerInfoText.text = $"{playerName}\n{actorName}";
     }
 
-    void Update()
-    {
-
-    }
-
     public void OnHeadIconClicked()
     {
         Debug.Log("Head icon clicked!");
+        OnHeadIconClickedCallback?.Invoke();
     }
 }

@@ -12,10 +12,23 @@ public class MainScene2 : MonoBehaviour
 
     public GameObject _dungeonButton;
 
+    public GameObject _playerInfoBar;
+
+    public GameObject _playerInfoDetails;
+
     void Start()
     {
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
+        Debug.Assert(_playerInfoBar != null, "_playerInfoBar is null");
+        Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
+
+        // 设置头像点击回调
+        _playerInfoBar.GetComponent<PlayerInfoBar>().OnHeadIconClickedCallback += OnHeadIconClicked;
+
+        // 设置关闭回调
+        _playerInfoDetails.GetComponent<PlayerInfoDetails>().OnCloseButtonClickedCallback += OnClickClosePlayerInfoDetails;
+        _playerInfoDetails.SetActive(false);
 
         // 直接刷新
         StartCoroutine(RefreshGameState());
@@ -106,5 +119,17 @@ public class MainScene2 : MonoBehaviour
         {
             Debug.LogError($"Failed to serialize Actor[{GameContext.Instance.ActorName}] to JSON: {ex.Message}");
         }
+    }
+
+    private void OnHeadIconClicked()
+    {
+        Debug.Log("Head icon clicked in MainScene2!");
+        _playerInfoDetails.SetActive(true);
+    }
+
+    public void OnClickClosePlayerInfoDetails()
+    {
+        Debug.Log("Player info details clicked!");
+        _playerInfoDetails.SetActive(false);
     }
 }
