@@ -31,7 +31,7 @@ public class SpriteClickHandler : MonoBehaviour
         // 检查是否点击在UI上
         if (EventSystem.current.IsPointerOverGameObject())
         {
-            Debug.Log("Clicked on UI, ignoring sprite click.");
+            Debug.Log($"Clicked on UI, ignoring sprite click. so sprite {gameObject.name} ignore this event.");
             return; // 如果点击在UI上，不处理这个事件
         }
 
