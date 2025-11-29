@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89816302969964d2ab99ab5ca4b955ed, type: 3}
   m_Name: RestaurantScene
   m_EditorClassIdentifier: Assembly-CSharp::HomeSceneConfig
-  StageName: "\u573A\u666F.\u9910\u9986"
+  StageName: "\u573A\u666F.\u9910\u5385"
   SceneDisplayName: RestaurantScene
