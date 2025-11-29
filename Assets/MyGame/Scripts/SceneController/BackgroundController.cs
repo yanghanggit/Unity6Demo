@@ -26,16 +26,29 @@ public class BackgroundController : MonoBehaviour
 
     private Camera mainCamera;
     private Vector2 originalSpriteSize;
+    private Vector2 lastScreenSize;
 
     void Start()
     {
         InitializeBackground();
+        lastScreenSize = new Vector2(Screen.width, Screen.height);
+    }
+
+    void Update()
+    {
+        // 检测屏幕尺寸变化（运行时）
+        Vector2 currentScreenSize = new Vector2(Screen.width, Screen.height);
+        if (currentScreenSize != lastScreenSize)
+        {
+            lastScreenSize = currentScreenSize;
+            UpdateBackgroundScale();
+        }
     }
 
     void OnValidate()
     {
-        // 在编辑器中实时预览效果
-        if (Application.isPlaying)
+        // 编辑器模式下修改参数时实时预览效果
+        if (!Application.isPlaying)
         {
             UpdateBackgroundScale();
         }
@@ -166,17 +179,4 @@ public class BackgroundController : MonoBehaviour
         fillMode = mode;
         UpdateBackgroundScale();
     }
-
-    /// <summary>
-    /// 当屏幕尺寸改变时调用（主要用于编辑器）
-    /// </summary>
-    void OnRenderObject()
-    {
-        if (Application.isEditor && !Application.isPlaying)
-        {
-            UpdateBackgroundScale();
-        }
-    }
-
-
 }
