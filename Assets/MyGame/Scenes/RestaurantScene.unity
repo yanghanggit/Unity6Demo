@@ -286,82 +286,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 15.971186, y: 7.3599987}
   m_EdgeRadius: 0
---- !u!1 &143415527
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 143415528}
-  - component: {fileID: 143415530}
-  - component: {fileID: 143415529}
-  m_Layer: 5
-  m_Name: Panel
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &143415528
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 143415527}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2110898355}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &143415529
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 143415527}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: -8765846003301459409, guid: e42b82b77466f4f6cad9a117c3203f9d,
-    type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &143415530
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 143415527}
-  m_CullTransparentMesh: 1
 --- !u!1 &279330931
 GameObject:
   m_ObjectHideFlags: 0
@@ -690,6 +614,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d7a3d0dccc8fc6429972f9628fce4df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RestaurantScene
+  _stageName: "\u573A\u666F.\u9910\u9986"
   _preScene: MainScene2
   _backgroundImage: {fileID: 95948007}
   _templateActor: {fileID: 809303518}
@@ -699,7 +624,6 @@ MonoBehaviour:
   _speechBubblePrefab: {fileID: 1266498991}
   _hideBubbleDuration: 5
   _homeGamePlayApi: {fileID: 399892902}
-  _sessionMessagesApi: {fileID: 0}
 --- !u!1 &428044658
 GameObject:
   m_ObjectHideFlags: 0
@@ -1204,7 +1128,7 @@ Transform:
   m_GameObject: {fileID: 809303517}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.0452957, y: 5.8646107, z: 9}
+  m_LocalPosition: {x: 2.39, y: 2.75, z: 9}
   m_LocalScale: {x: 1.3995299, y: 2.772, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2269,63 +2193,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1779619025}
   m_CullTransparentMesh: 1
---- !u!1 &2075260027
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2075260029}
-  - component: {fileID: 2075260028}
-  m_Layer: 0
-  m_Name: TextureManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2075260028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2075260027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a9a01839932d4af6a158f53bbe8dd5f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TextureManager
-  preloadTextures:
-  - {fileID: 2800000, guid: 026c0241e1dca4342b4142a832a163e3, type: 3}
-  - {fileID: 2800000, guid: d8bdf524df0e74052a70abab3c97fc5b, type: 3}
-  - {fileID: 2800000, guid: f0043eb4733ce4300ae901efc39e856f, type: 3}
-  - {fileID: 2800000, guid: f6a0269184b4245f5a8824992cb99fd7, type: 3}
-  textureKeys:
-  - "\u89D2\u8272.\u6218\u58EB.\u5361\u6069"
-  - "\u89D2\u8272.\u6CD5\u5E08.\u5965\u9732\u5A1C"
-  pixelsPerUnit: 100
-  spritePivot: {x: 0.5, y: 0.5}
-  autoPreloadOnStart: 1
-  resourcesTexturePath: Textures
-  enableDebugLog: 1
---- !u!4 &2075260029
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2075260027}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2076775055
 GameObject:
   m_ObjectHideFlags: 0
@@ -2660,7 +2527,6 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 143415528}
   - {fileID: 1654066304}
   - {fileID: 389859353}
   - {fileID: 1716847896}
@@ -2678,7 +2544,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 279330935}
   - {fileID: 399892900}
-  - {fileID: 2075260029}
   - {fileID: 95948009}
   - {fileID: 809303519}
   - {fileID: 2110898355}
