@@ -614,8 +614,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d7a3d0dccc8fc6429972f9628fce4df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RestaurantScene
-  _stageName: "\u573A\u666F.\u9910\u9986"
-  _preScene: MainScene2
   _backgroundImage: {fileID: 95948007}
   _templateActor: {fileID: 809303518}
   _spacingOffset: 1
@@ -624,6 +622,7 @@ MonoBehaviour:
   _speechBubblePrefab: {fileID: 1266498991}
   _hideBubbleDuration: 5
   _homeGamePlayApi: {fileID: 399892902}
+  _homeSceneConfig: {fileID: 11400000, guid: 9ff95a2f1582743b59a0310250d83c24, type: 2}
 --- !u!1 &428044658
 GameObject:
   m_ObjectHideFlags: 0

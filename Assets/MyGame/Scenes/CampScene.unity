@@ -602,8 +602,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50120895d8fa04412ae8a0d670541a32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stageName: "\u573A\u666F.\u5B89\u5168\u5C4B"
-  _preScene: MainScene2
   _backgroundImage: {fileID: 95948007}
   _templateActor: {fileID: 809303518}
   _spacingOffset: 1
@@ -612,6 +610,7 @@ MonoBehaviour:
   _speechBubblePrefab: {fileID: 1266498991}
   _hideBubbleDuration: 5
   _homeGamePlayApi: {fileID: 399892902}
+  _homeSceneConfig: {fileID: 11400000, guid: d1ec0cda2b05e497c8c83f991cf28dd9, type: 2}
 --- !u!114 &399892902
 MonoBehaviour:
   m_ObjectHideFlags: 0

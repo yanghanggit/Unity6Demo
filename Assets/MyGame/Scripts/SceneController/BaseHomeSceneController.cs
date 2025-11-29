@@ -20,6 +20,8 @@ public abstract class BaseHomeSceneController : MonoBehaviour
     public float _hideBubbleDuration = 5.0f;
     public HomeGamePlayApi _homeGamePlayApi;
 
+    public HomeSceneConfig _homeSceneConfig;
+
     // 私有字段
     private List<GameObject> _createdSprites;
     private string _currentSpriteName;
@@ -27,9 +29,8 @@ public abstract class BaseHomeSceneController : MonoBehaviour
     private Camera _mainCamera;
 
     // 子类必须实现的配置属性
-    protected abstract string StageName { get; }
     protected abstract string PreScene { get; }
-    protected abstract string SceneDisplayName { get; }
+
 
     protected virtual void Start()
     {
@@ -40,6 +41,7 @@ public abstract class BaseHomeSceneController : MonoBehaviour
         Debug.Assert(_inputField != null, "inputField is null");
         Debug.Assert(_homeGamePlayApi != null, "_homeRunAction is null");
         Debug.Assert(_speechBubblePrefab != null, "_speechBubblePrefab is null");
+        Debug.Assert(_homeSceneConfig != null, "_homeSceneConfig is null");
 
         // 隐藏输入背景
         HideInputBackground();
@@ -72,13 +74,10 @@ public abstract class BaseHomeSceneController : MonoBehaviour
 
     private IEnumerator InitializeSceneSequence()
     {
-        // 1. 通知服务器场景转换
-        yield return ExecuteTransStage(StageName);
-
-        // 2. 获取最新的 Mapping 信息
+        // 1. 获取最新的 Mapping 信息
         yield return FetchMapping();
 
-        // 3. 刷新精灵显示
+        // 2. 刷新精灵显示
         RefreshSprites();
     }
 
@@ -149,32 +148,8 @@ public abstract class BaseHomeSceneController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"Game is not set up. Staying in {SceneDisplayName}.");
+            Debug.LogWarning($"Game is not set up. Staying in {_homeSceneConfig.StageName}.");
         }
-    }
-
-    /// <summary>
-    /// 通知服务器场景转换
-    /// </summary>
-    private IEnumerator ExecuteTransStage(string stageName)
-    {
-        yield return _homeGamePlayApi.Call(
-            GameContext.Instance.HomeGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "/trans_home",
-            new Dictionary<string, string>
-            {
-                ["stage_name"] = stageName
-            });
-
-        if (_homeGamePlayApi.RespData == null)
-        {
-            Debug.LogError($"ExecuteTransStage = {stageName} request failed");
-            yield break;
-        }
-
-        Debug.Log($"ExecuteTransStage = {stageName} completed");
     }
 
     /// <summary>
