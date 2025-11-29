@@ -80,6 +80,8 @@ public class TestBackgroundScene : MonoBehaviour
             GameObject spriteInstance = Instantiate(spritePrototype, position, Quaternion.identity);
             // 设置名字
             spriteInstance.name = $"Actor_{i}";
+            // 设置父级，与原型平级
+            spriteInstance.transform.SetParent(spritePrototype.transform.parent);
             // 记录实例做最终返回
             instances[i] = spriteInstance;
         }
