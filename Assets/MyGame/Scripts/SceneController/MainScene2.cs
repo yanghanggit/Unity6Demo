@@ -48,6 +48,18 @@ public class MainScene2 : MonoBehaviour
 
     }
 
+    void OnDestroy()
+    {
+        // 清除回调,避免内存泄漏
+        Debug.Assert(_playerInfoBar != null, "_playerInfoBar is null");
+        Debug.Assert(_playerInfoBar.GetComponent<PlayerInfoBar>() != null, "_playerInfoBar PlayerInfoBar component is null");
+        Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
+        Debug.Assert(_playerInfoDetails.GetComponent<PlayerInfoDetails>() != null, "_playerInfoDetails PlayerInfoDetails component is null");
+
+        _playerInfoBar.GetComponent<PlayerInfoBar>().OnHeadIconClickedCallback -= OnHeadIconClicked;
+        _playerInfoDetails.GetComponent<PlayerInfoDetails>().OnCloseButtonClickedCallback -= OnClickClosePlayerInfoDetails;
+    }
+
     public void OnClickBack()
     {
         Debug.Log("Back button clicked");
