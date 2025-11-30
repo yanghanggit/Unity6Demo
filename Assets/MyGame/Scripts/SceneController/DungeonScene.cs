@@ -21,7 +21,7 @@ public class DungeonScene : MonoBehaviour
 
     public XCardPlayer _XCardPlayer;
 
-    public XCardEditor _XCardEditor;
+    //public XCardEditor _XCardEditor;
 
 
     void Start()
@@ -32,9 +32,9 @@ public class DungeonScene : MonoBehaviour
         //Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
         Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
-        Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
+        //Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
 
-        _XCardEditor.gameObject.SetActive(false);
+        //_XCardEditor.gameObject.SetActive(false);
 
         StartCoroutine(ExecuteViewDungeon());
     }
@@ -82,11 +82,11 @@ public class DungeonScene : MonoBehaviour
     }
 
 
-    public void OnClickXCard()
-    {
-        Debug.Log("OnClickXCard");
-        _XCardEditor.gameObject.SetActive(true);
-    }
+    // public void OnClickXCard()
+    // {
+    //     Debug.Log("OnClickXCard");
+    //     _XCardEditor.gameObject.SetActive(true);
+    // }
 
     // public void OnClickCombatComplete()
     // {
