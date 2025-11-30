@@ -1,26 +1,45 @@
-namespace Mosframe {
+using Mosframe;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using TMPro;
 
-    //using System.Collections.Generic;
-    using UnityEngine;
-    using UnityEngine.EventSystems;
-    using UnityEngine.UI;
+public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
+{
+    [Header("UI Components")]
+    [SerializeField] Image _icon;
+    [SerializeField] TMP_Text _title;
+    [SerializeField] Image _background;
+    [SerializeField] private Button _overlayButton;
 
-    public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem 
+
+    protected override void OnEnable()
     {
-	    private readonly Color[] colors = new Color[] {
-		    Color.cyan,
-		    Color.green,
-	    };
 
-	    public Image icon;
-	    public Text  title;
-	    public Image background;
+        base.OnEnable();
+        _overlayButton.onClick.AddListener(this.OnClick);
+    }
 
-        public void onUpdateItem( int index ) {
+    protected override void OnDisable()
+    {
 
-		    this.title.text         = string.Format("Actor{0:d3}", (index + 1) );
-		    this.background.color   = this.colors[Mathf.Abs(index) % this.colors.Length];
-		    this.icon.sprite        = Resources.Load<Sprite>( (Mathf.Abs(index) % 20 + 1).ToString("icon_00") );
-        }
+        base.OnDisable();
+        _overlayButton.onClick.RemoveListener(this.OnClick);
+    }
+
+    void OnClick()
+    {
+        Debug.Log("Clicked on " + _title.text);
+    }
+
+    public void onUpdateItem(int index)
+    {
+
+        Debug.Assert(_icon != null, "_icon != null");
+        Debug.Assert(_title != null, "_title != null");
+        Debug.Assert(_background != null, "_background != null");
+        Debug.Assert(_overlayButton != null, "_overlayButton != null");
+
+        _title.text = string.Format("Actor{0:d3}", (index + 1));
     }
 }
