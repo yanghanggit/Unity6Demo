@@ -30,10 +30,32 @@ public class TestBackgroundScene : MonoBehaviour
     [SerializeField] private float _spacingMultiplier = 1.1f;
 
     /// <summary>
+    /// 移动速度（单位：Unity单位/秒）
+    /// </summary>
+    [SerializeField] private float _moveSpeed = 2f;
+
+    /// <summary>
+    /// 屏幕边界偏移量（单位：Unity单位）
+    /// 正值：边界向内收缩，负值：边界向外扩展
+    /// 默认值：0（不偏移）
+    /// </summary>
+    [SerializeField] private float _screenBoundaryOffset = 0.5f;
+
+    /// <summary>
     /// 存储所有实例化的精灵对象
     /// 在运行时动态创建并填充
     /// </summary>
     private GameObject[] _spriteInstances;
+
+    /// <summary>
+    /// 当前移动方向：1 = 向右，-1 = 向左
+    /// </summary>
+    private float _moveDirection = 1f;
+
+    /// <summary>
+    /// 主摄像机引用，用于计算屏幕边界
+    /// </summary>
+    private Camera _mainCamera;
 
     void Start()
     {
@@ -59,11 +81,15 @@ public class TestBackgroundScene : MonoBehaviour
         Debug.Assert(parentCollider != null, "Parent of spritePrototype must have a BoxCollider2D component");
 
         // 创建多个精灵实例
+        _spritePrototype.SetActive(true);
         _spriteInstances = CreateSpriteInstances(_spritePrototype, _numberOfSprites, _spacingMultiplier);
         _spritePrototype.SetActive(false);
 
         // 更新父级碰撞体大小
         UpdateParentCollider(_spritePrototype.transform.parent.gameObject);
+
+        // 初始化移动相关变量
+        _mainCamera = Camera.main;
     }
 
     /// <summary>
@@ -170,7 +196,47 @@ public class TestBackgroundScene : MonoBehaviour
 
     void Update()
     {
+        MoveParentObject(_spritePrototype.transform.parent.gameObject, _mainCamera, _screenBoundaryOffset);
+    }
 
+    /// <summary>
+    /// 移动父级对象，实现左右来回移动效果
+    /// 当边缘完全进入屏幕时自动反向
+    /// </summary>
+    /// <param name="parentObject">要移动的父级对象</param>
+    /// <param name="mainCamera">主摄像机，用于计算屏幕边界</param>
+    /// <param name="offset">屏幕边界偏移量，正值向内收缩，负值向外扩展</param>
+    private void MoveParentObject(GameObject parentObject, Camera mainCamera, float offset)
+    {
+        // 计算移动
+        float movement = _moveDirection * _moveSpeed * Time.deltaTime;
+        parentObject.transform.position += new Vector3(movement, 0, 0);
+
+        // 获取父级碰撞体的世界边界
+        BoxCollider2D parentCollider = parentObject.GetComponent<BoxCollider2D>();
+        Bounds parentBounds = parentCollider.bounds;
+
+        // 计算屏幕边界（世界坐标）并应用偏移
+        float screenLeft = mainCamera.ViewportToWorldPoint(new Vector3(0, 0, 0)).x + offset;
+        float screenRight = mainCamera.ViewportToWorldPoint(new Vector3(1, 0, 0)).x - offset;
+
+        // 检测边界并反向
+        if (_moveDirection > 0) // 向右移动
+        {
+            // 最左侧边缘完全进入屏幕
+            if (parentBounds.min.x >= screenLeft)
+            {
+                _moveDirection = -1f;
+            }
+        }
+        else // 向左移动
+        {
+            // 最右侧边缘完全进入屏幕
+            if (parentBounds.max.x <= screenRight)
+            {
+                _moveDirection = 1f;
+            }
+        }
     }
 }
 
