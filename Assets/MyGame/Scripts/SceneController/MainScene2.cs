@@ -175,8 +175,6 @@ public class MainScene2 : MonoBehaviour
             (sessionMessages) =>
                 {
                     Debug.Log($"Fetched {sessionMessages.Count} session messages from server after transitioning to stage {targetStageName}");
-                    // 处理接收到的会话消息
-                    //GameContext.Instance.ProcessClientMessages(sessionMessages);
                 }
             );
 

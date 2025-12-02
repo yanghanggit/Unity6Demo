@@ -350,6 +350,32 @@ public class GameStateSync : MonoBehaviour
 
         Debug.Log($"[GameStateSync] Successfully fetched {sessionMessages.Count} session messages from server");
 
+        // 收集AgentEvents 事件到 GameContext
+        GameContext.Instance.CollectEventsByActor(sessionMessages);
+
+        // 测试下！
+        // var agentEventsByActor = GameContext.Instance.AgentEventsByActor;
+        // foreach (var kvp in agentEventsByActor)
+        // {
+        //     string actor = kvp.Key;
+        //     List<AgentEvent> events = kvp.Value;
+        //     Debug.Log($"Actor: {actor}, Events Count: {events.Count}");
+        //     for (int i = 0; i < events.Count; i++)
+        //     {
+        //         AgentEvent agentEvent = events[i];
+        //         try
+        //         {
+        //             // 直接将 AgentEvent 序列化为 JSON 字符串
+        //             string jsonString = JsonConvert.SerializeObject(agentEvent, Formatting.Indented);
+        //             Debug.Log($"Actor: {actor}, Event[{i}] JSON:\n{jsonString}");
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             Debug.LogError($"Failed to serialize Actor: {actor}, Event[{i}] to JSON: {ex.Message}");
+        //         }
+        //     }
+        // }
+
         // 通过回调返回消息列表
         onMessagesReceived?.Invoke(sessionMessages);
     }
