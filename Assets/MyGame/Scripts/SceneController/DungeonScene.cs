@@ -19,7 +19,7 @@ public class DungeonScene : MonoBehaviour
 
     public TransHomeApi _transHomeApi;
 
-    public XCardPlayer _XCardPlayer;
+    //public XCardPlayer _XCardPlayer;
 
     //public XCardEditor _XCardEditor;
 
@@ -31,7 +31,7 @@ public class DungeonScene : MonoBehaviour
         //Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
         //Debug.Assert(_actorDetailApi != null, "_actorDetailApi is null");
         Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
-        Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
+        //Debug.Assert(_XCardPlayer != null, "_XCardPlayer is null");
         //Debug.Assert(_XCardEditor != null, "_XCardEditor is null");
 
         //_XCardEditor.gameObject.SetActive(false);

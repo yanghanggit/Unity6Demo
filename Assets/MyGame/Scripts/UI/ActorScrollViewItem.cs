@@ -11,11 +11,11 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
     [SerializeField] TMP_Text _title;
     [SerializeField] Image _background;
     [SerializeField] private Button _overlayButton;
+    [SerializeField] private StringGameEvent onActorClickedEvent;
 
 
     protected override void OnEnable()
     {
-
         base.OnEnable();
         _overlayButton.onClick.AddListener(this.OnClick);
     }
@@ -30,6 +30,7 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
     void OnClick()
     {
         Debug.Log("Clicked on " + _title.text);
+        onActorClickedEvent?.Raise(_title.text);
     }
 
     public void onUpdateItem(int index)
@@ -39,6 +40,7 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
         Debug.Assert(_title != null, "_title != null");
         Debug.Assert(_background != null, "_background != null");
         Debug.Assert(_overlayButton != null, "_overlayButton != null");
+        Debug.Assert(onActorClickedEvent != null, "onActorClickedEvent != null");
 
         _title.text = string.Format("Actor{0:d3}", (index + 1));
     }
