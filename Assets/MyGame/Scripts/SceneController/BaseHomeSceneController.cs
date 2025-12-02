@@ -540,7 +540,7 @@ public abstract class BaseHomeSceneController : MonoBehaviour
                     Debug.Log($"TRANS_STAGE_EVENT: {transStageEvent.message}");
                     break;
 
-                case EventHead.COMBAT_KICK_OFF_EVENT:
+                //case EventHead.COMBAT_KICK_OFF_EVENT:
                 case EventHead.COMBAT_COMPLETE_EVENT:
                 case EventHead.DISCUSSION_EVENT:
                 case EventHead.NIGHT_ACTION_EVENT:

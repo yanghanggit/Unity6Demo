@@ -119,12 +119,12 @@ public partial class GameContext
                 AgentEvents.Add(mindVoiceEvent);
                 break;
 
-            case EventHead.COMBAT_KICK_OFF_EVENT:
-                CombatKickOffEvent combatKickOffEvent = dataToken.ToObject<CombatKickOffEvent>();
-                UnityEngine.Debug.Log($"COMBAT_KICK_OFF_EVENT: {combatKickOffEvent.actor} => {combatKickOffEvent.description}");
-                AgentEventLogs.Add($"{combatKickOffEvent.actor} => {combatKickOffEvent.description}");
-                AgentEvents.Add(combatKickOffEvent);
-                break;
+            // case EventHead.COMBAT_KICK_OFF_EVENT:
+            //     CombatKickOffEvent combatKickOffEvent = dataToken.ToObject<CombatKickOffEvent>();
+            //     UnityEngine.Debug.Log($"COMBAT_KICK_OFF_EVENT: {combatKickOffEvent.actor} => {combatKickOffEvent.description}");
+            //     AgentEventLogs.Add($"{combatKickOffEvent.actor} => {combatKickOffEvent.description}");
+            //     AgentEvents.Add(combatKickOffEvent);
+            //     break;
 
             case EventHead.COMBAT_COMPLETE_EVENT:
                 CombatCompleteEvent combatCompleteEvent = dataToken.ToObject<CombatCompleteEvent>();
