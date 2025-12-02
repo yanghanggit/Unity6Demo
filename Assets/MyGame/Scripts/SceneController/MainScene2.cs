@@ -109,7 +109,7 @@ public class MainScene2 : MonoBehaviour
     private IEnumerator RefreshGameState()
     {
         // 必须先走这个一步，本质上是全局状态的刷新！
-        yield return GameStateSync.Instance.RefreshStagesMappingAndActorsFromServer();
+        yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
 
         // 测试一下是否可以正确获取玩家角色的 EntitySerialization 并序列化为 JSON。
         var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);

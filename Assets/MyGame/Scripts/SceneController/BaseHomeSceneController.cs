@@ -83,7 +83,7 @@ public abstract class BaseHomeSceneController : MonoBehaviour
 
     private IEnumerator FetchMapping()
     {
-        yield return GameStateSync.Instance.RefreshStagesMappingAndActorsFromServer();
+        yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
     }
 
     public void OnClickBack()

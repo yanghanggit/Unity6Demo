@@ -60,7 +60,7 @@ public class GameStateSync : MonoBehaviour
     /// 获取场景与演员的映射关系并更新到GameContext
     /// </summary>
     /// <returns>协程迭代器，成功返回true，失败返回false</returns>
-    public IEnumerator RefreshStagesMappingFromServer()
+    public IEnumerator RefreshMappingFromServer()
     {
         if (_stagesStateApi == null)
         {
@@ -83,7 +83,7 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 更新全局映射关系
-        GameContext.Instance.Mapping = _stagesStateApi.RespData.mapping;
+        GameContext.Instance.StageActorMapping = _stagesStateApi.RespData.mapping;
         Debug.Log("[GameStateSync] Successfully refreshed stages mapping from server");
     }
 
@@ -196,14 +196,14 @@ public class GameStateSync : MonoBehaviour
     /// 适用于需要获取完整游戏状态的场景，如初始化、场景切换等
     /// </summary>
     /// <returns>协程迭代器</returns>
-    public IEnumerator RefreshStagesMappingAndEntitiesFromServer()
+    public IEnumerator RefreshMappingAndEntitiesFromServer()
     {
         // 步骤1: 刷新场景映射关系
-        yield return RefreshStagesMappingFromServer();
+        yield return RefreshMappingFromServer();
 
         // 临时测试，将  GameContext.Instance.Mapping 与 GameContext.Instance.AllActors 打印出来
         Debug.Log("[GameStateSync] Current Mapping:");
-        foreach (var kvp in GameContext.Instance.Mapping)
+        foreach (var kvp in GameContext.Instance.StageActorMapping)
         {
             Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
         }
@@ -225,14 +225,14 @@ public class GameStateSync : MonoBehaviour
     /// 相比RefreshStagesMappingAndEntitiesFromServer，此方法不获取场景详情，适用于只需要演员数据的场景
     /// </summary>
     /// <returns>协程迭代器</returns>
-    public IEnumerator RefreshStagesMappingAndActorsFromServer()
+    public IEnumerator RefreshMappingAndActorsFromServer()
     {
         // 步骤1: 刷新场景映射关系
-        yield return RefreshStagesMappingFromServer();
+        yield return RefreshMappingFromServer();
 
         // 临时测试，将  GameContext.Instance.Mapping 与 GameContext.Instance.AllActors 打印出来
         Debug.Log("[GameStateSync] Current Mapping:");
-        foreach (var kvp in GameContext.Instance.Mapping)
+        foreach (var kvp in GameContext.Instance.StageActorMapping)
         {
             Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
         }
@@ -270,7 +270,7 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 更新全局地下城数据
-        GameContext.Instance.Mapping = _dungeonStateApi.RespData.mapping;
+        GameContext.Instance.StageActorMapping = _dungeonStateApi.RespData.mapping;
         GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
 
         Debug.Log("[GameStateSync] Successfully refreshed dungeon state from server");

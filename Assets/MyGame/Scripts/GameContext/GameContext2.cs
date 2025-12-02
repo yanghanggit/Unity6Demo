@@ -1,21 +1,41 @@
 using System.Collections.Generic;
 
+/// <summary>
+/// GameContext的部分类扩展
+/// 负责管理游戏中的实体关系、场景映射和地牢数据
+/// </summary>
 public partial class GameContext
 {
-    private Dictionary<string, List<string>> _mapping = new Dictionary<string, List<string>>();
+    /// <summary>
+    /// 场景与角色的映射关系
+    /// Key: 场景名称, Value: 该场景中的角色列表
+    /// </summary>
+    private Dictionary<string, List<string>> _stageActorMapping = new Dictionary<string, List<string>>();
 
+    /// <summary>
+    /// 所有角色实体的序列化数据列表
+    /// </summary>
     private List<EntitySerialization> _actorEntitiesSerialization = new List<EntitySerialization>();
 
+    /// <summary>
+    /// 所有场景实体的序列化数据列表
+    /// </summary>
     private List<EntitySerialization> _stageEntitiesSerialization = new List<EntitySerialization>();
 
+    /// <summary>
+    /// 地牢数据对象
+    /// </summary>
     private Dungeon _dungeon = new Dungeon();
 
-
-    public Dictionary<string, List<string>> Mapping
+    /// <summary>
+    /// 获取或设置场景与角色的映射关系
+    /// Key为场景名称，Value为该场景中的角色名称列表
+    /// </summary>
+    public Dictionary<string, List<string>> StageActorMapping
     {
         get
         {
-            return _mapping;
+            return _stageActorMapping;
         }
 
         set
@@ -25,16 +45,20 @@ public partial class GameContext
                 UnityEngine.Debug.LogError("Mapping is null");
                 return;
             }
-            _mapping = value;
+            _stageActorMapping = value;
         }
     }
 
+    /// <summary>
+    /// 获取游戏中所有角色的名称列表
+    /// 通过遍历场景映射关系，汇总所有场景中的角色
+    /// </summary>
     public List<string> AllActors
     {
         get
         {
             List<string> allActors = new List<string>();
-            foreach (var kvp in _mapping)
+            foreach (var kvp in _stageActorMapping)
             {
                 allActors.AddRange(kvp.Value);
             }
@@ -42,17 +66,25 @@ public partial class GameContext
         }
     }
 
+    /// <summary>
+    /// 获取游戏中所有场景的名称列表
+    /// </summary>
     public List<string> AllStages
     {
         get
         {
-            return new List<string>(_mapping.Keys);
+            return new List<string>(_stageActorMapping.Keys);
         }
     }
 
+    /// <summary>
+    /// 根据角色名称查找该角色所在的场景
+    /// </summary>
+    /// <param name="actorName">角色名称</param>
+    /// <returns>返回场景名称，如果未找到则返回空字符串</returns>
     public string GetActorStage(string actorName)
     {
-        foreach (var kvp in _mapping)
+        foreach (var kvp in _stageActorMapping)
         {
             if (kvp.Value.Contains(actorName))
             {
@@ -62,15 +94,23 @@ public partial class GameContext
         return "";
     }
 
+    /// <summary>
+    /// 获取指定场景中的所有角色列表
+    /// </summary>
+    /// <param name="stageName">场景名称</param>
+    /// <returns>返回该场景中的角色列表，如果场景不存在则返回空列表</returns>
     public List<string> GetActorsInStage(string stageName)
     {
-        if (_mapping.ContainsKey(stageName))
+        if (_stageActorMapping.ContainsKey(stageName))
         {
-            return _mapping[stageName];
+            return _stageActorMapping[stageName];
         }
         return new List<string>();
     }
 
+    /// <summary>
+    /// 获取或设置当前地牢数据
+    /// </summary>
     public Dungeon Dungeon
     {
         get
@@ -89,6 +129,10 @@ public partial class GameContext
         }
     }
 
+    /// <summary>
+    /// 获取或设置所有角色实体的序列化数据列表
+    /// 用于存储和管理角色的持久化数据
+    /// </summary>
     public List<EntitySerialization> ActorEntitiesSerialization
     {
         get
@@ -106,6 +150,10 @@ public partial class GameContext
         }
     }
 
+    /// <summary>
+    /// 获取或设置所有场景实体的序列化数据列表
+    /// 用于存储和管理场景的持久化数据
+    /// </summary>
     public List<EntitySerialization> StageEntitiesSerialization
     {
         get
@@ -123,6 +171,11 @@ public partial class GameContext
         }
     }
 
+    /// <summary>
+    /// 根据角色名称获取对应的实体序列化数据
+    /// </summary>
+    /// <param name="actorName">角色名称</param>
+    /// <returns>返回对应的EntitySerialization对象，如果未找到则返回null</returns>
     public EntitySerialization GetActorEntitySerialization(string actorName)
     {
         foreach (var entitySerialization in _actorEntitiesSerialization)
@@ -135,6 +188,11 @@ public partial class GameContext
         return null;
     }
 
+    /// <summary>
+    /// 根据场景名称获取对应的实体序列化数据
+    /// </summary>
+    /// <param name="stageName">场景名称</param>
+    /// <returns>返回对应的EntitySerialization对象，如果未找到则返回null</returns>
     public EntitySerialization GetStageEntitySerialization(string stageName)
     {
         foreach (var entitySerialization in _stageEntitiesSerialization)
