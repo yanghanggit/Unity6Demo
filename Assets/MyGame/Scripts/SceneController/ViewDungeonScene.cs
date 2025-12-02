@@ -12,8 +12,6 @@ public class ViewDungeonScene : MonoBehaviour
 
     public TMP_Text _mainText;
 
-    //public DungeonStateApi _dungeonStateApi;
-
     public TransDungeonApi _transDungeonApi;
 
     void Start()
@@ -51,15 +49,6 @@ public class ViewDungeonScene : MonoBehaviour
 
     IEnumerator ExecuteViewDungeon()
     {
-        // yield return _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
-        // if (_dungeonStateApi.RespData == null)
-        // {
-        //     yield break;
-        // }
-
-        // GameContext.Instance.Mapping = _dungeonStateApi.RespData.mapping;
-        // GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
-
         yield return GameStateSync.Instance.RefreshDungeonFromServer();
 
         _mainText.text = DungeonOverviewDisplayText(GameContext.Instance.Dungeon);

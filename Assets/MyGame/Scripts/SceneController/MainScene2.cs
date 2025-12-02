@@ -171,6 +171,15 @@ public class MainScene2 : MonoBehaviour
                 yield break;
             }
 
+            yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
+            (sessionMessages) =>
+                {
+                    Debug.Log($"Fetched {sessionMessages.Count} session messages from server after transitioning to stage {targetStageName}");
+                    // 处理接收到的会话消息
+                    //GameContext.Instance.ProcessClientMessages(sessionMessages);
+                }
+            );
+
             // 请求成功
             Debug.Log($"ExecuteTransStage = {targetStageName} completed");
         }
