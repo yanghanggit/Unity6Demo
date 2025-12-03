@@ -4,29 +4,72 @@ using UnityEngine.SceneManagement;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+
+/// <summary>
+/// 主场景控制器(MainScene2)
+/// 负责管理主场景的UI交互、场景切换、玩家信息显示等核心功能
+/// 作为玩家进入游戏后的主要控制中心,提供前往不同游戏场景的入口
+/// </summary>
 public class MainScene2 : MonoBehaviour
 {
-    // 静态属性用于场景间传递配置
+    /// <summary>
+    /// 静态属性用于在场景切换时传递 HomeSceneConfig 配置数据
+    /// 下一个场景(HomeScene)会在 Awake 时读取并清空此属性
+    /// </summary>
     public static HomeSceneConfig PendingHomeSceneConfig { get; set; }
 
-    public string _preScene = "LoginScene";
+    [Header("Scene Settings")]
+    /// <summary>
+    /// 返回按钮要跳转的上一个场景名称
+    /// </summary>
+    [SerializeField] private string _preScene = "LoginScene";
 
-    public string _nextScene = "HomeScene";
+    /// <summary>
+    /// 场景转换时要加载的目标场景名称
+    /// </summary>
+    [SerializeField] private string _nextScene = "HomeScene";
 
-    public LogoutApi _logoutApi;
+    [Header("API Components")]
+    /// <summary>
+    /// 登出 API 接口,用于处理玩家退出登录的请求
+    /// </summary>
+    [SerializeField] private LogoutApi _logoutApi;
 
-    public HomeGamePlayApi _homeGamePlayApi;
+    /// <summary>
+    /// 主场景游戏玩法 API 接口,用于与服务器通信(如切换 Stage)
+    /// </summary>
+    [SerializeField] private HomeGamePlayApi _homeGamePlayApi;
 
-    public GameObject _dungeonButton;
+    [Header("HomeSceneConfigs")]
+    /// <summary>
+    /// 营地场景配置数据(包含 StageName 和 SceneDisplayName)
+    /// </summary>
+    [SerializeField] private HomeSceneConfig _campSceneConfig;
 
-    public GameObject _playerInfoBar;
+    /// <summary>
+    /// 餐厅场景配置数据(包含 StageName 和 SceneDisplayName)
+    /// </summary>
+    [SerializeField] private HomeSceneConfig _restaurantSceneConfig;
 
-    public GameObject _playerInfoDetails;
+    [Header("UI Components")]
+    /// <summary>
+    /// 地牢按钮对象
+    /// </summary>
+    [SerializeField] private GameObject _dungeonButton;
 
-    public HomeSceneConfig _campSceneConfig;
+    /// <summary>
+    /// 玩家信息栏UI对象(显示玩家头像等基本信息)
+    /// </summary>
+    [SerializeField] private GameObject _playerInfoBar;
 
-    public HomeSceneConfig _restaurantSceneConfig;
-
+    /// <summary>
+    /// 玩家详细信息面板UI对象(点击头像后显示)
+    /// </summary>
+    [SerializeField] private GameObject _playerInfoDetails;
+    /// <summary>
+    /// 场景启动初始化方法
+    /// 验证所有必需的组件引用,注册UI事件回调,刷新游戏状态
+    /// </summary>
     void Start()
     {
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
@@ -44,13 +87,17 @@ public class MainScene2 : MonoBehaviour
         _playerInfoDetails.GetComponent<PlayerInfoDetails>().OnCloseButtonClickedCallback += OnClickClosePlayerInfoDetails;
         _playerInfoDetails.SetActive(false);
 
-        // 直接刷新
+        // 启动时立即刷新游戏状态
         StartCoroutine(RefreshGameState());
     }
 
+    /// <summary>
+    /// 场景销毁时的清理方法
+    /// 取消注册所有事件回调,防止内存泄漏
+    /// </summary>
     void OnDestroy()
     {
-        // 清除回调,避免内存泄漏
+        // 清除玩家信息栏的头像点击回调
         if (_playerInfoBar != null)
         {
             PlayerInfoBar playerInfoBar = _playerInfoBar.GetComponent<PlayerInfoBar>();
@@ -60,6 +107,7 @@ public class MainScene2 : MonoBehaviour
             }
         }
 
+        // 清除玩家详细信息面板的关闭按钮回调
         if (_playerInfoDetails != null)
         {
             PlayerInfoDetails playerInfoDetails = _playerInfoDetails.GetComponent<PlayerInfoDetails>();
@@ -70,38 +118,85 @@ public class MainScene2 : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 返回按钮点击事件处理
+    /// 触发登出流程并返回登录场景
+    /// </summary>
     public void OnClickBack()
     {
         Debug.Log("Back button clicked");
         StartCoroutine(ReturnToLoginScene());
     }
 
+    /// <summary>
+    /// 营地按钮点击事件处理
+    /// 使用营地场景配置进行场景转换
+    /// </summary>
     public void OnClickCamp()
     {
         Debug.Log("OnClickCamp");
         StartCoroutine(TransitionToScene(_campSceneConfig));
     }
 
+    /// <summary>
+    /// 餐厅按钮点击事件处理
+    /// 使用餐厅场景配置进行场景转换
+    /// </summary>
     public void OnClickRestaurant()
     {
         Debug.Log("OnClickRestaurant");
         StartCoroutine(TransitionToScene(_restaurantSceneConfig));
     }
 
+    /// <summary>
+    /// 地牢按钮点击事件处理
+    /// 打开地牢浏览场景
+    /// </summary>
     public void OnClickDungeon()
     {
         Debug.Log("OnClickDungeon");
         StartCoroutine(OpenViewDungeonScene());
     }
 
+    /// <summary>
+    /// 玩家头像点击事件回调
+    /// 显示玩家详细信息面板
+    /// </summary>
+    private void OnHeadIconClicked()
+    {
+        Debug.Log("Head icon clicked in MainScene2!");
+        _playerInfoDetails.SetActive(true);
+    }
+
+    /// <summary>
+    /// 关闭玩家详细信息面板的回调
+    /// 隐藏玩家详细信息面板
+    /// </summary>
+    public void OnClickClosePlayerInfoDetails()
+    {
+        Debug.Log("Player info details clicked!");
+        _playerInfoDetails.SetActive(false);
+    }
+
+    /// <summary>
+    /// 打开地牢浏览场景的协程
+    /// 直接加载 ViewDungeonScene 场景
+    /// </summary>
     IEnumerator OpenViewDungeonScene()
     {
         yield return new WaitForSeconds(0);
         SceneManager.LoadScene("ViewDungeonScene");
     }
 
+    /// <summary>
+    /// 返回登录场景的协程
+    /// 1. 调用登出 API
+    /// 2. 清除游戏上下文数据
+    /// 3. 加载登录场景
+    /// </summary>
     IEnumerator ReturnToLoginScene()
     {
+        // 调用登出 API,通知服务器玩家退出
         yield return _logoutApi.Call(GameContext.Instance.LogoutUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
         if (_logoutApi.RespData == null)
         {
@@ -109,20 +204,25 @@ public class MainScene2 : MonoBehaviour
             yield break;
         }
 
-        // 清除数据
+        // 清除游戏上下文中的所有数据
         GameContext.ClearInstance();
 
-        // 返回登录场景
+        // 加载并返回到登录场景
         yield return new WaitForSeconds(0);
         SceneManager.LoadScene(_preScene);
     }
 
+    /// <summary>
+    /// 刷新游戏状态的协程
+    /// 1. 从服务器刷新映射和角色数据
+    /// 2. 获取并序列化玩家角色的实体数据(用于调试)
+    /// </summary>
     private IEnumerator RefreshGameState()
     {
-        // 必须先走这个一步，本质上是全局状态的刷新！
+        // 从服务器同步最新的全局状态(包括映射和所有角色数据)
         yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
 
-        // 测试一下是否可以正确获取玩家角色的 EntitySerialization 并序列化为 JSON。
+        // 获取玩家角色的实体序列化数据用于验证和调试
         var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
         if (playerActorEntitySerialization == null)
         {
@@ -132,7 +232,7 @@ public class MainScene2 : MonoBehaviour
 
         try
         {
-            // 直接将 EntitySerialization 序列化为 JSON 字符串
+            // 将玩家角色实体数据序列化为 JSON 并输出到日志(用于调试)
             string jsonString = JsonConvert.SerializeObject(playerActorEntitySerialization, Formatting.Indented);
             Debug.Log($"Actor[{GameContext.Instance.ActorName}] JSON:\n{jsonString}");
         }
@@ -142,38 +242,34 @@ public class MainScene2 : MonoBehaviour
         }
     }
 
-    private void OnHeadIconClicked()
-    {
-        Debug.Log("Head icon clicked in MainScene2!");
-        _playerInfoDetails.SetActive(true);
-    }
-
-    public void OnClickClosePlayerInfoDetails()
-    {
-        Debug.Log("Player info details clicked!");
-        _playerInfoDetails.SetActive(false);
-    }
-
     /// <summary>
     /// 验证场景转换事件是否成功
-    /// 检查是否收到了预期的 TransStageEvent
+    /// 在场景切换后检查服务器返回的消息中是否包含预期的 TransStageEvent
     /// </summary>
+    /// <param name="sessionMessages">从服务器获取的会话消息列表</param>
+    /// <param name="targetStageName">目标场景的 Stage 名称</param>
+    /// <returns>是否找到了 TransStageEvent</returns>
     private bool ValidateTransStageEvent(List<SessionMessage> sessionMessages, string targetStageName)
     {
         bool checkTransStageEvent = false;
 
+        // 输出获取到的消息数量
         Debug.Log($"Fetched {sessionMessages.Count} session messages from server after transitioning to stage {targetStageName}");
+
+        // 从游戏上下文获取最近的代理事件历史记录
         var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
         if (lastAgentEventsHistory.ContainsKey(GameContext.Instance.ActorName))
         {
             var agentEvents = lastAgentEventsHistory[GameContext.Instance.ActorName];
             Debug.Log($"There are {agentEvents.Count} agent events for actor {GameContext.Instance.ActorName} after transitioning to stage {targetStageName}");
 
+            // 遍历所有代理事件,查找 TransStageEvent
             foreach (var agentEvent in agentEvents)
             {
                 if (agentEvent.head == (int)EventHead.TRANS_STAGE_EVENT)
                 {
                     TransStageEvent transStageEvent = (TransStageEvent)agentEvent;
+                    // 验证事件的角色是否匹配当前玩家
                     Debug.Assert(transStageEvent.actor == GameContext.Instance.ActorName, "TransStageEvent actor does not match current actor");
                     Debug.Log($"{transStageEvent.actor} Agent Event: (trans_stage) from {transStageEvent.from_stage} to {transStageEvent.to_stage}");
                     checkTransStageEvent = true;
@@ -181,6 +277,7 @@ public class MainScene2 : MonoBehaviour
             }
         }
 
+        // 如果没有找到 TransStageEvent,输出警告
         if (!checkTransStageEvent)
         {
             Debug.LogWarning($"No TransStageEvent found for actor {GameContext.Instance.ActorName} after transitioning to stage {targetStageName}");
@@ -190,16 +287,23 @@ public class MainScene2 : MonoBehaviour
     }
 
     /// <summary>
-    /// 将玩家角色转移到指定的Stage(服务器状态)和Scene(Unity场景)
-    /// 如果玩家已在目标Stage中,则直接加载Scene
+    /// 将玩家角色转移到指定的 Stage(服务器状态) 和 Scene(Unity 场景)
+    /// 完整流程:
+    /// 1. 检查玩家当前是否已在目标 Stage
+    /// 2. 如果不在,调用服务器 API 切换 Stage
+    /// 3. 刷新游戏状态并验证转换事件
+    /// 4. 设置待处理的场景配置并加载目标 Unity 场景
     /// </summary>
+    /// <param name="sceneConfig">目标场景的配置数据(包含 StageName 和 SceneDisplayName)</param>
     private IEnumerator TransitionToScene(HomeSceneConfig sceneConfig)
     {
-        // 是否已经在该场景中
+        // 获取玩家当前所在的 Stage 名称
         var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+
+        // 检查玩家是否已在目标 Stage 中
         if (currentStageName != sceneConfig.StageName)
         {
-            // 不在，通知服务器转换场景
+            // 玩家不在目标 Stage,需要通知服务器切换 Stage
             yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
@@ -210,17 +314,17 @@ public class MainScene2 : MonoBehaviour
                 ["stage_name"] = sceneConfig.StageName
             });
 
+            // 检查 API 调用是否成功
             if (_homeGamePlayApi.RespData == null)
             {
-                // 请求失败，就不能往后走
                 Debug.LogError($"ExecuteTransStage = {sceneConfig.StageName} request failed");
                 yield break;
             }
 
-            // 请求成功，刷新全局状态，这么做有点笨，但保证万无一失
+            // API 调用成功,刷新全局状态以确保数据同步
             yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
 
-            // 尝试获取最新的消息并验证场景转换事件
+            // 获取服务器最新消息并验证是否收到了场景转换事件
             yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
             (sessionMessages) =>
                 {
@@ -228,21 +332,21 @@ public class MainScene2 : MonoBehaviour
                 }
             );
 
-            // 请求成功
             Debug.Log($"ExecuteTransStage = {sceneConfig.StageName} completed");
         }
         else
         {
+            // 玩家已在目标 Stage 中,无需切换服务器状态
             Debug.Log($"Already in target stage: {sceneConfig.StageName}, no need to switch.");
         }
 
-        // 到这里一定能打开场景，就进行切换！
+        // 短暂等待以确保所有异步操作完成
         yield return new WaitForSeconds(0.0f);
 
-        // 将配置传递给下一个场景
+        // 将场景配置设置到静态属性,供下一个场景(HomeScene)读取
         PendingHomeSceneConfig = sceneConfig;
 
-        // 加载目标场景
-        SceneManager.LoadScene("HomeScene");
+        // 加载目标 Unity 场景
+        SceneManager.LoadScene(_nextScene);
     }
 }
