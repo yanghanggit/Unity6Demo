@@ -141,7 +141,7 @@ public abstract class BaseHomeSceneController : MonoBehaviour
     {
         yield return new WaitForSeconds(0);
 
-        if (GameContext.Instance.Root != null)
+        if (GameContext.Instance.RootResp != null)
         {
             Debug.Log("Returning to MainScene2");
             SceneManager.LoadScene(PreScene);
@@ -326,7 +326,7 @@ public abstract class BaseHomeSceneController : MonoBehaviour
     public void OnClickSendMessage()
     {
         Debug.Log("Send Message button clicked");
-        if (GameContext.Instance.Root != null && !string.IsNullOrEmpty(_currentSpriteName) && !string.IsNullOrEmpty(_inputField.text))
+        if (GameContext.Instance.RootResp != null && !string.IsNullOrEmpty(_currentSpriteName) && !string.IsNullOrEmpty(_inputField.text))
         {
             if (_currentSpriteName != GameContext.Instance.ActorName)
             {
@@ -465,18 +465,19 @@ public abstract class BaseHomeSceneController : MonoBehaviour
         }
 
         // 获取当前场景的角色列表
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
-        Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
-        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
-        actorsInStage.Remove(GameContext.Instance.ActorName);
+        // var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        // Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
+        // var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        // actorsInStage.Remove(GameContext.Instance.ActorName);
+        var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
         if (actorsInStage.Count > 0)
         {
-            Debug.Log($"Actors in current stage ({stageName}): {string.Join(", ", actorsInStage)}");
+            Debug.Log($"Actors in current stage: {string.Join(", ", actorsInStage)}");
             _createdSprites = InstantiateAndPositionSprites(actorsInStage);
         }
         else
         {
-            Debug.Log($"No other actors found in current stage ({stageName})");
+            Debug.Log("No other actors found in current stage");
         }
     }
 

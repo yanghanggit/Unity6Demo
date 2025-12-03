@@ -257,8 +257,8 @@ public partial class GameContext
                 break;
 
             case EventHead.TRANS_STAGE_EVENT:
-                AgentEvent transStageEvent = dataToken.ToObject<AgentEvent>();
-                AddEventToActor(agentEventsByActor, transStageEvent.message, transStageEvent);
+                TransStageEvent transStageEvent = dataToken.ToObject<TransStageEvent>();
+                AddEventToActor(agentEventsByActor, transStageEvent.actor, transStageEvent);
                 break;
 
             default:
@@ -266,5 +266,4 @@ public partial class GameContext
                 break;
         }
     }
-
 }

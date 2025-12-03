@@ -188,6 +188,13 @@ public class MainScene2 : MonoBehaviour
 
         // 到这里一定能打开场景，就进行切换！
         yield return new WaitForSeconds(0.0f);
+
+        // 临时测试！
+        if (loadSceneName == "CampScene")
+        {
+            loadSceneName = "HomeScene";
+        }
+
         SceneManager.LoadScene(loadSceneName);
     }
 }

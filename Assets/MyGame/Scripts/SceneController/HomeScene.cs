@@ -1,83 +1,294 @@
 using UnityEngine;
 using Mosframe;
 using TMPro;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
+/// <summary>
+/// 主场景控制器
+/// 负责管理主场景的UI交互、角色选择和状态切换
+/// </summary>
 public class HomeScene : MonoBehaviour, IStringGameEventListener
 {
+    // UI组件引用
     [Header("UI Components")]
-    [SerializeField] private GameObject _background;
-    [SerializeField] private GameObject _currentActor;
-    [SerializeField] private GameObject _speechBubble;
-    [SerializeField] private TMP_Text _speechBubbleText;
-    [SerializeField] private GameObject _state1;
-    [SerializeField] private DynamicScrollView _scrollView;
+    [SerializeField] private GameObject _background;            // 场景背景
+    [SerializeField] private GameObject _currentActor;          // 当前选中的角色显示对象
+    [SerializeField] private GameObject _speechBubble;          // 对话气泡UI
+    [SerializeField] private TMP_Text _speechBubbleText;        // 对话气泡文本
+    [SerializeField] private GameObject _mainState;             // 主状态UI容器
+    [SerializeField] private GameObject _inputState;            // 输入状态UI容器
+    [SerializeField] private DynamicScrollView _scrollView;     // 动态滚动视图
 
+    // 配置和API
     [Header("Scene Config")]
-    [SerializeField] private HomeSceneConfig _homeSceneConfig;
+    [SerializeField] private HomeSceneConfig _homeSceneConfig; // 场景配置数据
 
     [Header("API Components")]
-    [SerializeField] private HomeGamePlayApi _homeGamePlayApi;
+    [SerializeField] private HomeGamePlayApi _homeGamePlayApi; // 游戏玩法API接口
 
+    // 事件系统
     [Header("Events")]
-    [SerializeField] private StringGameEvent onActorClickedEvent;
+    [SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
 
+    // 私有成员变量
+    /// <summary>
+    /// 当前选中的角色名称
+    /// </summary>
+    private string _selectedActorName = string.Empty;
 
+    // Unity生命周期方法
+    /// <summary>
+    /// 当脚本被启用时调用
+    /// 注册角色点击事件监听器
+    /// </summary>
     void OnEnable()
     {
-        Debug.Assert(onActorClickedEvent != null, "onActorClickedEvent is null");
-        onActorClickedEvent.RegisterListener(this);
-        
+        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
+        _onActorClickedEvent.RegisterListener(this);
     }
 
+    /// <summary>
+    /// 当脚本被禁用时调用
+    /// 注销所有事件监听器,防止内存泄漏
+    /// </summary>
     void OnDisable()
     {
-        Debug.Assert(onActorClickedEvent != null, "onActorClickedEvent is null");
-        onActorClickedEvent.UnregisterListener(this);
+        // 注销角色点击事件监听器
+        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
+        _onActorClickedEvent.UnregisterListener(this);
+
+        // 注销背景点击事件
+        Debug.Assert(_background != null, "_background is null");
+        SpriteClickHandler backgroundClickHandler = _background.GetComponent<SpriteClickHandler>();
+        Debug.Assert(backgroundClickHandler != null, "_background is missing SpriteClickHandler component");
+        backgroundClickHandler.OnSpriteClicked -= OnBackgroundClicked;
+
+        // 注销当前角色点击事件
+        Debug.Assert(_currentActor != null, "_currentActor is null");
+        SpriteClickHandler currentActorClickHandler = _currentActor.GetComponent<SpriteClickHandler>();
+        Debug.Assert(currentActorClickHandler != null, "_currentActor is missing SpriteClickHandler component");
+        currentActorClickHandler.OnSpriteClicked -= OnCurrentActorClicked;
     }
 
+    /// <summary>
+    /// 场景初始化方法
+    /// 执行组件引用验证和初始UI状态设置
+    /// </summary>
     void Start()
     {
+        // 验证所有必需的组件引用
+
+        // 背景组件验证
         Debug.Assert(_background != null, "_background is null");
+        Debug.Assert(_background.GetComponent<SpriteRenderer>() != null, "_background is missing SpriteRenderer component");
+        Debug.Assert(_background.GetComponent<BoxCollider2D>() != null, "_background is missing BoxCollider2D component");
+        Debug.Assert(_background.GetComponent<SpriteClickHandler>() != null, "_background is missing SpriteClickHandler component");
+
+        // 角色组件验证
         Debug.Assert(_currentActor != null, "_currentActor is null");
+        Debug.Assert(_currentActor.GetComponent<SpriteRenderer>() != null, "_currentActor is missing SpriteRenderer component");
+        Debug.Assert(_currentActor.GetComponent<BoxCollider2D>() != null, "_currentActor is missing BoxCollider2D component");
+        Debug.Assert(_currentActor.GetComponent<SpriteClickHandler>() != null, "_currentActor is missing SpriteClickHandler component");
+
+
         Debug.Assert(_speechBubble != null, "_speechBubble is null");
         Debug.Assert(_speechBubbleText != null, "_speechBubbleText is null");
-        Debug.Assert(_state1 != null, "_state1 is null");
+        Debug.Assert(_mainState != null, "_mainState is null");
+        Debug.Assert(_inputState != null, "_inputState is null");
         Debug.Assert(_scrollView != null, "_scrollView is null");
         Debug.Assert(_homeSceneConfig != null, "_homeSceneConfig is null");
         Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
-        Debug.Assert(onActorClickedEvent != null, "onActorClickedEvent is null");
+        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
+
+        // 初始化UI状态
+
+        // 注册背景点击事件
+        SpriteClickHandler backgroundClickHandler = _background.GetComponent<SpriteClickHandler>();
+        Debug.Assert(backgroundClickHandler != null, "_background is missing SpriteClickHandler component");
+        backgroundClickHandler.OnSpriteClicked += OnBackgroundClicked;
+
+        // 注册当前角色点击事件
+        SpriteClickHandler currentActorClickHandler = _currentActor.GetComponent<SpriteClickHandler>();
+        Debug.Assert(currentActorClickHandler != null, "_currentActor is missing SpriteClickHandler component");
+        currentActorClickHandler.OnSpriteClicked += OnCurrentActorClicked;
+
+        // 其余的设置！
+        Debug.Assert(string.IsNullOrEmpty(_selectedActorName), "_selectedActorName should be empty at start");
+        UpdateActorDisplay(_selectedActorName);    // 初始化角色显示为空
+
+        // 设置主状态UI
+        _mainState.SetActive(true);                  // 显示主状态UI
+        _inputState.SetActive(false);                // 隐藏输入状态UI
 
         //
-        _currentActor.SetActive(false);
-        _speechBubble.SetActive(false);
-        _state1.SetActive(true);
-        _scrollView.totalItemCount = 10;
-        //_speechBubbleText.text = "欢迎来到游戏！";
+        if (GameContext.Instance.RootResp != null)
+        {
+            // 走到这里就是有正规登陆的，加载当前场景的角色列表
+            var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
+            if (actorsInStage.Count > 0)
+            {
+                Debug.Log($"Actors in current stage: {string.Join(", ", actorsInStage)}");
+                _scrollView.totalItemCount = actorsInStage.Count;
+            }
+            else
+            {
+                _scrollView.totalItemCount = 0;
+                Debug.Log("No other actors found in current stage");
+            }
+        }
+        else
+        {
+            Debug.Log("[HomeScene] GameContext Root is null");
+            _scrollView.totalItemCount = 0;
+        }
+
     }
 
-    void Update()
-    {
-
-    }
-
+    // UI按钮回调方法
+    /// <summary>
+    /// 运行按钮点击回调
+    /// TODO: 实现游戏开始逻辑
+    /// </summary>
     public void OnRunButtonClicked()
     {
         Debug.Log("Run button clicked in HomeScene.");
+        StartCoroutine(AdvanceHomeState());
     }
 
+    /// <summary>
+    /// 返回按钮点击回调
+    /// TODO: 实现返回上一场景逻辑
+    /// </summary>
     public void OnBackButtonClicked()
     {
         Debug.Log("Back button clicked in HomeScene.");
+        StartCoroutine(ReturnToMainScene());
     }
 
-    // IStringGameEventListener 接口实现
+    // IStringGameEventListener接口实现
+    /// <summary>
+    /// 字符串游戏事件回调方法
+    /// 当角色被点击时触发,处理角色选择逻辑
+    /// </summary>
+    /// <param name="actorName">被点击的角色名称</param>
     public void OnEventRaised(string actorName)
     {
         Debug.Log($"[HomeScene] Actor clicked: {actorName}");
 
-        // 在这里处理 Actor 被点击的逻辑
-        _currentActor.SetActive(true);
-        _speechBubble.SetActive(true);
-        _speechBubbleText.text = $"你选择了: {actorName}";
+        // 防止重复选择同一角色
+        if (_selectedActorName == actorName)
+        {
+            Debug.Log($"[HomeScene] Actor {actorName} is already selected.");
+            return;
+        }
+
+        // 更新选中的角色名称
+        _selectedActorName = actorName;
+        Debug.Log($"[HomeScene] Selected actor updated to: {_selectedActorName}");
+
+        // 更新UI显示选中的角色
+        UpdateActorDisplay(actorName);
+    }
+
+    // 私有辅助方法
+    /// <summary>
+    /// 更新角色选择后的UI显示
+    /// 激活角色显示对象和对话气泡,并更新提示文本
+    /// </summary>
+    /// <param name="selectedActorName">选中的角色名称</param>
+    private void UpdateActorDisplay(string selectedActorName)
+    {
+        Debug.Log($"[HomeScene] Handling selection for actor: {selectedActorName}");
+
+        if (string.IsNullOrEmpty(selectedActorName))
+        {
+            _currentActor.SetActive(false);                             // 隐藏角色显示
+            _speechBubble.SetActive(false);                             // 隐藏对话气泡
+            _speechBubbleText.text = string.Empty;                      // 更新提示文本
+        }
+        else
+        {
+            _currentActor.SetActive(true);                              // 显示选中的角色
+            _speechBubble.SetActive(true);                              // 显示对话气泡
+            _speechBubbleText.text = $"你选择了: {selectedActorName}";   // 更新提示文本
+
+            // 更新当前角色的Sprite显示
+            var actorSprite = TextureManager.Instance.GetSprite(selectedActorName);
+            Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + selectedActorName);
+            _currentActor.GetComponent<SpriteRenderer>().sprite = actorSprite;
+        }
+    }
+
+    /// <summary>
+    /// 背景点击事件回调
+    /// 当背景被点击时触发,返回主状态
+    /// </summary>
+    /// <param name="clickHandler">触发点击的SpriteClickHandler组件</param>
+    private void OnBackgroundClicked(SpriteClickHandler clickHandler)
+    {
+        Debug.Log("背景被点击，返回主状态。");
+    }
+
+    /// <summary>
+    /// 当前角色点击事件回调
+    /// 当选中的角色精灵被点击时触发
+    /// </summary>
+    /// <param name="clickHandler">触发点击的SpriteClickHandler组件</param>
+    private void OnCurrentActorClicked(SpriteClickHandler clickHandler)
+    {
+        Debug.Log($"精灵 {clickHandler.gameObject.name} 被点击了！");
+    }
+
+    /// <summary>
+    /// 返回主场景的协程
+    /// 检查游戏是否已正确设置,如果是则加载MainScene2场景
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator ReturnToMainScene()
+    {
+        // 检查游戏是否已正确初始化
+        if (GameContext.Instance.RootResp != null)
+        {
+            yield return new WaitForSeconds(0);
+            Debug.Log("Returning to MainScene2");
+            SceneManager.LoadScene("MainScene2");
+        }
+        else
+        {
+            // 游戏未初始化,保持在当前场景
+            Debug.LogWarning($"Game is not set up. Staying in {_homeSceneConfig.StageName}.");
+        }
+    }
+
+    /// <summary>
+    /// 推进家园场景状态的协程
+    /// 调用服务器API推进场景中所有角色(包括NPC)的行动,并同步最新的游戏状态
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator AdvanceHomeState()
+    {
+        // 调用 HomeGameplay API 的 /advancing 端点,推进场景状态
+        yield return _homeGamePlayApi.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "/advancing");
+
+        // 检查API调用是否成功
+        if (_homeGamePlayApi.RespData == null)
+        {
+            Debug.LogError("HomeGameplayApi /advancing request failed");
+            yield break;
+        }
+
+        // 从服务器获取并同步最新的会话消息
+        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
+            (sessionMessages) =>
+            {
+                Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
+                // 处理接收到的会话消息,更新游戏状态
+            }
+        );
     }
 }

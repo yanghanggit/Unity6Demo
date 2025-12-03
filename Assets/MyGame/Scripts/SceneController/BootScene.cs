@@ -56,7 +56,7 @@ public class BootScene : MonoBehaviour
         }
 
         _loginButton.gameObject.SetActive(true);
-        GameContext.Instance.Root = _rootApi.RespData;
+        GameContext.Instance.RootResp = _rootApi.RespData;
         Debug.Log($"API endpoints initialized successfully from {_baseUrl}");
     }
 

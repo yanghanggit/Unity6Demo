@@ -1,3 +1,6 @@
+using System.Diagnostics;
+
+
 /// <summary>
 /// 游戏上下文管理类
 /// 用于管理游戏的全局状态，包括用户信息、游戏信息和API端点配置
@@ -47,22 +50,22 @@ public partial class GameContext
     /// <summary>
     /// 用户名
     /// </summary>
-    private string _userName = "";
+    private string _userName;
 
     /// <summary>
     /// 游戏名称
     /// </summary>
-    private string _gameName = "";
+    private string _gameName;
 
     /// <summary>
     /// 角色名称
     /// </summary>
-    private string _actorName = "";
+    private string _actorName;
 
     /// <summary>
     /// 根响应对象，包含所有API端点配置
     /// </summary>
-    private RootResponse _rootResponse = new RootResponse();
+    private RootResponse _rootResponse;
 
     /// <summary>
     /// 最后一次序列ID，用于追踪游戏事件的顺序
@@ -133,7 +136,7 @@ public partial class GameContext
     /// 获取或设置根响应对象
     /// 在设置时会验证所有必需的API端点是否存在
     /// </summary>
-    public RootResponse Root
+    public RootResponse RootResp
     {
         get
         {
@@ -171,6 +174,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting LoginUrl");
             return _rootResponse.endpoints["login"];
         }
     }
@@ -182,6 +186,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting LogoutUrl");
             return _rootResponse.endpoints["logout"];
         }
     }
@@ -193,6 +198,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting HomeGameplayUrl");
             return _rootResponse.endpoints["home_gameplay"];
         }
     }
@@ -205,6 +211,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting StagesStateUrl");
             var baseUrl = _rootResponse.endpoints["stages_state"];
             return $"{baseUrl}{UserName}/{GameName}/state";
         }
@@ -218,6 +225,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting DungeonStateUrl");
             var baseUrl = _rootResponse.endpoints["dungeon_state"];
             return $"{baseUrl}{UserName}/{GameName}/state";
         }
@@ -231,6 +239,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting EntityDetailsUrl");
             var baseUrl = _rootResponse.endpoints["entity_details"];
             return $"{baseUrl}{UserName}/{GameName}/details";
         }
@@ -243,6 +252,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting StartUrl");
             return _rootResponse.endpoints["start"];
         }
     }
@@ -254,6 +264,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting HomeTransDungeonUrl");
             return _rootResponse.endpoints["home_trans_dungeon"];
         }
     }
@@ -265,6 +276,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting DungeonGameplayUrl");
             return _rootResponse.endpoints["dungeon_gameplay"];
         }
     }
@@ -276,6 +288,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting DungeonTransHomeUrl");
             return _rootResponse.endpoints["dungeon_trans_home"];
         }
     }
@@ -288,6 +301,7 @@ public partial class GameContext
     {
         get
         {
+            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting SessionMessagesUrl");
             var baseUrl = _rootResponse.endpoints["session_messages"];
             return $"{baseUrl}{UserName}/{GameName}/since";
         }

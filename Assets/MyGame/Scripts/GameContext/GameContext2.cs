@@ -103,9 +103,28 @@ public partial class GameContext
     {
         if (_stageActorMapping.ContainsKey(stageName))
         {
-            return _stageActorMapping[stageName];
+            return new List<string>(_stageActorMapping[stageName]);  // 返回副本
         }
         return new List<string>();
+    }
+
+    /// <summary>
+    /// 获取当前角色所在场景中的其他角色列表(不包括当前角色自己)
+    /// </summary>
+    /// <returns>返回除当前角色外的场景中所有角色列表</returns>
+    public List<string> GetOtherActorsInCurrentStage()
+    {
+        // 获取当前角色所属场景
+        var stageName = GetActorStage(ActorName);
+        UnityEngine.Debug.Assert(stageName != "", "[GameContext] Current actor's stage name is empty");
+        
+        // 获取该场景中的所有角色
+        var actorsInStage = GetActorsInStage(stageName);
+        
+        // 移除当前角色自己
+        actorsInStage.Remove(ActorName);
+        
+        return actorsInStage;
     }
 
     /// <summary>
