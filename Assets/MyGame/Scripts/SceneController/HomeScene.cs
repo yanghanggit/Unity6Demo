@@ -93,7 +93,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         _inputState.SetActive(false);                // 隐藏输入状态UI
 
         //
-        if (GameContext.RootResp != null)
+        if (RootResp.Get() != null)
         {
             // 走到这里就是有正规登陆的，加载当前场景的角色列表
             var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
@@ -278,7 +278,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     private IEnumerator ReturnToMainScene()
     {
         // 检查游戏是否已正确初始化
-        if (GameContext.RootResp != null)
+        if (RootResp.Get() != null)
         {
             yield return new WaitForSeconds(0);
             Debug.Log("Returning to MainScene2");

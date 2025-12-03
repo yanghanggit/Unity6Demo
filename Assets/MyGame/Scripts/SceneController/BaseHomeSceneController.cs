@@ -141,7 +141,7 @@ public abstract class BaseHomeSceneController : MonoBehaviour
     {
         yield return new WaitForSeconds(0);
 
-        if (GameContext.RootResp != null)
+        if (RootResp.Get() != null)
         {
             Debug.Log("Returning to MainScene2");
             SceneManager.LoadScene(PreScene);
@@ -326,7 +326,7 @@ public abstract class BaseHomeSceneController : MonoBehaviour
     public void OnClickSendMessage()
     {
         Debug.Log("Send Message button clicked");
-        if (GameContext.RootResp != null && !string.IsNullOrEmpty(_currentSpriteName) && !string.IsNullOrEmpty(_inputField.text))
+        if (RootResp.Get() != null && !string.IsNullOrEmpty(_currentSpriteName) && !string.IsNullOrEmpty(_inputField.text))
         {
             if (_currentSpriteName != GameContext.Instance.ActorName)
             {

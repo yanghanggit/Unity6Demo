@@ -8,12 +8,6 @@ using System.Diagnostics;
 /// </summary>
 public partial class GameContext
 {
-
-    /// <summary>
-    /// 根响应对象，包含所有API端点配置
-    /// </summary>
-    public static RootResponse RootResp;
-
     /// <summary>
     /// 单例实例
     /// </summary>
@@ -53,7 +47,7 @@ public partial class GameContext
     public static void ClearInstance()
     {
         lock (_lockObj)
-        {    
+        {
             // 清空单例实例（这会导致实例字段如 UserName、GameName 等也被清除）
             _instance = null;
         }
@@ -156,8 +150,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting LoginUrl");
-            return RootResp.endpoints["login"];
+
+            return RootResp.Get().endpoints["login"];
         }
     }
 
@@ -168,8 +162,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting LogoutUrl");
-            return RootResp.endpoints["logout"];
+            return RootResp.Get().endpoints["logout"];
         }
     }
 
@@ -180,8 +173,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting HomeGameplayUrl");
-            return RootResp.endpoints["home_gameplay"];
+            return RootResp.Get().endpoints["home_gameplay"];
         }
     }
 
@@ -193,8 +185,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting StagesStateUrl");
-            var baseUrl = RootResp.endpoints["stages_state"];
+            var baseUrl = RootResp.Get().endpoints["stages_state"];
             return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }
@@ -207,8 +198,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting DungeonStateUrl");
-            var baseUrl = RootResp.endpoints["dungeon_state"];
+            var baseUrl = RootResp.Get().endpoints["dungeon_state"];
             return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }
@@ -221,8 +211,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting EntityDetailsUrl");
-            var baseUrl = RootResp.endpoints["entity_details"];
+            var baseUrl = RootResp.Get().endpoints["entity_details"];
             return $"{baseUrl}{UserName}/{GameName}/details";
         }
     }
@@ -234,8 +223,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting StartUrl");
-            return RootResp.endpoints["start"];
+            return RootResp.Get().endpoints["start"];
         }
     }
 
@@ -246,8 +234,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting HomeTransDungeonUrl");
-            return RootResp.endpoints["home_trans_dungeon"];
+            return RootResp.Get().endpoints["home_trans_dungeon"];
         }
     }
 
@@ -258,8 +245,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting DungeonGameplayUrl");
-            return RootResp.endpoints["dungeon_gameplay"];
+            return RootResp.Get().endpoints["dungeon_gameplay"];
         }
     }
 
@@ -270,8 +256,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting DungeonTransHomeUrl");
-            return RootResp.endpoints["dungeon_trans_home"];
+            return RootResp.Get().endpoints["dungeon_trans_home"];
         }
     }
 
@@ -283,8 +268,7 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(RootResp != null, "_rootResponse is null when getting SessionMessagesUrl");
-            var baseUrl = RootResp.endpoints["session_messages"];
+            var baseUrl = RootResp.Get().endpoints["session_messages"];
             return $"{baseUrl}{UserName}/{GameName}/since";
         }
     }
