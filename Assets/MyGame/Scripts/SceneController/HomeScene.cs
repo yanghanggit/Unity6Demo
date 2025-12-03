@@ -40,16 +40,10 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// </summary>
     private string _selectedActorName = string.Empty;
 
-    // Unity生命周期方法
-    /// <summary>
-    /// 场景初始化方法
-    /// 执行组件引用验证和初始UI状态设置
-    /// 注册所有事件监听器
-    /// </summary>
-    void Start()
+    //
+    void Awake()
     {
-        // 验证所有必需的组件引用
-
+        /// 验证所有必需的组件引用
         // 背景组件验证
         Debug.Assert(_background != null, "_background is null");
         Debug.Assert(_background.GetComponent<SpriteRenderer>() != null, "_background is missing SpriteRenderer component");
@@ -61,7 +55,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(_currentActor.GetComponent<SpriteRenderer>() != null, "_currentActor is missing SpriteRenderer component");
         Debug.Assert(_currentActor.GetComponent<BoxCollider2D>() != null, "_currentActor is missing BoxCollider2D component");
         Debug.Assert(_currentActor.GetComponent<SpriteClickHandler>() != null, "_currentActor is missing SpriteClickHandler component");
-
         Debug.Assert(_speechBubble != null, "_speechBubble is null");
         Debug.Assert(_speechBubbleText != null, "_speechBubbleText is null");
         Debug.Assert(_mainState != null, "_mainState is null");
@@ -72,8 +65,27 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
         Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
 
-        // 注册所有事件监听器
+        // 设置背景图像
+        var stageSprite = TextureManager.Instance.GetSprite(_homeSceneConfig.StageName);
+        if (stageSprite != null)
+        {
+            _background.GetComponent<SpriteRenderer>().sprite = stageSprite;
+        }
+        else
+        {
+            Debug.LogWarning("Stage sprite not found for: " + _homeSceneConfig.StageName);
+        }
+    }
 
+    // Unity生命周期方法
+    /// <summary>
+    /// 场景初始化方法
+    /// 执行组件引用验证和初始UI状态设置
+    /// 注册所有事件监听器
+    /// </summary>
+    void Start()
+    {
+        /// 注册所有事件监听器
         // 注册角色点击事件监听器
         _onActorClickedEvent.RegisterListener(this);
 
@@ -93,8 +105,10 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 
         // 中下部的UI状态初始化，带有滚动视图的主状态
         _mainState.SetActive(true);                  // 显示主状态UI
+
         // 刷新角色列表
         RefreshActorList();
+
         // 隐藏输入状态UI
         _inputState.SetActive(false);             // 隐藏输入状态UI
         _inputField.text = string.Empty;          // 清空输入字段
