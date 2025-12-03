@@ -19,11 +19,13 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     [SerializeField] private TMP_Text _speechBubbleText;        // 对话气泡文本
     [SerializeField] private GameObject _mainState;             // 主状态UI容器
     [SerializeField] private GameObject _inputState;            // 输入状态UI容器
+    [SerializeField] private TMP_InputField _inputField;       // 输入字段 (TMP)
     [SerializeField] private DynamicScrollView _scrollView;     // 动态滚动视图
 
     // 配置和API
     [Header("Scene Config")]
     [SerializeField] private HomeSceneConfig _homeSceneConfig; // 场景配置数据
+    [SerializeField] private string _preScene = "MainScene2";   // 上一个场景名称
 
     [Header("API Components")]
     [SerializeField] private HomeGamePlayApi _homeGamePlayApi; // 游戏玩法API接口
@@ -64,6 +66,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(_speechBubbleText != null, "_speechBubbleText is null");
         Debug.Assert(_mainState != null, "_mainState is null");
         Debug.Assert(_inputState != null, "_inputState is null");
+        Debug.Assert(_inputField != null, "_inputField is null");
         Debug.Assert(_scrollView != null, "_scrollView is null");
         Debug.Assert(_homeSceneConfig != null, "_homeSceneConfig is null");
         Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
@@ -84,35 +87,17 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(currentActorClickHandler != null, "_currentActor is missing SpriteClickHandler component");
         currentActorClickHandler.OnSpriteClicked += OnCurrentActorClicked;
 
-        // 其余的设置！
+        // 上部的当前精灵与对话气泡初始化
         Debug.Assert(string.IsNullOrEmpty(_selectedActorName), "_selectedActorName should be empty at start");
         UpdateActorDisplay(_selectedActorName);    // 初始化角色显示为空
 
-        // 设置主状态UI
+        // 中下部的UI状态初始化，带有滚动视图的主状态
         _mainState.SetActive(true);                  // 显示主状态UI
-        _inputState.SetActive(false);                // 隐藏输入状态UI
-
-        //
-        if (RootResp.Get() != null)
-        {
-            // 走到这里就是有正规登陆的，加载当前场景的角色列表
-            var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
-            if (actorsInStage.Count > 0)
-            {
-                Debug.Log($"Actors in current stage: {string.Join(", ", actorsInStage)}");
-                _scrollView.totalItemCount = actorsInStage.Count;
-            }
-            else
-            {
-                _scrollView.totalItemCount = 0;
-                Debug.Log("No other actors found in current stage");
-            }
-        }
-        else
-        {
-            Debug.Log("[HomeScene] GameContext Root is null");
-            _scrollView.totalItemCount = 0;
-        }
+        // 刷新角色列表
+        RefreshActorList();
+        // 隐藏输入状态UI
+        _inputState.SetActive(false);             // 隐藏输入状态UI
+        _inputField.text = string.Empty;          // 清空输入字段
     }
 
     /// <summary>
@@ -196,6 +181,35 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 
     // 私有辅助方法
     /// <summary>
+    /// 刷新场景中的角色列表
+    /// 如果游戏已正规登录,则加载当前场景的角色列表并更新滚动视图
+    /// 可以多次调用以更新角色列表显示
+    /// </summary>
+    private void RefreshActorList()
+    {
+        if (RootResp.Get() != null)
+        {
+            // 走到这里就是有正规登陆的，加载当前场景的角色列表
+            var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
+            if (actorsInStage.Count > 0)
+            {
+                Debug.Log($"Actors in current stage: {string.Join(", ", actorsInStage)}");
+                _scrollView.totalItemCount = actorsInStage.Count;
+            }
+            else
+            {
+                _scrollView.totalItemCount = 0;
+                Debug.Log("No other actors found in current stage");
+            }
+        }
+        else
+        {
+            Debug.Log("[HomeScene] GameContext Root is null");
+            _scrollView.totalItemCount = 0;
+        }
+    }
+
+    /// <summary>
     /// 更新角色选择后的UI显示
     /// 激活角色显示对象和对话气泡,并更新提示文本
     /// </summary>
@@ -258,6 +272,8 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     private void OnBackgroundClicked(SpriteClickHandler clickHandler)
     {
         Debug.Log("背景被点击，返回主状态。");
+        _mainState.SetActive(true);                  // 显示主状态UI
+        _inputState.SetActive(false);                // 隐藏输入状态UI
     }
 
     /// <summary>
@@ -268,6 +284,8 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     private void OnCurrentActorClicked(SpriteClickHandler clickHandler)
     {
         Debug.Log($"精灵 {clickHandler.gameObject.name} 被点击了！");
+        _mainState.SetActive(false);                // 隐藏主状态UI
+        _inputState.SetActive(true);                // 显示输入状态UI
     }
 
     /// <summary>
@@ -281,8 +299,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         if (RootResp.Get() != null)
         {
             yield return new WaitForSeconds(0);
-            Debug.Log("Returning to MainScene2");
-            SceneManager.LoadScene("MainScene2");
+            SceneManager.LoadScene(_preScene);
         }
         else
         {
@@ -324,5 +341,100 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
                 }
             }
         );
+    }
+
+    /// <summary>
+    /// InputField (TMP) - On Value Changed 事件处理器
+    /// </summary>
+    /// <param name="value">输入字段的当前值</param>
+    public void OnInputFieldValueChanged(string value)
+    {
+        Debug.Log($"InputField value changed: {value}");
+        Debug.Log("OnValueChanged: " + _inputField.text);
+        // Debug.Log($"你(/speak = @{_currentSpriteName} " + _inputField.text);
+    }
+
+    /// <summary>
+    /// InputField (TMP) - On End Edit 事件处理器
+    /// </summary>
+    /// <param name="value">输入字段的最终值</param>
+    public void OnInputFieldEndEdit(string value)
+    {
+        Debug.Log($"InputField end edit: {value}");
+    }
+
+    /// <summary>
+    /// InputField (TMP) - On Select 事件处理器
+    /// </summary>
+    /// <param name="value">输入字段被选中时的值</param>
+    public void OnInputFieldSelect(string value)
+    {
+        Debug.Log($"InputField selected: {value}");
+    }
+
+    /// <summary>
+    /// InputField (TMP) - On Deselect 事件处理器
+    /// </summary>
+    /// <param name="value">输入字段被取消选中时的值</param>
+    public void OnInputFieldDeselect(string value)
+    {
+        Debug.Log($"InputField deselected: {value}");
+    }
+
+    /// <summary>
+    /// 发送消息按钮点击回调
+    /// 验证游戏状态、角色选择和输入内容后,执行说话动作
+    /// </summary>
+    public void OnClickSendMessage()
+    {
+        Debug.Log("Send Message button clicked");
+        if (RootResp.Get() != null && !string.IsNullOrEmpty(_selectedActorName) && !string.IsNullOrEmpty(_inputField.text))
+        {
+            StartCoroutine(ExecuteSpeakAction(_selectedActorName, _inputField.text));
+        }
+        else
+        {
+            Debug.LogWarning("Cannot send message. Ensure game is set up, a sprite is selected, and input field is not empty.");
+        }
+    }
+
+    /// <summary>
+    /// 执行说话动作的协程
+    /// 调用服务器API发送消息到目标角色,并同步最新的游戏状态
+    /// </summary>
+    /// <param name="targetActorName">目标角色名称</param>
+    /// <param name="messageContent">消息内容</param>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator ExecuteSpeakAction(string targetActorName, string messageContent)
+    {
+        yield return _homeGamePlayApi.Call(
+            GameContext.Instance.HomeGameplayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "/speak", new Dictionary<string, string>
+            {
+                ["target"] = targetActorName,
+                ["content"] = messageContent
+            });
+
+        Debug.Log("Speak action executed");
+        if (_homeGamePlayApi.RespData == null)
+        {
+            Debug.LogError("RunHomeAction request failed");
+            yield break;
+        }
+
+        // 从服务器获取并同步最新的会话消息
+        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
+            (sessionMessages) =>
+            {
+                Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
+            }
+        );
+
+        // 清空输入字段,返回主状态.
+        _inputField.text = string.Empty;
+        _mainState.SetActive(true);                  // 显示主状态UI
+        _inputState.SetActive(false);                // 隐藏输入状态UI
     }
 }

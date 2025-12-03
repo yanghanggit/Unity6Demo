@@ -12,11 +12,11 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
 {
     // UI组件引用
     [Header("UI Components")]
-    [SerializeField] Image _icon;                               // 角色图标
-    [SerializeField] TMP_Text _title;                           // 角色名称文本
-    [SerializeField] Image _background;                         // 背景图片
+    [SerializeField] private Image _icon;                               // 角色图标
+    [SerializeField] private TMP_Text _title;                           // 角色名称文本
+    [SerializeField] private Image _background;                         // 背景图片
     [SerializeField] private Button _overlayButton;             // 覆盖层按钮,用于接收点击
-    [SerializeField] private StringGameEvent onActorClickedEvent; // 角色点击事件
+    [SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
 
     /// <summary>
     /// 当前显示的角色名称
@@ -50,7 +50,7 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
     void OnClick()
     {
         Debug.Log("Clicked on " + _actorName);
-        onActorClickedEvent.Raise(_actorName);
+        _onActorClickedEvent.Raise(_actorName);
     }
 
     /// <summary>
@@ -65,22 +65,37 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
         Debug.Assert(_title != null, "_title != null");
         Debug.Assert(_background != null, "_background != null");
         Debug.Assert(_overlayButton != null, "_overlayButton != null");
-        Debug.Assert(onActorClickedEvent != null, "onActorClickedEvent != null");
+        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent != null");
 
         // 获取当前场景中除了玩家角色外的其他角色列表
-        var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
-        Debug.Assert(actorsInStage.Count > 0, "actorsInStage.Count > 0");
-        Debug.Assert(index < actorsInStage.Count, "index < actorsInStage.Count");
+        
+        if (RootResp.Get() != null)
+        {
+            var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
+        
+            // 这段是正常的逻辑，也就是说有服务器返回其他角色数据
+            Debug.Assert(actorsInStage.Count > 0, "actorsInStage.Count > 0");
+            Debug.Assert(index < actorsInStage.Count, "index < actorsInStage.Count");
 
-        // 根据索引获取对应的角色名称
-        _actorName = actorsInStage[index];
+            // 根据索引获取对应的角色名称
+            _actorName = actorsInStage[index];
 
-        // 更新UI显示:设置角色名称文本
-        _title.text = _actorName;
+            // 更新UI显示:设置角色名称文本
+            _title.text = _actorName;
 
-        // 更新UI显示:从纹理管理器加载并设置角色图标
-        var actorSprite = TextureManager.Instance.GetSprite(_actorName);
-        Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + _actorName);
-        _icon.sprite = actorSprite;
+            // 更新UI显示:从纹理管理器加载并设置角色图标
+            var actorSprite = TextureManager.Instance.GetSprite(_actorName);
+            Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + _actorName);
+            _icon.sprite = actorSprite;
+        }
+        else
+        {
+            // 如果没有其他角色，显示默认信息
+            _actorName = string.Empty;
+            _title.text = "";
+            // 设置一个默认的图标或清空图标
+            _icon.sprite = null; // 或者设置为一个默认的Sprite
+        }
+
     }
 }
