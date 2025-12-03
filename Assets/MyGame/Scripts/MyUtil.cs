@@ -204,5 +204,51 @@ public static class MyUtils
 
         return texture;
     }
+
+    /// <summary>
+    /// 将单个代理事件格式化为简洁的摘要字符串
+    /// 根据事件类型生成不同格式的描述文本，用于UI显示或日志记录
+    /// </summary>
+    /// <param name="agentEvent">要格式化的代理事件</param>
+    /// <returns>格式化后的事件摘要字符串，格式为 "(事件类型) 内容"。如果事件类型未处理则返回空字符串</returns>
+    public static string FormatAgentEventSummary(AgentEvent agentEvent)
+    {
+        switch ((EventHead)agentEvent.head)
+        {
+            case EventHead.NONE:
+                var message = agentEvent.message;
+                Debug.Log("NONE: " + message);
+                break;
+
+            case EventHead.MIND_EVENT:
+                MindEvent mindVoiceEvent = (MindEvent)agentEvent;
+                return $"(mind) {mindVoiceEvent.content}";
+
+            case EventHead.SPEAK_EVENT:
+                SpeakEvent speakEvent = (SpeakEvent)agentEvent;
+                return $"(speak) @{speakEvent.target} {speakEvent.content}";
+
+
+            case EventHead.WHISPER_EVENT:
+                WhisperEvent whisperEvent = (WhisperEvent)agentEvent;
+                return $"(whisper) @{whisperEvent.target} {whisperEvent.content}";
+
+            case EventHead.ANNOUNCE_EVENT:
+                AnnounceEvent announceEvent = (AnnounceEvent)agentEvent;
+                return $"(announce) {announceEvent.content}";
+
+
+            case EventHead.TRANS_STAGE_EVENT:
+                TransStageEvent transStageEvent = (TransStageEvent)agentEvent;
+                return $"(trans_stage) from {transStageEvent.from_stage} to {transStageEvent.to_stage}";
+
+            default:
+                // 其他未处理的事件类型
+                Debug.LogWarning($"Unhandled event type: {agentEvent.head}");
+                break;
+        }
+
+        return string.Empty;
+    }
 }
 

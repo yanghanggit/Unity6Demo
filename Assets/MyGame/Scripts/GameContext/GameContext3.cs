@@ -6,29 +6,54 @@ using UnityEngine;
 // 垃圾先往这里放
 public partial class GameContext
 {
-    private List<string> _agentEventLogs = new();
+    private List<string> _agentEventLogs = new(); //旧的
 
-    private List<AgentEvent> _agentEvents = new();
+    private List<AgentEvent> _agentEvents = new();//旧的
 
-    // 新的数据结构！
-    private Dictionary<string, List<AgentEvent>> _agentEventsByActor = new();
-    public Dictionary<string, List<AgentEvent>> AgentEventsByActor
+    /// <summary>
+    /// 按轮次累积的代理事件历史记录
+    /// 每次调用 CollectEventsByActor 会添加一个新的字典到此列表中
+    /// 通过 AgentEventsCollection 属性可以获取合并后的所有历史数据
+    /// </summary>
+    private List<Dictionary<string, List<AgentEvent>>> _agentEventsHistory = new();
+
+
+    /// <summary>
+    /// 获取合并后的所有历史代理事件，按角色分组
+    /// 会遍历 _agentEventsHistory 中的所有轮次数据并合并返回
+    /// </summary>
+    public Dictionary<string, List<AgentEvent>> AgentEventsHistory
     {
         get
         {
-            return _agentEventsByActor;
-        }
-        set
-        {
-            if (value == null)
+            var agentEventsByActor = new Dictionary<string, List<AgentEvent>>();
+            foreach (var dict in _agentEventsHistory)
             {
-                UnityEngine.Debug.LogError("AgentEventsByActor is null");
-                return;
+                foreach (var kvp in dict)
+                {
+                    if (!agentEventsByActor.ContainsKey(kvp.Key))
+                    {
+                        agentEventsByActor[kvp.Key] = new List<AgentEvent>();
+                    }
+                    agentEventsByActor[kvp.Key].AddRange(kvp.Value);
+                }
             }
-            _agentEventsByActor = value;
+            return agentEventsByActor;
         }
     }
 
+    // 添加一个Getter 获取最后一次的 AgentEventsHistory
+    public Dictionary<string, List<AgentEvent>> LastAgentEventsHistory
+    {
+        get
+        {
+            if (_agentEventsHistory.Count == 0)
+            {
+                return new Dictionary<string, List<AgentEvent>>();
+            }
+            return _agentEventsHistory[_agentEventsHistory.Count - 1];
+        }
+    }
 
     public List<string> AgentEventLogs
     {
@@ -161,11 +186,17 @@ public partial class GameContext
     }
 
     /// <summary>
-    /// 从会话消息列表中收集代理事件,并按角色分组存储到 _agentEventsByActor 中
+    /// 从会话消息列表中收集代理事件，并按角色分组累积存储到 _agentEventsHistory 中
+    /// 每次调用会创建一个新的字典并添加到历史记录列表中，实现数据累积
     /// </summary>
     /// <param name="sessionMessages">会话消息列表</param>
     public void CollectEventsByActor(List<SessionMessage> sessionMessages)
     {
+        // 为 _agentEventsHistory 添加一个新的轮次字典
+        var agentEventsByActor = new Dictionary<string, List<AgentEvent>>();
+        _agentEventsHistory.Add(agentEventsByActor);
+
+        //
         for (int i = 0; i < sessionMessages.Count; i++)
         {
             SessionMessage sessionMessage = sessionMessages[i];
@@ -194,8 +225,19 @@ public partial class GameContext
                 continue;
             }
 
-            AddEventToActorCollection(dataToken, _agentEventsByActor);
+            AddEventToActorCollection(dataToken, agentEventsByActor);
         }
+    }
+
+    /// <summary>
+    /// 清除所有累积的代理事件历史记录
+    /// 调用此方法会清空 _agentEventsHistory，释放内存
+    /// 适用于游戏重置、场景切换等需要清空历史数据的场景
+    /// </summary>
+    public void ClearAgentEventsHistory()
+    {
+        _agentEventsHistory.Clear();
+        Debug.Log("[GameContext] Agent events history cleared");
     }
 
     /// <summary>

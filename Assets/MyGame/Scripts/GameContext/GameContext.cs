@@ -8,6 +8,12 @@ using System.Diagnostics;
 /// </summary>
 public partial class GameContext
 {
+
+    /// <summary>
+    /// 根响应对象，包含所有API端点配置
+    /// </summary>
+    public static RootResponse RootResp;
+
     /// <summary>
     /// 单例实例
     /// </summary>
@@ -41,6 +47,19 @@ public partial class GameContext
     }
 
     /// <summary>
+    /// 清除单例实例和所有静态数据
+    /// 用于登出或重新初始化游戏状态
+    /// </summary>
+    public static void ClearInstance()
+    {
+        lock (_lockObj)
+        {    
+            // 清空单例实例（这会导致实例字段如 UserName、GameName 等也被清除）
+            _instance = null;
+        }
+    }
+
+    /// <summary>
     /// 私有构造函数，防止外部实例化
     /// </summary>
     private GameContext()
@@ -62,10 +81,7 @@ public partial class GameContext
     /// </summary>
     private string _actorName;
 
-    /// <summary>
-    /// 根响应对象，包含所有API端点配置
-    /// </summary>
-    private RootResponse _rootResponse;
+
 
     /// <summary>
     /// 最后一次序列ID，用于追踪游戏事件的顺序
@@ -83,6 +99,7 @@ public partial class GameContext
         }
         set
         {
+            Debug.Assert(value >= 0, "LastSequenceId cannot be negative");
             _lastSequenceId = value;
         }
     }
@@ -133,49 +150,14 @@ public partial class GameContext
     }
 
     /// <summary>
-    /// 获取或设置根响应对象
-    /// 在设置时会验证所有必需的API端点是否存在
-    /// </summary>
-    public RootResponse RootResp
-    {
-        get
-        {
-            return _rootResponse;
-        }
-
-        set
-        {
-            if (value == null)
-            {
-                UnityEngine.Debug.LogError("_rootResponse is null");
-                return;
-            }
-            _rootResponse = value;
-
-            // 验证关键字段 - 确保所有必需的API端点都已配置
-            UnityEngine.Debug.Assert(_rootResponse.endpoints != null, "endpoints is null");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("login"), "endpoints does not contain login");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("logout"), "endpoints does not contain logout");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_gameplay"), "endpoints does not contain home_gameplay");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("stages_state"), "endpoints does not contain stages_state");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_state"), "endpoints does not contain dungeon_state");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("entity_details"), "endpoints does not contain entity_details");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("start"), "endpoints does not contain start");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("home_trans_dungeon"), "endpoints does not contain home_trans_dungeon");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_gameplay"), "endpoints does not contain dungeon_gameplay");
-            UnityEngine.Debug.Assert(_rootResponse.endpoints.ContainsKey("dungeon_trans_home"), "endpoints does not contain dungeon_trans_home");
-        }
-    }
-
-    /// <summary>
     /// 获取登录API的URL地址
     /// </summary>
     public string LoginUrl
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting LoginUrl");
-            return _rootResponse.endpoints["login"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting LoginUrl");
+            return RootResp.endpoints["login"];
         }
     }
 
@@ -186,8 +168,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting LogoutUrl");
-            return _rootResponse.endpoints["logout"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting LogoutUrl");
+            return RootResp.endpoints["logout"];
         }
     }
 
@@ -198,8 +180,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting HomeGameplayUrl");
-            return _rootResponse.endpoints["home_gameplay"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting HomeGameplayUrl");
+            return RootResp.endpoints["home_gameplay"];
         }
     }
 
@@ -211,8 +193,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting StagesStateUrl");
-            var baseUrl = _rootResponse.endpoints["stages_state"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting StagesStateUrl");
+            var baseUrl = RootResp.endpoints["stages_state"];
             return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }
@@ -225,8 +207,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting DungeonStateUrl");
-            var baseUrl = _rootResponse.endpoints["dungeon_state"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting DungeonStateUrl");
+            var baseUrl = RootResp.endpoints["dungeon_state"];
             return $"{baseUrl}{UserName}/{GameName}/state";
         }
     }
@@ -239,8 +221,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting EntityDetailsUrl");
-            var baseUrl = _rootResponse.endpoints["entity_details"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting EntityDetailsUrl");
+            var baseUrl = RootResp.endpoints["entity_details"];
             return $"{baseUrl}{UserName}/{GameName}/details";
         }
     }
@@ -252,8 +234,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting StartUrl");
-            return _rootResponse.endpoints["start"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting StartUrl");
+            return RootResp.endpoints["start"];
         }
     }
 
@@ -264,8 +246,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting HomeTransDungeonUrl");
-            return _rootResponse.endpoints["home_trans_dungeon"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting HomeTransDungeonUrl");
+            return RootResp.endpoints["home_trans_dungeon"];
         }
     }
 
@@ -276,8 +258,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting DungeonGameplayUrl");
-            return _rootResponse.endpoints["dungeon_gameplay"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting DungeonGameplayUrl");
+            return RootResp.endpoints["dungeon_gameplay"];
         }
     }
 
@@ -288,8 +270,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting DungeonTransHomeUrl");
-            return _rootResponse.endpoints["dungeon_trans_home"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting DungeonTransHomeUrl");
+            return RootResp.endpoints["dungeon_trans_home"];
         }
     }
 
@@ -301,8 +283,8 @@ public partial class GameContext
     {
         get
         {
-            Debug.Assert(_rootResponse != null, "_rootResponse is null when getting SessionMessagesUrl");
-            var baseUrl = _rootResponse.endpoints["session_messages"];
+            Debug.Assert(RootResp != null, "_rootResponse is null when getting SessionMessagesUrl");
+            var baseUrl = RootResp.endpoints["session_messages"];
             return $"{baseUrl}{UserName}/{GameName}/since";
         }
     }

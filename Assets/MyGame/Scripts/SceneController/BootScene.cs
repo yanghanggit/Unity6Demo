@@ -56,8 +56,22 @@ public class BootScene : MonoBehaviour
         }
 
         _loginButton.gameObject.SetActive(true);
-        GameContext.Instance.RootResp = _rootApi.RespData;
+        GameContext.RootResp = _rootApi.RespData;
         Debug.Log($"API endpoints initialized successfully from {_baseUrl}");
+        Debug.Assert(GameContext.RootResp.endpoints != null, "endpoints is null");
+
+        // 验证所有必要的端点是否存在
+        var endpoints = GameContext.RootResp.endpoints;
+        Debug.Assert(endpoints.ContainsKey("login"), "endpoints does not contain login");
+        Debug.Assert(endpoints.ContainsKey("logout"), "endpoints does not contain logout");
+        Debug.Assert(endpoints.ContainsKey("home_gameplay"), "endpoints does not contain home_gameplay");
+        Debug.Assert(endpoints.ContainsKey("stages_state"), "endpoints does not contain stages_state");
+        Debug.Assert(endpoints.ContainsKey("dungeon_state"), "endpoints does not contain dungeon_state");
+        Debug.Assert(endpoints.ContainsKey("entity_details"), "endpoints does not contain entity_details");
+        Debug.Assert(endpoints.ContainsKey("start"), "endpoints does not contain start");
+        Debug.Assert(endpoints.ContainsKey("home_trans_dungeon"), "endpoints does not contain home_trans_dungeon");
+        Debug.Assert(endpoints.ContainsKey("dungeon_gameplay"), "endpoints does not contain dungeon_gameplay");
+        Debug.Assert(endpoints.ContainsKey("dungeon_trans_home"), "endpoints does not contain dungeon_trans_home");
     }
 
     /// <summary>

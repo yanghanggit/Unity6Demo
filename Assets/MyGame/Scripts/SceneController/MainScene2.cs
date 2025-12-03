@@ -51,13 +51,23 @@ public class MainScene2 : MonoBehaviour
     void OnDestroy()
     {
         // 清除回调,避免内存泄漏
-        Debug.Assert(_playerInfoBar != null, "_playerInfoBar is null");
-        Debug.Assert(_playerInfoBar.GetComponent<PlayerInfoBar>() != null, "_playerInfoBar PlayerInfoBar component is null");
-        Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
-        Debug.Assert(_playerInfoDetails.GetComponent<PlayerInfoDetails>() != null, "_playerInfoDetails PlayerInfoDetails component is null");
+        if (_playerInfoBar != null)
+        {
+            PlayerInfoBar playerInfoBar = _playerInfoBar.GetComponent<PlayerInfoBar>();
+            if (playerInfoBar != null)
+            {
+                playerInfoBar.OnHeadIconClickedCallback -= OnHeadIconClicked;
+            }
+        }
 
-        _playerInfoBar.GetComponent<PlayerInfoBar>().OnHeadIconClickedCallback -= OnHeadIconClicked;
-        _playerInfoDetails.GetComponent<PlayerInfoDetails>().OnCloseButtonClickedCallback -= OnClickClosePlayerInfoDetails;
+        if (_playerInfoDetails != null)
+        {
+            PlayerInfoDetails playerInfoDetails = _playerInfoDetails.GetComponent<PlayerInfoDetails>();
+            if (playerInfoDetails != null)
+            {
+                playerInfoDetails.OnCloseButtonClickedCallback -= OnClickClosePlayerInfoDetails;
+            }
+        }
     }
 
     public void OnClickBack()
@@ -99,10 +109,11 @@ public class MainScene2 : MonoBehaviour
             yield break;
         }
 
-        GameContext.Instance.UserName = "";
-        GameContext.Instance.GameName = "";
-        GameContext.Instance.ActorName = "";
+        // 清除数据
+        GameContext.ClearInstance();
 
+        // 返回登录场景
+        yield return new WaitForSeconds(0);
         SceneManager.LoadScene(_preScene);
     }
 

@@ -77,7 +77,7 @@ public class ViewDungeonScene : MonoBehaviour
     {
         yield return new WaitForSeconds(0);
 
-        if (GameContext.Instance.RootResp != null)
+        if (GameContext.RootResp != null)
         {
             Debug.Log("Returning to MainScene2");
             SceneManager.LoadScene(_preScene);

@@ -3,6 +3,7 @@ using Mosframe;
 using TMPro;
 using System.Collections;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 /// <summary>
 /// 主场景控制器
@@ -39,41 +40,9 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 
     // Unity生命周期方法
     /// <summary>
-    /// 当脚本被启用时调用
-    /// 注册角色点击事件监听器
-    /// </summary>
-    void OnEnable()
-    {
-        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
-        _onActorClickedEvent.RegisterListener(this);
-    }
-
-    /// <summary>
-    /// 当脚本被禁用时调用
-    /// 注销所有事件监听器,防止内存泄漏
-    /// </summary>
-    void OnDisable()
-    {
-        // 注销角色点击事件监听器
-        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
-        _onActorClickedEvent.UnregisterListener(this);
-
-        // 注销背景点击事件
-        Debug.Assert(_background != null, "_background is null");
-        SpriteClickHandler backgroundClickHandler = _background.GetComponent<SpriteClickHandler>();
-        Debug.Assert(backgroundClickHandler != null, "_background is missing SpriteClickHandler component");
-        backgroundClickHandler.OnSpriteClicked -= OnBackgroundClicked;
-
-        // 注销当前角色点击事件
-        Debug.Assert(_currentActor != null, "_currentActor is null");
-        SpriteClickHandler currentActorClickHandler = _currentActor.GetComponent<SpriteClickHandler>();
-        Debug.Assert(currentActorClickHandler != null, "_currentActor is missing SpriteClickHandler component");
-        currentActorClickHandler.OnSpriteClicked -= OnCurrentActorClicked;
-    }
-
-    /// <summary>
     /// 场景初始化方法
     /// 执行组件引用验证和初始UI状态设置
+    /// 注册所有事件监听器
     /// </summary>
     void Start()
     {
@@ -91,7 +60,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(_currentActor.GetComponent<BoxCollider2D>() != null, "_currentActor is missing BoxCollider2D component");
         Debug.Assert(_currentActor.GetComponent<SpriteClickHandler>() != null, "_currentActor is missing SpriteClickHandler component");
 
-
         Debug.Assert(_speechBubble != null, "_speechBubble is null");
         Debug.Assert(_speechBubbleText != null, "_speechBubbleText is null");
         Debug.Assert(_mainState != null, "_mainState is null");
@@ -101,7 +69,10 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
         Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
 
-        // 初始化UI状态
+        // 注册所有事件监听器
+
+        // 注册角色点击事件监听器
+        _onActorClickedEvent.RegisterListener(this);
 
         // 注册背景点击事件
         SpriteClickHandler backgroundClickHandler = _background.GetComponent<SpriteClickHandler>();
@@ -122,7 +93,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         _inputState.SetActive(false);                // 隐藏输入状态UI
 
         //
-        if (GameContext.Instance.RootResp != null)
+        if (GameContext.RootResp != null)
         {
             // 走到这里就是有正规登陆的，加载当前场景的角色列表
             var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
@@ -142,7 +113,39 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             Debug.Log("[HomeScene] GameContext Root is null");
             _scrollView.totalItemCount = 0;
         }
+    }
 
+    /// <summary>
+    /// 当对象被销毁时调用
+    /// 注销所有事件监听器,防止内存泄漏
+    /// </summary>
+    void OnDestroy()
+    {
+        // 注销角色点击事件监听器
+        if (_onActorClickedEvent != null)
+        {
+            _onActorClickedEvent.UnregisterListener(this);
+        }
+
+        // 注销背景点击事件
+        if (_background != null)
+        {
+            SpriteClickHandler backgroundClickHandler = _background.GetComponent<SpriteClickHandler>();
+            if (backgroundClickHandler != null)
+            {
+                backgroundClickHandler.OnSpriteClicked -= OnBackgroundClicked;
+            }
+        }
+
+        // 注销当前角色点击事件
+        if (_currentActor != null)
+        {
+            SpriteClickHandler currentActorClickHandler = _currentActor.GetComponent<SpriteClickHandler>();
+            if (currentActorClickHandler != null)
+            {
+                currentActorClickHandler.OnSpriteClicked -= OnCurrentActorClicked;
+            }
+        }
     }
 
     // UI按钮回调方法
@@ -206,17 +209,44 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             _currentActor.SetActive(false);                             // 隐藏角色显示
             _speechBubble.SetActive(false);                             // 隐藏对话气泡
             _speechBubbleText.text = string.Empty;                      // 更新提示文本
+            return;
         }
-        else
-        {
-            _currentActor.SetActive(true);                              // 显示选中的角色
-            _speechBubble.SetActive(true);                              // 显示对话气泡
-            _speechBubbleText.text = $"你选择了: {selectedActorName}";   // 更新提示文本
 
-            // 更新当前角色的Sprite显示
-            var actorSprite = TextureManager.Instance.GetSprite(selectedActorName);
-            Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + selectedActorName);
-            _currentActor.GetComponent<SpriteRenderer>().sprite = actorSprite;
+        // 显示选中的角色和对话气泡
+        _currentActor.SetActive(true);                              // 显示选中的角色
+        _speechBubble.SetActive(true);                              // 显示对话气泡
+        _speechBubbleText.text = $"你选择了: {selectedActorName}";   // 更新提示文本
+
+        // 更新当前角色的Sprite显示
+        var actorSprite = TextureManager.Instance.GetSprite(selectedActorName);
+        Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + selectedActorName);
+        _currentActor.GetComponent<SpriteRenderer>().sprite = actorSprite;
+
+        // 显示该角色的最近事件（如果有）
+        var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
+        if (lastAgentEventsHistory.ContainsKey(selectedActorName))
+        {
+            List<string> agentEventSummaries = new();
+            var agentEvents = lastAgentEventsHistory[selectedActorName];
+            foreach (var agentEvent in agentEvents)
+            {
+                Debug.Log($"[HomeScene] Last event for {selectedActorName}: {agentEvent.GetType().Name}");
+                var summary = MyUtils.FormatAgentEventSummary(agentEvent);
+                if (!string.IsNullOrEmpty(summary))
+                {
+                    agentEventSummaries.Add(summary);
+                }
+            }
+
+            // 设置内容
+            if (agentEventSummaries.Count > 0)
+            {
+                _speechBubbleText.text = string.Join("\n", agentEventSummaries);
+            }
+            else
+            {
+                _speechBubbleText.text = $"你选择了: {selectedActorName}";
+            }
         }
     }
 
@@ -248,7 +278,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     private IEnumerator ReturnToMainScene()
     {
         // 检查游戏是否已正确初始化
-        if (GameContext.Instance.RootResp != null)
+        if (GameContext.RootResp != null)
         {
             yield return new WaitForSeconds(0);
             Debug.Log("Returning to MainScene2");
@@ -288,6 +318,10 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             {
                 Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
                 // 处理接收到的会话消息,更新游戏状态
+                if (!string.IsNullOrEmpty(_selectedActorName))
+                {
+                    UpdateActorDisplay(_selectedActorName);
+                }
             }
         );
     }
