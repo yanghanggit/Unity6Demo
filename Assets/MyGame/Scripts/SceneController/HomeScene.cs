@@ -43,6 +43,13 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     //
     void Awake()
     {
+        // 如果有从 MainScene2 传递过来的配置,使用它
+        if (MainScene2.PendingHomeSceneConfig != null)
+        {
+            _homeSceneConfig = MainScene2.PendingHomeSceneConfig;
+            MainScene2.PendingHomeSceneConfig = null; // 用完立即清空
+        }
+
         /// 验证所有必需的组件引用
         // 背景组件验证
         Debug.Assert(_background != null, "_background is null");

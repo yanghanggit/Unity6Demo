@@ -6,7 +6,12 @@ using System;
 using System.Collections.Generic;
 public class MainScene2 : MonoBehaviour
 {
+    // 静态属性用于场景间传递配置
+    public static HomeSceneConfig PendingHomeSceneConfig { get; set; }
+
     public string _preScene = "LoginScene";
+
+    public string _nextScene = "HomeScene";
 
     public LogoutApi _logoutApi;
 
@@ -43,11 +48,6 @@ public class MainScene2 : MonoBehaviour
         StartCoroutine(RefreshGameState());
     }
 
-    void Update()
-    {
-
-    }
-
     void OnDestroy()
     {
         // 清除回调,避免内存泄漏
@@ -79,13 +79,13 @@ public class MainScene2 : MonoBehaviour
     public void OnClickCamp()
     {
         Debug.Log("OnClickCamp");
-        StartCoroutine(TransitionToStageAndScene(_campSceneConfig.StageName, _campSceneConfig.SceneDisplayName));
+        StartCoroutine(TransitionToScene(_campSceneConfig));
     }
 
     public void OnClickRestaurant()
     {
         Debug.Log("OnClickRestaurant");
-        StartCoroutine(TransitionToStageAndScene(_restaurantSceneConfig.StageName, _restaurantSceneConfig.SceneDisplayName));
+        StartCoroutine(TransitionToScene(_restaurantSceneConfig));
     }
 
     public void OnClickDungeon()
@@ -155,14 +155,49 @@ public class MainScene2 : MonoBehaviour
     }
 
     /// <summary>
+    /// 验证场景转换事件是否成功
+    /// 检查是否收到了预期的 TransStageEvent
+    /// </summary>
+    private bool ValidateTransStageEvent(List<SessionMessage> sessionMessages, string targetStageName)
+    {
+        bool checkTransStageEvent = false;
+
+        Debug.Log($"Fetched {sessionMessages.Count} session messages from server after transitioning to stage {targetStageName}");
+        var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
+        if (lastAgentEventsHistory.ContainsKey(GameContext.Instance.ActorName))
+        {
+            var agentEvents = lastAgentEventsHistory[GameContext.Instance.ActorName];
+            Debug.Log($"There are {agentEvents.Count} agent events for actor {GameContext.Instance.ActorName} after transitioning to stage {targetStageName}");
+
+            foreach (var agentEvent in agentEvents)
+            {
+                if (agentEvent.head == (int)EventHead.TRANS_STAGE_EVENT)
+                {
+                    TransStageEvent transStageEvent = (TransStageEvent)agentEvent;
+                    Debug.Assert(transStageEvent.actor == GameContext.Instance.ActorName, "TransStageEvent actor does not match current actor");
+                    Debug.Log($"{transStageEvent.actor} Agent Event: (trans_stage) from {transStageEvent.from_stage} to {transStageEvent.to_stage}");
+                    checkTransStageEvent = true;
+                }
+            }
+        }
+
+        if (!checkTransStageEvent)
+        {
+            Debug.LogWarning($"No TransStageEvent found for actor {GameContext.Instance.ActorName} after transitioning to stage {targetStageName}");
+        }
+
+        return checkTransStageEvent;
+    }
+
+    /// <summary>
     /// 将玩家角色转移到指定的Stage(服务器状态)和Scene(Unity场景)
     /// 如果玩家已在目标Stage中,则直接加载Scene
     /// </summary>
-    private IEnumerator TransitionToStageAndScene(string targetStageName, string loadSceneName)
+    private IEnumerator TransitionToScene(HomeSceneConfig sceneConfig)
     {
         // 是否已经在该场景中
         var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
-        if (currentStageName != targetStageName)
+        if (currentStageName != sceneConfig.StageName)
         {
             // 不在，通知服务器转换场景
             yield return _homeGamePlayApi.Call(
@@ -172,40 +207,42 @@ public class MainScene2 : MonoBehaviour
             "/switch_stage",
             new Dictionary<string, string>
             {
-                ["stage_name"] = targetStageName
+                ["stage_name"] = sceneConfig.StageName
             });
 
             if (_homeGamePlayApi.RespData == null)
             {
                 // 请求失败，就不能往后走
-                Debug.LogError($"ExecuteTransStage = {targetStageName} request failed");
+                Debug.LogError($"ExecuteTransStage = {sceneConfig.StageName} request failed");
                 yield break;
             }
 
+            // 请求成功，刷新全局状态，这么做有点笨，但保证万无一失
+            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+
+            // 尝试获取最新的消息并验证场景转换事件
             yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
             (sessionMessages) =>
                 {
-                    Debug.Log($"Fetched {sessionMessages.Count} session messages from server after transitioning to stage {targetStageName}");
+                    ValidateTransStageEvent(sessionMessages, sceneConfig.StageName);
                 }
             );
 
             // 请求成功
-            Debug.Log($"ExecuteTransStage = {targetStageName} completed");
+            Debug.Log($"ExecuteTransStage = {sceneConfig.StageName} completed");
         }
         else
         {
-            Debug.Log($"Already in target stage: {targetStageName}");
+            Debug.Log($"Already in target stage: {sceneConfig.StageName}, no need to switch.");
         }
 
         // 到这里一定能打开场景，就进行切换！
         yield return new WaitForSeconds(0.0f);
 
-        // 临时测试！
-        if (loadSceneName == "CampScene")
-        {
-            loadSceneName = "HomeScene";
-        }
+        // 将配置传递给下一个场景
+        PendingHomeSceneConfig = sceneConfig;
 
-        SceneManager.LoadScene(loadSceneName);
+        // 加载目标场景
+        SceneManager.LoadScene("HomeScene");
     }
 }
