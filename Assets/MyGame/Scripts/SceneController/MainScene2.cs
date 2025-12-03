@@ -243,47 +243,16 @@ public class MainScene2 : MonoBehaviour
     }
 
     /// <summary>
-    /// 验证场景转换事件是否成功
-    /// 在场景切换后检查服务器返回的消息中是否包含预期的 TransStageEvent
+    /// 验证当前玩家角色是否成功执行了场景转换事件
+    /// 通过检查最近的代理事件历史,确认当前玩家是否在切换场景的角色集合中
     /// </summary>
-    /// <param name="sessionMessages">从服务器获取的会话消息列表</param>
-    /// <param name="targetStageName">目标场景的 Stage 名称</param>
-    /// <returns>是否找到了 TransStageEvent</returns>
-    private bool ValidateTransStageEvent(List<SessionMessage> sessionMessages, string targetStageName)
+    /// <returns>如果当前玩家角色执行了场景转换返回 true,否则返回 false</returns>
+    private bool ValidateTransStageEvent()
     {
-        bool checkTransStageEvent = false;
-
-        // 输出获取到的消息数量
-        Debug.Log($"Fetched {sessionMessages.Count} session messages from server after transitioning to stage {targetStageName}");
-
-        // 从游戏上下文获取最近的代理事件历史记录
         var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
-        if (lastAgentEventsHistory.ContainsKey(GameContext.Instance.ActorName))
-        {
-            var agentEvents = lastAgentEventsHistory[GameContext.Instance.ActorName];
-            Debug.Log($"There are {agentEvents.Count} agent events for actor {GameContext.Instance.ActorName} after transitioning to stage {targetStageName}");
-
-            // 遍历所有代理事件,查找 TransStageEvent
-            foreach (var agentEvent in agentEvents)
-            {
-                if (agentEvent.head == (int)EventHead.TRANS_STAGE_EVENT)
-                {
-                    TransStageEvent transStageEvent = (TransStageEvent)agentEvent;
-                    // 验证事件的角色是否匹配当前玩家
-                    Debug.Assert(transStageEvent.actor == GameContext.Instance.ActorName, "TransStageEvent actor does not match current actor");
-                    Debug.Log($"{transStageEvent.actor} Agent Event: (trans_stage) from {transStageEvent.from_stage} to {transStageEvent.to_stage}");
-                    checkTransStageEvent = true;
-                }
-            }
-        }
-
-        // 如果没有找到 TransStageEvent,输出警告
-        if (!checkTransStageEvent)
-        {
-            Debug.LogWarning($"No TransStageEvent found for actor {GameContext.Instance.ActorName} after transitioning to stage {targetStageName}");
-        }
-
-        return checkTransStageEvent;
+        var actorsWithTransStageEvents = MyUtils.GetActorsWithTransStageEvents(lastAgentEventsHistory);
+        Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
+        return actorsWithTransStageEvents.Contains(GameContext.Instance.ActorName);
     }
 
     /// <summary>
@@ -328,10 +297,13 @@ public class MainScene2 : MonoBehaviour
             yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
             (sessionMessages) =>
                 {
-                    ValidateTransStageEvent(sessionMessages, sceneConfig.StageName);
+                    Debug.Log($"Fetched {sessionMessages.Count} session messages from server after TransStage");
                 }
             );
 
+
+            var isTransStageEventValid = ValidateTransStageEvent();
+            Debug.Assert(isTransStageEventValid, "ValidateTransStageEvent failed");
             Debug.Log($"ExecuteTransStage = {sceneConfig.StageName} completed");
         }
         else

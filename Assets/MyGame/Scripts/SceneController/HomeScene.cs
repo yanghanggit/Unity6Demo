@@ -232,25 +232,25 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 
     /// <summary>
     /// 更新角色选择后的UI显示
-    /// 激活角色显示对象和对话气泡,并更新提示文本
+    /// 包括显示/隐藏角色精灵、对话气泡、更新角色图像,以及显示该角色最近一轮的事件历史
     /// </summary>
-    /// <param name="selectedActorName">选中的角色名称</param>
+    /// <param name="selectedActorName">选中的角色名称,如果为空则隐藏所有角色相关UI</param>
     private void UpdateActorDisplay(string selectedActorName)
     {
         Debug.Log($"[HomeScene] Handling selection for actor: {selectedActorName}");
 
         if (string.IsNullOrEmpty(selectedActorName))
         {
-            _currentActor.SetActive(false);                             // 隐藏角色显示
-            _speechBubble.SetActive(false);                             // 隐藏对话气泡
-            _speechBubbleText.text = string.Empty;                      // 更新提示文本
+            _currentActor.SetActive(false);  // 隐藏角色显示
+            _speechBubble.SetActive(false);  // 隐藏对话气泡
+            _speechBubbleText.text = string.Empty; // 更新提示文本
             return;
         }
 
         // 显示选中的角色和对话气泡
-        _currentActor.SetActive(true);                              // 显示选中的角色
-        _speechBubble.SetActive(true);                              // 显示对话气泡
-        _speechBubbleText.text = $"你选择了: {selectedActorName}";   // 更新提示文本
+        _currentActor.SetActive(true); // 显示选中的角色
+        _speechBubble.SetActive(true);  // 显示对话气泡
+        _speechBubbleText.text = $"你选择了: {selectedActorName}"; // 更新提示文本
 
         // 更新当前角色的Sprite显示
         var actorSprite = TextureManager.Instance.GetSprite(selectedActorName);
@@ -258,12 +258,11 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         _currentActor.GetComponent<SpriteRenderer>().sprite = actorSprite;
 
         // 显示该角色的最近事件（如果有）
-        var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
-        if (lastAgentEventsHistory.ContainsKey(selectedActorName))
+        var latestRoundEventsForActor = GameContext.Instance.GetLatestRoundEventsForActor(selectedActorName);
+        if (latestRoundEventsForActor.Count > 0)
         {
             List<string> agentEventSummaries = new();
-            var agentEvents = lastAgentEventsHistory[selectedActorName];
-            foreach (var agentEvent in agentEvents)
+            foreach (var agentEvent in latestRoundEventsForActor)
             {
                 Debug.Log($"[HomeScene] Last event for {selectedActorName}: {agentEvent.GetType().Name}");
                 var summary = MyUtils.FormatAgentEventSummary(agentEvent);
@@ -277,10 +276,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             if (agentEventSummaries.Count > 0)
             {
                 _speechBubbleText.text = string.Join("\n", agentEventSummaries);
-            }
-            else
-            {
-                _speechBubbleText.text = $"你选择了: {selectedActorName}";
             }
         }
     }
@@ -355,13 +350,34 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             (sessionMessages) =>
             {
                 Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
-                // 处理接收到的会话消息,更新游戏状态
-                if (!string.IsNullOrEmpty(_selectedActorName))
-                {
-                    UpdateActorDisplay(_selectedActorName);
-                }
             }
         );
+
+        // 检查是否有角色执行了场景切换事件，如果有就需要更新UI
+        var actorsWithTransStageEvents = MyUtils.GetActorsWithTransStageEvents(GameContext.Instance.LastAgentEventsHistory);
+        if (actorsWithTransStageEvents.Count > 0)
+        {
+            Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
+
+            // 刷新游戏状态以确保数据同步
+            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+
+            // 刷新角色列表
+            RefreshActorList();
+
+            // 如果当前选中的角色执行了场景转换,则清空选择
+            if (actorsWithTransStageEvents.Contains(_selectedActorName))
+            {
+                _selectedActorName = string.Empty;
+            }
+        }
+        else
+        {
+            Debug.Log("No actors executed TransStageEvents after advancing home state");
+        }
+
+        // 更新角色显示(可能已变化)
+        UpdateActorDisplay(_selectedActorName);
     }
 
     /// <summary>
@@ -372,7 +388,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     {
         Debug.Log($"InputField value changed: {value}");
         Debug.Log("OnValueChanged: " + _inputField.text);
-        // Debug.Log($"你(/speak = @{_currentSpriteName} " + _inputField.text);
     }
 
     /// <summary>
