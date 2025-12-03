@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "监控Unity日志",
+      "type": "shell",
+      "command": "tail -f ~/Library/Logs/Unity/Editor.log",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "isBackground": true
+    },
+    {
+      "label": "查看Unity日志(最后100行)",
+      "type": "shell",
+      "command": "tail -n 100 ~/Library/Logs/Unity/Editor.log",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "清空并监控Unity日志",
+      "type": "shell",
+      "command": "clear && tail -f ~/Library/Logs/Unity/Editor.log",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true,
+        "clear": true
+      },
+      "isBackground": true
+    }
+  ]
+}
