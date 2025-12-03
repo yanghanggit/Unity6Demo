@@ -158,7 +158,7 @@ public class MainScene2 : MonoBehaviour
             GameContext.Instance.HomeGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-            "/trans_home",
+            "/switch_stage",
             new Dictionary<string, string>
             {
                 ["stage_name"] = targetStageName
