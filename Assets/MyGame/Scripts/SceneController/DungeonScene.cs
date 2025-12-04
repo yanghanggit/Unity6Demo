@@ -20,7 +20,7 @@ public class DungeonScene : MonoBehaviour
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_dungeonGamePlayApi != null, "_dungeonAction is null");
         Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
-     
+
         StartCoroutine(ExecuteViewDungeon());
     }
 
@@ -197,13 +197,24 @@ public class DungeonScene : MonoBehaviour
 
     private IEnumerator FetchAndProcessSessionMessages()
     {
+        bool fetchSuccess = false;
         yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
-            (sessionMessages) =>
+            (success, sessionMessages) =>
             {
-                // 处理接收到的会话消息
-                GameContext.Instance.ProcessClientMessages(sessionMessages);
+                fetchSuccess = success;
+                if (success)
+                {
+                    // 处理接收到的会话消息
+                    GameContext.Instance.ProcessClientMessages(sessionMessages);
+                }
             }
         );
+
+        // 检查消息获取是否成功
+        if (!fetchSuccess)
+        {
+            Debug.LogError("Failed to fetch session messages in DungeonScene");
+        }
     }
 
 }

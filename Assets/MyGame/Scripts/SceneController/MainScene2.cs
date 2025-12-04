@@ -294,13 +294,24 @@ public class MainScene2 : MonoBehaviour
             yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
 
             // 获取服务器最新消息并验证是否收到了场景转换事件
+            bool fetchSuccess = false;
             yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
-            (sessionMessages) =>
+            (success, sessionMessages) =>
                 {
-                    Debug.Log($"Fetched {sessionMessages.Count} session messages from server after TransStage");
+                    fetchSuccess = success;
+                    if (success)
+                    {
+                        Debug.Log($"Fetched {sessionMessages.Count} session messages from server after TransStage");
+                    }
                 }
             );
 
+            // 检查消息获取是否成功
+            if (!fetchSuccess)
+            {
+                Debug.LogError($"Failed to fetch session messages after TransStage to {sceneConfig.StageName}, aborting transition");
+                yield break;
+            }
 
             var isTransStageEventValid = ValidateTransStageEvent();
             Debug.Assert(isTransStageEventValid, "ValidateTransStageEvent failed");

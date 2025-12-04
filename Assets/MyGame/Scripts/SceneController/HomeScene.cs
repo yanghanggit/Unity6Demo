@@ -346,12 +346,24 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         }
 
         // 从服务器获取并同步最新的会话消息
+        bool fetchSuccess = false;
         yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
-            (sessionMessages) =>
+            (success, sessionMessages) =>
             {
-                Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
+                fetchSuccess = success;
+                if (success)
+                {
+                    Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
+                }
             }
         );
+
+        // 检查消息获取是否成功
+        if (!fetchSuccess)
+        {
+            Debug.LogError("Failed to fetch session messages after home advancing, skipping event processing");
+            yield break;
+        }
 
         // 检查是否有角色执行了场景切换事件，如果有就需要更新UI
         var actorsWithTransStageEvents = MyUtils.GetActorsWithTransStageEvents(GameContext.Instance.LastAgentEventsHistory);
@@ -461,12 +473,24 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         }
 
         // 从服务器获取并同步最新的会话消息
+        bool fetchSuccess = false;
         yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
-            (sessionMessages) =>
+            (success, sessionMessages) =>
             {
-                Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
+                fetchSuccess = success;
+                if (success)
+                {
+                    Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
+                }
             }
         );
+
+        // 检查消息获取是否成功
+        if (!fetchSuccess)
+        {
+            Debug.LogError("Failed to fetch session messages after home advancing");
+            yield break;
+        }
 
         // 清空输入字段,返回主状态.
         _inputField.text = string.Empty;
