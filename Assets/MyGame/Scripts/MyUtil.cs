@@ -1,5 +1,7 @@
 //using System;
 using System.Collections.Generic;
+using System.Linq;
+
 //using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -197,6 +199,25 @@ public static class MyUtils
         }
 
         return switchStageActors;
+    }
+
+    /// <summary>
+    /// 格式化地下城概览信息为可读文本
+    /// 将地下城的名称、关卡列表和每关的怪物信息组织成便于UI显示的字符串
+    /// </summary>
+    /// <param name="dungeon">要格式化的地下城对象</param>
+    /// <returns>格式化后的地下城概览文本，包含地下城名称、各关卡名称及对应的怪物列表</returns>
+    public static string FormatDungeonOverview(Dungeon dungeon)
+    {
+        var dungeonOverviewText = string.Empty;
+        dungeonOverviewText += "地下城 = " + dungeon.name + "\n";
+        for (int i = 0; i < dungeon.stages.Count; i++)
+        {
+            dungeonOverviewText += "第" + (i + 1) + "关 = " + dungeon.stages[i].name + "\n";
+            dungeonOverviewText += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => a.name)) + "\n";
+        }
+
+        return dungeonOverviewText;
     }
 }
 

@@ -2,41 +2,53 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using TMPro;
-using System.Linq;
 
+/// <summary>
+/// 地下城概览场景控制器
+/// 负责显示地下城的宏观信息，包括关卡列表和怪物预览
+/// 提供进入地下城和返回主场景的功能
+/// </summary>
 public class DungeonOverviewScene : MonoBehaviour
 {
-    public string _preScene = "MainScene2";
+    [Header("Scene Settings")]
+    [SerializeField] private string _preScene = "MainScene2";
+    [SerializeField] private string _nextScene = "DungeonScene";
 
-    public string _nextScene = "DungeonScene";
+    [Header("UI Components")]
+    [SerializeField] private TMP_Text _mainText;
 
-    public TMP_Text _mainText;
+    [Header("API Components")]
+    [SerializeField] private TransDungeonApi _transDungeonApi;
 
-    public TransDungeonApi _transDungeonApi;
-
+    /// <summary>
+    /// 场景初始化
+    /// 验证必要组件并加载地下城概览数据
+    /// </summary>
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        //Debug.Assert(_dungeonStateApi != null, "_viewDungeonAction is null");
-        Debug.Assert(_transDungeonApi != null, "_transDungeonAction is null");
+        Debug.Assert(_transDungeonApi != null, "_transDungeonApi is null");
 
-        // Start the coroutine to view the dungeon
         _mainText.text = "Loading dungeon data...";
-        StartCoroutine(ExecuteViewDungeon());
+        StartCoroutine(LoadDungeonOverview());
     }
 
+    /// <summary>
+    /// UI按钮回调：进入地下城
+    /// 触发地下城传送流程，成功后切换到地下城场景
+    /// </summary>
     public void OnClickTransDungeon()
     {
         Debug.Log("OnClickTransDungeon");
-        StartCoroutine(ExecuteTransDungeon());
+        StartCoroutine(EnterDungeon());
     }
 
-    IEnumerator ExecuteTransDungeon()
+    /// <summary>
+    /// 执行进入地下城的流程
+    /// 调用传送API，验证响应后切换场景
+    /// </summary>
+    private IEnumerator EnterDungeon()
     {
-        if (_transDungeonApi == null)
-        {
-            yield break;
-        }
         yield return _transDungeonApi.Call(GameContext.Instance.HomeTransDungeonUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
         if (_transDungeonApi.RespData == null)
         {
@@ -47,39 +59,37 @@ public class DungeonOverviewScene : MonoBehaviour
         SceneManager.LoadScene(_nextScene);
     }
 
-    IEnumerator ExecuteViewDungeon()
+    /// <summary>
+    /// 加载并显示地下城概览信息
+    /// 从服务器刷新地下城数据，并格式化显示在UI上
+    /// </summary>
+    private IEnumerator LoadDungeonOverview()
     {
         yield return GameStateSync.Instance.RefreshDungeonFromServer();
 
-        _mainText.text = DungeonOverviewDisplayText(GameContext.Instance.Dungeon);
+        _mainText.text = MyUtils.FormatDungeonOverview(GameContext.Instance.Dungeon);
     }
 
-    string DungeonOverviewDisplayText(Dungeon dungeon)
-    {
-        var dungeon_text = "";
-        dungeon_text += "地下城 = " + dungeon.name + "\n";
-        for (int i = 0; i < dungeon.stages.Count; i++)
-        {
-            dungeon_text += "第" + (i + 1) + "关 = " + dungeon.stages[i].name + "\n";
-            dungeon_text += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => a.name)) + "\n";
-        }
-
-        return dungeon_text;
-    }
-
+    /// <summary>
+    /// UI按钮回调：返回主场景
+    /// 触发返回流程
+    /// </summary>
     public void OnClickBack()
     {
         Debug.Log("Back button clicked");
         StartCoroutine(ReturnToMainScene());
     }
 
-    IEnumerator ReturnToMainScene()
+    /// <summary>
+    /// 执行返回主场景的流程
+    /// 验证游戏状态后切换到主场景
+    /// </summary>
+    private IEnumerator ReturnToMainScene()
     {
-        yield return new WaitForSeconds(0);
-
         if (RootResp.Get() != null)
         {
             Debug.Log("Returning to MainScene2");
+            yield return new WaitForSeconds(0);
             SceneManager.LoadScene(_preScene);
         }
         else
