@@ -7,7 +7,7 @@ using System;
 /// Home游戏玩法管理器
 /// 单例模式，封装所有Home相关的游戏操作（POST请求）
 /// 负责推进游戏、场景切换、角色交互等写操作
-/// 仅依赖 GameStateSync.FetchSessionMessagesFromServer 获取会话消息
+/// 仅依赖 SessionManager.FetchSessionMessages 获取会话消息
 /// </summary>
 public class HomeGamePlayManager : MonoBehaviour
 {
@@ -73,7 +73,7 @@ public class HomeGamePlayManager : MonoBehaviour
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
-        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
+        yield return SessionManager.Instance.FetchSessionMessages(
             (success, sessionMessages) =>
             {
                 fetchSuccess = success;
@@ -143,7 +143,7 @@ public class HomeGamePlayManager : MonoBehaviour
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
-        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
+        yield return SessionManager.Instance.FetchSessionMessages(
             (success, sessionMessages) =>
             {
                 fetchSuccess = success;
@@ -211,7 +211,7 @@ public class HomeGamePlayManager : MonoBehaviour
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
-        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
+        yield return SessionManager.Instance.FetchSessionMessages(
             (success, sessionMessages) =>
             {
                 fetchSuccess = success;

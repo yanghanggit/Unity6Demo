@@ -198,7 +198,7 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator FetchAndProcessSessionMessages()
     {
         bool fetchSuccess = false;
-        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
+        yield return SessionManager.Instance.FetchSessionMessages(
             (success, sessionMessages) =>
             {
                 fetchSuccess = success;
