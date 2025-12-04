@@ -4,5 +4,5 @@ using UnityEngine;
 public class HomeSceneConfig : ScriptableObject
 {
     public string StageName;
-    public string SceneDisplayName;
+    //public string SceneDisplayName;
 }

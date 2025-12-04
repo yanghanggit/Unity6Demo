@@ -310,7 +310,7 @@ public class GameStateSync : MonoBehaviour
     /// 从服务器获取会话消息
     /// 获取最新的会话消息列表并更新序列ID
     /// </summary>
-    /// <param name="onMessagesReceived">回调函数，参数1：会话消息列表，参数2：是否成功获取</param>
+    /// <param name="onMessagesReceived">回调函数，参数1：是否成功获取 参数2：会话消息列表，</param>
     /// <returns>协程迭代器</returns>
     public IEnumerator FetchSessionMessagesFromServer(Action<bool, List<SessionMessage>> onMessagesReceived)
     {

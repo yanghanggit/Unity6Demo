@@ -12,11 +12,6 @@ using System.Collections.Generic;
 /// </summary>
 public class MainScene2 : MonoBehaviour
 {
-    /// <summary>
-    /// 静态属性用于在场景切换时传递 HomeSceneConfig 配置数据
-    /// 下一个场景(HomeScene)会在 Awake 时读取并清空此属性
-    /// </summary>
-    public static HomeSceneConfig PendingHomeSceneConfig { get; set; }
 
     [Header("Scene Settings")]
     /// <summary>
@@ -326,8 +321,8 @@ public class MainScene2 : MonoBehaviour
         // 短暂等待以确保所有异步操作完成
         yield return new WaitForSeconds(0.0f);
 
-        // 将场景配置设置到静态属性,供下一个场景(HomeScene)读取
-        PendingHomeSceneConfig = sceneConfig;
+        // 将场景配置设置到 HomeScene 的静态属性,供下一个场景读取
+        HomeScene.PendingHomeSceneConfig = sceneConfig;
 
         // 加载目标 Unity 场景
         SceneManager.LoadScene(_nextScene);

@@ -11,6 +11,11 @@ using System.Collections.Generic;
 /// </summary>
 public class HomeScene : MonoBehaviour, IStringGameEventListener
 {
+    /// <summary>
+    /// 静态属性用于在场景切换时传递 HomeSceneConfig 配置数据
+    /// MainScene2 会在切换场景前设置此属性,HomeScene 在 Awake 时读取并清空
+    /// </summary>
+    public static HomeSceneConfig PendingHomeSceneConfig { get; set; }
     // UI组件引用
     [Header("UI Components")]
     [SerializeField] private GameObject _background;            // 场景背景
@@ -44,10 +49,10 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     void Awake()
     {
         // 如果有从 MainScene2 传递过来的配置,使用它
-        if (MainScene2.PendingHomeSceneConfig != null)
+        if (PendingHomeSceneConfig != null)
         {
-            _homeSceneConfig = MainScene2.PendingHomeSceneConfig;
-            MainScene2.PendingHomeSceneConfig = null; // 用完立即清空
+            _homeSceneConfig = PendingHomeSceneConfig;
+            PendingHomeSceneConfig = null; // 用完立即清空
         }
 
         /// 验证所有必需的组件引用
