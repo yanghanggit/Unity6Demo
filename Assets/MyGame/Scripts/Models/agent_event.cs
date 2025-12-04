@@ -10,7 +10,7 @@ public enum EventHead
     MIND_EVENT = 4,
     QUERY_EVENT = 5,
     TRANS_STAGE_EVENT = 6,
-    //COMBAT_KICK_OFF_EVENT = 7,
+    COMBAT_ARBITRATION_EVENT = 7,
     COMBAT_COMPLETE_EVENT = 8,
     DISCUSSION_EVENT = 9,
     NIGHT_ACTION_EVENT = 10,
@@ -94,15 +94,15 @@ public sealed class TransStageEvent : AgentEvent
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * 战斗开始事件
+ * 战斗仲裁事件
  */
-// [System.Serializable]
-// public sealed class CombatKickOffEvent : AgentEvent
-// {
-//     //public new int head = (int)EventHead.COMBAT_KICK_OFF_EVENT;
-//     public string actor = "";
-//     public string description = "";
-// }
+public sealed class CombatArbitrationEvent : AgentEvent
+{
+    //public new int head = (int)EventHead.COMBAT_ARBITRATION_EVENT;
+    public string stage = "";
+    public string combat_log = "";
+    public string narrative = "";
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**

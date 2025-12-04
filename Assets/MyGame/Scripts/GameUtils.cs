@@ -6,6 +6,53 @@ using UnityEngine;
 public static class GameUtils
 {
     /// <summary>
+    /// 从实体序列化数据中获取指定类型的组件
+    /// </summary>
+    /// <typeparam name="T">组件类型</typeparam>
+    /// <param name="actorEntitySerialization">实体序列化数据</param>
+    /// <returns>如果找到返回组件实例，否则返回 null</returns>
+    public static T GetComponent<T>(EntitySerialization actorEntitySerialization) where T : class
+    {
+        if (actorEntitySerialization?.components == null)
+            return null;
+
+        string componentName = typeof(T).Name;
+
+        foreach (var component in actorEntitySerialization.components)
+        {
+            if (component.name == componentName)
+            {
+                return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(component.data));
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 从代理事件列表中提取指定类型的事件
+    /// 使用泛型筛选并转换事件类型，避免手动遍历和类型判断
+    /// </summary>
+    /// <typeparam name="T">目标事件类型，必须继承自 AgentEvent</typeparam>
+    /// <param name="agentEvents">代理事件列表</param>
+    /// <returns>指定类型的事件列表，如果没有则返回空列表</returns>
+    public static List<T> FilterEventsByType<T>(List<AgentEvent> agentEvents) where T : AgentEvent
+    {
+        var filteredEvents = new List<T>();
+
+        foreach (var agentEvent in agentEvents)
+        {
+            if (agentEvent is T typedEvent)
+            {
+                filteredEvents.Add(typedEvent);
+            }
+        }
+
+        return filteredEvents;
+    }
+
+
+    /// <summary>
     /// 格式化地下城状态显示文本，包含场景-角色映射和战斗序列信息
     /// </summary>
     public static string FormatDungeonStateDisplay(Dungeon dungeon, Dictionary<string, List<string>> stageActorsMapping)
@@ -71,29 +118,7 @@ public static class GameUtils
         return sb.ToString().TrimEnd();
     }
 
-    /// <summary>
-    /// 从实体序列化数据中获取指定类型的组件
-    /// </summary>
-    /// <typeparam name="T">组件类型</typeparam>
-    /// <param name="actorEntitySerialization">实体序列化数据</param>
-    /// <returns>如果找到返回组件实例，否则返回 null</returns>
-    public static T GetComponent<T>(EntitySerialization actorEntitySerialization) where T : class
-    {
-        if (actorEntitySerialization?.components == null)
-            return null;
 
-        string componentName = typeof(T).Name;
-
-        foreach (var component in actorEntitySerialization.components)
-        {
-            if (component.name == componentName)
-            {
-                return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(component.data));
-            }
-        }
-
-        return null;
-    }
 
     /// <summary>
     /// 格式化战斗属性组件为显示文本
@@ -144,15 +169,15 @@ public static class GameUtils
         if (handComponent == null || handComponent.cards.Count == 0)
             return string.Empty;
 
-        var text = $"{handComponent.name} Hand: ";
+        var text = $"{handComponent.name} Hand: \n";
 
         for (int i = 0; i < handComponent.cards.Count; i++)
         {
             var card = handComponent.cards[i];
-            text += $"{card.name} ({card.description})";
+            text += $"[{card.name}]:{card.description}";
             if (i < handComponent.cards.Count - 1)
             {
-                text += ", ";
+                text += "\n";
             }
         }
         text += "\n";

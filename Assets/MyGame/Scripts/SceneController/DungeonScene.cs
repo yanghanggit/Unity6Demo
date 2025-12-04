@@ -51,7 +51,7 @@ public class DungeonScene : MonoBehaviour
     public void OnClickPlayCards()
     {
         Debug.Log("OnClickPlayCards");
-        StartCoroutine(ExecutePlayCards());
+        StartCoroutine(ExecutePlayCardsAndShowResult());
     }
 
     public void OnClickAdvanceNextDungeon()
@@ -123,7 +123,11 @@ public class DungeonScene : MonoBehaviour
         _mainText.text = text;
     }
 
-    private IEnumerator ExecutePlayCards()
+    /// <summary>
+    /// 执行打牌操作并显示战斗仲裁结果
+    /// 调用服务器 play_cards 接口，获取战斗事件并显示战斗日志和叙述文本
+    /// </summary>
+    private IEnumerator ExecutePlayCardsAndShowResult()
     {
         yield return _dungeonGamePlayApi.Call(
             GameContext.Instance.DungeonGameplayUrl,
@@ -133,13 +137,46 @@ public class DungeonScene : MonoBehaviour
 
         if (_dungeonGamePlayApi.RespData == null)
         {
-            Debug.LogError("ExecutePlayCards request failed");
+            Debug.LogError("ExecutePlayCardsAndShowResult request failed");
             yield break;
         }
 
-        yield return FetchAndProcessSessionMessages();
-        Debug.Log("ExecutePlayCards request success");
-        UpdateTextFromAgentLogs();
+        bool fetchSuccess = false;
+        yield return SessionManager.Instance.FetchSessionMessages(
+            (success, sessionMessages) =>
+            {
+                fetchSuccess = success;
+                if (success)
+                {
+                    DisplayCombatArbitrationResult(sessionMessages);
+                }
+            }
+        );
+
+        if (!fetchSuccess)
+        {
+            Debug.LogError("Failed to fetch session messages in DungeonScene");
+        }
+    }
+
+    /// <summary>
+    /// 从会话消息中提取并显示战斗仲裁结果
+    /// 查找最后一个战斗仲裁事件并显示其战斗日志和叙述内容
+    /// </summary>
+    /// <param name="sessionMessages">会话消息列表</param>
+    private void DisplayCombatArbitrationResult(List<SessionMessage> sessionMessages)
+    {
+        var agentEvents = GameContext.Instance.ExtractCombatEventsFromMessages(sessionMessages);
+        var arbitrationEvents = GameUtils.FilterEventsByType<CombatArbitrationEvent>(agentEvents);
+
+        if (arbitrationEvents.Count == 0)
+        {
+            Debug.LogWarning("No CombatArbitrationEvent found in session messages");
+            return;
+        }
+
+        var lastArbitrationEvent = arbitrationEvents[arbitrationEvents.Count - 1];
+        _mainText.text = $"{lastArbitrationEvent.combat_log}\n{lastArbitrationEvent.narrative}";
     }
 
     /// <summary>
@@ -207,7 +244,6 @@ public class DungeonScene : MonoBehaviour
     {
         Debug.Log("ExecuteBackHome");
         yield return _transHomeApi.Call(GameContext.Instance.DungeonTransHomeUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
-        //if (!_transHomeAction.LastRequestSuccess)
         if (_transHomeApi.RespData == null)
         {
             Debug.LogError("TransHomeAction request failed");
@@ -217,33 +253,5 @@ public class DungeonScene : MonoBehaviour
         yield return new WaitForSeconds(0);
         SceneManager.LoadScene(_preScene);
     }
-
-    private void UpdateTextFromAgentLogs()
-    {
-        _mainText.text = GameUtils.AgentLogsDisplayText(GameContext.Instance.AgentEventLogs);
-    }
-
-    private IEnumerator FetchAndProcessSessionMessages()
-    {
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
-                {
-                    // 处理接收到的会话消息
-                    GameContext.Instance.ProcessClientMessages(sessionMessages);
-                }
-            }
-        );
-
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
-        {
-            Debug.LogError("Failed to fetch session messages in DungeonScene");
-        }
-    }
-
 }
 

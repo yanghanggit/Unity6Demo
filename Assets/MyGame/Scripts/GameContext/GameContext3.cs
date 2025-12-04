@@ -178,11 +178,6 @@ public partial class GameContext
                 AddEventToActor(agentEventsByActor, mindVoiceEvent.actor, mindVoiceEvent);
                 break;
 
-            case EventHead.COMBAT_COMPLETE_EVENT:
-                CombatCompleteEvent combatCompleteEvent = dataToken.ToObject<CombatCompleteEvent>();
-                AddEventToActor(agentEventsByActor, combatCompleteEvent.actor, combatCompleteEvent);
-                break;
-
             case EventHead.TRANS_STAGE_EVENT:
                 TransStageEvent transStageEvent = dataToken.ToObject<TransStageEvent>();
                 AddEventToActor(agentEventsByActor, transStageEvent.actor, transStageEvent);
@@ -191,6 +186,69 @@ public partial class GameContext
             default:
                 Debug.LogWarning("Unknown agent event head: " + eventHead);
                 break;
+        }
+    }
+
+    /// <summary>
+    /// 从会话消息列表中提取所有战斗相关事件
+    /// 包括战斗仲裁事件(COMBAT_ARBITRATION_EVENT)和战斗完成事件(COMBAT_COMPLETE_EVENT)
+    /// </summary>
+    /// <param name="sessionMessages">会话消息列表</param>
+    /// <returns>战斗事件列表，如果没有则返回空列表</returns>
+    public List<AgentEvent> ExtractCombatEventsFromMessages(List<SessionMessage> sessionMessages)
+    {
+        var combatEvents = new List<AgentEvent>();
+
+        foreach (var sessionMessage in sessionMessages)
+        {
+            if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
+            {
+                continue;
+            }
+
+            JToken dataToken = JToken.FromObject(sessionMessage.data);
+            var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
+
+            if (eventHead < 0 || eventHead == (int)EventHead.NONE)
+            {
+                continue;
+            }
+
+            var combatEvent = ParseCombatEventFromToken(dataToken);
+            if (combatEvent != null)
+            {
+                combatEvents.Add(combatEvent);
+            }
+        }
+
+        return combatEvents;
+    }
+
+
+    /// <summary>
+    /// 从 JSON 数据中解析战斗事件
+    /// 支持战斗仲裁事件和战斗完成事件两种类型
+    /// </summary>
+    /// <param name="dataToken">事件数据的 JSON 对象</param>
+    /// <returns>解析后的战斗事件，如果不是战斗事件则返回 null</returns>
+    private AgentEvent ParseCombatEventFromToken(JToken dataToken)
+    {
+        var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
+        if (eventHead < 0)
+        {
+            return null;
+        }
+
+        switch ((EventHead)eventHead)
+        {
+            case EventHead.COMBAT_ARBITRATION_EVENT:
+                return dataToken.ToObject<CombatArbitrationEvent>();
+
+            case EventHead.COMBAT_COMPLETE_EVENT:
+                return dataToken.ToObject<CombatCompleteEvent>();
+
+            default:
+                return null;
         }
     }
 }
