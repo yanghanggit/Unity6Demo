@@ -78,9 +78,8 @@ public class LoginScene : MonoBehaviour
             yield break;
         }
 
-        // 2. 刷新全局游戏状态（包括所有实体和地下城）
+        // 2. 刷新全局游戏状态
         yield return GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
-        yield return GameStateSync.Instance.RefreshDungeonFromServer();
 
         // 3. 验证所有 Actor 的精灵资源
         ValidateActorSprites();

@@ -266,7 +266,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             foreach (var agentEvent in latestRoundEventsForActor)
             {
                 Debug.Log($"[HomeScene] Last event for {selectedActorName}: {agentEvent.GetType().Name}");
-                var summary = MyUtils.FormatAgentEventSummary(agentEvent);
+                var summary = GameUtils.FormatAgentEventSummary(agentEvent);
                 if (!string.IsNullOrEmpty(summary))
                 {
                     agentEventSummaries.Add(summary);
@@ -349,7 +349,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         }
 
         // 检查是否有角色执行了场景切换事件，如果有就需要更新UI
-        var actorsWithTransStageEvents = MyUtils.GetActorsWithTransStageEvents(GameContext.Instance.LastAgentEventsHistory);
+        var actorsWithTransStageEvents = GameUtils.GetActorsWithTransStageEvents(GameContext.Instance.LastAgentEventsHistory);
         if (actorsWithTransStageEvents.Count > 0)
         {
             Debug.Log($"[HomeScene] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");

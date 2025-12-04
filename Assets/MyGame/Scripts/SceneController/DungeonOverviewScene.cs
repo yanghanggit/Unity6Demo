@@ -49,12 +49,36 @@ public class DungeonOverviewScene : MonoBehaviour
     /// </summary>
     private IEnumerator EnterDungeon()
     {
+        // 1. 调用传送地下城API
         yield return _transDungeonApi.Call(GameContext.Instance.HomeTransDungeonUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
         if (_transDungeonApi.RespData == null)
         {
             yield break;
         }
 
+        // 2. 刷新全局游戏状态
+        yield return GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+
+        // 3. 获取会话消息以确保状态同步
+        bool fetchSuccess = false;
+        yield return SessionManager.Instance.FetchSessionMessages(
+            (success, sessionMessages) =>
+            {
+                fetchSuccess = success;
+                if (success)
+                {
+                    Debug.Log("Fetched session messages successfully in DungeonScene");
+                }
+            }
+        );
+
+        // 检查消息获取是否成功
+        if (!fetchSuccess)
+        {
+            Debug.LogError("Failed to fetch session messages in DungeonScene");
+        }
+
+        // 4. 切换到地下城场景
         yield return new WaitForSeconds(0);
         SceneManager.LoadScene(_nextScene);
     }
@@ -67,7 +91,7 @@ public class DungeonOverviewScene : MonoBehaviour
     {
         yield return GameStateSync.Instance.RefreshDungeonFromServer();
 
-        _mainText.text = MyUtils.FormatDungeonOverview(GameContext.Instance.Dungeon);
+        _mainText.text = GameUtils.FormatDungeonOverview(GameContext.Instance.Dungeon);
     }
 
     /// <summary>

@@ -162,7 +162,7 @@ public class DungeonGamePlayRequest
 [System.Serializable]
 public class DungeonGamePlayResponse
 {
-    public List<SessionMessage> client_messages = new List<SessionMessage>();
+    public List<SessionMessage> session_messages = new List<SessionMessage>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -238,7 +238,7 @@ public class MainScene2 : MonoBehaviour
     private bool ValidateTransStageEvent()
     {
         var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
-        var actorsWithTransStageEvents = MyUtils.GetActorsWithTransStageEvents(lastAgentEventsHistory);
+        var actorsWithTransStageEvents = GameUtils.GetActorsWithTransStageEvents(lastAgentEventsHistory);
         Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
         return actorsWithTransStageEvents.Contains(GameContext.Instance.ActorName);
     }
