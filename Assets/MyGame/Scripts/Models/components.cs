@@ -196,7 +196,7 @@ public sealed class CombatStatsComponent
 {
     public string name = "";
     public CharacterStats stats = new CharacterStats();
-    public List<StatusEffect> effects = new List<StatusEffect>();
+    public List<StatusEffect> status_effects = new List<StatusEffect>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////

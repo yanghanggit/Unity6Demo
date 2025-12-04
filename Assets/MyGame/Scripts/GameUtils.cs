@@ -132,7 +132,7 @@ public static class GameUtils
             return string.Empty;
 
         var stats = combatStatsComponent.stats;
-        var text = $"{combatStatsComponent.name} = HP:{stats.hp}/{stats.max_hp}," +
+        var text = $"{combatStatsComponent.name} = LV:{stats.level}, HP:{stats.hp}/{stats.max_hp}," +
                    $" Strength:{stats.strength}," +
                    $" Dexterity:{stats.dexterity}," +
                    $" Wisdom:{stats.wisdom}," +
@@ -141,16 +141,16 @@ public static class GameUtils
                    $" Magic Attack:{stats.magic_attack}," +
                    $" Magic Defense:{stats.magic_defense}\n";
 
-        if (combatStatsComponent.effects.Count > 0)
+        if (combatStatsComponent.status_effects.Count > 0)
         {
-            text += "Status Effects: ";
-            for (int i = 0; i < combatStatsComponent.effects.Count; i++)
+            text += "Status Effects: \n";
+            for (int i = 0; i < combatStatsComponent.status_effects.Count; i++)
             {
-                var statusEffect = combatStatsComponent.effects[i];
+                var statusEffect = combatStatsComponent.status_effects[i];
                 text += $"{statusEffect.name} ({statusEffect.description}, {statusEffect.duration})";
-                if (i < combatStatsComponent.effects.Count - 1)
+                if (i < combatStatsComponent.status_effects.Count - 1)
                 {
-                    text += ", ";
+                    text += "\n";
                 }
             }
             text += "\n";

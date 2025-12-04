@@ -527,7 +527,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d46a85287e2f9434db43aceb5e6b17ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGamePlayApi
-  requestTimeout: 30
+  requestTimeout: 60
 --- !u!114 &290427724
 MonoBehaviour:
   m_ObjectHideFlags: 0

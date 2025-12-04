@@ -68,12 +68,12 @@ public class DungeonScene : MonoBehaviour
     {
         bool success = false;
         yield return DungeonGamePlayManager.Instance.CombatInit(
-            (result) =>
+            (result, message) =>
             {
                 success = result;
                 if (!result)
                 {
-                    _mainText.text = "Combat init failed";
+                    _mainText.text = message;
                 }
             });
 
@@ -91,20 +91,46 @@ public class DungeonScene : MonoBehaviour
     {
         bool success = false;
         yield return DungeonGamePlayManager.Instance.DrawCards(
-            (result) =>
+            (result, message) =>
             {
                 success = result;
                 if (!result)
                 {
-                    _mainText.text = "Draw cards failed";
+                    _mainText.text = message;
                 }
             });
 
-        if (success)
+        // Early return: 抽卡失败
+        if (!success)
         {
-            yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-            DisplayAllActorsHands();
+            yield break;
         }
+
+        // 刷新角色数据并显示手牌信息
+        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+
+        // 获取会话消息
+        bool fetchSuccess = false;
+        bool combatCompleteDisplayed = false;
+        yield return SessionManager.Instance.FetchSessionMessages(
+            (fetchResult, sessionMessages) =>
+            {
+                fetchSuccess = fetchResult;
+                if (fetchResult)
+                {
+                    Debug.Log("Fetched session messages after draw cards");
+                    combatCompleteDisplayed = DisplayCombatCompleteResult(sessionMessages);
+                }
+            }
+        );
+
+        // Early return: 战斗完成结果已显示
+        if (combatCompleteDisplayed)
+        {
+            yield break;
+        }
+
+        DisplayAllActorsHands();
     }
 
     /// <summary>
@@ -140,34 +166,38 @@ public class DungeonScene : MonoBehaviour
     {
         bool success = false;
         yield return DungeonGamePlayManager.Instance.PlayCards(
-            (result) =>
+            (result, message) =>
             {
                 success = result;
                 if (!result)
                 {
-                    _mainText.text = "Play cards failed";
+                    _mainText.text = message;
                 }
             });
 
-        if (success)
+        // Early return: 打牌失败
+        if (!success)
         {
-            // 从SessionManager获取最新消息并显示战斗结果
-            bool fetchSuccess = false;
-            yield return SessionManager.Instance.FetchSessionMessages(
-                (fetchResult, sessionMessages) =>
-                {
-                    fetchSuccess = fetchResult;
-                    if (fetchResult)
-                    {
-                        DisplayCombatArbitrationResult(sessionMessages);
-                    }
-                }
-            );
+            yield break;
+        }
 
-            if (!fetchSuccess)
+        // 从SessionManager获取最新消息并显示战斗结果
+        bool fetchSuccess = false;
+        yield return SessionManager.Instance.FetchSessionMessages(
+            (fetchResult, sessionMessages) =>
             {
-                Debug.LogError("Failed to fetch session messages after play cards");
+                fetchSuccess = fetchResult;
+                if (fetchResult)
+                {
+                    DisplayCombatArbitrationResult(sessionMessages);
+                }
             }
+        );
+
+        // 检查消息获取失败
+        if (!fetchSuccess)
+        {
+            Debug.LogError("Failed to fetch session messages after play cards");
         }
     }
 
@@ -191,6 +221,32 @@ public class DungeonScene : MonoBehaviour
         //_mainText.text = $"[combat_log]\n{lastArbitrationEvent.combat_log}\n\n[narrative]\n{lastArbitrationEvent.narrative}";
         _mainText.text = $"[narrative]\n{lastArbitrationEvent.narrative}";
     }
+
+    /// <summary>
+    /// 从会话消息中提取并显示战斗完成结果
+    /// 查找所有战斗完成事件并显示每个角色的战斗总结
+    /// </summary>
+    /// <param name="sessionMessages">会话消息列表</param>
+    /// <returns>是否成功找到并显示战斗完成事件</returns>
+    private bool DisplayCombatCompleteResult(List<SessionMessage> sessionMessages)
+    {
+        var agentEvents = GameContext.Instance.ExtractCombatEventsFromMessages(sessionMessages);
+        var completeEvents = GameUtils.FilterEventsByType<CombatCompleteEvent>(agentEvents);
+        if (completeEvents.Count == 0)
+        {
+            Debug.LogWarning("No CombatCompleteEvent found in session messages");
+            return false;
+        }
+
+        var text = string.Empty;
+        foreach (var evt in completeEvents)
+        {
+            text += $"Actor: {evt.actor}\nSummary: {evt.summary}\n\n";
+        }
+        _mainText.text = "战斗完成！\n\n" + text;
+        return true;
+    }
+
 
     /// <summary>
     /// 刷新并显示地下城状态
@@ -244,12 +300,12 @@ public class DungeonScene : MonoBehaviour
     {
         bool success = false;
         yield return DungeonGamePlayManager.Instance.AdvanceNextDungeon(
-            (result) =>
+            (result, message) =>
             {
                 success = result;
                 if (!result)
                 {
-                    _mainText.text = "Advance dungeon failed";
+                    _mainText.text = message;
                 }
             });
 
@@ -265,21 +321,21 @@ public class DungeonScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteBackHome()
     {
-        Debug.Log("ExecuteBackHome");
+        //Debug.Log("ExecuteBackHome");
         bool success = false;
         yield return DungeonGamePlayManager.Instance.TransHome(
-            (result) =>
+            (result, message) =>
             {
                 success = result;
                 if (!result)
                 {
-                    _mainText.text = "Trans home failed";
+                    _mainText.text = message;
                 }
             });
 
         if (success)
         {
-            Debug.Log("TransHomeAction request success");
+            //Debug.Log("TransHomeAction request success");
             yield return new WaitForSeconds(0);
             SceneManager.LoadScene(_preScene);
         }
