@@ -83,7 +83,7 @@ public class StartResponse
 public class HomeGamePlayUserInput
 {
     public string tag = "";
-    public Dictionary<string, string> data = new Dictionary<string, string>();
+    public Dictionary<string, string> data = new();
 }
 
 [System.Serializable]
@@ -91,13 +91,13 @@ public class HomeGamePlayRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public HomeGamePlayUserInput user_input = new HomeGamePlayUserInput();
+    public HomeGamePlayUserInput user_input = new();
 }
 
 [System.Serializable]
 public class HomeGamePlayResponse
 {
-    public List<SessionMessage> client_messages = new List<SessionMessage>();
+    public List<SessionMessage> session_messages = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// 主场景控制器(MainScene2)
@@ -26,14 +25,9 @@ public class MainScene2 : MonoBehaviour
 
     [Header("API Components")]
     /// <summary>
-    /// 登出 API 接口,用于处理玩家退出登录的请求
+    /// 退出登录 API 接口,用于退出登录
     /// </summary>
     [SerializeField] private LogoutApi _logoutApi;
-
-    /// <summary>
-    /// 主场景游戏玩法 API 接口,用于与服务器通信(如切换 Stage)
-    /// </summary>
-    [SerializeField] private HomeGamePlayApi _homeGamePlayApi;
 
     [Header("HomeSceneConfigs")]
     /// <summary>
@@ -68,7 +62,6 @@ public class MainScene2 : MonoBehaviour
     void Start()
     {
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
-        Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
         Debug.Assert(_playerInfoBar != null, "_playerInfoBar is null");
         Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
@@ -267,50 +260,27 @@ public class MainScene2 : MonoBehaviour
         // 检查玩家是否已在目标 Stage 中
         if (currentStageName != sceneConfig.StageName)
         {
-            // 玩家不在目标 Stage,需要通知服务器切换 Stage
-            yield return _homeGamePlayApi.Call(
-            GameContext.Instance.HomeGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "/switch_stage",
-            new Dictionary<string, string>
-            {
-                ["stage_name"] = sceneConfig.StageName
-            });
-
-            // 检查 API 调用是否成功
-            if (_homeGamePlayApi.RespData == null)
-            {
-                Debug.LogError($"ExecuteTransStage = {sceneConfig.StageName} request failed");
-                yield break;
-            }
-
-            // API 调用成功,刷新全局状态以确保数据同步
-            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-
-            // 获取服务器最新消息并验证是否收到了场景转换事件
-            bool fetchSuccess = false;
-            yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
-            (success, sessionMessages) =>
+            // 玩家不在目标 Stage,使用 HomeGamePlayManager 切换 Stage
+            bool switchSuccess = false;
+            yield return HomeGamePlayManager.Instance.SwitchStage(
+                sceneConfig.StageName,
+                (success) =>
                 {
-                    fetchSuccess = success;
-                    if (success)
-                    {
-                        Debug.Log($"Fetched {sessionMessages.Count} session messages from server after TransStage");
-                    }
+                    switchSuccess = success;
                 }
             );
 
-            // 检查消息获取是否成功
-            if (!fetchSuccess)
+            // 检查切换是否成功
+            if (!switchSuccess)
             {
-                Debug.LogError($"Failed to fetch session messages after TransStage to {sceneConfig.StageName}, aborting transition");
+                Debug.LogError($"[MainScene2] SwitchStage to {sceneConfig.StageName} failed");
                 yield break;
             }
 
+            // 验证场景转换事件
             var isTransStageEventValid = ValidateTransStageEvent();
             Debug.Assert(isTransStageEventValid, "ValidateTransStageEvent failed");
-            Debug.Log($"ExecuteTransStage = {sceneConfig.StageName} completed");
+            Debug.Log($"[MainScene2] TransitionToScene to {sceneConfig.StageName} completed");
         }
         else
         {

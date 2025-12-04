@@ -32,9 +32,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     [SerializeField] private HomeSceneConfig _homeSceneConfig; // 场景配置数据
     [SerializeField] private string _preScene = "MainScene2";   // 上一个场景名称
 
-    [Header("API Components")]
-    [SerializeField] private HomeGamePlayApi _homeGamePlayApi; // 游戏玩法API接口
-
     // 事件系统
     [Header("Events")]
     [SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
@@ -74,7 +71,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(_inputField != null, "_inputField is null");
         Debug.Assert(_scrollView != null, "_scrollView is null");
         Debug.Assert(_homeSceneConfig != null, "_homeSceneConfig is null");
-        Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
         Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
 
         // 设置背景图像
@@ -331,42 +327,24 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 
     /// <summary>
     /// 推进家园场景状态的协程
-    /// 调用服务器API推进场景中所有角色(包括NPC)的行动,并同步最新的游戏状态
+    /// 调用 HomeGamePlayManager 推进场景中所有角色(包括NPC)的行动,并同步最新的游戏状态
     /// </summary>
     /// <returns>协程迭代器</returns>
     private IEnumerator AdvanceHomeState()
     {
-        // 调用 HomeGameplay API 的 /advancing 端点,推进场景状态
-        yield return _homeGamePlayApi.Call(
-            GameContext.Instance.HomeGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "/advancing");
-
-        // 检查API调用是否成功
-        if (_homeGamePlayApi.RespData == null)
-        {
-            Debug.LogError("HomeGameplayApi /advancing request failed");
-            yield break;
-        }
-
-        // 从服务器获取并同步最新的会话消息
-        bool fetchSuccess = false;
-        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
-            (success, sessionMessages) =>
+        // 使用 HomeGamePlayManager 推进游戏
+        bool advanceSuccess = false;
+        yield return HomeGamePlayManager.Instance.AdvanceGame(
+            (success) =>
             {
-                fetchSuccess = success;
-                if (success)
-                {
-                    Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
-                }
+                advanceSuccess = success;
             }
         );
 
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
+        // 检查推进是否成功
+        if (!advanceSuccess)
         {
-            Debug.LogError("Failed to fetch session messages after home advancing, skipping event processing");
+            Debug.LogError("[HomeScene] AdvanceGame failed");
             yield break;
         }
 
@@ -374,10 +352,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         var actorsWithTransStageEvents = MyUtils.GetActorsWithTransStageEvents(GameContext.Instance.LastAgentEventsHistory);
         if (actorsWithTransStageEvents.Count > 0)
         {
-            Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
-
-            // 刷新游戏状态以确保数据同步
-            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+            Debug.Log($"[HomeScene] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
 
             // 刷新角色列表
             RefreshActorList();
@@ -387,10 +362,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             {
                 _selectedActorName = string.Empty;
             }
-        }
-        else
-        {
-            Debug.Log("No actors executed TransStageEvents after advancing home state");
         }
 
         // 更新角色显示(可能已变化)
@@ -453,53 +424,40 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 
     /// <summary>
     /// 执行说话动作的协程
-    /// 调用服务器API发送消息到目标角色,并同步最新的游戏状态
+    /// 调用 HomeGamePlayManager 发送消息到目标角色,并同步最新的游戏状态
     /// </summary>
     /// <param name="targetActorName">目标角色名称</param>
     /// <param name="messageContent">消息内容</param>
     /// <returns>协程迭代器</returns>
     private IEnumerator ExecuteSpeakAction(string targetActorName, string messageContent)
     {
-        yield return _homeGamePlayApi.Call(
-            GameContext.Instance.HomeGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "/speak", new Dictionary<string, string>
+        // 使用 HomeGamePlayManager 发送消息
+        bool speakSuccess = false;
+        yield return HomeGamePlayManager.Instance.SpeakToActor(
+            targetActorName,
+            messageContent,
+            (success) =>
             {
-                ["target"] = targetActorName,
-                ["content"] = messageContent
-            });
-
-        Debug.Log("Speak action executed");
-        if (_homeGamePlayApi.RespData == null)
-        {
-            Debug.LogError("RunHomeAction request failed");
-            yield break;
-        }
-
-        // 从服务器获取并同步最新的会话消息
-        bool fetchSuccess = false;
-        yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
-                {
-                    Debug.Log($"Fetched {sessionMessages.Count} session messages from server after home advancing");
-                }
+                speakSuccess = success;
             }
         );
 
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
+        // 检查是否成功
+        if (!speakSuccess)
         {
-            Debug.LogError("Failed to fetch session messages after home advancing");
+            Debug.LogError("[HomeScene] SpeakToActor failed");
             yield break;
         }
 
-        // 清空输入字段,返回主状态.
+        Debug.Log("[HomeScene] Speak action completed successfully");
+
+        // 清空输入字段,返回主状态
         _inputField.text = string.Empty;
         _mainState.SetActive(true);                  // 显示主状态UI
         _inputState.SetActive(false);                // 隐藏输入状态UI
     }
 }
+
+
+
+

@@ -169,7 +169,7 @@ public partial class GameContext
     /// <summary>
     /// 获取主场景游戏玩法API的URL地址
     /// </summary>
-    public string HomeGameplayUrl
+    public string HomeGamePlayUrl
     {
         get
         {
