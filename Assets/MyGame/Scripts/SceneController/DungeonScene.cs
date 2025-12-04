@@ -12,16 +12,9 @@ public class DungeonScene : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText;
 
-    [Header("API Components")]
-    [SerializeField] private DungeonGamePlayApi _dungeonGamePlayApi;
-    [SerializeField] private TransHomeApi _transHomeApi;
-
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        Debug.Assert(_dungeonGamePlayApi != null, "_dungeonAction is null");
-        Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
-
         StartCoroutine(RefreshDungeonStateDisplay());
     }
 
@@ -73,28 +66,21 @@ public class DungeonScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteCombatInit()
     {
-        yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "combat_init");
+        bool success = false;
+        yield return DungeonGamePlayManager.Instance.CombatInit(
+            (result) =>
+            {
+                success = result;
+                if (!result)
+                {
+                    _mainText.text = "Combat init failed";
+                }
+            });
 
-        if (_dungeonGamePlayApi.RespData == null)
+        if (success)
         {
-            if (_dungeonGamePlayApi.ReqResult != null)
-            {
-                Debug.LogError("ExecuteCombatInit request failed: " + _dungeonGamePlayApi.ReqResult.responseText);
-                _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
-            }
-            else
-            {
-                Debug.LogError("ExecuteCombatInit request failed: response data is null");
-            }
-            yield break;
+            yield return RefreshDungeonStateDisplay();
         }
-
-        //yield return FetchAndProcessSessionMessages();
-        yield return RefreshDungeonStateDisplay();
     }
 
     /// <summary>
@@ -103,29 +89,22 @@ public class DungeonScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteDrawCardsAndShowHands()
     {
-        yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "draw_cards");
+        bool success = false;
+        yield return DungeonGamePlayManager.Instance.DrawCards(
+            (result) =>
+            {
+                success = result;
+                if (!result)
+                {
+                    _mainText.text = "Draw cards failed";
+                }
+            });
 
-        if (_dungeonGamePlayApi.RespData == null)
+        if (success)
         {
-            if (_dungeonGamePlayApi.ReqResult != null)
-            {
-                Debug.LogError("ExecuteDrawCardsAndShowHands request failed: " + _dungeonGamePlayApi.ReqResult.responseText);
-                _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
-            }
-            else
-            {
-                Debug.LogError("ExecuteDrawCardsAndShowHands request failed: response data is null");
-            }
-
-            yield break;
+            yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+            DisplayAllActorsHands();
         }
-
-        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-        DisplayAllActorsHands();
     }
 
     /// <summary>
@@ -159,41 +138,36 @@ public class DungeonScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecutePlayCardsAndShowResult()
     {
-        yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "play_cards");
-
-        if (_dungeonGamePlayApi.RespData == null)
-        {
-            if (_dungeonGamePlayApi.ReqResult != null)
+        bool success = false;
+        yield return DungeonGamePlayManager.Instance.PlayCards(
+            (result) =>
             {
-                Debug.LogError("ExecutePlayCardsAndShowResult request failed: " + _dungeonGamePlayApi.ReqResult.responseText);
-                _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
-            }
-            else
-            {
-                Debug.LogError("ExecutePlayCardsAndShowResult request failed: response data is null");
-            }
-            yield break;
-        }
-
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
+                success = result;
+                if (!result)
                 {
-                    DisplayCombatArbitrationResult(sessionMessages);
+                    _mainText.text = "Play cards failed";
                 }
-            }
-        );
+            });
 
-        if (!fetchSuccess)
+        if (success)
         {
-            Debug.LogError("Failed to fetch session messages in DungeonScene");
+            // 从SessionManager获取最新消息并显示战斗结果
+            bool fetchSuccess = false;
+            yield return SessionManager.Instance.FetchSessionMessages(
+                (fetchResult, sessionMessages) =>
+                {
+                    fetchSuccess = fetchResult;
+                    if (fetchResult)
+                    {
+                        DisplayCombatArbitrationResult(sessionMessages);
+                    }
+                }
+            );
+
+            if (!fetchSuccess)
+            {
+                Debug.LogError("Failed to fetch session messages after play cards");
+            }
         }
     }
 
@@ -268,27 +242,21 @@ public class DungeonScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteAdvanceNextDungeon()
     {
-        yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGameplayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "advance_next_dungeon");
-        if (_dungeonGamePlayApi.RespData == null)
-        {
-            if (_dungeonGamePlayApi.ReqResult != null)
+        bool success = false;
+        yield return DungeonGamePlayManager.Instance.AdvanceNextDungeon(
+            (result) =>
             {
-                Debug.LogError("ExecuteAdvanceNextDungeon request failed: " + _dungeonGamePlayApi.ReqResult.responseText);
-                _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
-            }
-            else
-            {
-                Debug.LogError("ExecuteAdvanceNextDungeon request failed: response data is null");
-            }
-            yield break;
-        }
+                success = result;
+                if (!result)
+                {
+                    _mainText.text = "Advance dungeon failed";
+                }
+            });
 
-        //_mainText.text = "已进入下一个地下城";
-        yield return RefreshDungeonStateDisplay();
+        if (success)
+        {
+            yield return RefreshDungeonStateDisplay();
+        }
     }
 
     /// <summary>
@@ -298,25 +266,23 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteBackHome()
     {
         Debug.Log("ExecuteBackHome");
-        yield return _transHomeApi.Call(GameContext.Instance.DungeonTransHomeUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
-        if (_transHomeApi.RespData == null)
-        {
-            Debug.LogError("TransHomeAction request failed");
-            if (_transHomeApi.ReqResult != null)
+        bool success = false;
+        yield return DungeonGamePlayManager.Instance.TransHome(
+            (result) =>
             {
-                Debug.LogError("ExecuteBackHome request failed: " + _transHomeApi.ReqResult.responseText);
-                _mainText.text = _transHomeApi.ReqResult.responseText;
-            }
-            else
-            {
-                Debug.LogError("ExecuteBackHome request failed: response data is null");
-            }
+                success = result;
+                if (!result)
+                {
+                    _mainText.text = "Trans home failed";
+                }
+            });
 
-            yield break;
+        if (success)
+        {
+            Debug.Log("TransHomeAction request success");
+            yield return new WaitForSeconds(0);
+            SceneManager.LoadScene(_preScene);
         }
-        Debug.Log("TransHomeAction request success");
-        yield return new WaitForSeconds(0);
-        SceneManager.LoadScene(_preScene);
     }
 }
 

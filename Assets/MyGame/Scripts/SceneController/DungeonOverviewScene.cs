@@ -17,9 +17,6 @@ public class DungeonOverviewScene : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText;
 
-    [Header("API Components")]
-    [SerializeField] private TransDungeonApi _transDungeonApi;
-
     /// <summary>
     /// 场景初始化
     /// 验证必要组件并加载地下城概览数据
@@ -27,7 +24,6 @@ public class DungeonOverviewScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        Debug.Assert(_transDungeonApi != null, "_transDungeonApi is null");
 
         _mainText.text = "Loading dungeon data...";
         StartCoroutine(LoadDungeonOverview());
@@ -49,9 +45,20 @@ public class DungeonOverviewScene : MonoBehaviour
     /// </summary>
     private IEnumerator EnterDungeon()
     {
+        bool success = false;
+
         // 1. 调用传送地下城API
-        yield return _transDungeonApi.Call(GameContext.Instance.HomeTransDungeonUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
-        if (_transDungeonApi.RespData == null)
+        yield return HomeGamePlayManager.Instance.TransDungeon(
+            (result) =>
+            {
+                success = result;
+                if (!result)
+                {
+                    _mainText.text = "Trans dungeon failed";
+                }
+            });
+
+        if (!success)
         {
             yield break;
         }
@@ -59,26 +66,7 @@ public class DungeonOverviewScene : MonoBehaviour
         // 2. 刷新全局游戏状态
         yield return GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
 
-        // 3. 获取会话消息以确保状态同步
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
-                {
-                    Debug.Log("Fetched session messages successfully in DungeonScene");
-                }
-            }
-        );
-
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
-        {
-            Debug.LogError("Failed to fetch session messages in DungeonScene");
-        }
-
-        // 4. 切换到地下城场景
+        // 3. 切换到地下城场景
         yield return new WaitForSeconds(0);
         SceneManager.LoadScene(_nextScene);
     }

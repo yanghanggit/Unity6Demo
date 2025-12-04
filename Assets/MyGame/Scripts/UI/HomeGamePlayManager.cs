@@ -21,6 +21,11 @@ public class HomeGamePlayManager : MonoBehaviour
     /// </summary>
     [SerializeField] private HomeGamePlayApi _homeGamePlayApi;
 
+    /// <summary>
+    /// 传送到地下城API接口
+    /// </summary>
+    [SerializeField] private TransDungeonApi _transDungeonApi;
+
     private void Awake()
     {
         // 单例模式处理
@@ -38,6 +43,7 @@ public class HomeGamePlayManager : MonoBehaviour
     private void Start()
     {
         Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
+        Debug.Assert(_transDungeonApi != null, "_transDungeonApi is null");
     }
 
     /// <summary>
@@ -231,6 +237,61 @@ public class HomeGamePlayManager : MonoBehaviour
         }
 
         Debug.Log($"[HomeGamePlayManager] SwitchStage completed successfully: {stageName}");
+        onComplete?.Invoke(true);
+    }
+
+    /// <summary>
+    /// 传送到地下城
+    /// 调用传送地下城端点，进入地下城副本
+    /// 自动获取最新会话消息
+    /// </summary>
+    /// <param name="onComplete">完成回调，参数为是否成功</param>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator TransDungeon(Action<bool> onComplete = null)
+    {
+        if (_transDungeonApi == null)
+        {
+            Debug.LogError("[HomeGamePlayManager] TransDungeonApi is not initialized");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        // 调用传送地下城端点
+        yield return _transDungeonApi.Call(
+            GameContext.Instance.HomeTransDungeonUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName);
+
+        // 检查API调用是否成功
+        if (_transDungeonApi.RespData == null)
+        {
+            Debug.LogError("[HomeGamePlayManager] TransDungeon request failed");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        // 从服务器获取并同步最新的会话消息
+        bool fetchSuccess = false;
+        yield return SessionManager.Instance.FetchSessionMessages(
+            (success, sessionMessages) =>
+            {
+                fetchSuccess = success;
+                if (success)
+                {
+                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after trans dungeon");
+                }
+            }
+        );
+
+        // 检查消息获取是否成功
+        if (!fetchSuccess)
+        {
+            Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after trans dungeon");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        Debug.Log("[HomeGamePlayManager] TransDungeon completed successfully");
         onComplete?.Invoke(true);
     }
 }
