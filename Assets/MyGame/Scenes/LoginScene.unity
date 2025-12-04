@@ -463,8 +463,6 @@ GameObject:
   m_Component:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
-  - component: {fileID: 399892902}
-  - component: {fileID: 399892903}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -503,37 +501,9 @@ MonoBehaviour:
   _gameNameText: {fileID: 143863052}
   _actorNameText: {fileID: 1310098622}
   _nextSceneName: MainScene2
-  _loginApi: {fileID: 399892902}
-  _startApi: {fileID: 399892903}
   _gameStateSync: {fileID: 2047208668}
   _actorName: "\u89D2\u8272.\u6218\u58EB.\u5361\u6069"
   _gameName: Game1
---- !u!114 &399892902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 451a5d84c98c44038afbe576fc4dfafd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  requestTimeout: 30
---- !u!114 &399892903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 573b6e76dfc824076b101b4eba928202, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  requestTimeout: 30
 --- !u!1 &470425675
 GameObject:
   m_ObjectHideFlags: 0
@@ -1394,6 +1364,95 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1736060650
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1736060651}
+  - component: {fileID: 1736060652}
+  - component: {fileID: 1736060655}
+  - component: {fileID: 1736060654}
+  - component: {fileID: 1736060653}
+  m_Layer: 0
+  m_Name: SessionManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1736060651
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736060650}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1736060652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736060650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa1fad310807244039cf6c080639e285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SessionManager
+  _loginApi: {fileID: 1736060655}
+  _startApi: {fileID: 1736060654}
+  _logoutApi: {fileID: 1736060653}
+--- !u!114 &1736060653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736060650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f947bdfc8ec0644d7929706550f03dbd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LogoutApi
+  requestTimeout: 30
+--- !u!114 &1736060654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736060650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 573b6e76dfc824076b101b4eba928202, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StartApi
+  requestTimeout: 30
+--- !u!114 &1736060655
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736060650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 451a5d84c98c44038afbe576fc4dfafd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LoginApi
+  requestTimeout: 30
 --- !u!1 &1985693585
 GameObject:
   m_ObjectHideFlags: 0
@@ -1822,6 +1881,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 60244930}
   - {fileID: 399892900}
+  - {fileID: 1736060651}
   - {fileID: 2047208667}
   - {fileID: 128522041}
   - {fileID: 1455665588}

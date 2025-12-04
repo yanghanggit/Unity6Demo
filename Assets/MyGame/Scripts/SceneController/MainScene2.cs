@@ -23,12 +23,6 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     [SerializeField] private string _nextScene = "HomeScene";
 
-    [Header("API Components")]
-    /// <summary>
-    /// 退出登录 API 接口,用于退出登录
-    /// </summary>
-    [SerializeField] private LogoutApi _logoutApi;
-
     [Header("HomeSceneConfigs")]
     /// <summary>
     /// 营地场景配置数据(包含 StageName 和 SceneDisplayName)
@@ -61,7 +55,6 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     void Start()
     {
-        Debug.Assert(_logoutApi != null, "_logoutApi is null");
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
         Debug.Assert(_playerInfoBar != null, "_playerInfoBar is null");
         Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
@@ -178,22 +171,23 @@ public class MainScene2 : MonoBehaviour
 
     /// <summary>
     /// 返回登录场景的协程
-    /// 1. 调用登出 API
-    /// 2. 清除游戏上下文数据
-    /// 3. 加载登录场景
+    /// 1. 使用 SessionManager 执行登出
+    /// 2. 加载登录场景
     /// </summary>
     IEnumerator ReturnToLoginScene()
     {
-        // 调用登出 API,通知服务器玩家退出
-        yield return _logoutApi.Call(GameContext.Instance.LogoutUrl, GameContext.Instance.UserName, GameContext.Instance.GameName);
-        if (_logoutApi.RespData == null)
+        // 使用 SessionManager 执行登出
+        bool logoutSuccess = false;
+        yield return SessionManager.Instance.Logout(
+            (success) => logoutSuccess = success
+        );
+
+        // 检查登出是否成功
+        if (!logoutSuccess)
         {
-            Debug.LogError("LogoutAction request failed");
+            Debug.LogError("[MainScene2] Logout failed");
             yield break;
         }
-
-        // 清除游戏上下文中的所有数据
-        GameContext.ClearInstance();
 
         // 加载并返回到登录场景
         yield return new WaitForSeconds(0);

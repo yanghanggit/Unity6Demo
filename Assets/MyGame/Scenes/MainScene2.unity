@@ -347,6 +347,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -699,6 +700,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -883,10 +885,6 @@ GameObject:
   m_Component:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
-  - component: {fileID: 399892902}
-  - component: {fileID: 399892904}
-  - component: {fileID: 399892903}
-  - component: {fileID: 399892905}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -922,66 +920,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _preScene: LoginScene
-  _logoutApi: {fileID: 399892902}
-  _homeGamePlayApi: {fileID: 399892905}
-  _dungeonButton: {fileID: 1416183366}
-  _playerInfoBar: {fileID: 8281322745747966233}
-  _playerInfoDetails: {fileID: 1318025743}
+  _nextScene: HomeScene
   _campSceneConfig: {fileID: 11400000, guid: d1ec0cda2b05e497c8c83f991cf28dd9, type: 2}
   _restaurantSceneConfig: {fileID: 11400000, guid: 9ff95a2f1582743b59a0310250d83c24,
     type: 2}
---- !u!114 &399892902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f947bdfc8ec0644d7929706550f03dbd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  requestTimeout: 30
---- !u!114 &399892903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e1ef5e385ceb46ea824910e77c561a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  requestTimeout: 30
---- !u!114 &399892904
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3be24e7a16bd42a9b0f0a5b47fc88e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  requestTimeout: 30
---- !u!114 &399892905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 549d431be56eb4c9e95c52a7eb426b12, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HomeGamePlayApi
-  requestTimeout: 30
+  _dungeonButton: {fileID: 1416183366}
+  _playerInfoBar: {fileID: 8281322745747966233}
+  _playerInfoDetails: {fileID: 1318025743}
 --- !u!1 &524838950
 GameObject:
   m_ObjectHideFlags: 0
@@ -1553,6 +1498,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1689,6 +1635,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

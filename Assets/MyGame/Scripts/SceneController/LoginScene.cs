@@ -13,10 +13,8 @@ public class LoginScene : MonoBehaviour
     [Header("Scene Settings")]
     [SerializeField] private string _nextSceneName = "MainScene2";
 
-    [Header("API Components")]
-    [SerializeField] private LoginApi _loginApi;
-    [SerializeField] private StartApi _startApi;
-    [SerializeField] private GameStateSync _gameStateSync;
+    // [Header("Sync Components")]
+    // [SerializeField] private GameStateSync _gameStateSync;
 
     [Header("Game Data")]
     [SerializeField] private string _actorName;
@@ -29,9 +27,7 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_userNameText != null, "_userNameText is null");
         Debug.Assert(_gameNameText != null, "_gameNameText is null");
         Debug.Assert(_actorNameText != null, "_actorNameText is null");
-        Debug.Assert(_loginApi != null, "_loginApi is null");
-        Debug.Assert(_startApi != null, "_startApi is null");
-        Debug.Assert(_gameStateSync != null, "_gameStateSync is null");
+        //Debug.Assert(_gameStateSync != null, "_gameStateSync is null");
         Debug.Assert(!string.IsNullOrEmpty(_actorName), "_actorName is null");
         Debug.Assert(!string.IsNullOrEmpty(_gameName), "_gameName is null");
         Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
@@ -62,48 +58,49 @@ public class LoginScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 执行登录并开始游戏的完整流程：登录 -> 开始游戏 -> 同步状态 -> 加载场景
+    /// 执行登录并开始游戏的完整流程：登录 -> 开始游戎 -> 同步状态 -> 加载场景
     /// </summary>
     private IEnumerator StartGameFlow(string userName, string gameName, string actorName)
     {
-        yield return _loginApi.Call(GameContext.Instance.LoginUrl, userName, gameName);
-        if (_loginApi.ReqResult == null || !_loginApi.ReqResult.isSuccess)
+        // 1. 使用 SessionManager 执行登录和开始游戏
+        bool sessionSuccess = false;
+        yield return SessionManager.Instance.LoginAndStart(
+            userName,
+            gameName,
+            actorName,
+            (success) => sessionSuccess = success
+        );
+
+        // 检查会话是否成功
+        if (!sessionSuccess)
         {
-            Debug.LogError("Login failed");
+            Debug.LogError("[LoginScene] LoginAndStart failed");
             yield break;
         }
 
-        // 保存登录信息
-        GameContext.Instance.UserName = userName;
-        GameContext.Instance.GameName = gameName;
-        GameContext.Instance.ActorName = "";
+        // 2. 刷新全局游戏状态（包括所有实体和地下城）
+        yield return GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+        yield return GameStateSync.Instance.RefreshDungeonFromServer();
 
-        yield return _startApi.Call(GameContext.Instance.StartUrl, userName, gameName, actorName);
-        if (_startApi.ReqResult == null || !_startApi.ReqResult.isSuccess)
-        {
-            Debug.LogError("Start new game failed");
-            yield break;
-        }
+        // 3. 验证所有 Actor 的精灵资源
+        ValidateActorSprites();
 
-        GameContext.Instance.ActorName = actorName;
+        // 4. 切换场景
+        SceneManager.LoadScene(_nextSceneName);
+    }
 
-        // 刷新全局游戏状态, 全部刷新！
-        yield return _gameStateSync.RefreshMappingAndEntitiesFromServer();
-
-        // 刷新地下城数据！
-        yield return _gameStateSync.RefreshDungeonFromServer();
-
-        //这里加一个测试,打印所有的actor entity，确保都能取到贴图
+    /// <summary>
+    /// 验证所有 Actor 实体的精灵资源是否可用
+    /// </summary>
+    private void ValidateActorSprites()
+    {
         var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
         for (int i = 0; i < actorEntitiesSerialization.Count; i++)
         {
             var entity = actorEntitiesSerialization[i];
-            Debug.Log("Actor Entity " + i + ": " + entity.ToString());
+            Debug.Log($"[LoginScene] Actor Entity {i}: {entity.ToString()}");
             var actorSprite = TextureManager.Instance.GetSprite(entity.name);
-            Debug.Assert(actorSprite != null, "Actor sprite is null for entity: " + entity.name);
+            Debug.Assert(actorSprite != null, $"Actor sprite is null for entity: {entity.name}");
         }
-
-        // 切换场景
-        SceneManager.LoadScene(_nextSceneName);
     }
 }
