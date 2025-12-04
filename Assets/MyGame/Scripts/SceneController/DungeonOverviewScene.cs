@@ -4,7 +4,7 @@ using System.Collections;
 using TMPro;
 using System.Linq;
 
-public class ViewDungeonScene : MonoBehaviour
+public class DungeonOverviewScene : MonoBehaviour
 {
     public string _preScene = "MainScene2";
 

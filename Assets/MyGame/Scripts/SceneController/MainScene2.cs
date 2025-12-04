@@ -23,6 +23,12 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     [SerializeField] private string _nextScene = "HomeScene";
 
+    /// <summary>
+    /// 地牢浏览场景名称
+    /// </summary>
+    [SerializeField] private string _dungeonOverviewScene = "DungeonOverviewScene";
+
+
     [Header("HomeSceneConfigs")]
     /// <summary>
     /// 营地场景配置数据(包含 StageName 和 SceneDisplayName)
@@ -136,7 +142,7 @@ public class MainScene2 : MonoBehaviour
     public void OnClickDungeon()
     {
         Debug.Log("OnClickDungeon");
-        StartCoroutine(OpenViewDungeonScene());
+        StartCoroutine(LoadDungeonOverviewScene());
     }
 
     /// <summary>
@@ -163,10 +169,10 @@ public class MainScene2 : MonoBehaviour
     /// 打开地牢浏览场景的协程
     /// 直接加载 ViewDungeonScene 场景
     /// </summary>
-    IEnumerator OpenViewDungeonScene()
+    IEnumerator LoadDungeonOverviewScene()
     {
         yield return new WaitForSeconds(0);
-        SceneManager.LoadScene("ViewDungeonScene");
+        SceneManager.LoadScene(_dungeonOverviewScene);
     }
 
     /// <summary>
