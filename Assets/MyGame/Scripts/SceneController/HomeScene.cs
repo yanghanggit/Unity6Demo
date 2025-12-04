@@ -354,6 +354,9 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         {
             Debug.Log($"[HomeScene] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
 
+            // 刷新游戏状态以确保数据同步
+            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+
             // 刷新角色列表
             RefreshActorList();
 

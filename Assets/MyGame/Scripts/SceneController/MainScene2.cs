@@ -277,6 +277,9 @@ public class MainScene2 : MonoBehaviour
                 yield break;
             }
 
+            // 刷新全局状态以确保数据同步
+            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+
             // 验证场景转换事件
             var isTransStageEventValid = ValidateTransStageEvent();
             Debug.Assert(isTransStageEventValid, "ValidateTransStageEvent failed");

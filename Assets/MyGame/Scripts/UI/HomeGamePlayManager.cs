@@ -7,7 +7,7 @@ using System;
 /// Home游戏玩法管理器
 /// 单例模式，封装所有Home相关的游戏操作（POST请求）
 /// 负责推进游戏、场景切换、角色交互等写操作
-/// 依赖 GameStateSync 获取会话消息和状态同步
+/// 仅依赖 GameStateSync.FetchSessionMessagesFromServer 获取会话消息
 /// </summary>
 public class HomeGamePlayManager : MonoBehaviour
 {
@@ -43,7 +43,7 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <summary>
     /// 推进游戏状态
     /// 调用 /advancing 端点推进场景中所有角色的行动
-    /// 自动获取最新会话消息并处理场景切换事件
+    /// 自动获取最新会话消息
     /// </summary>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
@@ -90,16 +90,6 @@ public class HomeGamePlayManager : MonoBehaviour
             Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after advancing");
             onComplete?.Invoke(false);
             yield break;
-        }
-
-        // 检查是否有角色执行了场景切换事件，如果有就需要刷新状态
-        var actorsWithTransStageEvents = MyUtils.GetActorsWithTransStageEvents(GameContext.Instance.LastAgentEventsHistory);
-        if (actorsWithTransStageEvents.Count > 0)
-        {
-            Debug.Log($"[HomeGamePlayManager] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
-
-            // 刷新游戏状态以确保数据同步
-            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         }
 
         Debug.Log("[HomeGamePlayManager] AdvanceGame completed successfully");
@@ -179,7 +169,7 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <summary>
     /// 切换场景
     /// 调用 /switch_stage 端点切换到目标场景
-    /// 自动刷新映射关系和演员数据，并获取最新会话消息
+    /// 自动获取最新会话消息
     /// </summary>
     /// <param name="stageName">目标场景名称</param>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
@@ -219,10 +209,7 @@ public class HomeGamePlayManager : MonoBehaviour
             yield break;
         }
 
-        // 刷新全局状态以确保数据同步
-        yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-
-        // 获取服务器最新消息并验证是否收到了场景转换事件
+        // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
         yield return GameStateSync.Instance.FetchSessionMessagesFromServer(
             (success, sessionMessages) =>
