@@ -6,14 +6,15 @@ using UnityEngine.SceneManagement;
 
 public class DungeonScene : MonoBehaviour
 {
-    public string _preScene = "MainScene2";
+    [Header("Scene Settings")]
+    [SerializeField] private string _preScene = "MainScene2";
 
-    public TMP_Text _mainText;
+    [Header("UI Components")]
+    [SerializeField] private TMP_Text _mainText;
 
-    public DungeonGamePlayApi _dungeonGamePlayApi;
-
-    public TransHomeApi _transHomeApi;
-
+    [Header("API Components")]
+    [SerializeField] private DungeonGamePlayApi _dungeonGamePlayApi;
+    [SerializeField] private TransHomeApi _transHomeApi;
 
     void Start()
     {
@@ -45,7 +46,7 @@ public class DungeonScene : MonoBehaviour
     public void OnClickDrawCards()
     {
         Debug.Log("OnClickDrawCards");
-        StartCoroutine(ExecuteDrawCards());
+        StartCoroutine(ExecuteDrawCardsAndShowHands());
     }
 
     public void OnClickPlayCards()
@@ -66,6 +67,10 @@ public class DungeonScene : MonoBehaviour
         StartCoroutine(ExecuteBackHome());
     }
 
+    /// <summary>
+    /// 初始化战斗并刷新地下城状态
+    /// 调用服务器 combat_init 接口开始战斗，成功后刷新并显示当前地下城状态
+    /// </summary>
     private IEnumerator ExecuteCombatInit()
     {
         yield return _dungeonGamePlayApi.Call(
@@ -92,34 +97,59 @@ public class DungeonScene : MonoBehaviour
         yield return RefreshDungeonStateDisplay();
     }
 
-    private IEnumerator ExecuteDrawCards()
+    /// <summary>
+    /// 执行抽卡操作并显示所有角色的手牌
+    /// 调用服务器 draw_cards 接口，刷新角色数据后显示每个角色的手牌信息
+    /// </summary>
+    private IEnumerator ExecuteDrawCardsAndShowHands()
     {
         yield return _dungeonGamePlayApi.Call(
             GameContext.Instance.DungeonGameplayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "draw_cards");
+
         if (_dungeonGamePlayApi.RespData == null)
         {
-            Debug.LogError("ExecuteDrawCards request failed");
+            if (_dungeonGamePlayApi.ReqResult != null)
+            {
+                Debug.LogError("ExecuteDrawCardsAndShowHands request failed: " + _dungeonGamePlayApi.ReqResult.responseText);
+                _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
+            }
+            else
+            {
+                Debug.LogError("ExecuteDrawCardsAndShowHands request failed: response data is null");
+            }
+
             yield break;
         }
 
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        DisplayAllActorsHands();
+    }
 
+    /// <summary>
+    /// 显示所有角色的手牌信息
+    /// 遍历所有角色实体，提取手牌组件并格式化显示
+    /// </summary>
+    private void DisplayAllActorsHands()
+    {
         var text = "";
         var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
-        for (int i = 0; i < actorEntitiesSerialization.Count; i++)
+
+        foreach (var actorEntity in actorEntitiesSerialization)
         {
-            var handComponent = GameUtils.GetComponent<HandComponent>(actorEntitiesSerialization[i]);
+            var handComponent = GameUtils.GetComponent<HandComponent>(actorEntity);
             if (handComponent == null)
             {
-                Debug.Assert(false, "combatStatsComponent is null");
+                Debug.LogWarning($"HandComponent is null for actor: {actorEntity.name}");
                 continue;
             }
+
             text += GameUtils.FormatHandComponent(handComponent);
             text += "\n";
         }
+
         _mainText.text = text;
     }
 
@@ -137,7 +167,15 @@ public class DungeonScene : MonoBehaviour
 
         if (_dungeonGamePlayApi.RespData == null)
         {
-            Debug.LogError("ExecutePlayCardsAndShowResult request failed");
+            if (_dungeonGamePlayApi.ReqResult != null)
+            {
+                Debug.LogError("ExecutePlayCardsAndShowResult request failed: " + _dungeonGamePlayApi.ReqResult.responseText);
+                _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
+            }
+            else
+            {
+                Debug.LogError("ExecutePlayCardsAndShowResult request failed: response data is null");
+            }
             yield break;
         }
 
@@ -176,7 +214,8 @@ public class DungeonScene : MonoBehaviour
         }
 
         var lastArbitrationEvent = arbitrationEvents[arbitrationEvents.Count - 1];
-        _mainText.text = $"{lastArbitrationEvent.combat_log}\n{lastArbitrationEvent.narrative}";
+        //_mainText.text = $"[combat_log]\n{lastArbitrationEvent.combat_log}\n\n[narrative]\n{lastArbitrationEvent.narrative}";
+        _mainText.text = $"[narrative]\n{lastArbitrationEvent.narrative}";
     }
 
     /// <summary>
@@ -223,6 +262,10 @@ public class DungeonScene : MonoBehaviour
         _mainText.text = text;
     }
 
+    /// <summary>
+    /// 前进到下一个地下城关卡
+    /// 调用服务器 advance_next_dungeon 接口，成功后刷新并显示新的地下城状态
+    /// </summary>
     private IEnumerator ExecuteAdvanceNextDungeon()
     {
         yield return _dungeonGamePlayApi.Call(
@@ -232,14 +275,26 @@ public class DungeonScene : MonoBehaviour
             "advance_next_dungeon");
         if (_dungeonGamePlayApi.RespData == null)
         {
-            _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
+            if (_dungeonGamePlayApi.ReqResult != null)
+            {
+                Debug.LogError("ExecuteAdvanceNextDungeon request failed: " + _dungeonGamePlayApi.ReqResult.responseText);
+                _mainText.text = _dungeonGamePlayApi.ReqResult.responseText;
+            }
+            else
+            {
+                Debug.LogError("ExecuteAdvanceNextDungeon request failed: response data is null");
+            }
             yield break;
         }
 
-        _mainText.text = "已进入下一个地下城";
+        //_mainText.text = "已进入下一个地下城";
         yield return RefreshDungeonStateDisplay();
     }
 
+    /// <summary>
+    /// 返回主场景
+    /// 调用服务器传送回家接口，成功后切换到主场景
+    /// </summary>
     private IEnumerator ExecuteBackHome()
     {
         Debug.Log("ExecuteBackHome");
@@ -247,6 +302,16 @@ public class DungeonScene : MonoBehaviour
         if (_transHomeApi.RespData == null)
         {
             Debug.LogError("TransHomeAction request failed");
+            if (_transHomeApi.ReqResult != null)
+            {
+                Debug.LogError("ExecuteBackHome request failed: " + _transHomeApi.ReqResult.responseText);
+                _mainText.text = _transHomeApi.ReqResult.responseText;
+            }
+            else
+            {
+                Debug.LogError("ExecuteBackHome request failed: response data is null");
+            }
+
             yield break;
         }
         Debug.Log("TransHomeAction request success");

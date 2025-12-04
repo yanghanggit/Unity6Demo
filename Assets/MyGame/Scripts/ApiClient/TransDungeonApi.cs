@@ -23,6 +23,16 @@ public class TransDungeonApi : BaseApiClient
     private string _gameName;
 
     /// <summary>
+    /// 请求结果
+    /// </summary>
+    private RequestResult _requestResult;
+
+    /// <summary>
+    /// 获取请求结果
+    /// </summary>
+    public RequestResult ReqResult => _requestResult;
+
+    /// <summary>
     /// 响应数据
     /// </summary>
     private HomeTransDungeonResponse _responseData;
@@ -84,17 +94,17 @@ public class TransDungeonApi : BaseApiClient
             yield break;
         }
 
-        var result = task.Result;
+        _requestResult = task.Result;
 
         // 处理请求结果
-        if (!result.isSuccess)
+        if (!_requestResult.isSuccess)
         {
-            Debug.LogError($"Request failed: {result.error}");
+            Debug.LogError($"Request failed: {_requestResult.error}");
             yield break;
         }
 
         // 解析响应数据
-        if (string.IsNullOrEmpty(result.responseText))
+        if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
             yield break;
@@ -102,7 +112,7 @@ public class TransDungeonApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<HomeTransDungeonResponse>(result.responseText);
+            _responseData = JsonConvert.DeserializeObject<HomeTransDungeonResponse>(_requestResult.responseText);
 
             if (_responseData == null)
             {
