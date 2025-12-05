@@ -23,11 +23,6 @@ public class StartApi : BaseApiClient
     private string _gameName;
 
     /// <summary>
-    /// 角色名
-    /// </summary>
-    private string _actorName;
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -54,16 +49,15 @@ public class StartApi : BaseApiClient
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
     /// <param name="actorName">角色名</param>
-    private void Initialize(string url, string userName, string gameName, string actorName)
+    private void Initialize(string url, string userName, string gameName)
     {
         _url = url;
         _userName = userName;
         _gameName = gameName;
-        _actorName = actorName;
         _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"StartApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, ActorName: {_actorName}");
+        Debug.Log($"StartApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
     }
 
     /// <summary>
@@ -74,9 +68,9 @@ public class StartApi : BaseApiClient
     /// <param name="game">游戏名</param>
     /// <param name="actor">角色名</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url, string user, string game, string actor)
+    public IEnumerator Call(string url, string user, string game)
     {
-        Initialize(url, user, game, actor);
+        Initialize(url, user, game);
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -90,7 +84,7 @@ public class StartApi : BaseApiClient
         {
             user_name = _userName,
             game_name = _gameName,
-            actor_name = _actorName
+            //actor_name = _actorName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 

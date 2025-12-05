@@ -234,7 +234,7 @@ public class DungeonScene : MonoBehaviour
         var completeEvents = GameUtils.FilterEventsByType<CombatCompleteEvent>(agentEvents);
         if (completeEvents.Count == 0)
         {
-            Debug.LogWarning("No CombatCompleteEvent found in session messages");
+            //Debug.LogWarning("No CombatCompleteEvent found in session messages");
             return false;
         }
 

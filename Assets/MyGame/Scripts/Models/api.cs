@@ -64,13 +64,14 @@ public class StartRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public string actor_name = "";
 }
 
 [System.Serializable]
 public class StartResponse
 {
     public string message = "";
+
+    public string player_actor = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

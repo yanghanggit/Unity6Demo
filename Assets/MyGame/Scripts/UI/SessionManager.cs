@@ -108,7 +108,7 @@ public class SessionManager : MonoBehaviour
     /// <param name="actorName">角色名</param>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator StartGame(string userName, string gameName, string actorName, Action<bool> onComplete = null)
+    public IEnumerator StartGame(string userName, string gameName, Action<bool> onComplete = null)
     {
         if (_startApi == null)
         {
@@ -118,7 +118,7 @@ public class SessionManager : MonoBehaviour
         }
 
         // 调用 StartApi
-        yield return _startApi.Call(GameContext.Instance.StartUrl, userName, gameName, actorName);
+        yield return _startApi.Call(GameContext.Instance.StartUrl, userName, gameName);
 
         // 检查结果
         if (_startApi.ReqResult == null || !_startApi.ReqResult.isSuccess)
@@ -129,9 +129,9 @@ public class SessionManager : MonoBehaviour
         }
 
         // 保存角色信息到 GameContext
-        GameContext.Instance.ActorName = actorName;
+        GameContext.Instance.ActorName = _startApi.RespData.player_actor;
 
-        Debug.Log($"[SessionManager] StartGame completed successfully: {actorName}");
+        Debug.Log($"[SessionManager] StartGame completed successfully: {GameContext.Instance.ActorName}");
         onComplete?.Invoke(true);
     }
 
@@ -182,7 +182,7 @@ public class SessionManager : MonoBehaviour
     /// <param name="actorName">角色名</param>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator LoginAndStart(string userName, string gameName, string actorName, Action<bool> onComplete = null)
+    public IEnumerator LoginAndStart(string userName, string gameName, Action<bool> onComplete = null)
     {
         // 1. 登录
         bool loginSuccess = false;
@@ -197,7 +197,7 @@ public class SessionManager : MonoBehaviour
 
         // 2. 开始游戏
         bool startSuccess = false;
-        yield return StartGame(userName, gameName, actorName, (success) => startSuccess = success);
+        yield return StartGame(userName, gameName, (success) => startSuccess = success);
 
         if (!startSuccess)
         {
