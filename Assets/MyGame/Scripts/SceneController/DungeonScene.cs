@@ -151,15 +151,15 @@ public class DungeonScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecutePlayCardsAndShowResult()
     {
-        // bool success = false;
+        bool success = false;
         yield return DungeonGamePlayManager.Instance.PlayCards(
             (result, message, sessionMessages) =>
             {
-                // success = result;
+                success = result;
                 if (result)
                 {
                     // 显示战斗仲裁结果
-                    DisplayCombatArbitrationResult(sessionMessages);
+                    //DisplayCombatArbitrationResult(sessionMessages);
                 }
                 else
                 {
@@ -167,41 +167,33 @@ public class DungeonScene : MonoBehaviour
                     _mainText.text = message;
                 }
             });
-    }
 
-    /// <summary>
-    /// 从会话消息中提取并显示战斗仲裁结果
-    /// 查找最后一个战斗仲裁事件并显示其战斗日志和叙述内容
-    /// </summary>
-    /// <param name="sessionMessages">会话消息列表</param>
-    private void DisplayCombatArbitrationResult(List<SessionMessage> sessionMessages)
-    {
-        if (sessionMessages == null || sessionMessages.Count == 0)
+        if (!success)
         {
-            Debug.LogWarning("No session messages to display combat arbitration result");
-            _mainText.text = "No session messages available.";
-            return;
+            yield break;
         }
 
-        foreach (var msg in sessionMessages)
-        {
-            var agentEvent = GameUtils.ParseAgentEvent(msg);
-            if (agentEvent == null)
-            {
-                Debug.LogWarning("Failed to parse AgentEvent from session message");
-                continue;
-            }
+        // 刷新地下城和角色数据
+        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
-            if (agentEvent is CombatArbitrationEvent combatEvent)
-            {
-                Debug.Log($"Found CombatArbitrationEvent: combat_log={combatEvent.combat_log}, narrative={combatEvent.narrative}");
-                _mainText.text = $"[combat_log]\n{combatEvent.combat_log}\n[narrative]\n{combatEvent.narrative}";
-                break;
-            }
-            else
-            {
-                Debug.Log($"Skipping non-combat arbitration event of type: {agentEvent.GetType().Name}");
-            }
+        // 获取最新的地下城回合信息
+        Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+        if (round == null)
+        {
+            Debug.LogWarning("No rounds found in dungeon after playing cards");
+            _mainText.text = "No round information available after playing cards.";
+            yield break;
+        }
+
+        // 显示最新的地下城战斗仲裁信息
+        var formattedRoundInfo = GameUtils.FormatRoundInfo(round);
+        if (!string.IsNullOrEmpty(formattedRoundInfo))
+        {
+            _mainText.text = formattedRoundInfo;
+        }
+        else
+        {
+            Debug.LogWarning("No combat arbitration info available in dungeon state");
         }
     }
 

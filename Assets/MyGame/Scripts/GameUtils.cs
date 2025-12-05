@@ -350,5 +350,57 @@ public static class GameUtils
 
         return null;
     }
+
+
+    /// <summary>
+    /// 获取地下城战斗序列中最后一个回合
+    /// </summary>
+    /// <param name="dungeon">地下城对象</param>
+    /// <returns>如果存在则返回最后一个回合，否则返回 null</returns>
+    public static Round GetLastRound(Dungeon dungeon)
+    {
+        if (dungeon?.combat_sequence?.combats == null || dungeon.combat_sequence.combats.Count == 0)
+            return null;
+
+        var lastCombat = dungeon.combat_sequence.combats[dungeon.combat_sequence.combats.Count - 1];
+
+        if (lastCombat.rounds == null || lastCombat.rounds.Count == 0)
+            return null;
+
+        return lastCombat.rounds[lastCombat.rounds.Count - 1];
+    }
+
+    /// <summary>
+    /// 格式化战斗回合信息为显示文本
+    /// 将回合的标签、行动顺序、战斗日志和叙事文本组织成便于UI显示的字符串
+    /// </summary>
+    /// <param name="round">要格式化的回合对象</param>
+    /// <returns>格式化后的回合信息文本，包含回合标签、角色行动顺序、战斗日志和叙事描述。如果回合为 null 则返回空字符串</returns>
+    public static string FormatRoundInfo(Round round)
+    {
+        if (round == null)
+            return string.Empty;
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"Round: {round.tag}");
+
+        if (round.action_order != null && round.action_order.Count > 0)
+        {
+            sb.AppendLine($"Action Order: {string.Join(" -> ", round.action_order)}");
+        }
+
+        if (!string.IsNullOrEmpty(round.combat_log))
+        {
+            sb.AppendLine($"Combat Log:\n{round.combat_log}");
+        }
+
+        if (!string.IsNullOrEmpty(round.narrative))
+        {
+            sb.AppendLine($"Narrative:\n{round.narrative}");
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
 }
 
