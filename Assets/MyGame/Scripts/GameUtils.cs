@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
-
+using Newtonsoft.Json.Linq;
 public static class GameUtils
 {
     /// <summary>
@@ -294,6 +294,61 @@ public static class GameUtils
         }
 
         return dungeonOverviewText;
+    }
+
+    /// <summary>
+    /// 从会话消息中解析代理事件对象，根据事件头类型反序列化为对应的 AgentEvent 子类实例
+    /// </summary>
+    /// <param name="sessionMessage">会话消息对象，必须是 AGENT_EVENT 类型</param>
+    /// <returns>解析成功返回对应的 AgentEvent 实例，失败返回 null</returns>
+    public static AgentEvent ParseAgentEvent(SessionMessage sessionMessage)
+    {
+        if (sessionMessage == null || sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
+        {
+            return null;
+        }
+
+        JToken dataToken = JToken.FromObject(sessionMessage.data);
+        var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
+        if (eventHead < 0)
+        {
+            Debug.Assert(false, "Invalid event head in session message");
+            return null;
+        }
+
+        switch ((EventHead)eventHead)
+        {
+            case EventHead.NONE:
+                Debug.Log($"NONE event encountered, skipping processing. message = {dataToken["message"]?.ToString() ?? "No message"}");
+                break;
+
+            case EventHead.SPEAK_EVENT:
+                return dataToken.ToObject<SpeakEvent>();
+
+            case EventHead.WHISPER_EVENT:
+                return dataToken.ToObject<WhisperEvent>();
+
+            case EventHead.ANNOUNCE_EVENT:
+                return dataToken.ToObject<AnnounceEvent>();
+
+            case EventHead.MIND_EVENT:
+                return dataToken.ToObject<MindEvent>();
+
+            case EventHead.TRANS_STAGE_EVENT:
+                return dataToken.ToObject<TransStageEvent>();
+
+            case EventHead.COMBAT_ARBITRATION_EVENT:
+                return dataToken.ToObject<CombatArbitrationEvent>();
+
+            case EventHead.COMBAT_COMPLETE_EVENT:
+                return dataToken.ToObject<CombatCompleteEvent>();
+
+            default:
+                Debug.LogWarning("Unknown agent event head: " + eventHead);
+                break;
+        }
+
+        return null;
     }
 }
 

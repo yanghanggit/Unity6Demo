@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// Dungeon游戏玩法管理器
@@ -33,10 +34,6 @@ public class DungeonGamePlayManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
-        {
-            Destroy(gameObject);
-        }
     }
 
     private void Start()
@@ -49,77 +46,80 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 初始化战斗
     /// 调用 combat_init 端点开始战斗
     /// </summary>
-    /// <param name="onComplete">完成回调，参数为是否成功和消息</param>
+    /// <param name="onComplete">完成回调，参数为是否成功、消息和会话消息列表</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator CombatInit(Action<bool, string> onComplete = null)
+    public IEnumerator CombatInit(Action<bool, string, List<SessionMessage>> onComplete = null)
     {
-        if (_dungeonGamePlayApi == null)
-        {
-            string errorMsg = "DungeonGamePlayApi is not initialized";
-            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
-            yield break;
-        }
-
         // 调用 combat_init 端点
         yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.DungeonGamePlayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "combat_init");
 
         // 检查API调用是否成功
-        if (_dungeonGamePlayApi.RespData == null)
+        if (_dungeonGamePlayApi.ReqResult == null)
         {
-            string errorMsg = _dungeonGamePlayApi.ReqResult != null
-                ? _dungeonGamePlayApi.ReqResult.responseText
-                : "combat_init request failed: response data is null";
+            // 没有任何请求结果，这就是不需要继续的！
+            string errorMsg = "DungeonGamePlayApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
+            onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
+        if (!_dungeonGamePlayApi.ReqResult.isSuccess)
+        {
+            string errorMsg = _dungeonGamePlayApi.ReqResult.responseText;
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
+
+        // 必有响应数据，即使是[]
+        Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
+
         Debug.Log("[DungeonGamePlayManager] CombatInit completed successfully");
-        onComplete?.Invoke(true, "Combat init completed successfully");
+        onComplete?.Invoke(true, "Combat init completed successfully", _dungeonGamePlayApi.RespData.session_messages);
     }
 
     /// <summary>
     /// 抽卡
     /// 调用 draw_cards 端点执行抽卡操作
     /// </summary>
-    /// <param name="onComplete">完成回调，参数为是否成功和消息</param>
+    /// <param name="onComplete">完成回调，参数为是否成功、消息和会话消息列表</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator DrawCards(Action<bool, string> onComplete = null)
+    public IEnumerator DrawCards(Action<bool, string, List<SessionMessage>> onComplete = null)
     {
-        if (_dungeonGamePlayApi == null)
-        {
-            string errorMsg = "DungeonGamePlayApi is not initialized";
-            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
-            yield break;
-        }
-
         // 调用 draw_cards 端点
         yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.DungeonGamePlayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "draw_cards");
 
         // 检查API调用是否成功
-        if (_dungeonGamePlayApi.RespData == null)
+        if (_dungeonGamePlayApi.ReqResult == null)
         {
-            string errorMsg = _dungeonGamePlayApi.ReqResult != null
-                ? _dungeonGamePlayApi.ReqResult.responseText
-                : "draw_cards request failed: response data is null";
+            // 没有任何请求结果，这就是不需要继续的！
+            string errorMsg = "DungeonGamePlayApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
+            onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
-        //
+        if (!_dungeonGamePlayApi.ReqResult.isSuccess)
+        {
+            string errorMsg = _dungeonGamePlayApi.ReqResult.responseText;
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
+
+        // 必有响应数据，即使是[]
+        Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
+
         Debug.Log("[DungeonGamePlayManager] DrawCards completed successfully");
-        onComplete?.Invoke(true, "Draw cards completed successfully");
+        onComplete?.Invoke(true, "Draw cards completed successfully", _dungeonGamePlayApi.RespData.session_messages);
     }
 
     /// <summary>
@@ -128,74 +128,78 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// </summary>
     /// <param name="onComplete">完成回调，参数为是否成功和消息</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator PlayCards(Action<bool, string> onComplete = null)
+    public IEnumerator PlayCards(Action<bool, string, List<SessionMessage>> onComplete = null)
     {
-        if (_dungeonGamePlayApi == null)
-        {
-            string errorMsg = "DungeonGamePlayApi is not initialized";
-            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
-            yield break;
-        }
-
         // 调用 play_cards 端点
         yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.DungeonGamePlayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "play_cards");
 
-        // 检查API调用是否成功
-        if (_dungeonGamePlayApi.RespData == null)
+        // 检查API调用是否成功,
+        if (_dungeonGamePlayApi.ReqResult == null)
         {
-            string errorMsg = _dungeonGamePlayApi.ReqResult != null
-                ? _dungeonGamePlayApi.ReqResult.responseText
-                : "play_cards request failed: response data is null";
+            // 没有任何请求结果，这就是不需要继续的！
+            string errorMsg = "DungeonGamePlayApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
+            onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
+        if (!_dungeonGamePlayApi.ReqResult.isSuccess)
+        {
+            string errorMsg = _dungeonGamePlayApi.ReqResult.responseText;
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
+
+        // 必有响应数据，即使是[]
+        Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
+
         Debug.Log("[DungeonGamePlayManager] PlayCards completed successfully");
-        onComplete?.Invoke(true, "Play cards completed successfully");
+        onComplete?.Invoke(true, "Play cards completed successfully", _dungeonGamePlayApi.RespData.session_messages);
     }
 
     /// <summary>
     /// 前进到下一个地下城
     /// 调用 advance_next_dungeon 端点推进地下城进度
     /// </summary>
-    /// <param name="onComplete">完成回调，参数为是否成功和消息</param>
+    /// <param name="onComplete">完成回调，参数为是否成功、消息和会话消息列表</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator AdvanceNextDungeon(Action<bool, string> onComplete = null)
+    public IEnumerator AdvanceNextDungeon(Action<bool, string, List<SessionMessage>> onComplete = null)
     {
-        if (_dungeonGamePlayApi == null)
-        {
-            string errorMsg = "DungeonGamePlayApi is not initialized";
-            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
-            yield break;
-        }
-
         // 调用 advance_next_dungeon 端点
         yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGameplayUrl,
+            GameContext.Instance.DungeonGamePlayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "advance_next_dungeon");
 
         // 检查API调用是否成功
-        if (_dungeonGamePlayApi.RespData == null)
+        if (_dungeonGamePlayApi.ReqResult == null)
         {
-            string errorMsg = _dungeonGamePlayApi.ReqResult != null
-                ? _dungeonGamePlayApi.ReqResult.responseText
-                : "advance_next_dungeon request failed: response data is null";
+            // 没有任何请求结果，这就是不需要继续的！
+            string errorMsg = "DungeonGamePlayApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
+            onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
+        if (!_dungeonGamePlayApi.ReqResult.isSuccess)
+        {
+            string errorMsg = _dungeonGamePlayApi.ReqResult.responseText;
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
+
+        // 必有响应数据，即使是[]
+        Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
+
         Debug.Log("[DungeonGamePlayManager] AdvanceNextDungeon completed successfully");
-        onComplete?.Invoke(true, "Advance dungeon completed successfully");
+        onComplete?.Invoke(true, "Advance dungeon completed successfully", _dungeonGamePlayApi.RespData.session_messages);
     }
 
     /// <summary>

@@ -73,6 +73,11 @@ public partial class GameContext
     /// <summary>
     /// 从会话消息列表中收集代理事件，并按角色分组累积存储到 _agentEventsHistory 中
     /// 每次调用会创建一个新的字典并添加到历史记录列表中，实现数据累积
+    /// 处理流程:
+    /// 1. 创建新的轮次字典并添加到 _agentEventsHistory
+    /// 2. 遍历会话消息列表，过滤出 AGENT_EVENT 类型消息
+    /// 3. 使用 GameUtils.ParseAgentEvent 解析每条消息
+    /// 4. 调用 AddEventToActorCollection 将解析后的事件按角色分类存储
     /// </summary>
     /// <param name="sessionMessages">会话消息列表</param>
     public void CollectEventsByActor(List<SessionMessage> sessionMessages)
@@ -81,7 +86,7 @@ public partial class GameContext
         var agentEventsByActor = new Dictionary<string, List<AgentEvent>>();
         _agentEventsHistory.Add(agentEventsByActor);
 
-        //
+        // 遍历会话消息，解析并收集代理事件
         for (int i = 0; i < sessionMessages.Count; i++)
         {
             SessionMessage sessionMessage = sessionMessages[i];
@@ -92,25 +97,14 @@ public partial class GameContext
                 continue;
             }
 
-            // 解析数据部分
-            JToken dataToken = JToken.FromObject(sessionMessage.data);
-            var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
-            Debug.Log("body = " + dataToken.ToString());
-
-            if (eventHead < 0)
+            var agentEvent = GameUtils.ParseAgentEvent(sessionMessage);
+            if (agentEvent == null)
             {
-                Debug.LogWarning("Invalid event head: " + eventHead);
+                Debug.LogWarning("Failed to parse agent event from session message");
                 continue;
             }
 
-            // 故意忽略 NONE 事件
-            if (eventHead == (int)EventHead.NONE)
-            {
-                Debug.Log($"NONE event encountered, skipping processing. message = {dataToken["message"]?.ToString() ?? "No message"}");
-                continue;
-            }
-
-            AddEventToActorCollection(dataToken, agentEventsByActor);
+            AddEventToActorCollection(agentEvent, agentEventsByActor);
         }
     }
 
@@ -141,114 +135,50 @@ public partial class GameContext
     }
 
     /// <summary>
-    /// 将事件数据解析并添加到指定角色的事件集合中。支持 SPEAK、WHISPER、ANNOUNCE、MIND、COMBAT_COMPLETE、TRANS_STAGE 等事件类型
+    /// 将已解析的代理事件添加到指定角色的事件集合中
+    /// 根据事件类型(head)进行分类处理，将事件添加到对应角色的事件列表中
+    /// 支持的事件类型: SPEAK_EVENT, WHISPER_EVENT, ANNOUNCE_EVENT, MIND_EVENT, TRANS_STAGE_EVENT
+    /// 处理流程:
+    /// 1. 根据 agentEvent.head 判断事件类型
+    /// 2. 将 AgentEvent 转换为具体的事件类型(SpeakEvent, WhisperEvent 等)
+    /// 3. 提取事件中的 actor 字段
+    /// 4. 调用 AddEventToActor 将事件添加到该角色的事件列表中
     /// </summary>
-    /// <param name="dataToken">事件数据的 JSON 对象</param>
+    /// <param name="agentEvent">已解析的代理事件对象</param>
     /// <param name="agentEventsByActor">按角色分组的事件集合字典</param>
-    private void AddEventToActorCollection(JToken dataToken, Dictionary<string, List<AgentEvent>> agentEventsByActor)
+    private void AddEventToActorCollection(AgentEvent agentEvent, Dictionary<string, List<AgentEvent>> agentEventsByActor)
     {
-        // 获取事件头
-        var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
-        Debug.Assert(eventHead >= 0, "Invalid event head: " + eventHead);
-
         // 分类解析
-        switch ((EventHead)eventHead)
+        switch ((EventHead)agentEvent.head)
         {
-            case EventHead.NONE:
-                Debug.Log($"NONE event encountered, skipping processing. message = {dataToken["message"]?.ToString() ?? "No message"}");
-                break;
-
             case EventHead.SPEAK_EVENT:
-                SpeakEvent speakEvent = dataToken.ToObject<SpeakEvent>();
+                SpeakEvent speakEvent = (SpeakEvent)agentEvent;
                 AddEventToActor(agentEventsByActor, speakEvent.actor, speakEvent);
                 break;
 
             case EventHead.WHISPER_EVENT:
-                WhisperEvent whisperEvent = dataToken.ToObject<WhisperEvent>();
+                WhisperEvent whisperEvent = (WhisperEvent)agentEvent;
                 AddEventToActor(agentEventsByActor, whisperEvent.actor, whisperEvent);
                 break;
 
             case EventHead.ANNOUNCE_EVENT:
-                AnnounceEvent announceEvent = dataToken.ToObject<AnnounceEvent>();
+                AnnounceEvent announceEvent = (AnnounceEvent)agentEvent;
                 AddEventToActor(agentEventsByActor, announceEvent.actor, announceEvent);
                 break;
 
             case EventHead.MIND_EVENT:
-                MindEvent mindVoiceEvent = dataToken.ToObject<MindEvent>();
+                MindEvent mindVoiceEvent = (MindEvent)agentEvent;
                 AddEventToActor(agentEventsByActor, mindVoiceEvent.actor, mindVoiceEvent);
                 break;
 
             case EventHead.TRANS_STAGE_EVENT:
-                TransStageEvent transStageEvent = dataToken.ToObject<TransStageEvent>();
+                TransStageEvent transStageEvent = (TransStageEvent)agentEvent;
                 AddEventToActor(agentEventsByActor, transStageEvent.actor, transStageEvent);
                 break;
 
             default:
-                Debug.LogWarning("Unknown agent event head: " + eventHead);
+                Debug.LogWarning("Unknown agent event head: " + agentEvent.head);
                 break;
-        }
-    }
-
-    /// <summary>
-    /// 从会话消息列表中提取所有战斗相关事件
-    /// 包括战斗仲裁事件(COMBAT_ARBITRATION_EVENT)和战斗完成事件(COMBAT_COMPLETE_EVENT)
-    /// </summary>
-    /// <param name="sessionMessages">会话消息列表</param>
-    /// <returns>战斗事件列表，如果没有则返回空列表</returns>
-    public List<AgentEvent> ExtractCombatEventsFromMessages(List<SessionMessage> sessionMessages)
-    {
-        var combatEvents = new List<AgentEvent>();
-
-        foreach (var sessionMessage in sessionMessages)
-        {
-            if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
-            {
-                continue;
-            }
-
-            JToken dataToken = JToken.FromObject(sessionMessage.data);
-            var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
-
-            if (eventHead < 0 || eventHead == (int)EventHead.NONE)
-            {
-                continue;
-            }
-
-            var combatEvent = ParseCombatEventFromToken(dataToken);
-            if (combatEvent != null)
-            {
-                combatEvents.Add(combatEvent);
-            }
-        }
-
-        return combatEvents;
-    }
-
-
-    /// <summary>
-    /// 从 JSON 数据中解析战斗事件
-    /// 支持战斗仲裁事件和战斗完成事件两种类型
-    /// </summary>
-    /// <param name="dataToken">事件数据的 JSON 对象</param>
-    /// <returns>解析后的战斗事件，如果不是战斗事件则返回 null</returns>
-    private AgentEvent ParseCombatEventFromToken(JToken dataToken)
-    {
-        var eventHead = dataToken["head"]?.ToObject<int>() ?? -1;
-        if (eventHead < 0)
-        {
-            return null;
-        }
-
-        switch ((EventHead)eventHead)
-        {
-            case EventHead.COMBAT_ARBITRATION_EVENT:
-                return dataToken.ToObject<CombatArbitrationEvent>();
-
-            case EventHead.COMBAT_COMPLETE_EVENT:
-                return dataToken.ToObject<CombatCompleteEvent>();
-
-            default:
-                return null;
         }
     }
 }

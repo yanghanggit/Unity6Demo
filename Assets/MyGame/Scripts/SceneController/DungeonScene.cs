@@ -68,7 +68,7 @@ public class DungeonScene : MonoBehaviour
     {
         bool success = false;
         yield return DungeonGamePlayManager.Instance.CombatInit(
-            (result, message) =>
+            (result, message, sessionMessages) =>
             {
                 success = result;
                 if (!result)
@@ -90,10 +90,12 @@ public class DungeonScene : MonoBehaviour
     private IEnumerator ExecuteDrawCardsAndShowHands()
     {
         bool success = false;
+        List<SessionMessage> sessionMessages = null;
         yield return DungeonGamePlayManager.Instance.DrawCards(
-            (result, message) =>
+            (result, message, messages) =>
             {
                 success = result;
+                sessionMessages = messages;
                 if (!result)
                 {
                     _mainText.text = message;
@@ -109,23 +111,8 @@ public class DungeonScene : MonoBehaviour
         // 刷新角色数据并显示手牌信息
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
-        // 获取会话消息
-        bool fetchSuccess = false;
-        bool combatCompleteDisplayed = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (fetchResult, sessionMessages) =>
-            {
-                fetchSuccess = fetchResult;
-                if (fetchResult)
-                {
-                    Debug.Log("Fetched session messages after draw cards");
-                    combatCompleteDisplayed = DisplayCombatCompleteResult(sessionMessages);
-                }
-            }
-        );
-
-        // Early return: 战斗完成结果已显示
-        if (combatCompleteDisplayed)
+        // 检查是否有战斗完成事件
+        if (sessionMessages != null && DisplayCombatCompleteResult(sessionMessages))
         {
             yield break;
         }
@@ -164,41 +151,22 @@ public class DungeonScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecutePlayCardsAndShowResult()
     {
-        bool success = false;
+        // bool success = false;
         yield return DungeonGamePlayManager.Instance.PlayCards(
-            (result, message) =>
+            (result, message, sessionMessages) =>
             {
-                success = result;
-                if (!result)
+                // success = result;
+                if (result)
                 {
+                    // 显示战斗仲裁结果
+                    DisplayCombatArbitrationResult(sessionMessages);
+                }
+                else
+                {
+                    // 显示错误消息
                     _mainText.text = message;
                 }
             });
-
-        // Early return: 打牌失败
-        if (!success)
-        {
-            yield break;
-        }
-
-        // 从SessionManager获取最新消息并显示战斗结果
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (fetchResult, sessionMessages) =>
-            {
-                fetchSuccess = fetchResult;
-                if (fetchResult)
-                {
-                    DisplayCombatArbitrationResult(sessionMessages);
-                }
-            }
-        );
-
-        // 检查消息获取失败
-        if (!fetchSuccess)
-        {
-            Debug.LogError("Failed to fetch session messages after play cards");
-        }
     }
 
     /// <summary>
@@ -208,18 +176,33 @@ public class DungeonScene : MonoBehaviour
     /// <param name="sessionMessages">会话消息列表</param>
     private void DisplayCombatArbitrationResult(List<SessionMessage> sessionMessages)
     {
-        var agentEvents = GameContext.Instance.ExtractCombatEventsFromMessages(sessionMessages);
-        var arbitrationEvents = GameUtils.FilterEventsByType<CombatArbitrationEvent>(agentEvents);
-
-        if (arbitrationEvents.Count == 0)
+        if (sessionMessages == null || sessionMessages.Count == 0)
         {
-            Debug.LogWarning("No CombatArbitrationEvent found in session messages");
+            Debug.LogWarning("No session messages to display combat arbitration result");
+            _mainText.text = "No session messages available.";
             return;
         }
 
-        var lastArbitrationEvent = arbitrationEvents[arbitrationEvents.Count - 1];
-        //_mainText.text = $"[combat_log]\n{lastArbitrationEvent.combat_log}\n\n[narrative]\n{lastArbitrationEvent.narrative}";
-        _mainText.text = $"[narrative]\n{lastArbitrationEvent.narrative}";
+        foreach (var msg in sessionMessages)
+        {
+            var agentEvent = GameUtils.ParseAgentEvent(msg);
+            if (agentEvent == null)
+            {
+                Debug.LogWarning("Failed to parse AgentEvent from session message");
+                continue;
+            }
+
+            if (agentEvent is CombatArbitrationEvent combatEvent)
+            {
+                Debug.Log($"Found CombatArbitrationEvent: combat_log={combatEvent.combat_log}, narrative={combatEvent.narrative}");
+                _mainText.text = $"[combat_log]\n{combatEvent.combat_log}\n[narrative]\n{combatEvent.narrative}";
+                break;
+            }
+            else
+            {
+                Debug.Log($"Skipping non-combat arbitration event of type: {agentEvent.GetType().Name}");
+            }
+        }
     }
 
     /// <summary>
@@ -230,11 +213,35 @@ public class DungeonScene : MonoBehaviour
     /// <returns>是否成功找到并显示战斗完成事件</returns>
     private bool DisplayCombatCompleteResult(List<SessionMessage> sessionMessages)
     {
-        var agentEvents = GameContext.Instance.ExtractCombatEventsFromMessages(sessionMessages);
-        var completeEvents = GameUtils.FilterEventsByType<CombatCompleteEvent>(agentEvents);
+        if (sessionMessages == null || sessionMessages.Count == 0)
+        {
+            return false;
+        }
+
+        var completeEvents = new List<CombatCompleteEvent>();
+
+        foreach (var msg in sessionMessages)
+        {
+            var agentEvent = GameUtils.ParseAgentEvent(msg);
+            if (agentEvent == null)
+            {
+                Debug.LogWarning("Failed to parse AgentEvent from session message");
+                continue;
+            }
+
+            if (agentEvent is CombatCompleteEvent completeEvent)
+            {
+                Debug.Log($"Found CombatCompleteEvent: actor={completeEvent.actor}, summary={completeEvent.summary}");
+                completeEvents.Add(completeEvent);
+            }
+            else
+            {
+                Debug.Log($"Skipping non-combat complete event of type: {agentEvent.GetType().Name}");
+            }
+        }
+
         if (completeEvents.Count == 0)
         {
-            //Debug.LogWarning("No CombatCompleteEvent found in session messages");
             return false;
         }
 
@@ -243,6 +250,7 @@ public class DungeonScene : MonoBehaviour
         {
             text += $"Actor: {evt.actor}\nSummary: {evt.summary}\n\n";
         }
+
         _mainText.text = "战斗完成！\n\n" + text;
         return true;
     }
@@ -300,7 +308,7 @@ public class DungeonScene : MonoBehaviour
     {
         bool success = false;
         yield return DungeonGamePlayManager.Instance.AdvanceNextDungeon(
-            (result, message) =>
+            (result, message, sessionMessages) =>
             {
                 success = result;
                 if (!result)

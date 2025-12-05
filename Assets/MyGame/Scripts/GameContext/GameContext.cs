@@ -241,7 +241,7 @@ public partial class GameContext
     /// <summary>
     /// 获取地牢游戏玩法API的URL地址
     /// </summary>
-    public string DungeonGameplayUrl
+    public string DungeonGamePlayUrl
     {
         get
         {

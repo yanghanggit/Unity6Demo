@@ -34,10 +34,6 @@ public class HomeGamePlayManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
-        {
-            Destroy(gameObject);
-        }
     }
 
     private void Start()
