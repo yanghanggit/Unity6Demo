@@ -210,14 +210,6 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator TransHome(Action<bool, string> onComplete = null)
     {
-        if (_transHomeApi == null)
-        {
-            string errorMsg = "TransHomeApi is not initialized";
-            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
-            yield break;
-        }
-
         // 调用传送回家端点
         yield return _transHomeApi.Call(
             GameContext.Instance.DungeonTransHomeUrl,
@@ -225,15 +217,23 @@ public class DungeonGamePlayManager : MonoBehaviour
             GameContext.Instance.GameName);
 
         // 检查API调用是否成功
-        if (_transHomeApi.RespData == null)
+        if (_transHomeApi.ReqResult == null)
         {
-            string errorMsg = _transHomeApi.ReqResult != null
-                ? _transHomeApi.ReqResult.responseText
-                : "TransHome request failed: response data is null";
+            string errorMsg = "TransHomeApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg);
             yield break;
         }
+
+        if (!_transHomeApi.ReqResult.isSuccess)
+        {
+            string errorMsg = _transHomeApi.ReqResult.responseText;
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg);
+            yield break;
+        }
+
+        Debug.Assert(_transHomeApi.RespData != null, "TransHomeApi response data is null");
 
         Debug.Log("[DungeonGamePlayManager] TransHome completed successfully");
         onComplete?.Invoke(true, "Trans home completed successfully");

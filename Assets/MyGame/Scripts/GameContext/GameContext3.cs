@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -105,6 +106,28 @@ public partial class GameContext
             }
 
             AddEventToActorCollection(agentEvent, agentEventsByActor);
+        }
+
+        // 测试下！！！！！
+        foreach (var kvp in AgentEventsHistory)
+        {
+            string actor = kvp.Key;
+            List<AgentEvent> events = kvp.Value;
+            Debug.Log($"Actor: {actor}, Events Count: {events.Count}");
+            for (int i = 0; i < events.Count; i++)
+            {
+                AgentEvent agentEvent = events[i];
+                try
+                {
+                    // 直接将 AgentEvent 序列化为 JSON 字符串
+                    string jsonString = JsonConvert.SerializeObject(agentEvent, Formatting.Indented);
+                    Debug.Log($"Actor: {actor}, Event[{i}] JSON:\n{jsonString}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"Failed to serialize Actor: {actor}, Event[{i}] to JSON: {ex.Message}");
+                }
+            }
         }
     }
 

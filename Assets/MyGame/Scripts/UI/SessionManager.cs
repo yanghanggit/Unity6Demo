@@ -67,13 +67,6 @@ public class SessionManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator Login(string userName, string gameName, Action<bool> onComplete = null)
     {
-        if (_loginApi == null)
-        {
-            Debug.LogError("[SessionManager] LoginApi is not initialized");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
         // 调用 LoginApi
         yield return _loginApi.Call(GameContext.Instance.LoginUrl, userName, gameName);
 
@@ -106,13 +99,6 @@ public class SessionManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator StartGame(string userName, string gameName, Action<bool> onComplete = null)
     {
-        if (_startApi == null)
-        {
-            Debug.LogError("[SessionManager] StartApi is not initialized");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
         // 调用 StartApi
         yield return _startApi.Call(GameContext.Instance.StartUrl, userName, gameName);
 
@@ -139,13 +125,6 @@ public class SessionManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator Logout(Action<bool> onComplete = null)
     {
-        if (_logoutApi == null)
-        {
-            Debug.LogError("[SessionManager] LogoutApi is not initialized");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
         // 调用 LogoutApi
         yield return _logoutApi.Call(
             GameContext.Instance.LogoutUrl,
@@ -154,12 +133,21 @@ public class SessionManager : MonoBehaviour
         );
 
         // 检查结果
-        if (_logoutApi.RespData == null)
+        if (_logoutApi.ReqResult == null)
         {
-            Debug.LogError("[SessionManager] Logout request failed");
+            Debug.LogError("[SessionManager] Logout request failed: request result is null");
             onComplete?.Invoke(false);
             yield break;
         }
+
+        if (!_logoutApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[SessionManager] Logout request failed: {_logoutApi.ReqResult.responseText}");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        Debug.Assert(_logoutApi.RespData != null, "[SessionManager] Logout response data is null");
 
         // 清理游戏上下文
         GameContext.ClearInstance();
@@ -214,13 +202,6 @@ public class SessionManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator FetchSessionMessages(Action<bool, List<SessionMessage>> onMessagesReceived)
     {
-        if (_sessionMessagesApi == null)
-        {
-            Debug.LogError("[SessionManager] SessionMessagesApi is not initialized");
-            onMessagesReceived?.Invoke(false, null);
-            yield break;
-        }
-
         if (string.IsNullOrEmpty(GameContext.Instance.UserName) ||
             string.IsNullOrEmpty(GameContext.Instance.GameName))
         {
@@ -235,12 +216,21 @@ public class SessionManager : MonoBehaviour
             GameContext.Instance.GameName,
             GameContext.Instance.LastSequenceId);
 
-        if (_sessionMessagesApi.RespData == null)
+        if (_sessionMessagesApi.ReqResult == null)
         {
-            Debug.LogError("[SessionManager] Failed to fetch session messages from server");
+            Debug.LogError("[SessionManager] Failed to fetch session messages from server: request result is null");
             onMessagesReceived?.Invoke(false, null);
             yield break;
         }
+
+        if (!_sessionMessagesApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[SessionManager] Failed to fetch session messages from server: {_sessionMessagesApi.ReqResult.responseText}");
+            onMessagesReceived?.Invoke(false, null);
+            yield break;
+        }
+
+        Debug.Assert(_sessionMessagesApi.RespData != null, "[SessionManager] SessionMessagesApi response data is null");
 
         // 更新最后一个序列ID
         if (_sessionMessagesApi.RespLastSequenceId >= 0)
@@ -252,32 +242,6 @@ public class SessionManager : MonoBehaviour
         var sessionMessages = new List<SessionMessage>(_sessionMessagesApi.RespData.session_messages);
 
         Debug.Log($"[SessionManager] Successfully fetched {sessionMessages.Count} session messages from server");
-
-        // 收集AgentEvents 事件到 GameContext
-        GameContext.Instance.CollectEventsByActor(sessionMessages);
-
-        // 测试下！
-        var agentEventsByActor = GameContext.Instance.AgentEventsHistory;
-        foreach (var kvp in agentEventsByActor)
-        {
-            string actor = kvp.Key;
-            List<AgentEvent> events = kvp.Value;
-            Debug.Log($"Actor: {actor}, Events Count: {events.Count}");
-            for (int i = 0; i < events.Count; i++)
-            {
-                AgentEvent agentEvent = events[i];
-                try
-                {
-                    // 直接将 AgentEvent 序列化为 JSON 字符串
-                    string jsonString = JsonConvert.SerializeObject(agentEvent, Formatting.Indented);
-                    Debug.Log($"Actor: {actor}, Event[{i}] JSON:\n{jsonString}");
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"Failed to serialize Actor: {actor}, Event[{i}] to JSON: {ex.Message}");
-                }
-            }
-        }
 
         // 通过回调返回消息列表和成功标识
         onMessagesReceived?.Invoke(true, sessionMessages);

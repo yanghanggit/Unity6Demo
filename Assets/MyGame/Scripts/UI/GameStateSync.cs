@@ -55,12 +55,6 @@ public class GameStateSync : MonoBehaviour
     /// <returns>协程迭代器，成功返回true，失败返回false</returns>
     public IEnumerator RefreshMappingFromServer()
     {
-        if (_stagesStateApi == null)
-        {
-            Debug.LogError("[GameStateSync] StagesStateApi is not initialized");
-            yield break;
-        }
-
         if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.ActorName))
         {
             Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
@@ -69,11 +63,20 @@ public class GameStateSync : MonoBehaviour
 
         // 获取场景与演员映射关系
         yield return _stagesStateApi.Call(GameContext.Instance.StagesStateUrl);
-        if (_stagesStateApi.RespData == null)
+        
+        if (_stagesStateApi.ReqResult == null)
         {
-            Debug.LogError("[GameStateSync] Failed to fetch stages state from server");
+            Debug.LogError("[GameStateSync] Failed to fetch stages state from server: request result is null");
             yield break;
         }
+
+        if (!_stagesStateApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[GameStateSync] Failed to fetch stages state from server: {_stagesStateApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_stagesStateApi.RespData != null, "[GameStateSync] StagesStateApi response data is null");
 
         // 更新全局映射关系
         GameContext.Instance.StageActorMapping = _stagesStateApi.RespData.mapping;
@@ -88,12 +91,6 @@ public class GameStateSync : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator RefreshStageDetailsFromServer(List<string> stages)
     {
-        if (_entityDetailsApi == null)
-        {
-            Debug.LogError("[GameStateSync] EntityDetailsApi is not initialized");
-            yield break;
-        }
-
         if (stages == null || stages.Count == 0)
         {
             Debug.LogWarning("[GameStateSync] Stage list is empty, skip fetching stage details");
@@ -102,11 +99,20 @@ public class GameStateSync : MonoBehaviour
 
         // 获取场景详情数据
         yield return _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, stages);
-        if (_entityDetailsApi.RespData == null)
+        
+        if (_entityDetailsApi.ReqResult == null)
         {
-            Debug.LogError("[GameStateSync] Failed to fetch stage details from server");
+            Debug.LogError("[GameStateSync] Failed to fetch stage details from server: request result is null");
             yield break;
         }
+
+        if (!_entityDetailsApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[GameStateSync] Failed to fetch stage details from server: {_entityDetailsApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_entityDetailsApi.RespData != null, "[GameStateSync] EntityDetailsApi response data is null");
 
         // 更新全局场景详情数据
         GameContext.Instance.StageEntitiesSerialization = _entityDetailsApi.RespData.entities_serialization;
@@ -137,12 +143,6 @@ public class GameStateSync : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator RefreshActorDetailsFromServer(List<string> actors)
     {
-        if (_entityDetailsApi == null)
-        {
-            Debug.LogError("[GameStateSync] ActorDetailsApi is not initialized");
-            yield break;
-        }
-
         if (actors == null || actors.Count == 0)
         {
             Debug.LogWarning("[GameStateSync] Actor list is empty, skip fetching actor details");
@@ -151,11 +151,20 @@ public class GameStateSync : MonoBehaviour
 
         // 获取演员详情数据
         yield return _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, actors);
-        if (_entityDetailsApi.RespData == null)
+        
+        if (_entityDetailsApi.ReqResult == null)
         {
-            Debug.LogError("[GameStateSync] Failed to fetch actor details from server");
+            Debug.LogError("[GameStateSync] Failed to fetch actor details from server: request result is null");
             yield break;
         }
+
+        if (!_entityDetailsApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[GameStateSync] Failed to fetch actor details from server: {_entityDetailsApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_entityDetailsApi.RespData != null, "[GameStateSync] EntityDetailsApi response data is null");
 
         // 更新全局演员详情数据
         GameContext.Instance.ActorEntitiesSerialization = _entityDetailsApi.RespData.entities_serialization;
@@ -243,12 +252,6 @@ public class GameStateSync : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator RefreshDungeonFromServer()
     {
-        if (_dungeonStateApi == null)
-        {
-            Debug.LogError("[GameStateSync] DungeonStateApi is not initialized");
-            yield break;
-        }
-
         if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.ActorName))
         {
             Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
@@ -256,11 +259,20 @@ public class GameStateSync : MonoBehaviour
         }
 
         yield return _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
-        if (_dungeonStateApi.RespData == null)
+        
+        if (_dungeonStateApi.ReqResult == null)
         {
-            Debug.LogError("[GameStateSync] Failed to fetch dungeon state from server");
+            Debug.LogError("[GameStateSync] Failed to fetch dungeon state from server: request result is null");
             yield break;
         }
+
+        if (!_dungeonStateApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[GameStateSync] Failed to fetch dungeon state from server: {_dungeonStateApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_dungeonStateApi.RespData != null, "[GameStateSync] DungeonStateApi response data is null");
 
         // 更新全局地下城数据
         GameContext.Instance.StageActorMapping = _dungeonStateApi.RespData.mapping;

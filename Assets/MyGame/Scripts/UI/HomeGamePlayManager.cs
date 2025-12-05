@@ -51,13 +51,6 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator AdvanceGame(Action<bool> onComplete = null)
     {
-        if (_homeGamePlayApi == null)
-        {
-            Debug.LogError("[HomeGamePlayManager] HomeGamePlayApi is not initialized");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
         // 调用 HomeGameplay API 的 /advancing 端点
         yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGamePlayUrl,
@@ -66,12 +59,22 @@ public class HomeGamePlayManager : MonoBehaviour
             "/advancing");
 
         // 检查API调用是否成功
-        if (_homeGamePlayApi.RespData == null)
+        if (_homeGamePlayApi.ReqResult == null)
         {
             Debug.LogError("[HomeGamePlayManager] /advancing request failed");
             onComplete?.Invoke(false);
             yield break;
         }
+
+        // 进一步检查响应结果的成功标志
+        if (!_homeGamePlayApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[HomeGamePlayManager] /advancing request failed: {_homeGamePlayApi.ReqResult.responseText}");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        Debug.Assert(_homeGamePlayApi.RespData != null, "[HomeGamePlayManager] /advancing response data is null");
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
@@ -82,6 +85,8 @@ public class HomeGamePlayManager : MonoBehaviour
                 if (success)
                 {
                     Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after advancing");
+                    // 收集AgentEvents 事件到 GameContext
+                    GameContext.Instance.CollectEventsByActor(sessionMessages);
                 }
             }
         );
@@ -109,13 +114,6 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator SpeakToActor(string targetActorName, string messageContent, Action<bool> onComplete = null)
     {
-        if (_homeGamePlayApi == null)
-        {
-            Debug.LogError("[HomeGamePlayManager] HomeGamePlayApi is not initialized");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
         if (string.IsNullOrEmpty(targetActorName) || string.IsNullOrEmpty(messageContent))
         {
             Debug.LogError("[HomeGamePlayManager] Target actor name or message content is empty");
@@ -136,12 +134,22 @@ public class HomeGamePlayManager : MonoBehaviour
             });
 
         // 检查API调用是否成功
-        if (_homeGamePlayApi.RespData == null)
+        if (_homeGamePlayApi.ReqResult == null)
         {
             Debug.LogError("[HomeGamePlayManager] /speak request failed");
             onComplete?.Invoke(false);
             yield break;
         }
+
+        // 进一步检查响应结果的成功标志
+        if (!_homeGamePlayApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[HomeGamePlayManager] /speak request failed: {_homeGamePlayApi.ReqResult.responseText}");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        Debug.Assert(_homeGamePlayApi.RespData != null, "[HomeGamePlayManager] /speak response data is null");
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
@@ -152,6 +160,8 @@ public class HomeGamePlayManager : MonoBehaviour
                 if (success)
                 {
                     Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after speaking");
+                    // 收集AgentEvents 事件到 GameContext
+                    GameContext.Instance.CollectEventsByActor(sessionMessages);
                 }
             }
         );
@@ -178,13 +188,6 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator SwitchStage(string stageName, Action<bool> onComplete = null)
     {
-        if (_homeGamePlayApi == null)
-        {
-            Debug.LogError("[HomeGamePlayManager] HomeGamePlayApi is not initialized");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
         if (string.IsNullOrEmpty(stageName))
         {
             Debug.LogError("[HomeGamePlayManager] Stage name is empty");
@@ -204,12 +207,22 @@ public class HomeGamePlayManager : MonoBehaviour
             });
 
         // 检查API调用是否成功
-        if (_homeGamePlayApi.RespData == null)
+        if (_homeGamePlayApi.ReqResult == null)
         {
             Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed");
             onComplete?.Invoke(false);
             yield break;
         }
+
+        // 进一步检查响应结果的成功标志
+        if (!_homeGamePlayApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed: {_homeGamePlayApi.ReqResult.responseText}");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        Debug.Assert(_homeGamePlayApi.RespData != null, $"[HomeGamePlayManager] /switch_stage to {stageName} response data is null");
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
@@ -220,6 +233,8 @@ public class HomeGamePlayManager : MonoBehaviour
                 if (success)
                 {
                     Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after stage switch");
+                    // 收集AgentEvents 事件到 GameContext
+                    GameContext.Instance.CollectEventsByActor(sessionMessages);
                 }
             }
         );
@@ -245,13 +260,6 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator TransDungeon(Action<bool> onComplete = null)
     {
-        if (_transDungeonApi == null)
-        {
-            Debug.LogError("[HomeGamePlayManager] TransDungeonApi is not initialized");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
         // 调用传送地下城端点
         yield return _transDungeonApi.Call(
             GameContext.Instance.HomeTransDungeonUrl,
@@ -259,12 +267,22 @@ public class HomeGamePlayManager : MonoBehaviour
             GameContext.Instance.GameName);
 
         // 检查API调用是否成功
-        if (_transDungeonApi.RespData == null)
+        if (_transDungeonApi.ReqResult == null)
         {
             Debug.LogError("[HomeGamePlayManager] TransDungeon request failed");
             onComplete?.Invoke(false);
             yield break;
         }
+
+        // 进一步检查响应结果的成功标志
+        if (!_transDungeonApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[HomeGamePlayManager] TransDungeon request failed: {_transDungeonApi.ReqResult.responseText}");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        Debug.Assert(_transDungeonApi.RespData != null, "[HomeGamePlayManager] TransDungeon response data is null");
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
@@ -275,6 +293,8 @@ public class HomeGamePlayManager : MonoBehaviour
                 if (success)
                 {
                     Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after trans dungeon");
+                    // 收集AgentEvents 事件到 GameContext
+                    GameContext.Instance.CollectEventsByActor(sessionMessages);
                 }
             }
         );

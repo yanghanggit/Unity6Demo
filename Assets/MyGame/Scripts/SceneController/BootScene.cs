@@ -49,11 +49,20 @@ public class BootScene : MonoBehaviour
     private IEnumerator InitializeApiEndpoints()
     {
         yield return _rootApi.Call(_baseUrl);
-        if (_rootApi.RespData == null)
+        
+        if (_rootApi.ReqResult == null)
         {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}");
+            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: request result is null");
             yield break;
         }
+
+        if (!_rootApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: {_rootApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_rootApi.RespData != null, "RootApi response data is null");
 
         _loginButton.gameObject.SetActive(true);
 
