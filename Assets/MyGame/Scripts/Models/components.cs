@@ -17,7 +17,7 @@ public sealed class RuntimeComponent
 /// 记录kick off原始信息
 /// </summary>
 [System.Serializable]
-public sealed class KickOffMessageComponent
+public sealed class KickOffComponent
 {
     public string name = "";
     public string content = "";
