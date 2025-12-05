@@ -25,11 +25,21 @@ using System.Threading.Tasks;
 /// 2. 在子类中调用 GetRequestCoroutine/PostRequestCoroutine 或 GetRequestAsync/PostRequestAsync
 /// 3. 处理返回的 RequestResult 结构
 /// 
-/// 作者：Unity6Demo Team
-/// 日期：2025-01-23
+/// 作者:Unity6Demo Team
+/// 日期:2025-01-23
 /// </summary>
-public class BaseApiClient : MonoBehaviour
+public abstract class BaseApiClient : MonoBehaviour
 {
+    #region 抽象属性
+
+    /// <summary>
+    /// 请求结果属性 - 子类必须实现
+    /// 用于获取最近一次请求的结果
+    /// </summary>
+    public abstract RequestResult ReqResult { get; }
+
+    #endregion
+
     #region 配置字段
 
     [Header("请求配置")]

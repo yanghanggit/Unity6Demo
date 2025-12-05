@@ -13,6 +13,16 @@ public class DungeonStateApi : BaseApiClient
     private string _url;
 
     /// <summary>
+    /// 请求结果
+    /// </summary>
+    private RequestResult _requestResult;
+
+    /// <summary>
+    /// 获取请求结果
+    /// </summary>
+    public override RequestResult ReqResult => _requestResult;
+
+    /// <summary>
     /// 响应数据
     /// </summary>
     private DungeonStateResponse _responseData;
@@ -29,6 +39,7 @@ public class DungeonStateApi : BaseApiClient
     private void Initialize(string url)
     {
         _url = url;
+        _requestResult = null;
         _responseData = null;
         Debug.Log($"DungeonStateApi initialized with URL: {_url}");
     }
@@ -59,17 +70,17 @@ public class DungeonStateApi : BaseApiClient
             yield break;
         }
 
-        var result = task.Result;
+        _requestResult = task.Result;
 
         // 处理请求结果
-        if (!result.isSuccess)
+        if (!_requestResult.isSuccess)
         {
-            Debug.LogError($"Request failed: {result.error}");
+            Debug.LogError($"Request failed: {_requestResult.error}");
             yield break;
         }
 
         // 解析响应数据
-        if (string.IsNullOrEmpty(result.responseText))
+        if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
             yield break;
@@ -77,7 +88,7 @@ public class DungeonStateApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<DungeonStateResponse>(result.responseText);
+            _responseData = JsonConvert.DeserializeObject<DungeonStateResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
@@ -91,5 +102,4 @@ public class DungeonStateApi : BaseApiClient
             Debug.LogError($"Failed to parse response data: {ex.Message}");
         }
     }
-
 }

@@ -24,6 +24,16 @@ public class EntityDetailsApi : BaseApiClient
     private string _requestUrl;
 
     /// <summary>
+    /// 请求结果
+    /// </summary>
+    private RequestResult _requestResult;
+
+    /// <summary>
+    /// 获取请求结果
+    /// </summary>
+    public override RequestResult ReqResult => _requestResult;
+
+    /// <summary>
     /// 响应数据
     /// </summary>
     private EntitiesDetailsResponse _responseData;
@@ -32,16 +42,6 @@ public class EntityDetailsApi : BaseApiClient
     /// 获取响应数据
     /// </summary>
     public EntitiesDetailsResponse RespData => _responseData;
-
-    /// <summary>
-    /// 请求结果
-    /// </summary>
-    private RequestResult _requestResult;
-
-    /// <summary>
-    /// 获取请求结果
-    /// </summary>
-    public RequestResult ReqResult => _requestResult;
 
     /// <summary>
     /// 初始化实体详情请求

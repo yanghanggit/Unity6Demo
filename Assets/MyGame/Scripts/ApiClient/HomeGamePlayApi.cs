@@ -41,7 +41,7 @@ public class HomeGamePlayApi : BaseApiClient
     /// <summary>
     /// 获取请求结果
     /// </summary>
-    public RequestResult ReqResult => _requestResult;
+    public override RequestResult ReqResult => _requestResult;
 
     /// <summary>
     /// 响应数据

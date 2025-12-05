@@ -50,6 +50,16 @@ public class SessionMessagesApi : BaseApiClient
     private string _requestUrl;
 
     /// <summary>
+    /// 请求结果
+    /// </summary>
+    private RequestResult _requestResult;
+
+    /// <summary>
+    /// 获取请求结果,目前故意不写，始终返回 null
+    /// </summary>
+    public override RequestResult ReqResult => _requestResult;
+
+    /// <summary>
     /// 响应数据
     /// </summary>
     private SessionMessageResponse _responseData;
@@ -73,6 +83,7 @@ public class SessionMessagesApi : BaseApiClient
         _userName = userName;
         _gameName = gameName;
         _requestLastSequenceId = requestLastSequenceId;
+        _requestResult = null;
         _responseData = null;
         _requestUrl = BuildRequestUrl(requestLastSequenceId);
 
@@ -123,17 +134,17 @@ public class SessionMessagesApi : BaseApiClient
             yield break;
         }
 
-        var result = task.Result;
+        _requestResult = task.Result;
 
         // 处理请求结果
-        if (!result.isSuccess)
+        if (!_requestResult.isSuccess)
         {
-            Debug.LogError($"Request failed: {result.error}");
+            Debug.LogError($"Request failed: {_requestResult.error}");
             yield break;
         }
 
         // 解析响应数据
-        if (string.IsNullOrEmpty(result.responseText))
+        if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
             yield break;
@@ -141,7 +152,7 @@ public class SessionMessagesApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<SessionMessageResponse>(result.responseText);
+            _responseData = JsonConvert.DeserializeObject<SessionMessageResponse>(_requestResult.responseText);
 
             if (_responseData == null)
             {

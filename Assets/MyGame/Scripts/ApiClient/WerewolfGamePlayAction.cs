@@ -15,7 +15,7 @@ public class WerewolfGamePlayAction : BaseApiClient
 
     public WerewolfGamePlayResponse ResponseData => _responseData;
 
-    public RequestResult ReqResult => _requestResult;
+    public override RequestResult ReqResult => _requestResult;
 
     private string _url;
 

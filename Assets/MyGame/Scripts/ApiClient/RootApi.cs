@@ -8,6 +8,16 @@ using Newtonsoft.Json;
 public class RootApi : BaseApiClient
 {
     /// <summary>
+    /// 请求结果
+    /// </summary>
+    private RequestResult _requestResult;
+
+    /// <summary>
+    /// 获取请求结果
+    /// </summary>
+    public override RequestResult ReqResult => _requestResult;
+
+    /// <summary>
     /// 响应数据
     /// </summary>
     private RootResponse _responseData;
@@ -16,16 +26,6 @@ public class RootApi : BaseApiClient
     /// 获取响应数据
     /// </summary>
     public RootResponse RespData => _responseData;
-
-    /// <summary>
-    /// 请求结果
-    /// </summary>
-    private RequestResult _requestResult;
-
-    /// <summary>
-    /// 获取请求结果
-    /// </summary>
-    public RequestResult ReqResult => _requestResult;
 
     /// <summary>
     /// 请求 URL

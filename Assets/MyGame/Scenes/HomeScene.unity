@@ -906,7 +906,6 @@ GameObject:
   m_Component:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
-  - component: {fileID: 399892902}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -951,22 +950,8 @@ MonoBehaviour:
   _scrollView: {fileID: 876004725}
   _homeSceneConfig: {fileID: 11400000, guid: d1ec0cda2b05e497c8c83f991cf28dd9, type: 2}
   _preScene: MainScene2
-  _homeGamePlayApi: {fileID: 399892902}
   _onActorClickedEvent: {fileID: 11400000, guid: cdb300192ace1475990159f868b47bcc,
     type: 2}
---- !u!114 &399892902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 549d431be56eb4c9e95c52a7eb426b12, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HomeGamePlayApi
-  requestTimeout: 30
 --- !u!1 &456567907
 GameObject:
   m_ObjectHideFlags: 0

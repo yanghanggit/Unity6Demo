@@ -13,6 +13,16 @@ public class StagesStateApi : BaseApiClient
     private string _url;
 
     /// <summary>
+    /// 请求结果
+    /// </summary>
+    private RequestResult _requestResult;
+
+    /// <summary>
+    /// 获取请求结果
+    /// </summary>
+    public override RequestResult ReqResult => _requestResult;
+
+    /// <summary>
     /// 响应数据
     /// </summary>
     private StagesStateResponse _responseData;
@@ -21,17 +31,6 @@ public class StagesStateApi : BaseApiClient
     /// 获取响应数据
     /// </summary>
     public StagesStateResponse RespData => _responseData;
-
-    /// <summary>
-    /// 请求结果
-    /// </summary>
-    private RequestResult _requestResult;
-
-    /// <summary>
-    /// 获取请求结果
-    /// </summary>
-    public RequestResult ReqResult => _requestResult;
-
 
     /// <summary>
     /// 初始化关卡状态请求
