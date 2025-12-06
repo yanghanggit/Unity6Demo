@@ -56,7 +56,7 @@ public class LoginApi : BaseApiClient
         _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"LoginApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+        //Debug.Log($"LoginApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
     }
 
     /// <summary>
@@ -110,7 +110,7 @@ public class LoginApi : BaseApiClient
                 yield break;
             }
 
-            Debug.Log($"Login successful. Message: {_responseData.message}");
+            //Debug.Log($"Login successful. Message: {_responseData.message}");
         }
         catch (System.Exception ex)
         {

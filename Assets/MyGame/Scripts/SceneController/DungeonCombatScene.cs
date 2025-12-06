@@ -17,9 +17,6 @@ public class DungeonCombatScene : MonoBehaviour
     {
         Debug.Assert(_mainText != null, "_mainText is null");
 
-        // 初始化UI文本
-        _mainText.text = "Initializing Dungeon Combat Scene...";
-
         // 检查是否已经连接服务器
         if (RootResp.Get() != null)
         {
@@ -27,7 +24,6 @@ public class DungeonCombatScene : MonoBehaviour
             var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
             _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
 
-            //Debug.Log("DungeonCombatScene Start: RootResp is already set");
             StartCoroutine(ExecuteCombatInit());
         }
         else
@@ -294,7 +290,6 @@ public class DungeonCombatScene : MonoBehaviour
 
             if (agentEvent is CombatCompleteEvent completeEvent)
             {
-//                Debug.Log($"Found CombatCompleteEvent: actor={completeEvent.actor}, summary={completeEvent.summary}");
                 completeEvents.Add(completeEvent);
             }
             else
@@ -311,7 +306,7 @@ public class DungeonCombatScene : MonoBehaviour
         var text = string.Empty;
         foreach (var evt in completeEvents)
         {
-            text += $"Actor: {evt.actor}\nSummary: {evt.summary}\n\n";
+            text += $"Actor: {evt.actor}\nSummary: \n{evt.summary}\n\n";
         }
 
         _mainText.text = "战斗完成！\n\n" + text;
@@ -437,7 +432,6 @@ public class DungeonCombatScene : MonoBehaviour
 
         if (success)
         {
-            //Debug.Log("TransHomeAction request success");
             yield return new WaitForSeconds(0);
             SceneManager.LoadScene(_preScene);
         }

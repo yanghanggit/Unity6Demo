@@ -42,7 +42,7 @@ public class RootApi : BaseApiClient
         _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"RootApi initialized with URL: {_url}");
+        //Debug.Log($"RootApi initialized with URL: {_url}");
     }
 
 
@@ -98,7 +98,7 @@ public class RootApi : BaseApiClient
                 yield break;
             }
 
-            Debug.Log($"Root configuration loaded successfully. API Version: {_responseData.version}");
+            //Debug.Log($"Root configuration loaded successfully. API Version: {_responseData.version}");
         }
         catch (System.Exception ex)
         {

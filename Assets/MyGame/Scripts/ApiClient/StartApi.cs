@@ -57,7 +57,7 @@ public class StartApi : BaseApiClient
         _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"StartApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
+        //Debug.Log($"StartApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
     }
 
     /// <summary>
@@ -124,7 +124,7 @@ public class StartApi : BaseApiClient
                 yield break;
             }
 
-            Debug.Log($"Start game successful. Message: {_responseData.message}");
+            //Debug.Log($"Start game successful. Message: {_responseData.message}");
         }
         catch (System.Exception ex)
         {

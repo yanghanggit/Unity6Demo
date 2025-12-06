@@ -83,7 +83,7 @@ public class SessionManager : MonoBehaviour
         GameContext.Instance.GameName = gameName;
         GameContext.Instance.ActorName = ""; // 尚未分配角色
 
-        Debug.Log($"[SessionManager] Login completed successfully: {userName}");
+        //Debug.Log($"[SessionManager] Login completed successfully: {userName}");
         onComplete?.Invoke(true);
     }
 
@@ -113,7 +113,7 @@ public class SessionManager : MonoBehaviour
         // 保存角色信息到 GameContext
         GameContext.Instance.ActorName = _startApi.RespData.player_actor;
 
-        Debug.Log($"[SessionManager] StartGame completed successfully: {GameContext.Instance.ActorName}");
+        //Debug.Log($"[SessionManager] StartGame completed successfully: {GameContext.Instance.ActorName}");
         onComplete?.Invoke(true);
     }
 
@@ -152,7 +152,7 @@ public class SessionManager : MonoBehaviour
         // 清理游戏上下文
         GameContext.ClearInstance();
 
-        Debug.Log("[SessionManager] Logout completed successfully");
+        //Debug.Log("[SessionManager] Logout completed successfully");
         onComplete?.Invoke(true);
     }
 
@@ -190,7 +190,7 @@ public class SessionManager : MonoBehaviour
             yield break;
         }
 
-        Debug.Log("[SessionManager] LoginAndStart completed successfully");
+        //Debug.Log("[SessionManager] LoginAndStart completed successfully");
         onComplete?.Invoke(true);
     }
 
@@ -241,7 +241,7 @@ public class SessionManager : MonoBehaviour
         // 复制会话消息列表
         var sessionMessages = new List<SessionMessage>(_sessionMessagesApi.RespData.session_messages);
 
-        Debug.Log($"[SessionManager] Successfully fetched {sessionMessages.Count} session messages from server");
+        //Debug.Log($"[SessionManager] Successfully fetched {sessionMessages.Count} session messages from server");
 
         // 通过回调返回消息列表和成功标识
         onMessagesReceived?.Invoke(true, sessionMessages);

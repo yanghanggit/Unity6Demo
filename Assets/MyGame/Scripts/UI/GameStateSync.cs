@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 using System.Collections.Generic;
 using System;
 
@@ -90,7 +90,7 @@ public class GameStateSync : MonoBehaviour
         // 更新全局映射关系
         GameContext.Instance.StageActorMapping = _stagesStateApi.RespData.mapping;
         string successMsg = "[GameStateSync] Successfully refreshed stages mapping from server";
-        Debug.Log(successMsg);
+        //Debug.Log(successMsg);
         onComplete?.Invoke(true, successMsg);
     }
 
@@ -136,22 +136,22 @@ public class GameStateSync : MonoBehaviour
         GameContext.Instance.StageEntitiesSerialization = _entityDetailsApi.RespData.entities_serialization;
 
         string successMsg = $"[GameStateSync] Successfully refreshed {stages.Count} stage details from server";
-        Debug.Log(successMsg);
-        var stageEntitiesSerialization = GameContext.Instance.StageEntitiesSerialization;
-        for (int i = 0; i < stageEntitiesSerialization.Count; i++)
-        {
-            var entitySerialization = stageEntitiesSerialization[i];
-            try
-            {
-                // 直接将 EntitySerialization 序列化为 JSON 字符串
-                string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
-                Debug.Log($"Stage[{i}] JSON:\n{jsonString}");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Failed to serialize Stage[{i}] to JSON: {ex.Message}");
-            }
-        }
+        // Debug.Log(successMsg);
+        // var stageEntitiesSerialization = GameContext.Instance.StageEntitiesSerialization;
+        // for (int i = 0; i < stageEntitiesSerialization.Count; i++)
+        // {
+        //     var entitySerialization = stageEntitiesSerialization[i];
+        //     try
+        //     {
+        //         // 直接将 EntitySerialization 序列化为 JSON 字符串
+        //         string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
+        //         Debug.Log($"Stage[{i}] JSON:\n{jsonString}");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Debug.LogError($"Failed to serialize Stage[{i}] to JSON: {ex.Message}");
+        //     }
+        // }
         onComplete?.Invoke(true, successMsg);
     }
 
@@ -246,12 +246,12 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 临时测试，将  GameContext.Instance.Mapping 与 GameContext.Instance.AllActors 打印出来
-        Debug.Log("[GameStateSync] Current Mapping:");
-        foreach (var kvp in GameContext.Instance.StageActorMapping)
-        {
-            Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
-        }
-        Debug.Log("[GameStateSync] All Actors: " + string.Join(", ", GameContext.Instance.AllActors));
+        // Debug.Log("[GameStateSync] Current Mapping:");
+        // foreach (var kvp in GameContext.Instance.StageActorMapping)
+        // {
+        //     Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
+        // }
+        // Debug.Log("[GameStateSync] All Actors: " + string.Join(", ", GameContext.Instance.AllActors));
 
         // 步骤2: 刷新所有演员的详情数据
         yield return RefreshActorDetailsFromServer(GameContext.Instance.AllActors, (success, msg) => 
@@ -311,12 +311,12 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 临时测试，将  GameContext.Instance.Mapping 与 GameContext.Instance.AllActors 打印出来
-        Debug.Log("[GameStateSync] Current Mapping:");
-        foreach (var kvp in GameContext.Instance.StageActorMapping)
-        {
-            Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
-        }
-        Debug.Log("[GameStateSync] All Actors: " + string.Join(", ", GameContext.Instance.AllActors));
+        // Debug.Log("[GameStateSync] Current Mapping:");
+        // foreach (var kvp in GameContext.Instance.StageActorMapping)
+        // {
+        //     Debug.Log($"Stage: {kvp.Key}, Actors: {string.Join(", ", kvp.Value)}");
+        // }
+        // Debug.Log("[GameStateSync] All Actors: " + string.Join(", ", GameContext.Instance.AllActors));
 
         // 步骤2: 刷新所有演员的详情数据
         yield return RefreshActorDetailsFromServer(GameContext.Instance.AllActors, (success, msg) => 
@@ -376,7 +376,7 @@ public class GameStateSync : MonoBehaviour
         GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
 
         string successMsg = "[GameStateSync] Successfully refreshed dungeon state from server";
-        Debug.Log(successMsg);
+        //Debug.Log(successMsg);
         onComplete?.Invoke(true, successMsg);
     }
 
