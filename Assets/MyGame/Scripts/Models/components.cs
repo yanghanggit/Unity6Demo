@@ -52,6 +52,19 @@ public sealed class WorldSystemComponent
 public sealed class StageComponent
 {
     public string name = "";
+    public string character_sheet_name = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// <summary>
+/// 角色标记
+/// </summary>
+[System.Serializable]
+public sealed class ActorComponent
+{
+    public string name = "";
+    public string character_sheet_name = "";
+    public string current_stage = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,17 +76,6 @@ public sealed class EnvironmentComponent
 {
     public string name = "";
     public string narrate = "";
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// <summary>
-/// 角色标记
-/// </summary>
-[System.Serializable]
-public sealed class ActorComponent
-{
-    public string name = "";
-    public string current_stage = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
