@@ -6,13 +6,13 @@ using System.Collections.Generic;
 /// <summary>
 /// 表示战斗的状态 Phase
 /// </summary>
-public enum CombatPhase
+public enum CombatState
 {
     NONE = 0,
-    KICKOFF = 1,  // 初始化，需要同步一些数据与状态
+    INITIALIZATION = 1,  // 初始化，需要同步一些数据与状态
     ONGOING = 2,  // 运行中，不断进行战斗推理
     COMPLETE = 3,  // 结束，需要进行结算
-    POSTWAIT = 4  // 战斗等待进入新一轮战斗或者回家
+    POST_COMBAT = 4  // 战斗等待进入新一轮战斗或者回家
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,8 +22,8 @@ public enum CombatPhase
 public enum CombatResult
 {
     NONE = 0,
-    HERO_WIN = 1,  // 胜利
-    HERO_LOSE = 2  // 失败
+    WIN = 1,  // 胜利
+    LOSE = 2  // 失败
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,9 +71,9 @@ public sealed class Round
 public sealed class Combat
 {
     public string name = "";
-    public CombatPhase phase = CombatPhase.NONE;
+    public CombatState state = CombatState.NONE;
     public CombatResult result = CombatResult.NONE;
-    public List<Round> rounds = new List<Round>();
+    public List<Round> rounds = new();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

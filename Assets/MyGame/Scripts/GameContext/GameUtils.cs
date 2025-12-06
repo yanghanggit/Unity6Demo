@@ -104,8 +104,8 @@ public static class GameUtils
         var lastCombat = combatSequence.combats[combatSequence.combats.Count - 1];
         var sb = new System.Text.StringBuilder();
 
-        sb.AppendLine($"Last Combat: {lastCombat.name}");
-        sb.AppendLine($"Phase: {lastCombat.phase}");
+        sb.AppendLine($"Combat: {lastCombat.name}");
+        sb.AppendLine($"State: {lastCombat.state}");
         sb.AppendLine($"Result: {lastCombat.result}");
 
         if (lastCombat.rounds?.Count > 0)
