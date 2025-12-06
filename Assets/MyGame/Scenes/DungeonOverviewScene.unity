@@ -439,7 +439,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _preScene: MainScene2
-  _nextScene: DungeonScene
+  _nextScene: DungeonCombatScene
   _mainText: {fileID: 3871845}
 --- !u!1 &433063512
 GameObject:

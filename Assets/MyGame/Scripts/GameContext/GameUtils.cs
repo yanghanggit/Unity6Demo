@@ -111,7 +111,7 @@ public static class GameUtils
         if (lastCombat.rounds?.Count > 0)
         {
             var lastRound = lastCombat.rounds[lastCombat.rounds.Count - 1];
-            sb.AppendLine($"Last Round: {lastRound.tag}");
+            sb.AppendLine($"Round: {lastRound.tag}");
             sb.AppendLine($"Action Order: {string.Join(" --> ", lastRound.action_order)}");
         }
 

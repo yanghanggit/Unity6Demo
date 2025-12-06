@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
-public class DungeonScene : MonoBehaviour
+public class DungeonCombatScene : MonoBehaviour
 {
     [Header("Scene Settings")]
     [SerializeField] private string _preScene = "MainScene2";

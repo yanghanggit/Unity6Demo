@@ -12,7 +12,7 @@ public class DungeonOverviewScene : MonoBehaviour
 {
     [Header("Scene Settings")]
     [SerializeField] private string _preScene = "MainScene2";
-    [SerializeField] private string _nextScene = "DungeonScene";
+    [SerializeField] private string _nextScene = "DungeonCombatScene";
 
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText;
