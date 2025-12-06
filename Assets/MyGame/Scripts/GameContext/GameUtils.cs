@@ -118,8 +118,6 @@ public static class GameUtils
         return sb.ToString().TrimEnd();
     }
 
-
-
     /// <summary>
     /// 格式化战斗属性组件为显示文本
     /// </summary>
@@ -147,7 +145,7 @@ public static class GameUtils
             for (int i = 0; i < combatStatsComponent.status_effects.Count; i++)
             {
                 var statusEffect = combatStatsComponent.status_effects[i];
-                text += $"{statusEffect.name} ({statusEffect.description}, {statusEffect.duration})";
+                text += $"[{statusEffect.name}]: \n{statusEffect.description}({statusEffect.duration})";
                 if (i < combatStatsComponent.status_effects.Count - 1)
                 {
                     text += "\n";

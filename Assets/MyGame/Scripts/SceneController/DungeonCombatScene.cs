@@ -15,7 +15,18 @@ public class DungeonCombatScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        StartCoroutine(RefreshDungeonStateDisplay());
+
+        // 检查是否已经连接服务器
+        if (RootResp.Get() != null)
+        {
+            Debug.Log("DungeonCombatScene Start: RootResp is already set");
+            StartCoroutine(RefreshDungeonStateDisplay());
+        }
+        else
+        {
+            // 没有连接服务器，基本是本地测试模式
+            Debug.Log("DungeonCombatScene Start: RootResp is null, running in local test mode");
+        }
     }
 
     public void OnClickCombatInit()
@@ -34,6 +45,12 @@ public class DungeonCombatScene : MonoBehaviour
     {
         Debug.Log("OnClickViewActor");
         StartCoroutine(ExecuteViewActorStats());
+    }
+
+    public void OnClickViewCards()
+    {
+        Debug.Log("OnClickViewCards");
+        StartCoroutine(ExecuteViewActorCards());
     }
 
     public void OnClickDrawCards()
@@ -89,6 +106,26 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteDrawCardsAndShowHands()
     {
+        // 先刷新数据，检查是否有角色已经持有手牌
+        bool anyActorHasHandCards = false;
+        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer(
+            (result, message) =>
+            {
+                if (result)
+                {
+                    anyActorHasHandCards = AnyActorHasHandCards();
+                }
+            }
+        );
+
+        if (anyActorHasHandCards)
+        {
+            _mainText.text = "角色已有手牌，跳过抽卡操作。";
+            yield break;
+        }
+
+        // 正式的抽卡操作
+        // 步骤函数定义
         bool success = false;
         List<SessionMessage> sessionMessages = null;
         yield return DungeonGamePlayManager.Instance.DrawCards(
@@ -105,19 +142,44 @@ public class DungeonCombatScene : MonoBehaviour
         // Early return: 抽卡失败
         if (!success)
         {
+            Debug.LogWarning("DrawCards action failed");
+            yield break;
+        }
+
+        // 检查是否有战斗完成事件
+        if (sessionMessages != null && DisplayCombatCompleteResult(sessionMessages))
+        {
+            // 已经显示战斗完成结果，直接返回，不要再显示手牌信息！
             yield break;
         }
 
         // 刷新角色数据并显示手牌信息
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
-        // 检查是否有战斗完成事件
-        if (sessionMessages != null && DisplayCombatCompleteResult(sessionMessages))
+        // 显示所有角色的手牌信息
+        DisplayAllActorsHands();
+    }
+
+    /// <summary>
+    /// 检查是否有任意角色持有手牌
+    /// 遍历所有角色实体,检查其手牌组件是否包含卡牌
+    /// 用于在抽卡操作前判断是否需要跳过抽卡(避免重复抽卡)
+    /// </summary>
+    /// <returns>如果至少有一个角色持有手牌则返回 true,否则返回 false</returns>
+    private bool AnyActorHasHandCards()
+    {
+        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+
+        foreach (var actorEntity in actorEntitiesSerialization)
         {
-            yield break;
+            var handComponent = GameUtils.GetComponent<HandComponent>(actorEntity);
+            if (handComponent != null && handComponent.cards.Count > 0)
+            {
+                return true;
+            }
         }
 
-        DisplayAllActorsHands();
+        return false;
     }
 
     /// <summary>
@@ -159,7 +221,7 @@ public class DungeonCombatScene : MonoBehaviour
                 if (result)
                 {
                     // 显示战斗仲裁结果
-                    //DisplayCombatArbitrationResult(sessionMessages);
+                    Debug.Log("PlayCards action succeeded, displaying combat arbitration results");
                 }
                 else
                 {
@@ -290,6 +352,17 @@ public class DungeonCombatScene : MonoBehaviour
             text += "\n";
         }
         _mainText.text = text;
+    }
+
+    /// <summary>
+    /// 查看并显示所有角色的手牌信息
+    /// 从服务器刷新数据后,直接显示所有角色当前持有的手牌
+    /// 用于在游戏过程中随时查看角色的手牌状态
+    /// </summary>
+    private IEnumerator ExecuteViewActorCards()
+    {
+        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        DisplayAllActorsHands();
     }
 
     /// <summary>

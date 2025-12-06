@@ -8,17 +8,10 @@ public class LoginScene : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private TMP_Text _userNameText;
     [SerializeField] private TMP_Text _gameNameText;
-    [SerializeField] private TMP_Text _actorNameText;
 
     [Header("Scene Settings")]
     [SerializeField] private string _nextSceneName = "MainScene2";
-
-    // [Header("Sync Components")]
-    // [SerializeField] private GameStateSync _gameStateSync;
-
-    [Header("Game Data")]
-    //[SerializeField] private string _actorName;
-    [SerializeField] private string _gameName;
+    [SerializeField] private string _gameName = "Game1";
 
     private string _playerIdentifier;
 
@@ -26,16 +19,12 @@ public class LoginScene : MonoBehaviour
     {
         Debug.Assert(_userNameText != null, "_userNameText is null");
         Debug.Assert(_gameNameText != null, "_gameNameText is null");
-        Debug.Assert(_actorNameText != null, "_actorNameText is null");
-        //Debug.Assert(_gameStateSync != null, "_gameStateSync is null");
-        //Debug.Assert(!string.IsNullOrEmpty(_actorName), "_actorName is null");
         Debug.Assert(!string.IsNullOrEmpty(_gameName), "_gameName is null");
         Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
 
         _playerIdentifier = GeneratePlayerId();
         _userNameText.text = "临时ID = " + _playerIdentifier;
         _gameNameText.text = "测试游戏 = " + _gameName;
-        //_actorNameText.text = "扮演角色 = " + _actorName;
     }
 
     /// <summary>
