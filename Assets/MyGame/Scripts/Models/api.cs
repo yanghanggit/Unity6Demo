@@ -14,7 +14,8 @@ public class RootResponse
     public string version = "";
     public string status = "";
     public string timestamp = "";
-    public Dictionary<string, string> endpoints = new Dictionary<string, string>();
+    public Dictionary<string, string> endpoints = new();
+    public Dictionary<string, string> api_docs = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
