@@ -8,6 +8,7 @@ public class DungeonCombatScene : MonoBehaviour
 {
     [Header("Scene Settings")]
     [SerializeField] private string _preScene = "MainScene2";
+    [SerializeField] private string _nextScene = "DungeonCombatScene";
 
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText;
@@ -16,23 +17,24 @@ public class DungeonCombatScene : MonoBehaviour
     {
         Debug.Assert(_mainText != null, "_mainText is null");
 
+        // 初始化UI文本
+        _mainText.text = "Initializing Dungeon Combat Scene...";
+
         // 检查是否已经连接服务器
         if (RootResp.Get() != null)
         {
-            Debug.Log("DungeonCombatScene Start: RootResp is already set");
-            StartCoroutine(RefreshDungeonStateDisplay());
+            // 已经连接服务器，开始初始化战斗场景
+            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+            _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
+
+            //Debug.Log("DungeonCombatScene Start: RootResp is already set");
+            StartCoroutine(ExecuteCombatInit());
         }
         else
         {
             // 没有连接服务器，基本是本地测试模式
             Debug.Log("DungeonCombatScene Start: RootResp is null, running in local test mode");
         }
-    }
-
-    public void OnClickCombatInit()
-    {
-        Debug.Log("OnClickCombatInit");
-        StartCoroutine(ExecuteCombatInit());
     }
 
     public void OnClickViewDungeon()
@@ -188,15 +190,15 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private void DisplayAllActorsHands()
     {
-        var text = "";
-        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+        var text = string.Empty;
 
+        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
         foreach (var actorEntity in actorEntitiesSerialization)
         {
             var handComponent = GameUtils.GetComponent<HandComponent>(actorEntity);
             if (handComponent == null)
             {
-                Debug.LogWarning($"HandComponent is null for actor: {actorEntity.name}");
+                //Debug.Log($"HandComponent is null for actor: {actorEntity.name}");
                 continue;
             }
 
@@ -204,7 +206,14 @@ public class DungeonCombatScene : MonoBehaviour
             text += "\n";
         }
 
-        _mainText.text = text;
+        if (string.IsNullOrEmpty(text))
+        {
+            _mainText.text = "当前没有角色持有手牌信息。";
+        }
+        else
+        {
+            _mainText.text = "当前角色手牌信息：\n\n" + text;
+        }
     }
 
     /// <summary>
@@ -285,7 +294,7 @@ public class DungeonCombatScene : MonoBehaviour
 
             if (agentEvent is CombatCompleteEvent completeEvent)
             {
-                Debug.Log($"Found CombatCompleteEvent: actor={completeEvent.actor}, summary={completeEvent.summary}");
+//                Debug.Log($"Found CombatCompleteEvent: actor={completeEvent.actor}, summary={completeEvent.summary}");
                 completeEvents.Add(completeEvent);
             }
             else
@@ -382,10 +391,30 @@ public class DungeonCombatScene : MonoBehaviour
                 }
             });
 
-        if (success)
+        if (!success)
         {
-            yield return RefreshDungeonStateDisplay();
+            yield break;
         }
+
+        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer(
+            (result, message) =>
+            {
+                success = result;
+                if (!result)
+                {
+                    _mainText.text = message;
+                }
+            }
+        );
+
+        if (!success)
+        {
+            yield break;
+        }
+
+        // 3. 切换到地下城场景
+        yield return new WaitForSeconds(0);
+        SceneManager.LoadScene(_nextScene);
     }
 
     /// <summary>

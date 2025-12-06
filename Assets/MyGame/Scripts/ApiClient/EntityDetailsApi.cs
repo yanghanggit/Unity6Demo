@@ -55,11 +55,11 @@ public class EntityDetailsApi : BaseApiClient
         _responseData = null;
         _requestResult = null;
 
-        Debug.Log($"EntityDetailsApi initialized with URL: {_url} and {entityNames?.Count ?? 0} entities");
-        for (int i = 0; i < entityNames.Count; i++)
-        {
-            Debug.Log($"Entity {i}: {entityNames[i]}");
-        }
+        // Debug.Log($"EntityDetailsApi initialized with URL: {_url} and {entityNames?.Count ?? 0} entities");
+        // for (int i = 0; i < entityNames.Count; i++)
+        // {
+        //     Debug.Log($"Entity {i}: {entityNames[i]}");
+        // }
         _requestUrl = BuildRequestUrl(_entitiyNames);
     }
 
@@ -121,7 +121,7 @@ public class EntityDetailsApi : BaseApiClient
                 yield break;
             }
 
-            Debug.Log("Entity details loaded successfully");
+            //Debug.Log("Entity details loaded successfully");
         }
         catch (System.Exception ex)
         {

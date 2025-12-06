@@ -139,7 +139,7 @@ public class DungeonGamePlayApi : BaseApiClient
                 yield break;
             }
 
-            Debug.Log("Dungeon gameplay successful");
+            //Debug.Log("Dungeon gameplay successful");
         }
         catch (System.Exception ex)
         {

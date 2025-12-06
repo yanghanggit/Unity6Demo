@@ -111,7 +111,7 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     public void OnClickBack()
     {
-        Debug.Log("Back button clicked");
+        //Debug.Log("Back button clicked");
         StartCoroutine(ReturnToLoginScene());
     }
 
@@ -121,7 +121,7 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     public void OnClickCamp()
     {
-        Debug.Log("OnClickCamp");
+        //Debug.Log("OnClickCamp");
         StartCoroutine(TransitionToScene(_campSceneConfig));
     }
 
@@ -131,7 +131,7 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     public void OnClickRestaurant()
     {
-        Debug.Log("OnClickRestaurant");
+        //Debug.Log("OnClickRestaurant");
         StartCoroutine(TransitionToScene(_restaurantSceneConfig));
     }
 
@@ -141,7 +141,7 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     public void OnClickDungeon()
     {
-        Debug.Log("OnClickDungeon");
+        //Debug.Log("OnClickDungeon");
         StartCoroutine(LoadDungeonOverviewScene());
     }
 
@@ -151,7 +151,7 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     private void OnHeadIconClicked()
     {
-        Debug.Log("Head icon clicked in MainScene2!");
+        //Debug.Log("Head icon clicked in MainScene2!");
         _playerInfoDetails.SetActive(true);
     }
 
@@ -161,7 +161,7 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     public void OnClickClosePlayerInfoDetails()
     {
-        Debug.Log("Player info details clicked!");
+        //Debug.Log("Player info details clicked!");
         _playerInfoDetails.SetActive(false);
     }
 
@@ -239,7 +239,7 @@ public class MainScene2 : MonoBehaviour
     {
         var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
         var actorsWithTransStageEvents = GameUtils.GetActorsWithTransStageEvents(lastAgentEventsHistory);
-        Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
+        //Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
         return actorsWithTransStageEvents.Contains(GameContext.Instance.ActorName);
     }
 

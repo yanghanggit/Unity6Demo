@@ -197,24 +197,23 @@ public class GameStateSync : MonoBehaviour
         GameContext.Instance.ActorEntitiesSerialization = _entityDetailsApi.RespData.entities_serialization;
 
         string successMsg = $"[GameStateSync] Successfully refreshed {actors.Count} actor details from server";
-        Debug.Log(successMsg);
-
+        //Debug.Log(successMsg);
         // 打印演员详情的调试信息
-        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
-        for (int i = 0; i < actorEntitiesSerialization.Count; i++)
-        {
-            var entitySerialization = actorEntitiesSerialization[i];
-            try
-            {
-                // 直接将 EntitySerialization 序列化为 JSON 字符串
-                string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
-                Debug.Log($"Actor[{i}] JSON:\n{jsonString}");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"Failed to serialize Actor[{i}] to JSON: {ex.Message}");
-            }
-        }
+        // var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+        // for (int i = 0; i < actorEntitiesSerialization.Count; i++)
+        // {
+        //     var entitySerialization = actorEntitiesSerialization[i];
+        //     try
+        //     {
+        //         // 直接将 EntitySerialization 序列化为 JSON 字符串
+        //         string jsonString = JsonConvert.SerializeObject(entitySerialization, Formatting.Indented);
+        //         Debug.Log($"Actor[{i}] JSON:\n{jsonString}");
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         Debug.LogError($"Failed to serialize Actor[{i}] to JSON: {ex.Message}");
+        //     }
+        // }
         onComplete?.Invoke(true, successMsg);
     }
 

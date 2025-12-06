@@ -118,7 +118,7 @@ public class DungeonGamePlayManager : MonoBehaviour
         // 必有响应数据，即使是[]
         Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
 
-        Debug.Log("[DungeonGamePlayManager] DrawCards completed successfully");
+        //Debug.Log("[DungeonGamePlayManager] DrawCards completed successfully");
         onComplete?.Invoke(true, "Draw cards completed successfully", _dungeonGamePlayApi.RespData.session_messages);
     }
 
