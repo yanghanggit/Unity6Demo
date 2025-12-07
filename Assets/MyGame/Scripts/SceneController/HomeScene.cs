@@ -349,7 +349,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         }
 
         // 检查是否有角色执行了场景切换事件，如果有就需要更新UI
-        var actorsWithTransStageEvents = GameUtils.GetActorsWithTransStageEvents(GameContext.Instance.LastAgentEventsHistory);
+        var actorsWithTransStageEvents = GameUtils.GetActorsWithEventType<TransStageEvent>(GameContext.Instance.LastAgentEventsHistory);
         if (actorsWithTransStageEvents.Count > 0)
         {
             Debug.Log($"[HomeScene] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
