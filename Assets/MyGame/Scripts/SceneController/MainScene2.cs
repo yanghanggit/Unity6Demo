@@ -1,8 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Newtonsoft.Json;
-using System;
+// using Newtonsoft.Json;
+// using System;
 
 /// <summary>
 /// 主场景控制器(MainScene2)
@@ -211,23 +211,23 @@ public class MainScene2 : MonoBehaviour
         yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
 
         // 获取玩家角色的实体序列化数据用于验证和调试
-        var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
-        if (playerActorEntitySerialization == null)
-        {
-            Debug.LogError($"Player actor entity serialization not found for actor: {GameContext.Instance.ActorName}");
-            yield break;
-        }
+        // var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
+        // if (playerActorEntitySerialization == null)
+        // {
+        //     Debug.LogError($"Player actor entity serialization not found for actor: {GameContext.Instance.ActorName}");
+        //     yield break;
+        // }
 
-        try
-        {
-            // 将玩家角色实体数据序列化为 JSON 并输出到日志(用于调试)
-            string jsonString = JsonConvert.SerializeObject(playerActorEntitySerialization, Formatting.Indented);
-            Debug.Log($"Actor[{GameContext.Instance.ActorName}] JSON:\n{jsonString}");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Failed to serialize Actor[{GameContext.Instance.ActorName}] to JSON: {ex.Message}");
-        }
+        // try
+        // {
+        //     // 将玩家角色实体数据序列化为 JSON 并输出到日志(用于调试)
+        //     string jsonString = JsonConvert.SerializeObject(playerActorEntitySerialization, Formatting.Indented);
+        //     Debug.Log($"Actor[{GameContext.Instance.ActorName}] JSON:\n{jsonString}");
+        // }
+        // catch (Exception ex)
+        // {
+        //     Debug.LogError($"Failed to serialize Actor[{GameContext.Instance.ActorName}] to JSON: {ex.Message}");
+        // }
     }
 
     /// <summary>
@@ -235,13 +235,13 @@ public class MainScene2 : MonoBehaviour
     /// 通过检查最近的代理事件历史,确认当前玩家是否在切换场景的角色集合中
     /// </summary>
     /// <returns>如果当前玩家角色执行了场景转换返回 true,否则返回 false</returns>
-    private bool ValidateTransStageEvent()
-    {
-        var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
-        var actorsWithTransStageEvents = GameUtils.GetActorsWithEventType<TransStageEvent>(lastAgentEventsHistory);
-        //Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
-        return actorsWithTransStageEvents.Contains(GameContext.Instance.ActorName);
-    }
+    // private bool ValidateTransStageEvent()
+    // {
+    //     var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
+    //     var actorsWithTransStageEvents = GameUtils.GetActorsWithEventType<TransStageEvent>(lastAgentEventsHistory);
+    //     //Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
+    //     return actorsWithTransStageEvents.Contains(GameContext.Instance.ActorName);
+    // }
 
     /// <summary>
     /// 将玩家角色转移到指定的 Stage(服务器状态) 和 Scene(Unity 场景)
@@ -281,9 +281,9 @@ public class MainScene2 : MonoBehaviour
             yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
 
             // 验证场景转换事件
-            var isTransStageEventValid = ValidateTransStageEvent();
-            Debug.Assert(isTransStageEventValid, "ValidateTransStageEvent failed");
-            Debug.Log($"[MainScene2] TransitionToScene to {sceneConfig.StageName} completed");
+            // var isTransStageEventValid = ValidateTransStageEvent();
+            // Debug.Assert(isTransStageEventValid, "ValidateTransStageEvent failed");
+            // Debug.Log($"[MainScene2] TransitionToScene to {sceneConfig.StageName} completed");
         }
         else
         {

@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 using System;
 
 /// <summary>
@@ -81,7 +81,7 @@ public class SessionManager : MonoBehaviour
         // 保存基本信息到 GameContext
         GameContext.Instance.UserName = userName;
         GameContext.Instance.GameName = gameName;
-        GameContext.Instance.ActorName = ""; // 尚未分配角色
+        GameContext.Instance.ActorName = string.Empty; // 尚未分配角色
 
         //Debug.Log($"[SessionManager] Login completed successfully: {userName}");
         onComplete?.Invoke(true);

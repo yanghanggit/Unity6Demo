@@ -19,7 +19,7 @@ public partial class GameContext
     /// <summary>
     /// 线程锁对象,用于确保单例模式的线程安全
     /// </summary>
-    private static readonly object _lockObj = new object();
+    private static readonly object _lockObj = new();
 
     /// <summary>
     /// 获取GameContext的单例实例
@@ -31,10 +31,7 @@ public partial class GameContext
         {
             lock (_lockObj)
             {
-                if (_instance == null)
-                {
-                    _instance = new GameContext();
-                }
+                _instance ??= new GameContext();
                 return _instance;
             }
         }

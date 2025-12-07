@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// GameContext的部分类扩展
@@ -42,7 +43,7 @@ public partial class GameContext
         {
             if (value == null)
             {
-                UnityEngine.Debug.LogError("Mapping is null");
+                Debug.LogError("Mapping is null");
                 return;
             }
             _stageActorMapping = value;
@@ -116,7 +117,7 @@ public partial class GameContext
     {
         // 获取当前角色所属场景
         var stageName = GetActorStage(ActorName);
-        UnityEngine.Debug.Assert(stageName != "", "[GameContext] Current actor's stage name is empty");
+        Debug.Assert(stageName != "", "[GameContext] Current actor's stage name is empty");
         
         // 获取该场景中的所有角色
         var actorsInStage = GetActorsInStage(stageName);
@@ -141,7 +142,7 @@ public partial class GameContext
         {
             if (value == null)
             {
-                UnityEngine.Debug.LogError("Dungeon is null");
+                Debug.LogError("Dungeon is null");
                 return;
             }
             _dungeon = value;
@@ -162,7 +163,7 @@ public partial class GameContext
         {
             if (value == null)
             {
-                UnityEngine.Debug.LogError("ActorEntitiesSerialization is null");
+                Debug.LogError("ActorEntitiesSerialization is null");
                 return;
             }
             _actorEntitiesSerialization = value;
@@ -183,7 +184,7 @@ public partial class GameContext
         {
             if (value == null)
             {
-                UnityEngine.Debug.LogError("StageEntitiesSerialization is null");
+                Debug.LogError("StageEntitiesSerialization is null");
                 return;
             }
             _stageEntitiesSerialization = value;
