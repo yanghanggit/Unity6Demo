@@ -301,6 +301,17 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     private void OnCurrentActorClicked(SpriteClickHandler clickHandler)
     {
         Debug.Log($"精灵 {clickHandler.gameObject.name} 被点击了！");
+
+        // 确认选中的角色仍在当前场景中
+        var selectedActorStageName = GameContext.Instance.GetActorStage(_selectedActorName);
+        if (selectedActorStageName != _homeSceneConfig.StageName)
+        {
+            Debug.LogWarning($"Selected actor {_selectedActorName} is not in the current stage {_homeSceneConfig.StageName}.");
+            _speechBubbleText.text = $"[{_selectedActorName}] => 不在当前场景～"; // 更新提示文本
+            return;
+        }
+
+        // 切换到输入状态！
         _mainState.SetActive(false);                // 隐藏主状态UI
         _inputState.SetActive(true);                // 显示输入状态UI
     }
@@ -361,10 +372,10 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             RefreshActorList();
 
             // 如果当前选中的角色执行了场景转换,则清空选择
-            if (actorsWithTransStageEvents.Contains(_selectedActorName))
-            {
-                _selectedActorName = string.Empty;
-            }
+            // if (actorsWithTransStageEvents.Contains(_selectedActorName))
+            // {
+            //     _selectedActorName = string.Empty;
+            // }
         }
 
         // 更新角色显示(可能已变化)
