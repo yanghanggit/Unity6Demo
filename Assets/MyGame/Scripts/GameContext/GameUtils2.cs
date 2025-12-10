@@ -89,7 +89,8 @@ public static partial class GameUtils
                    $" Physical Attack:{stats.physical_attack}," +
                    $" Physical Defense:{stats.physical_defense}," +
                    $" Magic Attack:{stats.magic_attack}," +
-                   $" Magic Defense:{stats.magic_defense}\n";
+                   // $" Magic Defense:{stats.magic_defense}\n";
+                   "\n";
 
         if (combatStatsComponent.status_effects.Count > 0)
         {

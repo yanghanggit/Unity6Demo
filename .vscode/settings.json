@@ -48,7 +48,7 @@
         "UserSettings/": true,
         "temp/": true,
         "Temp/": true,
-        "**/*.meta": true,
+        "**/*.meta": true
     },
     "dotnet.defaultSolution": "Unity6Demo.slnx"
 }

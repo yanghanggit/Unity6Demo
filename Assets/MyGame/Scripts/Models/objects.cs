@@ -125,7 +125,7 @@ public class CharacterStats
     public int base_physical_attack = 8;
     public int base_physical_defense = 5;
     public int base_magic_attack = 7;
-    public int base_magic_defense = 6;
+    // public int base_magic_defense = 6;
 
     // 成长系数
     public int strength_per_level = 2;
@@ -150,7 +150,7 @@ public class CharacterStats
 
     public int magic_attack => base_magic_attack + (wisdom * 2);
 
-    public int magic_defense => base_magic_defense + wisdom;
+    // public int magic_defense => base_magic_defense + wisdom;
 }
 
 /**
