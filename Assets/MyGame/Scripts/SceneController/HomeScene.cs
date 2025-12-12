@@ -504,6 +504,54 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         _mainState.SetActive(true);                  // 显示主状态UI
         _inputState.SetActive(false);                // 隐藏输入状态UI
     }
+
+    /// <summary>
+    /// 英雄行动按钮点击回调
+    /// 验证游戏状态和角色选择后,执行英雄行动
+    /// </summary>
+    public void OnHeroButtonClicked()
+    {
+        Debug.Log("Hero button clicked in HomeScene.");
+        if (RootResp.Get() != null && !string.IsNullOrEmpty(_selectedActorName))
+        {
+            StartCoroutine(ExecuteHeroAction(_selectedActorName));
+        }
+        else
+        {
+            Debug.LogWarning("Cannot execute hero action. Ensure game is set up and a sprite is selected.");
+        }
+    }
+
+    /// <summary>
+    /// 执行英雄行动的协程
+    /// 调用 HomeGamePlayManager 为目标角色执行英雄行动,并同步最新的游戏状态
+    /// </summary>
+    /// <param name="actorName">目标角色名称</param>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator ExecuteHeroAction(string actorName)
+    {
+        // 使用 HomeGamePlayManager 执行英雄行动
+        bool heroActionSuccess = false;
+        yield return HomeGamePlayManager.Instance.HeroAction(
+            actorName,
+            (success) =>
+            {
+                heroActionSuccess = success;
+            }
+        );
+
+        // 检查是否成功
+        if (!heroActionSuccess)
+        {
+            Debug.LogError("[HomeScene] HeroAction failed");
+            yield break;
+        }
+
+        Debug.Log($"[HomeScene] Hero action completed successfully for {actorName}");
+
+        // 更新角色显示(可能已变化)
+        UpdateActorDisplay(_selectedActorName);
+    }
 }
 
 

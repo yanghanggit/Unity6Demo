@@ -310,4 +310,77 @@ public class HomeGamePlayManager : MonoBehaviour
         Debug.Log("[HomeGamePlayManager] TransDungeon completed successfully");
         onComplete?.Invoke(true);
     }
+
+    /// <summary>
+    /// 执行英雄行动
+    /// 调用 /hero 端点为指定角色添加plan action并执行
+    /// 自动获取最新会话消息
+    /// </summary>
+    /// <param name="actorName">目标角色名称</param>
+    /// <param name="onComplete">完成回调，参数为是否成功</param>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator HeroAction(string actorName, Action<bool> onComplete = null)
+    {
+        if (string.IsNullOrEmpty(actorName))
+        {
+            Debug.LogError("[HomeGamePlayManager] Actor name is empty");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        // 调用 /hero 端点
+        yield return _homeGamePlayApi.Call(
+            GameContext.Instance.HomeGamePlayUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            "/hero",
+            new Dictionary<string, string>
+            {
+                ["heroes"] = actorName
+            });
+
+        // 检查API调用是否成功
+        if (_homeGamePlayApi.ReqResult == null)
+        {
+            Debug.LogError($"[HomeGamePlayManager] /hero request for {actorName} failed");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        // 进一步检查响应结果的成功标志
+        if (!_homeGamePlayApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[HomeGamePlayManager] /hero request for {actorName} failed: {_homeGamePlayApi.ReqResult.responseText}");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        Debug.Assert(_homeGamePlayApi.RespData != null, $"[HomeGamePlayManager] /hero for {actorName} response data is null");
+
+        // 从服务器获取并同步最新的会话消息
+        bool fetchSuccess = false;
+        yield return SessionManager.Instance.FetchSessionMessages(
+            (success, sessionMessages) =>
+            {
+                fetchSuccess = success;
+                if (success)
+                {
+                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after hero action");
+                    // 收集AgentEvents 事件到 GameContext
+                    GameContext.Instance.CollectEventsByActor(sessionMessages);
+                }
+            }
+        );
+
+        // 检查消息获取是否成功
+        if (!fetchSuccess)
+        {
+            Debug.LogError($"[HomeGamePlayManager] Failed to fetch session messages after hero action for {actorName}");
+            onComplete?.Invoke(false);
+            yield break;
+        }
+
+        Debug.Log($"[HomeGamePlayManager] HeroAction completed successfully for: {actorName}");
+        onComplete?.Invoke(true);
+    }
 }
