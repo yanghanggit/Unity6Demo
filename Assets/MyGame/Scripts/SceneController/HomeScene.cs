@@ -31,6 +31,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     [Header("Scene Config")]
     [SerializeField] private HomeSceneConfig _homeSceneConfig; // 场景配置数据
     [SerializeField] private string _preScene = "MainScene2";   // 上一个场景名称
+    [SerializeField] private HomeSceneConfig _monitoringHouseSceneConfig; // 监视之屋场景配置数据
 
     // 事件系统
     [Header("Events")]
@@ -318,7 +319,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 
     /// <summary>
     /// 返回主场景的协程
-    /// 检查游戏是否已正确设置,如果是则加载MainScene2场景
+    /// 检查游戏是否已正确设置,切换到监视之屋Stage,然后加载MainScene2场景
     /// </summary>
     /// <returns>协程迭代器</returns>
     private IEnumerator ReturnToMainScene()
@@ -326,6 +327,39 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         // 检查游戏是否已正确初始化
         if (RootResp.Get() != null)
         {
+            // 获取玩家当前所在的 Stage 名称
+            var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+
+            // 检查玩家是否已在监视之屋中
+            if (currentStageName != _monitoringHouseSceneConfig.StageName)
+            {
+                // 玩家不在监视之屋,使用 HomeGamePlayManager 切换到监视之屋 Stage
+                bool switchSuccess = false;
+                yield return HomeGamePlayManager.Instance.SwitchStage(
+                    _monitoringHouseSceneConfig.StageName,
+                    (success) =>
+                    {
+                        switchSuccess = success;
+                    }
+                );
+
+                // 检查切换是否成功
+                if (!switchSuccess)
+                {
+                    Debug.LogError($"[HomeScene] SwitchStage to {_monitoringHouseSceneConfig.StageName} failed");
+                    yield break;
+                }
+
+                // 刷新全局状态以确保数据同步
+                yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+            }
+            else
+            {
+                // 玩家已在监视之屋中,无需切换服务器状态
+                Debug.Log($"Already in monitoring house stage, no need to switch.");
+            }
+
+            // 加载 MainScene2 场景
             yield return new WaitForSeconds(0);
             SceneManager.LoadScene(_preScene);
         }

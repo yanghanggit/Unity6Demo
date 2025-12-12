@@ -55,6 +55,21 @@ public class MainScene2 : MonoBehaviour
     /// 玩家详细信息面板UI对象(点击头像后显示)
     /// </summary>
     [SerializeField] private GameObject _playerInfoDetails;
+
+    /// <summary>
+    /// 营地区域角色图标容器
+    /// </summary>
+    [SerializeField] private GameObject _campActorIconsContainer;
+
+    /// <summary>
+    /// 餐厅区域角色图标容器
+    /// </summary>
+    [SerializeField] private GameObject _restaurantActorIconsContainer;
+
+    /// <summary>
+    /// 角色迷你图标预制件
+    /// </summary>
+    [SerializeField] private GameObject _actorMiniIconPrefab;
     /// <summary>
     /// 场景启动初始化方法
     /// 验证所有必需的组件引用,注册UI事件回调,刷新游戏状态
@@ -66,6 +81,9 @@ public class MainScene2 : MonoBehaviour
         Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
         Debug.Assert(_campSceneConfig != null, "_campSceneConfig is null");
         Debug.Assert(_restaurantSceneConfig != null, "_restaurantSceneConfig is null");
+        Debug.Assert(_campActorIconsContainer != null, "_campActorIconsContainer is null");
+        Debug.Assert(_restaurantActorIconsContainer != null, "_restaurantActorIconsContainer is null");
+        Debug.Assert(_actorMiniIconPrefab != null, "_actorMiniIconPrefab is null");
 
         // 设置头像点击回调
         _playerInfoBar.GetComponent<PlayerInfoBar>().OnHeadIconClickedCallback += OnHeadIconClicked;
@@ -146,6 +164,16 @@ public class MainScene2 : MonoBehaviour
     }
 
     /// <summary>
+    /// 运行按钮点击事件处理
+    /// 推进游戏状态，让所有角色执行行动
+    /// </summary>
+    public void OnClickRun()
+    {
+        Debug.Log("Run button clicked in MainScene2.");
+        StartCoroutine(AdvanceGameState());
+    }
+
+    /// <summary>
     /// 玩家头像点击事件回调
     /// 显示玩家详细信息面板
     /// </summary>
@@ -204,6 +232,7 @@ public class MainScene2 : MonoBehaviour
     /// 刷新游戏状态的协程
     /// 1. 从服务器刷新映射和角色数据
     /// 2. 获取并序列化玩家角色的实体数据(用于调试)
+    /// 3. 刷新角色位置显示
     /// </summary>
     private IEnumerator RefreshGameState()
     {
@@ -228,6 +257,9 @@ public class MainScene2 : MonoBehaviour
         // {
         //     Debug.LogError($"Failed to serialize Actor[{GameContext.Instance.ActorName}] to JSON: {ex.Message}");
         // }
+
+        // 刷新角色位置显示
+        RefreshActorLocations();
     }
 
     /// <summary>
@@ -242,6 +274,38 @@ public class MainScene2 : MonoBehaviour
     //     //Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
     //     return actorsWithTransStageEvents.Contains(GameContext.Instance.ActorName);
     // }
+
+    /// <summary>
+    /// 推进游戏状态的协程
+    /// 调用 HomeGamePlayManager 推进所有角色的行动，并同步最新的游戏状态
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator AdvanceGameState()
+    {
+        // 使用 HomeGamePlayManager 推进游戏
+        bool advanceSuccess = false;
+        yield return HomeGamePlayManager.Instance.AdvanceGame(
+            (success) =>
+            {
+                advanceSuccess = success;
+            }
+        );
+
+        // 检查推进是否成功
+        if (!advanceSuccess)
+        {
+            Debug.LogError("[MainScene2] AdvanceGame failed");
+            yield break;
+        }
+
+        Debug.Log("[MainScene2] Game state advanced successfully");
+
+        // 刷新游戏状态以确保数据同步
+        yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+
+        // 刷新角色位置显示
+        RefreshActorLocations();
+    }
 
     /// <summary>
     /// 将玩家角色转移到指定的 Stage(服务器状态) 和 Scene(Unity 场景)
@@ -299,5 +363,83 @@ public class MainScene2 : MonoBehaviour
 
         // 加载目标 Unity 场景
         SceneManager.LoadScene(_nextScene);
+    }
+
+    /// <summary>
+    /// 刷新场景中的角色位置显示
+    /// 遍历所有角色,根据他们所在的 Stage 在对应区域显示迷你图标
+    /// </summary>
+    private void RefreshActorLocations()
+    {
+        // 清空现有图标
+        ClearActorIcons(_campActorIconsContainer);
+        ClearActorIcons(_restaurantActorIconsContainer);
+
+        // 获取所有角色(排除玩家自己)
+        var allActors = GameContext.Instance.AllActors;
+        foreach (var actorName in allActors)
+        {
+            // 跳过玩家自己
+            if (actorName == GameContext.Instance.ActorName)
+            {
+                continue;
+            }
+
+            // 获取角色所在的 Stage
+            var actorStage = GameContext.Instance.GetActorStage(actorName);
+
+            // 根据 Stage 在对应区域显示角色图标
+            if (actorStage == _campSceneConfig.StageName)
+            {
+                CreateActorIcon(actorName, _campActorIconsContainer);
+            }
+            else if (actorStage == _restaurantSceneConfig.StageName)
+            {
+                CreateActorIcon(actorName, _restaurantActorIconsContainer);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 创建角色迷你图标
+    /// </summary>
+    /// <param name="actorName">角色名称</param>
+    /// <param name="container">图标容器</param>
+    private void CreateActorIcon(string actorName, GameObject container)
+    {
+        if (container == null || _actorMiniIconPrefab == null)
+        {
+            return;
+        }
+
+        // 实例化图标
+        GameObject iconObj = Instantiate(_actorMiniIconPrefab, container.transform);
+        ActorMiniIcon icon = iconObj.GetComponent<ActorMiniIcon>();
+        
+        if (icon != null)
+        {
+            icon.SetActor(actorName);
+        }
+        else
+        {
+            Debug.LogWarning($"ActorMiniIcon component not found on prefab for actor: {actorName}");
+        }
+    }
+
+    /// <summary>
+    /// 清空指定容器中的所有角色图标
+    /// </summary>
+    /// <param name="container">图标容器</param>
+    private void ClearActorIcons(GameObject container)
+    {
+        if (container == null)
+        {
+            return;
+        }
+
+        // 销毁容器中的所有子对象
+        foreach (Transform child in container.transform)
+        {            Destroy(child.gameObject);
+        }
     }
 }
