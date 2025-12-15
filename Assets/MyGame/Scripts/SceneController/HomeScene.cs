@@ -31,7 +31,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     [Header("Scene Config")]
     [SerializeField] private HomeSceneConfig _homeSceneConfig; // 场景配置数据
     [SerializeField] private string _preScene = "MainScene2";   // 上一个场景名称
-    [SerializeField] private HomeSceneConfig _monitoringHouseSceneConfig; // 监视之屋场景配置数据
+    [SerializeField] private string _monitoringHouseStageName; // 监视之屋场景名称
 
     // 事件系统
     [Header("Events")]
@@ -318,6 +318,51 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     }
 
     /// <summary>
+    /// 如果玩家不在目标 Stage 中则切换到该 Stage,已在目标 Stage 则直接返回成功
+    /// </summary>
+    /// <param name="targetStageName">目标 Stage 名称</param>
+    /// <param name="onComplete">完成回调,参数为是否成功进入目标 Stage</param>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator SwitchToStageIfNeeded(string targetStageName, System.Action<bool> onComplete)
+    {
+        // 获取玩家当前所在的 Stage 名称
+        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+
+        // 检查玩家是否已在目标 Stage 中
+        if (currentStageName != targetStageName)
+        {
+            // 玩家不在目标 Stage，使用 HomeGamePlayManager 切换
+            bool switchSuccess = false;
+            yield return HomeGamePlayManager.Instance.SwitchStage(
+                targetStageName,
+                (success) =>
+                {
+                    switchSuccess = success;
+                }
+            );
+
+            // 检查切换是否成功
+            if (!switchSuccess)
+            {
+                Debug.LogError($"[HomeScene] SwitchStage to {targetStageName} failed");
+                onComplete?.Invoke(false);
+                yield break;
+            }
+
+            // 刷新全局状态以确保数据同步
+            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+            Debug.Log($"[HomeScene] Successfully switched to stage: {targetStageName}");
+            onComplete?.Invoke(true);
+        }
+        else
+        {
+            // 玩家已在目标 Stage 中，无需切换服务器状态
+            Debug.Log($"[HomeScene] Already in target stage {targetStageName}, no need to switch.");
+            onComplete?.Invoke(true);
+        }
+    }
+
+    /// <summary>
     /// 返回主场景的协程
     /// 检查游戏是否已正确设置,切换到监视之屋Stage,然后加载MainScene2场景
     /// </summary>
@@ -327,36 +372,21 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         // 检查游戏是否已正确初始化
         if (RootResp.Get() != null)
         {
-            // 获取玩家当前所在的 Stage 名称
-            var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
-
-            // 检查玩家是否已在监视之屋中
-            if (currentStageName != _monitoringHouseSceneConfig.StageName)
-            {
-                // 玩家不在监视之屋,使用 HomeGamePlayManager 切换到监视之屋 Stage
-                bool switchSuccess = false;
-                yield return HomeGamePlayManager.Instance.SwitchStage(
-                    _monitoringHouseSceneConfig.StageName,
-                    (success) =>
-                    {
-                        switchSuccess = success;
-                    }
-                );
-
-                // 检查切换是否成功
-                if (!switchSuccess)
+            // 切换到监视之屋（如果需要）
+            bool switchSuccess = false;
+            yield return SwitchToStageIfNeeded(
+                _monitoringHouseStageName,
+                (success) =>
                 {
-                    Debug.LogError($"[HomeScene] SwitchStage to {_monitoringHouseSceneConfig.StageName} failed");
-                    yield break;
+                    switchSuccess = success;
                 }
+            );
 
-                // 刷新全局状态以确保数据同步
-                yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-            }
-            else
+            // 检查是否成功进入监视之屋
+            if (!switchSuccess)
             {
-                // 玩家已在监视之屋中,无需切换服务器状态
-                Debug.Log($"Already in monitoring house stage, no need to switch.");
+                Debug.LogError($"[HomeScene] Failed to ensure in {_monitoringHouseStageName}");
+                yield break;
             }
 
             // 加载 MainScene2 场景
