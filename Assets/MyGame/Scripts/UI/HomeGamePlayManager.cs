@@ -312,14 +312,14 @@ public class HomeGamePlayManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 执行英雄行动
-    /// 调用 /hero 端点为指定角色添加plan action并执行
+    /// 执行盟友行动
+    /// 调用 /ally 端点为指定角色添加plan action并执行
     /// 自动获取最新会话消息
     /// </summary>
     /// <param name="actorName">目标角色名称</param>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator HeroAction(string actorName, Action<bool> onComplete = null)
+    public IEnumerator AllyPlanAction(string actorName, Action<bool> onComplete = null)
     {
         if (string.IsNullOrEmpty(actorName))
         {
@@ -328,21 +328,21 @@ public class HomeGamePlayManager : MonoBehaviour
             yield break;
         }
 
-        // 调用 /hero 端点
+        // 调用 /ally_plan 端点
         yield return _homeGamePlayApi.Call(
             GameContext.Instance.HomeGamePlayUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-            "/hero",
+            "/ally_plan",
             new Dictionary<string, string>
             {
-                ["heroes"] = actorName
+                ["allies"] = actorName
             });
 
         // 检查API调用是否成功
         if (_homeGamePlayApi.ReqResult == null)
         {
-            Debug.LogError($"[HomeGamePlayManager] /hero request for {actorName} failed");
+            Debug.LogError($"[HomeGamePlayManager] /ally request for {actorName} failed");
             onComplete?.Invoke(false);
             yield break;
         }
@@ -350,12 +350,12 @@ public class HomeGamePlayManager : MonoBehaviour
         // 进一步检查响应结果的成功标志
         if (!_homeGamePlayApi.ReqResult.isSuccess)
         {
-            Debug.LogError($"[HomeGamePlayManager] /hero request for {actorName} failed: {_homeGamePlayApi.ReqResult.responseText}");
+            Debug.LogError($"[HomeGamePlayManager] /ally request for {actorName} failed: {_homeGamePlayApi.ReqResult.responseText}");
             onComplete?.Invoke(false);
             yield break;
         }
 
-        Debug.Assert(_homeGamePlayApi.RespData != null, $"[HomeGamePlayManager] /hero for {actorName} response data is null");
+        Debug.Assert(_homeGamePlayApi.RespData != null, $"[HomeGamePlayManager] /ally for {actorName} response data is null");
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
@@ -365,7 +365,7 @@ public class HomeGamePlayManager : MonoBehaviour
                 fetchSuccess = success;
                 if (success)
                 {
-                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after hero action");
+                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after ally action");
                     // 收集AgentEvents 事件到 GameContext
                     GameContext.Instance.CollectEventsByActor(sessionMessages);
                 }
@@ -375,12 +375,12 @@ public class HomeGamePlayManager : MonoBehaviour
         // 检查消息获取是否成功
         if (!fetchSuccess)
         {
-            Debug.LogError($"[HomeGamePlayManager] Failed to fetch session messages after hero action for {actorName}");
+            Debug.LogError($"[HomeGamePlayManager] Failed to fetch session messages after ally action for {actorName}");
             onComplete?.Invoke(false);
             yield break;
         }
 
-        Debug.Log($"[HomeGamePlayManager] HeroAction completed successfully for: {actorName}");
+        Debug.Log($"[HomeGamePlayManager] AllyPlanAction completed successfully for: {actorName}");
         onComplete?.Invoke(true);
     }
 }

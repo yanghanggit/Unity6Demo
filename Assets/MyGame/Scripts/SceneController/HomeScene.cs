@@ -31,7 +31,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     [Header("Scene Config")]
     [SerializeField] private HomeSceneConfig _homeSceneConfig; // 场景配置数据
     [SerializeField] private string _preScene = "MainScene2";   // 上一个场景名称
-    [SerializeField] private string _monitoringHouseStageName; // 监视之屋场景名称
+    [SerializeField] private string _monitoringHouseStageName = "场景.监视之屋"; // 监视之屋场景名称
 
     // 事件系统
     [Header("Events")]
@@ -536,48 +536,48 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     }
 
     /// <summary>
-    /// 英雄行动按钮点击回调
-    /// 验证游戏状态和角色选择后,执行英雄行动
+    /// 盟友行动按钮点击回调
+    /// 验证游戏状态和角色选择后,执行盟友行动
     /// </summary>
-    public void OnHeroButtonClicked()
+    public void OnAllyButtonClicked()
     {
-        Debug.Log("Hero button clicked in HomeScene.");
+        Debug.Log("Ally button clicked in HomeScene.");
         if (RootResp.Get() != null && !string.IsNullOrEmpty(_selectedActorName))
         {
-            StartCoroutine(ExecuteHeroAction(_selectedActorName));
+            StartCoroutine(ExecuteAllyAction(_selectedActorName));
         }
         else
         {
-            Debug.LogWarning("Cannot execute hero action. Ensure game is set up and a sprite is selected.");
+            Debug.LogWarning("Cannot execute ally action. Ensure game is set up and a sprite is selected.");
         }
     }
 
     /// <summary>
-    /// 执行英雄行动的协程
-    /// 调用 HomeGamePlayManager 为目标角色执行英雄行动,并同步最新的游戏状态
+    /// 执行盟友行动的协程
+    /// 调用 HomeGamePlayManager 为目标角色执行盟友行动,并同步最新的游戏状态
     /// </summary>
     /// <param name="actorName">目标角色名称</param>
     /// <returns>协程迭代器</returns>
-    private IEnumerator ExecuteHeroAction(string actorName)
+    private IEnumerator ExecuteAllyAction(string actorName)
     {
-        // 使用 HomeGamePlayManager 执行英雄行动
-        bool heroActionSuccess = false;
-        yield return HomeGamePlayManager.Instance.HeroAction(
+        // 使用 HomeGamePlayManager 执行盟友行动
+        bool allyActionSuccess = false;
+        yield return HomeGamePlayManager.Instance.AllyPlanAction(
             actorName,
             (success) =>
             {
-                heroActionSuccess = success;
+                allyActionSuccess = success;
             }
         );
 
         // 检查是否成功
-        if (!heroActionSuccess)
+        if (!allyActionSuccess)
         {
-            Debug.LogError("[HomeScene] HeroAction failed");
+            Debug.LogError("[HomeScene] AllyPlanAction failed");
             yield break;
         }
 
-        Debug.Log($"[HomeScene] Hero action completed successfully for {actorName}");
+        Debug.Log($"[HomeScene] Ally action completed successfully for {actorName}");
 
         // 更新角色显示(可能已变化)
         UpdateActorDisplay(_selectedActorName);
