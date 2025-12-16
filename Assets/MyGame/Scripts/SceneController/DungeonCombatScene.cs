@@ -12,10 +12,16 @@ public class DungeonCombatScene : MonoBehaviour
 
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText;
+    [SerializeField] private GameObject _allyAvatarContainer;  // 我方角色头像容器(左侧)
+    [SerializeField] private GameObject _enemyAvatarContainer; // 敌方角色头像容器(右侧)
+    [SerializeField] private GameObject _actorAvatarPrefab;    // 角色头像预制体
 
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
+        Debug.Assert(_allyAvatarContainer != null, "_allyAvatarContainer is null");
+        Debug.Assert(_enemyAvatarContainer != null, "_enemyAvatarContainer is null");
+        Debug.Assert(_actorAvatarPrefab != null, "_actorAvatarPrefab is null");
 
         // 检查是否已经连接服务器
         if (RootResp.Get() != null)
@@ -95,6 +101,7 @@ public class DungeonCombatScene : MonoBehaviour
         if (success)
         {
             yield return RefreshDungeonStateDisplay();
+            DisplayActorAvatars();
         }
     }
 
@@ -147,12 +154,20 @@ public class DungeonCombatScene : MonoBehaviour
         // 检查是否有战斗完成事件
         if (sessionMessages != null && DisplayCombatCompleteResult(sessionMessages))
         {
+
+            yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+
+            UpdateActorAvatarsDeathState();
+
             // 已经显示战斗完成结果，直接返回，不要再显示手牌信息！
             yield break;
         }
 
         // 刷新角色数据并显示手牌信息
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+
+        // 更新角色头像的死亡状态
+        UpdateActorAvatarsDeathState();
 
         // 显示所有角色的手牌信息
         DisplayAllActorsHands();
@@ -243,6 +258,9 @@ public class DungeonCombatScene : MonoBehaviour
         // 刷新地下城和角色数据
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
+        // 更新角色头像的死亡状态
+        UpdateActorAvatarsDeathState();
+
         // 获取最新的地下城回合信息
         Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
         if (round == null)
@@ -322,6 +340,9 @@ public class DungeonCombatScene : MonoBehaviour
     {
         // 从服务器刷新地下城和角色数据
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+
+        // 更新角色头像的死亡状态
+        UpdateActorAvatarsDeathState();
 
         // 获取当前角色所在场景及该场景中的所有角色
         var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
@@ -434,6 +455,204 @@ public class DungeonCombatScene : MonoBehaviour
         {
             yield return new WaitForSeconds(0);
             SceneManager.LoadScene(_preScene);
+        }
+    }
+
+    /// <summary>
+    /// 显示所有角色的头像，根据阵营分别显示在左右两侧
+    /// 遍历当前场景中的所有角色，根据是否拥有AllyComponent或EnemyComponent
+    /// 将角色头像实例化到对应的容器中(Ally显示在左侧，Enemy显示在右侧)
+    /// </summary>
+    private void DisplayActorAvatars()
+    {
+        if (_allyAvatarContainer == null || _enemyAvatarContainer == null || _actorAvatarPrefab == null)
+        {
+            Debug.LogWarning("Avatar containers or prefab not set, skipping avatar display");
+            return;
+        }
+
+        // 清空现有的头像
+        ClearAvatarContainers();
+
+        // 获取当前角色所在场景名称
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        if (string.IsNullOrEmpty(stageName))
+        {
+            Debug.LogWarning("Current actor's stage name is empty, cannot display avatars");
+            return;
+        }
+
+        // 获取该场景中的所有角色
+        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        if (actorsInStage == null || actorsInStage.Count == 0)
+        {
+            Debug.LogWarning($"No actors found in stage: {stageName}");
+            return;
+        }
+
+        // 遍历角色并根据阵营分类显示
+        foreach (var actorName in actorsInStage)
+        {
+            var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
+            if (actorEntity == null)
+            {
+                Debug.LogWarning($"Actor entity not found for: {actorName}");
+                continue;
+            }
+
+            // 检查角色是Ally还是Enemy
+            var allyComponent = GameUtils.GetComponent<AllyComponent>(actorEntity);
+            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntity);
+
+            GameObject targetContainer = null;
+            if (allyComponent != null)
+            {
+                targetContainer = _allyAvatarContainer;
+            }
+            else if (enemyComponent != null)
+            {
+                targetContainer = _enemyAvatarContainer;
+            }
+            else
+            {
+                Debug.LogWarning($"Actor {actorName} has neither AllyComponent nor EnemyComponent");
+                continue;
+            }
+
+            // 实例化头像预制体
+            CreateActorAvatar(actorName, targetContainer);
+        }
+
+        Debug.Log($"Displayed avatars for {actorsInStage.Count} actors in stage: {stageName}");
+    }
+
+    /// <summary>
+    /// 创建单个角色的头像UI
+    /// 在指定容器中实例化头像预制体，并设置角色信息
+    /// </summary>
+    /// <param name="actorName">角色名称</param>
+    /// <param name="container">头像容器</param>
+    private void CreateActorAvatar(string actorName, GameObject container)
+    {
+        if (container == null || _actorAvatarPrefab == null)
+        {
+            return;
+        }
+
+        // 实例化头像预制体
+        GameObject avatarObj = Instantiate(_actorAvatarPrefab, container.transform);
+        
+        // 尝试获取ActorMiniIcon组件
+        ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
+        if (miniIcon != null)
+        {
+            miniIcon.SetActor(actorName);
+            
+            // 检查角色是否死亡，并设置死亡状态
+            bool isDead = IsActorDead(actorName);
+            miniIcon.SetDeathState(isDead);
+        }
+        else
+        {
+            Debug.LogWarning($"ActorMiniIcon component not found on avatar prefab for actor: {actorName}");
+        }
+    }
+
+    /// <summary>
+    /// 清空两个头像容器中的所有子对象
+    /// </summary>
+    private void ClearAvatarContainers()
+    {
+        if (_allyAvatarContainer != null)
+        {
+            foreach (Transform child in _allyAvatarContainer.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        if (_enemyAvatarContainer != null)
+        {
+            foreach (Transform child in _enemyAvatarContainer.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 检测角色是否死亡
+    /// 通过检查CombatStatsComponent中的hp是否为0来判断
+    /// </summary>
+    /// <param name="actorName">角色名称</param>
+    /// <returns>是否死亡</returns>
+    private bool IsActorDead(string actorName)
+    {
+        var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
+        if (actorEntity == null)
+        {
+            return false;
+        }
+
+        var combatStats = GameUtils.GetComponent<CombatStatsComponent>(actorEntity);
+        if (combatStats == null)
+        {
+            return false;
+        }
+
+        // 检查hp是否为0或负数
+        return combatStats.stats.hp <= 0;
+    }
+
+    /// <summary>
+    /// 更新所有已显示的角色头像的死亡状态
+    /// 在战斗过程中调用，用于刷新角色的死亡状态显示
+    /// </summary>
+    private void UpdateActorAvatarsDeathState()
+    {
+        // 更新盟友容器中的头像
+        if (_allyAvatarContainer != null)
+        {
+            UpdateContainerAvatarsDeathState(_allyAvatarContainer);
+        }
+
+        // 更新敌人容器中的头像
+        if (_enemyAvatarContainer != null)
+        {
+            UpdateContainerAvatarsDeathState(_enemyAvatarContainer);
+        }
+    }
+
+    /// <summary>
+    /// 更新指定容器中所有头像的死亡状态
+    /// </summary>
+    /// <param name="container">头像容器</param>
+    private void UpdateContainerAvatarsDeathState(GameObject container)
+    {
+        if (container == null)
+        {
+            return;
+        }
+
+        foreach (Transform child in container.transform)
+        {
+            ActorMiniIcon miniIcon = child.GetComponent<ActorMiniIcon>();
+            if (miniIcon != null)
+            {
+                // 从头像的名字文本中获取角色名
+                // 注意：这里假设我们可以通过某种方式获取到角色名
+                // 如果 ActorMiniIcon 没有存储角色名，需要添加一个字段
+                TMP_Text nameText = miniIcon.GetComponentInChildren<TMP_Text>();
+                if (nameText != null)
+                {
+                    string actorName = nameText.text;
+                    if (!string.IsNullOrEmpty(actorName))
+                    {
+                        bool isDead = IsActorDead(actorName);
+                        miniIcon.SetDeathState(isDead);
+                    }
+                }
+            }
         }
     }
 }

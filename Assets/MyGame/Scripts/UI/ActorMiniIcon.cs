@@ -11,6 +11,7 @@ public class ActorMiniIcon : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private Image _actorImage;          // 角色头像图片
     [SerializeField] private TMP_Text _actorNameText;    // 角色名称文本
+    [SerializeField] private GameObject _deathOverlay;    // 死亡覆盖标记（例如骷髅图标或X标记）
 
     /// <summary>
     /// 设置角色图标的显示内容
@@ -71,5 +72,29 @@ public class ActorMiniIcon : MonoBehaviour
         }
         
         gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 设置角色的死亡状态显示
+    /// </summary>
+    /// <param name="isDead">是否死亡</param>
+    public void SetDeathState(bool isDead)
+    {
+        if (_deathOverlay != null)
+        {
+            _deathOverlay.SetActive(isDead);
+        }
+
+        // 可选：死亡时将角色图片变灰
+        if (_actorImage != null)
+        {
+            _actorImage.color = isDead ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
+        }
+
+        // 可选：死亡时将名字变红
+        if (_actorNameText != null)
+        {
+            _actorNameText.color = isDead ? Color.red : Color.black;
+        }
     }
 }
