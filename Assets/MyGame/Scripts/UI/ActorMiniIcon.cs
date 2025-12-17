@@ -24,7 +24,7 @@ public class ActorMiniIcon : MonoBehaviour
     {
         Debug.Assert(_actorImage != null, "_actorImage is null");
         Debug.Assert(_actorNameText != null, "_actorNameText is null");
-        Debug.Assert(_deathOverlay != null, "_deathOverlay is null");
+        // _deathOverlay is optional
     }
 
     /// <summary>
@@ -64,18 +64,21 @@ public class ActorMiniIcon : MonoBehaviour
             Debug.LogWarning($"Actor sprite not found for: {actorName}");
         }
 
-        // 检测并设置死亡状态
-        bool isDead = false;
-        var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
-        if (actorEntity != null)
+        // 检测并设置死亡状态（仅在配置了_deathOverlay时）
+        if (_deathOverlay != null)
         {
-            var deathComponent = GameUtils.GetComponent<DeathComponent>(actorEntity);
-            isDead = deathComponent != null;
-        }
+            bool isDead = false;
+            var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
+            if (actorEntity != null)
+            {
+                var deathComponent = GameUtils.GetComponent<DeathComponent>(actorEntity);
+                isDead = deathComponent != null;
+            }
 
-        // 应用死亡状态UI效果
-        _deathOverlay.SetActive(isDead);
-        _actorImage.color = isDead ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
-        _actorNameText.color = isDead ? Color.red : Color.black;
+            // 应用死亡状态UI效果
+            _deathOverlay.SetActive(isDead);
+            _actorImage.color = isDead ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
+            _actorNameText.color = isDead ? Color.red : Color.black;
+        }
     }
 }
