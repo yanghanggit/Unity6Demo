@@ -84,6 +84,7 @@ public class MainScene2 : MonoBehaviour
         Debug.Assert(_campActorIconsContainer != null, "_campActorIconsContainer is null");
         Debug.Assert(_restaurantActorIconsContainer != null, "_restaurantActorIconsContainer is null");
         Debug.Assert(_actorMiniIconPrefab != null, "_actorMiniIconPrefab is null");
+        Debug.Assert(_actorMiniIconPrefab.GetComponent<ActorMiniIcon>() != null, "ActorMiniIcon component not found on _actorMiniIconPrefab");
 
         // 设置头像点击回调
         _playerInfoBar.GetComponent<PlayerInfoBar>().OnHeadIconClickedCallback += OnHeadIconClicked;
@@ -412,18 +413,19 @@ public class MainScene2 : MonoBehaviour
             return;
         }
 
+        // 验证角色名称
+        if (string.IsNullOrEmpty(actorName))
+        {
+            Debug.LogWarning("Cannot create actor icon with empty actor name");
+            return;
+        }
+
         // 实例化图标
         GameObject iconObj = Instantiate(_actorMiniIconPrefab, container.transform);
         ActorMiniIcon icon = iconObj.GetComponent<ActorMiniIcon>();
         
-        if (icon != null)
-        {
-            icon.BindActor(actorName);
-        }
-        else
-        {
-            Debug.LogWarning($"ActorMiniIcon component not found on prefab for actor: {actorName}");
-        }
+        iconObj.SetActive(true);
+        icon.BindActor(actorName);
     }
 
     /// <summary>
