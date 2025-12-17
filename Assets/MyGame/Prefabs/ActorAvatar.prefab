@@ -63,6 +63,7 @@ MonoBehaviour:
   _actorImage: {fileID: 6756011783545974541}
   _actorNameText: {fileID: 2541385535386928186}
   _deathOverlay: {fileID: 6749997501649079061}
+  enableDeathDetection: 1
 --- !u!114 &6756011783545974541
 MonoBehaviour:
   m_ObjectHideFlags: 0
