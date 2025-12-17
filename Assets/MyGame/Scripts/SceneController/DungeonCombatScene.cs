@@ -465,8 +465,6 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private void DisplayActorAvatars()
     {
-        // 清空现有的头像
-        ClearAvatarContainers();
 
         // 获取当前角色所在场景名称
         var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
@@ -540,22 +538,6 @@ public class DungeonCombatScene : MonoBehaviour
         else
         {
             Debug.LogWarning($"ActorMiniIcon component not found on avatar prefab for actor: {actorName}");
-        }
-    }
-
-    /// <summary>
-    /// 清空两个头像容器中的所有子对象
-    /// </summary>
-    private void ClearAvatarContainers()
-    {
-        foreach (Transform child in _allyAvatarContainer.transform)
-        {
-            Destroy(child.gameObject);
-        }
-
-        foreach (Transform child in _enemyAvatarContainer.transform)
-        {
-            Destroy(child.gameObject);
         }
     }
 
