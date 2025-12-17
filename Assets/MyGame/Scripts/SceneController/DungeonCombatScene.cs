@@ -512,33 +512,21 @@ public class DungeonCombatScene : MonoBehaviour
             }
 
             // 实例化头像预制体
-            CreateActorAvatar(actorName, targetContainer);
+            GameObject avatarObj = Instantiate(_actorAvatarPrefab, targetContainer.transform);
+            
+            // 尝试获取ActorMiniIcon组件并绑定角色（会自动检测并设置死亡状态）
+            ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
+            if (miniIcon != null)
+            {
+                miniIcon.BindActor(actorName);
+            }
+            else
+            {
+                Debug.LogWarning($"ActorMiniIcon component not found on avatar prefab for actor: {actorName}");
+            }
         }
 
         Debug.Log($"Displayed avatars for {actorsInStage.Count} actors in stage: {stageName}");
-    }
-
-    /// <summary>
-    /// 创建单个角色的头像UI
-    /// 在指定容器中实例化头像预制体，并设置角色信息
-    /// </summary>
-    /// <param name="actorName">角色名称</param>
-    /// <param name="container">头像容器</param>
-    private void CreateActorAvatar(string actorName, GameObject container)
-    {
-        // 实例化头像预制体
-        GameObject avatarObj = Instantiate(_actorAvatarPrefab, container.transform);
-        
-        // 尝试获取ActorMiniIcon组件并绑定角色（会自动检测并设置死亡状态）
-        ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
-        if (miniIcon != null)
-        {
-            miniIcon.BindActor(actorName);
-        }
-        else
-        {
-            Debug.LogWarning($"ActorMiniIcon component not found on avatar prefab for actor: {actorName}");
-        }
     }
 
     /// <summary>
