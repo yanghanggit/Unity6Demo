@@ -13,6 +13,13 @@ public class ActorMiniIcon : MonoBehaviour
     [SerializeField] private TMP_Text _actorNameText;    // 角色名称文本
     [SerializeField] private GameObject _deathOverlay;    // 死亡覆盖标记（例如骷髅图标或X标记）
 
+    void Start()
+    {
+        Debug.Assert(_actorImage != null, "_actorImage is null");
+        Debug.Assert(_actorNameText != null, "_actorNameText is null");
+        Debug.Assert(_deathOverlay != null, "_deathOverlay is null");
+    }
+
     /// <summary>
     /// 设置角色图标的显示内容
     /// </summary>
@@ -28,31 +35,25 @@ public class ActorMiniIcon : MonoBehaviour
         gameObject.SetActive(true);
 
         // 设置角色名称
-        if (_actorNameText != null)
-        {
-            _actorNameText.text = actorName;
-        }
+        _actorNameText.text = actorName;
 
         // 设置角色头像
-        if (_actorImage != null)
+        // 优先尝试加载头像素材（键值格式：角色名_头像）
+        var avatarSprite = TextureManager.Instance.GetSprite(actorName + "_头像");
+        
+        // 如果没有头像素材，降级使用全身图
+        if (avatarSprite == null)
         {
-            // 优先尝试加载头像素材（键值格式：角色名_头像）
-            var avatarSprite = TextureManager.Instance.GetSprite(actorName + "_头像");
-            
-            // 如果没有头像素材，降级使用全身图
-            if (avatarSprite == null)
-            {
-                avatarSprite = TextureManager.Instance.GetSprite(actorName);
-            }
+            avatarSprite = TextureManager.Instance.GetSprite(actorName);
+        }
 
-            if (avatarSprite != null)
-            {
-                _actorImage.sprite = avatarSprite;
-            }
-            else
-            {
-                Debug.LogWarning($"Actor sprite not found for: {actorName}");
-            }
+        if (avatarSprite != null)
+        {
+            _actorImage.sprite = avatarSprite;
+        }
+        else
+        {
+            Debug.LogWarning($"Actor sprite not found for: {actorName}");
         }
     }
 
@@ -61,16 +62,8 @@ public class ActorMiniIcon : MonoBehaviour
     /// </summary>
     public void Clear()
     {
-        if (_actorNameText != null)
-        {
-            _actorNameText.text = string.Empty;
-        }
-        
-        if (_actorImage != null)
-        {
-            _actorImage.sprite = null;
-        }
-        
+        _actorNameText.text = string.Empty;
+        _actorImage.sprite = null;
         gameObject.SetActive(false);
     }
 
@@ -80,21 +73,12 @@ public class ActorMiniIcon : MonoBehaviour
     /// <param name="isDead">是否死亡</param>
     public void SetDeathState(bool isDead)
     {
-        if (_deathOverlay != null)
-        {
-            _deathOverlay.SetActive(isDead);
-        }
+        _deathOverlay.SetActive(isDead);
 
         // 可选：死亡时将角色图片变灰
-        if (_actorImage != null)
-        {
-            _actorImage.color = isDead ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
-        }
+        _actorImage.color = isDead ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
 
         // 可选：死亡时将名字变红
-        if (_actorNameText != null)
-        {
-            _actorNameText.color = isDead ? Color.red : Color.black;
-        }
+        _actorNameText.color = isDead ? Color.red : Color.black;
     }
 }
