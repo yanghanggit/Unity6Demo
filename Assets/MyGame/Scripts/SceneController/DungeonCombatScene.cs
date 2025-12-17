@@ -465,12 +465,6 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private void DisplayActorAvatars()
     {
-        if (_allyAvatarContainer == null || _enemyAvatarContainer == null || _actorAvatarPrefab == null)
-        {
-            Debug.LogWarning("Avatar containers or prefab not set, skipping avatar display");
-            return;
-        }
-
         // 清空现有的头像
         ClearAvatarContainers();
 
@@ -534,11 +528,6 @@ public class DungeonCombatScene : MonoBehaviour
     /// <param name="container">头像容器</param>
     private void CreateActorAvatar(string actorName, GameObject container)
     {
-        if (container == null || _actorAvatarPrefab == null)
-        {
-            return;
-        }
-
         // 实例化头像预制体
         GameObject avatarObj = Instantiate(_actorAvatarPrefab, container.transform);
         
@@ -549,7 +538,7 @@ public class DungeonCombatScene : MonoBehaviour
             miniIcon.SetActor(actorName);
             
             // 检查角色是否死亡，并设置死亡状态
-            bool isDead = IsActorDead(actorName);
+            bool isDead = GameUtils.IsActorDead(actorName);
             miniIcon.SetDeathState(isDead);
         }
         else
@@ -563,45 +552,15 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private void ClearAvatarContainers()
     {
-        if (_allyAvatarContainer != null)
+        foreach (Transform child in _allyAvatarContainer.transform)
         {
-            foreach (Transform child in _allyAvatarContainer.transform)
-            {
-                Destroy(child.gameObject);
-            }
+            Destroy(child.gameObject);
         }
 
-        if (_enemyAvatarContainer != null)
+        foreach (Transform child in _enemyAvatarContainer.transform)
         {
-            foreach (Transform child in _enemyAvatarContainer.transform)
-            {
-                Destroy(child.gameObject);
-            }
+            Destroy(child.gameObject);
         }
-    }
-
-    /// <summary>
-    /// 检测角色是否死亡
-    /// 通过检查CombatStatsComponent中的hp是否为0来判断
-    /// </summary>
-    /// <param name="actorName">角色名称</param>
-    /// <returns>是否死亡</returns>
-    private bool IsActorDead(string actorName)
-    {
-        var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
-        if (actorEntity == null)
-        {
-            return false;
-        }
-
-        var combatStats = GameUtils.GetComponent<CombatStatsComponent>(actorEntity);
-        if (combatStats == null)
-        {
-            return false;
-        }
-
-        // 检查hp是否为0或负数
-        return combatStats.stats.hp <= 0;
     }
 
     /// <summary>
@@ -611,16 +570,10 @@ public class DungeonCombatScene : MonoBehaviour
     private void UpdateActorAvatarsDeathState()
     {
         // 更新盟友容器中的头像
-        if (_allyAvatarContainer != null)
-        {
-            UpdateContainerAvatarsDeathState(_allyAvatarContainer);
-        }
+        UpdateContainerAvatarsDeathState(_allyAvatarContainer);
 
         // 更新敌人容器中的头像
-        if (_enemyAvatarContainer != null)
-        {
-            UpdateContainerAvatarsDeathState(_enemyAvatarContainer);
-        }
+        UpdateContainerAvatarsDeathState(_enemyAvatarContainer);
     }
 
     /// <summary>
@@ -629,11 +582,6 @@ public class DungeonCombatScene : MonoBehaviour
     /// <param name="container">头像容器</param>
     private void UpdateContainerAvatarsDeathState(GameObject container)
     {
-        if (container == null)
-        {
-            return;
-        }
-
         foreach (Transform child in container.transform)
         {
             ActorMiniIcon miniIcon = child.GetComponent<ActorMiniIcon>();
@@ -648,7 +596,7 @@ public class DungeonCombatScene : MonoBehaviour
                     string actorName = nameText.text;
                     if (!string.IsNullOrEmpty(actorName))
                     {
-                        bool isDead = IsActorDead(actorName);
+                        bool isDead = GameUtils.IsActorDead(actorName);
                         miniIcon.SetDeathState(isDead);
                     }
                 }

@@ -40,3 +40,12 @@ public sealed class CombatStatsComponent
     public CharacterStats stats = new();
     public List<StatusEffect> status_effects = new();
 }
+
+/// <summary>
+/// 死亡组件。
+/// </summary>
+[System.Serializable]
+public sealed class DeathComponent
+{
+    public string name = "";
+}
