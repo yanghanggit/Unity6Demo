@@ -13,6 +13,13 @@ public class ActorMiniIcon : MonoBehaviour
     [SerializeField] private TMP_Text _actorNameText;    // 角色名称文本
     [SerializeField] private GameObject _deathOverlay;    // 死亡覆盖标记（例如骷髅图标或X标记）
 
+    private string _actorName;  // 当前绑定的角色名称
+
+    /// <summary>
+    /// 获取当前绑定的角色名称
+    /// </summary>
+    public string ActorName => _actorName;
+
     void Start()
     {
         Debug.Assert(_actorImage != null, "_actorImage is null");
@@ -32,6 +39,7 @@ public class ActorMiniIcon : MonoBehaviour
             return;
         }
 
+        _actorName = actorName;
         gameObject.SetActive(true);
 
         // 设置角色名称
@@ -55,30 +63,19 @@ public class ActorMiniIcon : MonoBehaviour
         {
             Debug.LogWarning($"Actor sprite not found for: {actorName}");
         }
-    }
 
-    /// <summary>
-    /// 清空并隐藏图标
-    /// </summary>
-    public void Clear()
-    {
-        _actorNameText.text = string.Empty;
-        _actorImage.sprite = null;
-        gameObject.SetActive(false);
-    }
+        // 检测并设置死亡状态
+        bool isDead = false;
+        var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
+        if (actorEntity != null)
+        {
+            var deathComponent = GameUtils.GetComponent<DeathComponent>(actorEntity);
+            isDead = deathComponent != null;
+        }
 
-    /// <summary>
-    /// 设置角色的死亡状态显示
-    /// </summary>
-    /// <param name="isDead">是否死亡</param>
-    public void SetDeathState(bool isDead)
-    {
+        // 应用死亡状态UI效果
         _deathOverlay.SetActive(isDead);
-
-        // 可选：死亡时将角色图片变灰
         _actorImage.color = isDead ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
-
-        // 可选：死亡时将名字变红
         _actorNameText.color = isDead ? Color.red : Color.black;
     }
 }

@@ -239,22 +239,4 @@ public static partial class GameUtils
 
         return sb.ToString().TrimEnd();
     }
-
-    /// <summary>
-    /// 检测角色是否死亡
-    /// 通过检查角色是否拥有DeathComponent来判断
-    /// </summary>
-    /// <param name="actorName">角色名称</param>
-    /// <returns>如果角色已死亡则返回 true，否则返回 false</returns>
-    public static bool IsActorDead(string actorName)
-    {
-        var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
-        if (actorEntity == null)
-        {
-            return false;
-        }
-
-        var deathComponent = GetComponent<DeathComponent>(actorEntity);
-        return deathComponent != null;
-    }
 }

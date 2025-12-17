@@ -531,15 +531,11 @@ public class DungeonCombatScene : MonoBehaviour
         // 实例化头像预制体
         GameObject avatarObj = Instantiate(_actorAvatarPrefab, container.transform);
         
-        // 尝试获取ActorMiniIcon组件
+        // 尝试获取ActorMiniIcon组件并绑定角色（会自动检测并设置死亡状态）
         ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
         if (miniIcon != null)
         {
             miniIcon.BindActor(actorName);
-            
-            // 检查角色是否死亡，并设置死亡状态
-            bool isDead = GameUtils.IsActorDead(actorName);
-            miniIcon.SetDeathState(isDead);
         }
         else
         {
@@ -585,21 +581,10 @@ public class DungeonCombatScene : MonoBehaviour
         foreach (Transform child in container.transform)
         {
             ActorMiniIcon miniIcon = child.GetComponent<ActorMiniIcon>();
-            if (miniIcon != null)
+            if (miniIcon != null && !string.IsNullOrEmpty(miniIcon.ActorName))
             {
-                // 从头像的名字文本中获取角色名
-                // 注意：这里假设我们可以通过某种方式获取到角色名
-                // 如果 ActorMiniIcon 没有存储角色名，需要添加一个字段
-                TMP_Text nameText = miniIcon.GetComponentInChildren<TMP_Text>();
-                if (nameText != null)
-                {
-                    string actorName = nameText.text;
-                    if (!string.IsNullOrEmpty(actorName))
-                    {
-                        bool isDead = GameUtils.IsActorDead(actorName);
-                        miniIcon.SetDeathState(isDead);
-                    }
-                }
+                // 重新绑定角色以刷新死亡状态
+                miniIcon.BindActor(miniIcon.ActorName);
             }
         }
     }
