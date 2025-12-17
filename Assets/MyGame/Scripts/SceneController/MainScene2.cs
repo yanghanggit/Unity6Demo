@@ -418,7 +418,7 @@ public class MainScene2 : MonoBehaviour
         
         if (icon != null)
         {
-            icon.SetActor(actorName);
+            icon.BindActor(actorName);
         }
         else
         {

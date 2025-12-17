@@ -61,6 +61,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActorMiniIcon
   _actorImage: {fileID: 6756011783545974541}
   _actorNameText: {fileID: 2541385535386928186}
+  _deathOverlay: {fileID: 0}
 --- !u!114 &6756011783545974541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,7 +127,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 98, y: 98}
+  m_SizeDelta: {x: 90, y: 90}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5808962141838938228
 CanvasRenderer:

@@ -21,10 +21,10 @@ public class ActorMiniIcon : MonoBehaviour
     }
 
     /// <summary>
-    /// 设置角色图标的显示内容
+    /// 绑定角色图标的显示内容
     /// </summary>
     /// <param name="actorName">角色名称</param>
-    public void SetActor(string actorName)
+    public void BindActor(string actorName)
     {
         if (string.IsNullOrEmpty(actorName))
         {

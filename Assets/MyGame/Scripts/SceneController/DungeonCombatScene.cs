@@ -535,7 +535,7 @@ public class DungeonCombatScene : MonoBehaviour
         ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
         if (miniIcon != null)
         {
-            miniIcon.SetActor(actorName);
+            miniIcon.BindActor(actorName);
             
             // 检查角色是否死亡，并设置死亡状态
             bool isDead = GameUtils.IsActorDead(actorName);
