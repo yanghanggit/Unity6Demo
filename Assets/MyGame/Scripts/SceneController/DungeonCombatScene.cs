@@ -471,25 +471,31 @@ public class DungeonCombatScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 获取指定场景中符合阵营条件的角色名称列表
+    /// 获取当前场景中的所有角色实体列表
     /// </summary>
-    /// <param name="stageName">场景名称</param>
-    /// <param name="isAlly">是否获取盟友（true为盟友，false为敌人）</param>
-    /// <returns>符合条件的角色名称列表</returns>
-    private List<string> GetContainerActorNames(string stageName, bool isAlly)
+    /// <returns>当前场景中的所有角色实体列表</returns>
+    private List<EntitySerialization> GetStageActors()
     {
-        var actorNames = new List<string>();
+        var actorEntities = new List<EntitySerialization>();
         
-        // 获取该场景中的所有角色
-        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
-        if (actorsInStage == null || actorsInStage.Count == 0)
+        // 获取当前角色所在场景名称
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        if (string.IsNullOrEmpty(stageName))
+        {
+            Debug.LogWarning("Current actor's stage name is empty, cannot get actor names");
+            return actorEntities;
+        }
+        
+        // 获取该场景中的所有角色名称
+        var actorNames = GameContext.Instance.GetActorsInStage(stageName);
+        if (actorNames == null || actorNames.Count == 0)
         {
             Debug.LogWarning($"No actors found in stage: {stageName}");
-            return actorNames;
+            return actorEntities;
         }
 
-        // 遍历角色并根据阵营筛选
-        foreach (var actorName in actorsInStage)
+        // 获取每个角色的实体
+        foreach (var actorName in actorNames)
         {
             var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
             if (actorEntity == null)
@@ -497,20 +503,10 @@ public class DungeonCombatScene : MonoBehaviour
                 Debug.LogWarning($"Actor entity not found for: {actorName}");
                 continue;
             }
-
-            // 检查角色是Ally还是Enemy
-            var allyComponent = GameUtils.GetComponent<AllyComponent>(actorEntity);
-            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntity);
-
-            // 根据类型筛选角色
-            bool shouldInclude = (isAlly && allyComponent != null) || (!isAlly && enemyComponent != null);
-            if (shouldInclude)
-            {
-                actorNames.Add(actorName);
-            }
+            actorEntities.Add(actorEntity);
         }
 
-        return actorNames;
+        return actorEntities;
     }
 
     /// <summary>
@@ -520,30 +516,27 @@ public class DungeonCombatScene : MonoBehaviour
     /// <param name="isAlly">是否为盟友容器（true为盟友，false为敌人）</param>
     private void CreateContainerActorAvatars(GameObject container, bool isAlly)
     {
-        // 获取当前角色所在场景名称
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
-        if (string.IsNullOrEmpty(stageName))
-        {
-            Debug.LogWarning("Current actor's stage name is empty, cannot create avatars");
-            return;
-        }
+        // 获取当前场景的所有角色实体
+        var allActors = GetStageActors();
 
-        // 获取符合阵营条件的角色名称列表
-        var actorNames = GetContainerActorNames(stageName, isAlly);
-
-        // 创建每个角色的头像
-        foreach (var actorName in actorNames)
+        // 创建每个符合阵营条件的角色的头像
+        foreach (var actorEntity in allActors)
         {
-            if (string.IsNullOrEmpty(actorName))
+            // 检查角色阵营并筛选
+            var allyComponent = GameUtils.GetComponent<AllyComponent>(actorEntity);
+            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntity);
+            bool shouldInclude = (isAlly && allyComponent != null) || (!isAlly && enemyComponent != null);
+            
+            if (!shouldInclude)
             {
-                Debug.LogWarning("Cannot create actor avatar with empty actor name");
                 continue;
             }
 
+            // 创建头像
             GameObject avatarObj = Instantiate(_actorAvatarPrefab, container.transform);
             ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
             avatarObj.SetActive(true);
-            miniIcon.BindActor(actorName);
+            miniIcon.BindActor(actorEntity.name);
         }
     }
 
