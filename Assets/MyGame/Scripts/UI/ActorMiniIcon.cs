@@ -45,7 +45,7 @@ public class ActorMiniIcon : MonoBehaviour
         _actorName = actorName;
 
         // 设置角色名称
-        _actorNameText.text = actorName;
+        _actorNameText.text = GameUtils.GetDisplayName(actorName);
 
         // 设置角色头像
         // 优先尝试加载头像素材（键值格式：角色名_头像）

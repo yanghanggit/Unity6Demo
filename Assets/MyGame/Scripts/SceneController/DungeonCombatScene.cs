@@ -324,7 +324,7 @@ public class DungeonCombatScene : MonoBehaviour
         var text = string.Empty;
         foreach (var evt in completeEvents)
         {
-            text += $"Actor: {evt.actor}\nSummary: \n{evt.summary}\n\n";
+            text += $"Actor: {GameUtils.GetDisplayName(evt.actor)}\nSummary: \n{evt.summary}\n\n";
         }
 
         _mainText.text = "战斗完成！\n\n" + text;
@@ -501,6 +501,9 @@ public class DungeonCombatScene : MonoBehaviour
 
         // 创建并显示敌人头像
         PopulateContainerWithAvatars(_enemyAvatarContainer, enemyEntities);
+        
+        // 刷新所有头像的死亡状态显示
+        RefreshActorAvatars();
     }
 
     /// <summary>
@@ -525,11 +528,10 @@ public class DungeonCombatScene : MonoBehaviour
             GameObject avatarObj = Instantiate(_actorAvatarPrefab, container.transform);
             avatarObj.name = actorEntity.name;
 
-            ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
-            Debug.Assert(miniIcon != null, "miniIcon is null in avatar prefab");
+            // ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
+            // Debug.Assert(miniIcon != null, "miniIcon is null in avatar prefab");
 
-            avatarObj.SetActive(true);
-            miniIcon.BindActor(actorEntity.name);
+            // miniIcon.BindActor(actorEntity.name);
         }
     }
 
@@ -555,17 +557,10 @@ public class DungeonCombatScene : MonoBehaviour
         foreach (Transform child in container.transform)
         {
             ActorMiniIcon miniIcon = child.GetComponent<ActorMiniIcon>();
-            if (!string.IsNullOrEmpty(miniIcon.ActorName))
-            {
-                // 重新绑定角色以刷新死亡状态
-                child.gameObject.SetActive(true);
-                miniIcon.BindActor(miniIcon.ActorName);
-            }
-            else
-            {
-                // 如果没有绑定角色名称，隐藏该图标
-                child.gameObject.SetActive(false);
-            }
+
+            // 重新绑定角色以刷新死亡状态
+            miniIcon.BindActor(child.gameObject.name);
+
         }
     }
 }

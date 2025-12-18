@@ -6,6 +6,26 @@ using Newtonsoft.Json.Linq;
 public static partial class GameUtils
 {
     /// <summary>
+    /// 从完整的角色名称中提取显示名称（最后一部分）
+    /// 例如："角色.战士.卡恩" -> "卡恩"
+    /// </summary>
+    /// <param name="fullName">完整的角色名称</param>
+    /// <returns>提取的显示名称，如果输入为空则返回空字符串</returns>
+    public static string GetDisplayName(string fullName)
+    {
+        if (string.IsNullOrEmpty(fullName))
+            return string.Empty;
+
+        int lastDotIndex = fullName.LastIndexOf('.');
+        if (lastDotIndex >= 0 && lastDotIndex < fullName.Length - 1)
+        {
+            return fullName.Substring(lastDotIndex + 1);
+        }
+
+        return fullName;
+    }
+
+    /// <summary>
     /// 从实体序列化数据中获取指定类型的组件
     /// </summary>
     /// <typeparam name="T">组件类型</typeparam>

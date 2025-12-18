@@ -46,7 +46,7 @@ public class PlayerInfoBar : MonoBehaviour
         // 设置文本
         var playerName = GameContext.Instance.UserName;
         var actorName = GameContext.Instance.ActorName;
-        _playerInfoText.text = $"{playerName}\n{actorName}";
+        _playerInfoText.text = $"{playerName}\n{GameUtils.GetDisplayName(actorName)}";
     }
 
     public void OnHeadIconClicked()

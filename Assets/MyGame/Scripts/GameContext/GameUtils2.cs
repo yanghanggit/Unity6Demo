@@ -40,7 +40,8 @@ public static partial class GameUtils
         var sb = new System.Text.StringBuilder();
         foreach (var kvp in mapping)
         {
-            sb.AppendLine($"{kvp.Key}: {string.Join(", ", kvp.Value)}");
+            var displayNames = kvp.Value.Select(GetDisplayName);
+            sb.AppendLine($"{kvp.Key}: {string.Join(", ", displayNames)}");
         }
         return sb.ToString().TrimEnd();
     }
@@ -64,7 +65,7 @@ public static partial class GameUtils
         {
             var lastRound = lastCombat.rounds[lastCombat.rounds.Count - 1];
             sb.AppendLine($"Round: {lastRound.tag}");
-            sb.AppendLine($"Action Order: {string.Join(" --> ", lastRound.action_order)}");
+            sb.AppendLine($"Action Order: {string.Join(" --> ", lastRound.action_order.Select(GetDisplayName))}");
         }
 
         return sb.ToString().TrimEnd();
@@ -82,7 +83,7 @@ public static partial class GameUtils
             return string.Empty;
 
         var stats = combatStatsComponent.stats;
-        var text = $"{combatStatsComponent.name} = LV:{stats.level}, HP:{stats.hp}/{stats.max_hp}," +
+        var text = $"{GetDisplayName(combatStatsComponent.name)} = LV:{stats.level}, HP:{stats.hp}/{stats.max_hp}," +
                    $" Strength:{stats.strength}," +
                    $" Dexterity:{stats.dexterity}," +
                    $" Wisdom:{stats.wisdom}," +
@@ -120,7 +121,7 @@ public static partial class GameUtils
         if (handComponent == null || handComponent.cards.Count == 0)
             return string.Empty;
 
-        var text = $"{handComponent.name} Hand: \n";
+        var text = $"{GetDisplayName(handComponent.name)} Hand: \n";
 
         for (int i = 0; i < handComponent.cards.Count; i++)
         {
@@ -202,7 +203,7 @@ public static partial class GameUtils
         for (int i = 0; i < dungeon.stages.Count; i++)
         {
             dungeonOverviewText += "第" + (i + 1) + "关 = " + dungeon.stages[i].name + "\n";
-            dungeonOverviewText += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => a.name)) + "\n";
+            dungeonOverviewText += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => GetDisplayName(a.name))) + "\n";
         }
 
         return dungeonOverviewText;
@@ -224,7 +225,7 @@ public static partial class GameUtils
 
         if (round.action_order != null && round.action_order.Count > 0)
         {
-            sb.AppendLine($"Action Order: {string.Join(" -> ", round.action_order)}");
+            sb.AppendLine($"Action Order: {string.Join(" -> ", round.action_order.Select(GetDisplayName))}");
         }
 
         if (!string.IsNullOrEmpty(round.combat_log))
