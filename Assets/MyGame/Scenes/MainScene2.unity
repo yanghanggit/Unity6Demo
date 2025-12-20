@@ -992,7 +992,7 @@ MonoBehaviour:
   _playerInfoDetails: {fileID: 1318025743}
   _campActorIconsContainer: {fileID: 1059999693}
   _restaurantActorIconsContainer: {fileID: 100838}
-  _actorMiniIconPrefab: {fileID: 3187419097204350532, guid: aa3136dccd1601149b3ef3b7b7a814ea,
+  _actorAvatarPrefab: {fileID: 3187419097204350532, guid: fe839bde562ef1848b67dfa6f1684460,
     type: 3}
 --- !u!1 &524838950
 GameObject:

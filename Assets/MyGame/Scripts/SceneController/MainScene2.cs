@@ -1,8 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-// using Newtonsoft.Json;
-// using System;
 
 /// <summary>
 /// 主场景控制器(MainScene2)
@@ -69,7 +67,7 @@ public class MainScene2 : MonoBehaviour
     /// <summary>
     /// 角色迷你图标预制件
     /// </summary>
-    [SerializeField] private GameObject _actorMiniIconPrefab;
+    [SerializeField] private GameObject _actorAvatarPrefab;
     /// <summary>
     /// 场景启动初始化方法
     /// 验证所有必需的组件引用,注册UI事件回调,刷新游戏状态
@@ -83,8 +81,8 @@ public class MainScene2 : MonoBehaviour
         Debug.Assert(_restaurantSceneConfig != null, "_restaurantSceneConfig is null");
         Debug.Assert(_campActorIconsContainer != null, "_campActorIconsContainer is null");
         Debug.Assert(_restaurantActorIconsContainer != null, "_restaurantActorIconsContainer is null");
-        Debug.Assert(_actorMiniIconPrefab != null, "_actorMiniIconPrefab is null");
-        Debug.Assert(_actorMiniIconPrefab.GetComponent<ActorMiniIcon>() != null, "ActorMiniIcon component not found on _actorMiniIconPrefab");
+        Debug.Assert(_actorAvatarPrefab != null, "_actorMiniIconPrefab is null");
+        Debug.Assert(_actorAvatarPrefab.GetComponent<ActorMiniIcon>() != null, "ActorMiniIcon component not found on _actorMiniIconPrefab");
 
         // 设置头像点击回调
         _playerInfoBar.GetComponent<PlayerInfoBar>().OnHeadIconClickedCallback += OnHeadIconClicked;
@@ -240,41 +238,9 @@ public class MainScene2 : MonoBehaviour
         // 从服务器同步最新的全局状态(包括映射和所有角色数据)
         yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
 
-        // 获取玩家角色的实体序列化数据用于验证和调试
-        // var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
-        // if (playerActorEntitySerialization == null)
-        // {
-        //     Debug.LogError($"Player actor entity serialization not found for actor: {GameContext.Instance.ActorName}");
-        //     yield break;
-        // }
-
-        // try
-        // {
-        //     // 将玩家角色实体数据序列化为 JSON 并输出到日志(用于调试)
-        //     string jsonString = JsonConvert.SerializeObject(playerActorEntitySerialization, Formatting.Indented);
-        //     Debug.Log($"Actor[{GameContext.Instance.ActorName}] JSON:\n{jsonString}");
-        // }
-        // catch (Exception ex)
-        // {
-        //     Debug.LogError($"Failed to serialize Actor[{GameContext.Instance.ActorName}] to JSON: {ex.Message}");
-        // }
-
         // 刷新角色位置显示
         RefreshActorLocations();
     }
-
-    /// <summary>
-    /// 验证当前玩家角色是否成功执行了场景转换事件
-    /// 通过检查最近的代理事件历史,确认当前玩家是否在切换场景的角色集合中
-    /// </summary>
-    /// <returns>如果当前玩家角色执行了场景转换返回 true,否则返回 false</returns>
-    // private bool ValidateTransStageEvent()
-    // {
-    //     var lastAgentEventsHistory = GameContext.Instance.LastAgentEventsHistory;
-    //     var actorsWithTransStageEvents = GameUtils.GetActorsWithEventType<TransStageEvent>(lastAgentEventsHistory);
-    //     //Debug.Log($"Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
-    //     return actorsWithTransStageEvents.Contains(GameContext.Instance.ActorName);
-    // }
 
     /// <summary>
     /// 推进游戏状态的协程
@@ -344,11 +310,6 @@ public class MainScene2 : MonoBehaviour
 
             // 刷新全局状态以确保数据同步
             yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-
-            // 验证场景转换事件
-            // var isTransStageEventValid = ValidateTransStageEvent();
-            // Debug.Assert(isTransStageEventValid, "ValidateTransStageEvent failed");
-            // Debug.Log($"[MainScene2] TransitionToScene to {sceneConfig.StageName} completed");
         }
         else
         {
@@ -408,11 +369,6 @@ public class MainScene2 : MonoBehaviour
     /// <param name="container">图标容器</param>
     private void CreateActorIcon(string actorName, GameObject container)
     {
-        if (container == null || _actorMiniIconPrefab == null)
-        {
-            return;
-        }
-
         // 验证角色名称
         if (string.IsNullOrEmpty(actorName))
         {
@@ -421,11 +377,8 @@ public class MainScene2 : MonoBehaviour
         }
 
         // 实例化图标
-        GameObject iconObj = Instantiate(_actorMiniIconPrefab, container.transform);
-        ActorMiniIcon icon = iconObj.GetComponent<ActorMiniIcon>();
-        
-        iconObj.SetActive(true);
-        icon.BindActor(actorName);
+        GameObject iconInstance = Instantiate(_actorAvatarPrefab, container.transform);
+        iconInstance.name = actorName;
     }
 
     /// <summary>
@@ -441,7 +394,8 @@ public class MainScene2 : MonoBehaviour
 
         // 销毁容器中的所有子对象
         foreach (Transform child in container.transform)
-        {            Destroy(child.gameObject);
+        {
+            Destroy(child.gameObject);
         }
     }
 }

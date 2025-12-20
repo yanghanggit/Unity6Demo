@@ -15,6 +15,7 @@ public class DungeonCombatScene : MonoBehaviour
     [SerializeField] private GameObject _allyAvatarContainer;  // 我方角色头像容器(左侧)
     [SerializeField] private GameObject _enemyAvatarContainer; // 敌方角色头像容器(右侧)
     [SerializeField] private GameObject _actorAvatarPrefab;    // 角色头像预制体
+    [SerializeField] private StringGameEvent _onActorAvatarsRefreshEvent; // 角色头像刷新事件
 
     void Start()
     {
@@ -22,6 +23,7 @@ public class DungeonCombatScene : MonoBehaviour
         Debug.Assert(_allyAvatarContainer != null, "_allyAvatarContainer is null");
         Debug.Assert(_enemyAvatarContainer != null, "_enemyAvatarContainer is null");
         Debug.Assert(_actorAvatarPrefab != null, "_actorAvatarPrefab is null");
+        Debug.Assert(_onActorAvatarsRefreshEvent != null, "_onActorAvatarsRefreshEvent is null");
 
         // 检查是否已经连接服务器
         if (RootResp.Get() != null)
@@ -152,8 +154,10 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 检查是否有战斗完成事件
-        if (sessionMessages != null && DisplayCombatCompleteResult(sessionMessages))
+        var combatCompleteEvents = GetCombatCompleteEvents(sessionMessages);
+        if (combatCompleteEvents.Count > 0)
         {
+            DisplayCombatCompleteEvents(combatCompleteEvents);
 
             yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
@@ -283,19 +287,19 @@ public class DungeonCombatScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 从会话消息中提取并显示战斗完成结果
-    /// 查找所有战斗完成事件并显示每个角色的战斗总结
+    /// 从会话消息中提取战斗完成事件
+    /// 查找并返回所有战斗完成事件的列表
     /// </summary>
     /// <param name="sessionMessages">会话消息列表</param>
-    /// <returns>是否成功找到并显示战斗完成事件</returns>
-    private bool DisplayCombatCompleteResult(List<SessionMessage> sessionMessages)
+    /// <returns>战斗完成事件列表，如果没有找到则返回空列表</returns>
+    private List<CombatCompleteEvent> GetCombatCompleteEvents(List<SessionMessage> sessionMessages)
     {
+        var completeEvents = new List<CombatCompleteEvent>();
+
         if (sessionMessages == null || sessionMessages.Count == 0)
         {
-            return false;
+            return completeEvents;
         }
-
-        var completeEvents = new List<CombatCompleteEvent>();
 
         foreach (var msg in sessionMessages)
         {
@@ -316,19 +320,29 @@ public class DungeonCombatScene : MonoBehaviour
             }
         }
 
-        if (completeEvents.Count == 0)
+        return completeEvents;
+    }
+
+    /// <summary>
+    /// 显示战斗完成事件结果
+    /// 格式化战斗完成事件列表并更新主文本显示
+    /// </summary>
+    /// <param name="events">战斗完成事件列表</param>
+    private void DisplayCombatCompleteEvents(List<CombatCompleteEvent> events)
+    {
+        if (events == null || events.Count == 0)
         {
-            return false;
+            Debug.LogWarning("No combat complete events to display");
+            return;
         }
 
         var text = string.Empty;
-        foreach (var evt in completeEvents)
+        foreach (var evt in events)
         {
             text += $"Actor: {GameUtils.GetDisplayName(evt.actor)}\nSummary: \n{evt.summary}\n\n";
         }
 
         _mainText.text = "战斗完成！\n\n" + text;
-        return true;
     }
 
 
@@ -501,7 +515,7 @@ public class DungeonCombatScene : MonoBehaviour
 
         // 创建并显示敌人头像
         PopulateContainerWithAvatars(_enemyAvatarContainer, enemyEntities);
-        
+
         // 刷新所有头像的死亡状态显示
         RefreshActorAvatars();
     }
@@ -525,13 +539,8 @@ public class DungeonCombatScene : MonoBehaviour
         foreach (var actorEntity in actorEntities)
         {
             // 创建头像
-            GameObject avatarObj = Instantiate(_actorAvatarPrefab, container.transform);
-            avatarObj.name = actorEntity.name;
-
-            // ActorMiniIcon miniIcon = avatarObj.GetComponent<ActorMiniIcon>();
-            // Debug.Assert(miniIcon != null, "miniIcon is null in avatar prefab");
-
-            // miniIcon.BindActor(actorEntity.name);
+            GameObject actorAvatarInstance = Instantiate(_actorAvatarPrefab, container.transform);
+            actorAvatarInstance.name = actorEntity.name;
         }
     }
 
@@ -541,27 +550,8 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private void RefreshActorAvatars()
     {
-        // 更新盟友容器中的头像
-        RefreshAvatarsInContainer(_allyAvatarContainer);
-
-        // 更新敌人容器中的头像
-        RefreshAvatarsInContainer(_enemyAvatarContainer);
-    }
-
-    /// <summary>
-    /// 更新指定容器中所有头像的死亡状态
-    /// </summary>
-    /// <param name="container">头像容器</param>
-    private void RefreshAvatarsInContainer(GameObject container)
-    {
-        foreach (Transform child in container.transform)
-        {
-            ActorMiniIcon miniIcon = child.GetComponent<ActorMiniIcon>();
-
-            // 重新绑定角色以刷新死亡状态
-            miniIcon.BindActor(child.gameObject.name);
-
-        }
+        // 获取当前场景的名字，给到
+        _onActorAvatarsRefreshEvent.Raise(SceneManager.GetActiveScene().name);
     }
 }
 

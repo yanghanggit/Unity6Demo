@@ -969,6 +969,8 @@ MonoBehaviour:
   _enemyAvatarContainer: {fileID: 1666979899}
   _actorAvatarPrefab: {fileID: 3187419097204350532, guid: fe839bde562ef1848b67dfa6f1684460,
     type: 3}
+  _onActorAvatarsRefreshEvent: {fileID: 11400000, guid: 24712b7f887c54a53b03aebdcfaae1cc,
+    type: 2}
 --- !u!1 &437181629
 GameObject:
   m_ObjectHideFlags: 0

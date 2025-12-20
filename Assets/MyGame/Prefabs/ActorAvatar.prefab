@@ -63,7 +63,8 @@ MonoBehaviour:
   _actorImage: {fileID: 6756011783545974541}
   _actorNameText: {fileID: 2541385535386928186}
   _deathOverlay: {fileID: 6749997501649079061}
-  enableDeathDetection: 1
+  _onActorAvatarsRefreshEvent: {fileID: 11400000, guid: 24712b7f887c54a53b03aebdcfaae1cc,
+    type: 2}
 --- !u!114 &6756011783545974541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -106,7 +107,7 @@ GameObject:
   - component: {fileID: 3086690540673896221}
   - component: {fileID: 4194635982175019285}
   m_Layer: 5
-  m_Name: Image (1)
+  m_Name: Death
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
