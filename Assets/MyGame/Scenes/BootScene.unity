@@ -482,6 +482,7 @@ GameObject:
   - component: {fileID: 399892901}
   - component: {fileID: 399892903}
   - component: {fileID: 399892904}
+  - component: {fileID: 399892905}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -520,6 +521,7 @@ MonoBehaviour:
   _nextSceneName: LoginScene
   _rootApi: {fileID: 399892903}
   _taskTriggerApi: {fileID: 399892904}
+  _tasksStatusApi: {fileID: 399892905}
   _loginButton: {fileID: 1202936521}
 --- !u!114 &399892903
 MonoBehaviour:
@@ -546,6 +548,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 871dff9bb95394267bfe1666d2585397, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TaskTriggerApi
+  requestTimeout: 30
+--- !u!114 &399892905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b4b41fbe39740799fa3830acf2686f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TasksStatusApi
   requestTimeout: 30
 --- !u!1 &524838950
 GameObject:

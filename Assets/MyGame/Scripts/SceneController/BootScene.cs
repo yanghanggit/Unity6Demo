@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class BootScene : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class BootScene : MonoBehaviour
     [Header("API Components")]
     [SerializeField] private RootApi _rootApi;
     [SerializeField] private TaskTriggerApi _taskTriggerApi;
+    [SerializeField] private TasksStatusApi _tasksStatusApi;
 
     [Header("UI Components")]
     [SerializeField] private Button _loginButton;
@@ -29,6 +31,7 @@ public class BootScene : MonoBehaviour
         Debug.Assert(!string.IsNullOrEmpty(_baseUrl), "_baseUrl is null");
         Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
         Debug.Assert(_taskTriggerApi != null, "_taskTriggerApi is null");
+        Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
         _loginButton.gameObject.SetActive(false);
         StartCoroutine(InitializeApiEndpoints());
@@ -107,6 +110,43 @@ public class BootScene : MonoBehaviour
 
         Debug.Assert(_taskTriggerApi.RespData != null, "TaskTriggerApi response data is null");
         Debug.Log($"Task triggered successfully. Task ID: {_taskTriggerApi.RespData.task_id}, Status: {_taskTriggerApi.RespData.status}");
+
+        //等待10秒
+        //yield return new WaitForSeconds(10.0f);
+
+        //调用 QueryTasksStatus 来获取 _taskTriggerApi.RespData.task_id 的状态
+        List<string> taskIds = new() { _taskTriggerApi.RespData.task_id };
+        yield return QueryTasksStatus(taskIds);
+    }
+
+    /// <summary>
+    /// 查询多个任务的执行状态
+    /// 调用任务状态查询端点，获取指定任务ID列表的当前状态信息
+    /// </summary>
+    /// <param name="taskIds">要查询的任务ID列表</param>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator QueryTasksStatus(List<string> taskIds)
+    {
+        string url = GameContext.Instance.TasksStatusUrl;
+        yield return _tasksStatusApi.Call(url, taskIds);
+
+        if (_tasksStatusApi.ReqResult == null)
+        {
+            Debug.LogError($"Failed to query task status from {url}: request result is null");
+            yield break;
+        }
+
+        if (!_tasksStatusApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"Failed to query task status from {url}: {_tasksStatusApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_tasksStatusApi.RespData != null, "TasksStatusApi response data is null");
+        foreach (var taskStatus in _tasksStatusApi.RespData.tasks)
+        {
+            Debug.Log($"Task ID: {taskStatus.task_id}, Status: {taskStatus.status}");
+        }
     }
 }
 

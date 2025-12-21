@@ -237,11 +237,17 @@ public class TaskTriggerResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [System.Serializable]
-public class TaskStatusResponse
+public class TaskStatusDetail
 {
     public string task_id = "";
     public string status = "";
     public string start_time = "";
     public string end_time = "";
     public string error = "";
+}
+
+[System.Serializable]
+public class TasksStatusResponse
+{
+    public List<TaskStatusDetail> tasks = new();
 }

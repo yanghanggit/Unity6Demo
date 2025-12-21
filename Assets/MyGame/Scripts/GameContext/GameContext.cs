@@ -282,14 +282,16 @@ public partial class GameContext
     }
 
     /// <summary>
-    /// 获取任务状态API的URL地址
-    /// 根据任务ID动态构建完整的URL
+    /// 获取任务状态API的URL地址模板
+    /// 返回包含 {task_id} 占位符的URL模板，需要调用者替换为实际的任务ID
     /// </summary>
-    /// <param name="taskId">任务ID</param>
-    /// <returns>包含任务ID的完整URL</returns>
-    public string GetTasksStatusUrl(string taskId)
+    public string TasksStatusUrl
     {
-        var baseUrl = RootResp.Get().endpoints["tasks_status"];
-        return baseUrl.Replace("{task_id}", taskId);
+        get
+        {
+            var baseUrl = RootResp.Get().endpoints["tasks_status"];
+            return baseUrl;
+        }
     }
+
 }
