@@ -269,4 +269,27 @@ public partial class GameContext
             return $"{baseUrl}{UserName}/{GameName}/since";
         }
     }
+
+    /// <summary>
+    /// 获取任务触发API的URL地址
+    /// </summary>
+    public string TasksTriggerUrl
+    {
+        get
+        {
+            return RootResp.Get().endpoints["tasks_trigger"];
+        }
+    }
+
+    /// <summary>
+    /// 获取任务状态API的URL地址
+    /// 根据任务ID动态构建完整的URL
+    /// </summary>
+    /// <param name="taskId">任务ID</param>
+    /// <returns>包含任务ID的完整URL</returns>
+    public string GetTasksStatusUrl(string taskId)
+    {
+        var baseUrl = RootResp.Get().endpoints["tasks_status"];
+        return baseUrl.Replace("{task_id}", taskId);
+    }
 }

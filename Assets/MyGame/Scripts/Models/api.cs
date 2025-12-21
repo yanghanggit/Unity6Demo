@@ -150,7 +150,7 @@ public class DungeonTransHomeResponse
 public class DungeonGamePlayUserInput
 {
     public string tag = "";
-    public Dictionary<string, string> data = new Dictionary<string, string>();
+    public Dictionary<string, string> data = new();
 }
 
 [System.Serializable]
@@ -158,13 +158,13 @@ public class DungeonGamePlayRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public DungeonGamePlayUserInput user_input = new DungeonGamePlayUserInput();
+    public DungeonGamePlayUserInput user_input = new();
 }
 
 [System.Serializable]
 public class DungeonGamePlayResponse
 {
-    public List<SessionMessage> session_messages = new List<SessionMessage>();
+    public List<SessionMessage> session_messages = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +176,7 @@ public class DungeonGamePlayResponse
 [System.Serializable]
 public class DungeonStateResponse
 {
-    public Dictionary<string, List<string>> mapping = new Dictionary<string, List<string>>();
+    public Dictionary<string, List<string>> mapping = new();
     public Dungeon dungeon = new Dungeon();
 }
 
@@ -189,7 +189,7 @@ public class DungeonStateResponse
 [System.Serializable]
 public class StagesStateResponse
 {
-    public Dictionary<string, List<string>> mapping = new Dictionary<string, List<string>>();
+    public Dictionary<string, List<string>> mapping = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +201,7 @@ public class StagesStateResponse
 [System.Serializable]
 public class EntitiesDetailsResponse
 {
-    public List<EntitySerialization> entities_serialization = new List<EntitySerialization>();
+    public List<EntitySerialization> entities_serialization = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,5 +213,35 @@ public class EntitiesDetailsResponse
 [System.Serializable]
 public class SessionMessageResponse
 {
-    public List<SessionMessage> session_messages = new List<SessionMessage>();
+    public List<SessionMessage> session_messages = new();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Task Trigger request/response classes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[System.Serializable]
+public class TaskTriggerResponse
+{
+    public string task_id = "";
+    public string status = "";
+    public string message = "";
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Task Status request/response classes
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[System.Serializable]
+public class TaskStatusResponse
+{
+    public string task_id = "";
+    public string status = "";
+    public string start_time = "";
+    public string end_time = "";
+    public string error = "";
 }

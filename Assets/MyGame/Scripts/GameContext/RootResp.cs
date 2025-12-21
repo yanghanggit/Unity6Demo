@@ -65,6 +65,11 @@ public static class RootResp
             // 场景转换相关端点
             Debug.Assert(endpoints.ContainsKey("home_trans_dungeon"), "endpoints does not contain home_trans_dungeon");
             Debug.Assert(endpoints.ContainsKey("dungeon_trans_home"), "endpoints does not contain dungeon_trans_home");
+
+            // 测试后台任务相关端点
+            Debug.Assert(endpoints.ContainsKey("tasks_trigger"), "endpoints does not contain tasks_trigger");
+            Debug.Assert(endpoints.ContainsKey("tasks_status"), "endpoints does not contain tasks_status");
+
         }
     }
 }

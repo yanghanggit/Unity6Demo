@@ -13,6 +13,7 @@ public class BootScene : MonoBehaviour
 
     [Header("API Components")]
     [SerializeField] private RootApi _rootApi;
+    [SerializeField] private TaskTriggerApi _taskTriggerApi;
 
     [Header("UI Components")]
     [SerializeField] private Button _loginButton;
@@ -27,6 +28,7 @@ public class BootScene : MonoBehaviour
         Debug.Assert(_loginButton != null, "_loginButton is null");
         Debug.Assert(!string.IsNullOrEmpty(_baseUrl), "_baseUrl is null");
         Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
+        Debug.Assert(_taskTriggerApi != null, "_taskTriggerApi is null");
 
         _loginButton.gameObject.SetActive(false);
         StartCoroutine(InitializeApiEndpoints());
@@ -39,6 +41,7 @@ public class BootScene : MonoBehaviour
     public void OnLoginButtonClick()
     {
         StartCoroutine(LoadLoginScene());
+        //StartCoroutine(TriggerTask());
     }
 
     /// <summary>
@@ -49,7 +52,7 @@ public class BootScene : MonoBehaviour
     private IEnumerator InitializeApiEndpoints()
     {
         yield return _rootApi.Call(_baseUrl);
-        
+
         if (_rootApi.ReqResult == null)
         {
             Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: request result is null");
@@ -78,6 +81,32 @@ public class BootScene : MonoBehaviour
     {
         yield return new WaitForSeconds(0.0f);
         SceneManager.LoadScene(_nextSceneName);
+    }
+
+    /// <summary>
+    /// 触发任务API调用
+    /// 调用任务触发端点，发起异步任务执行
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator TriggerTask()
+    {
+        string url = GameContext.Instance.TasksTriggerUrl;
+        yield return _taskTriggerApi.Call(url);
+
+        if (_taskTriggerApi.ReqResult == null)
+        {
+            Debug.LogError($"Failed to trigger task from {url}: request result is null");
+            yield break;
+        }
+
+        if (!_taskTriggerApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"Failed to trigger task from {url}: {_taskTriggerApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_taskTriggerApi.RespData != null, "TaskTriggerApi response data is null");
+        Debug.Log($"Task triggered successfully. Task ID: {_taskTriggerApi.RespData.task_id}, Status: {_taskTriggerApi.RespData.status}");
     }
 }
 
