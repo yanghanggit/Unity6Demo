@@ -1,0 +1,230 @@
+/* 根容器 */
+.root {
+    flex-grow: 1;
+    padding: 0;
+    background-color: rgb(56, 56, 56);
+}
+
+/* 头部 */
+.header {
+    padding: 10px;
+    background-color: rgb(50, 50, 50);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(35, 35, 35);
+}
+
+.title {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: rgb(210, 210, 210);
+    margin-bottom: 5px;
+}
+
+.status {
+    font-size: 11px;
+    color: rgb(150, 150, 150);
+}
+
+/* 主滚动区域 */
+.main-scroll {
+    flex-grow: 1;
+    padding: 5px;
+}
+
+/* 折叠面板 */
+.section-foldout {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: rgb(60, 60, 60);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(35, 35, 35);
+}
+
+.section-foldout > .unity-foldout__toggle {
+    font-size: 12px;
+    -unity-font-style: bold;
+    padding: 3px;
+}
+
+.section-foldout > .unity-foldout__toggle:hover {
+    background-color: rgb(70, 70, 70);
+}
+
+.section-content {
+    padding: 8px;
+    margin-top: 5px;
+}
+
+/* 文本字段 */
+.unity-text-field {
+    margin-bottom: 5px;
+}
+
+.unity-text-field__label {
+    min-width: 100px;
+    font-size: 11px;
+    color: rgb(180, 180, 180);
+}
+
+.unity-text-field__input {
+    background-color: rgb(45, 45, 45);
+    border-color: rgb(35, 35, 35);
+    color: rgb(210, 210, 210);
+    font-size: 11px;
+}
+
+/* JSON字段 */
+.json-field {
+    min-height: 100px;
+    max-height: 300px;
+}
+
+.json-field .unity-text-field__input {
+    white-space: pre;
+    font-size: 10px;
+    -unity-font: url('project://database/Library/unity%20default%20resources?fileID=10102&guid=0000000000000000e000000000000000&type=0#LegacyRuntime');
+}
+
+/* 实体卡片 */
+.entity-card {
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: rgb(50, 50, 50);
+    border-radius: 3px;
+    border-width: 1px;
+    border-color: rgb(35, 35, 35);
+}
+
+.entity-name {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: rgb(220, 220, 220);
+    margin-bottom: 5px;
+}
+
+.component-card {
+    padding: 6px;
+    margin-top: 5px;
+    background-color: rgb(55, 55, 55);
+    border-radius: 2px;
+    border-left-width: 3px;
+    border-left-color: rgb(100, 150, 200);
+}
+
+.component-name {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(200, 200, 200);
+    margin-bottom: 3px;
+}
+
+/* URL行 */
+.url-row {
+    flex-direction: row;
+    margin-bottom: 3px;
+    align-items: center;
+}
+
+.url-label {
+    min-width: 150px;
+    font-size: 11px;
+    color: rgb(180, 180, 180);
+}
+
+.url-value {
+    flex-grow: 1;
+    font-size: 10px;
+    color: rgb(150, 200, 255);
+    -unity-text-align: middle-left;
+}
+
+.copy-button {
+    width: 50px;
+    height: 18px;
+    margin-left: 5px;
+    font-size: 10px;
+}
+
+/* 事件卡片 */
+.event-card {
+    padding: 6px;
+    margin-bottom: 5px;
+    background-color: rgb(50, 50, 50);
+    border-radius: 2px;
+    border-left-width: 2px;
+    border-left-color: rgb(150, 100, 200);
+}
+
+.event-type {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: rgb(200, 180, 255);
+    margin-bottom: 3px;
+}
+
+.event-json {
+    font-size: 10px;
+    color: rgb(190, 190, 190);
+    white-space: pre-wrap;
+    max-height: 100px;
+    overflow: hidden;
+}
+
+/* 底部按钮区 */
+.footer {
+    padding: 10px;
+    background-color: rgb(50, 50, 50);
+    border-top-width: 1px;
+    border-top-color: rgb(35, 35, 35);
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.action-button {
+    height: 30px;
+    flex-grow: 1;
+    margin: 0 5px;
+    font-size: 12px;
+    background-color: rgb(60, 60, 60);
+    border-color: rgb(80, 80, 80);
+    color: rgb(220, 220, 220);
+}
+
+.action-button:hover {
+    background-color: rgb(70, 70, 70);
+}
+
+.action-button:active {
+    background-color: rgb(50, 50, 50);
+}
+
+.warning-button {
+    background-color: rgb(80, 50, 50);
+    border-color: rgb(100, 60, 60);
+}
+
+.warning-button:hover {
+    background-color: rgb(100, 60, 60);
+}
+
+/* 辅助类 */
+.info-label {
+    font-size: 11px;
+    color: rgb(180, 180, 180);
+    margin: 3px 0;
+}
+
+.bold-label {
+    -unity-font-style: bold;
+    color: rgb(220, 220, 220);
+}
+
+.empty-message {
+    font-size: 11px;
+    color: rgb(120, 120, 120);
+    font-style: italic;
+    padding: 10px;
+    -unity-text-align: middle-center;
+}
