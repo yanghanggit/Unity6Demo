@@ -378,6 +378,12 @@ public class MainScene2 : MonoBehaviour
 
         // 实例化图标
         GameObject iconInstance = Instantiate(_actorAvatarPrefab, container.transform);
+        // 设置图标大小
+        RectTransform rectTransform = iconInstance.GetComponent<RectTransform>();
+        if (rectTransform != null)
+        {
+            rectTransform.sizeDelta = new Vector2(100, 100); // 宽100像素，高100像素
+        }
         iconInstance.name = actorName;
     }
 

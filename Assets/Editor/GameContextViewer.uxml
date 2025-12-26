@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/Editor/GameContextViewer.uss?fileID=7433441132597879392&amp;guid=4bf84f16abf10864f83f97f01ee20f19&amp;type=3#GameContextViewer" />
+    <ui:VisualElement name="root" class="root">
+        <ui:VisualElement name="header" class="header">
+            <ui:Label text="Game Context Viewer" class="title" />
+            <ui:Label name="status-label" text="GameContext 已加载" class="status" />
+        </ui:VisualElement>
+        <ui:ScrollView name="main-scroll" class="main-scroll">
+            <ui:Foldout name="user-info-foldout" text="用户信息" value="true" class="section-foldout">
+                <ui:VisualElement class="section-content">
+                    <ui:TextField label="用户名" name="username-field" readonly="true" />
+                    <ui:TextField label="游戏名称" name="gamename-field" readonly="true" />
+                    <ui:TextField label="角色名称" name="actorname-field" readonly="true" />
+                    <ui:TextField label="最后序列ID" name="sequenceid-field" readonly="true" />
+                </ui:VisualElement>
+            </ui:Foldout>
+            <ui:Foldout name="urls-foldout" text="API端点" value="false" class="section-foldout">
+                <ui:VisualElement name="urls-container" class="section-content" style="white-space: pre-wrap;" />
+            </ui:Foldout>
+            <ui:Foldout name="stage-mapping-foldout" text="场景-角色映射" value="true" class="section-foldout">
+                <ui:VisualElement name="stage-mapping-container" class="section-content" />
+            </ui:Foldout>
+            <ui:Foldout name="actor-entities-foldout" text="角色实体序列化" value="false" class="section-foldout">
+                <ui:VisualElement name="actor-entities-container" class="section-content" />
+            </ui:Foldout>
+            <ui:Foldout name="stage-entities-foldout" text="场景实体序列化" value="false" class="section-foldout">
+                <ui:VisualElement name="stage-entities-container" class="section-content" />
+            </ui:Foldout>
+            <ui:Foldout name="dungeon-foldout" text="地牢数据" value="false" class="section-foldout">
+                <ui:VisualElement class="section-content">
+                    <ui:TextField name="dungeon-field" readonly="true" multiline="true" class="json-field" />
+                </ui:VisualElement>
+            </ui:Foldout>
+            <ui:Foldout name="agent-events-foldout" text="代理事件历史" value="true" class="section-foldout">
+                <ui:VisualElement name="agent-events-container" class="section-content" />
+            </ui:Foldout>
+        </ui:ScrollView>
+        <ui:VisualElement name="footer" class="footer">
+            <ui:Button name="refresh-button" text="刷新数据" class="action-button" />
+            <ui:Button name="clear-events-button" text="清除事件历史" class="action-button" />
+            <ui:Button name="clear-context-button" text="清除GameContext" class="action-button warning-button" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
