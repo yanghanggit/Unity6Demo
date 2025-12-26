@@ -26,6 +26,11 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// </summary>
     [SerializeField] private TransHomeApi _transHomeApi;
 
+    /// <summary>
+    /// Dungeon战斗打牌API接口
+    /// </summary>
+    [SerializeField] private DungeonCombatPlayCardsApi _dungeonCombatPlayCardsApi;
+
     private void Awake()
     {
         // 单例模式处理
@@ -34,12 +39,18 @@ public class DungeonGamePlayManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+        else
+        {
+            Debug.LogWarning("[DungeonGamePlayManager] Duplicate instance detected, destroying the new one.");
+            Destroy(gameObject);
+        }
     }
 
     private void Start()
     {
         Debug.Assert(_dungeonGamePlayApi != null, "_dungeonGamePlayApi is null");
         Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
+        Debug.Assert(_dungeonCombatPlayCardsApi != null, "_dungeonCombatPlayCardsApi is null");
     }
 
     /// <summary>
@@ -131,35 +142,35 @@ public class DungeonGamePlayManager : MonoBehaviour
     public IEnumerator PlayCards(Action<bool, string, List<SessionMessage>> onComplete = null)
     {
         // 调用 play_cards 端点
-        yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGamePlayUrl,
+        yield return _dungeonCombatPlayCardsApi.Call(
+            GameContext.Instance.DungeonCombatPlayCardsUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             "play_cards");
 
         // 检查API调用是否成功,
-        if (_dungeonGamePlayApi.ReqResult == null)
+        if (_dungeonCombatPlayCardsApi.ReqResult == null)
         {
             // 没有任何请求结果，这就是不需要继续的！
-            string errorMsg = "DungeonGamePlayApi request result is null";
+            string errorMsg = "DungeonCombatPlayCardsApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
-        if (!_dungeonGamePlayApi.ReqResult.isSuccess)
+        if (!_dungeonCombatPlayCardsApi.ReqResult.isSuccess)
         {
-            string errorMsg = _dungeonGamePlayApi.ReqResult.responseText;
+            string errorMsg = _dungeonCombatPlayCardsApi.ReqResult.responseText;
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
         // 必有响应数据，即使是[]
-        Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
+        Debug.Assert(_dungeonCombatPlayCardsApi.RespData != null, "DungeonCombatPlayCardsApi response data is null");
 
         Debug.Log("[DungeonGamePlayManager] PlayCards completed successfully");
-        onComplete?.Invoke(true, "Play cards completed successfully", _dungeonGamePlayApi.RespData.session_messages);
+        onComplete?.Invoke(true, "Play cards completed successfully", _dungeonCombatPlayCardsApi.RespData.session_messages);
     }
 
     /// <summary>
