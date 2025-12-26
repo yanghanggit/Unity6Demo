@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using TMPro;
+using System.Collections.Generic;
 
 public class LoginScene : MonoBehaviour
 {
@@ -13,6 +14,10 @@ public class LoginScene : MonoBehaviour
     [SerializeField] private string _nextSceneName = "MainScene2";
     [SerializeField] private string _gameName = "Game1";
 
+    [Header("API Components")]
+    [SerializeField] private TaskTriggerApi _taskTriggerApi;
+    [SerializeField] private TasksStatusApi _tasksStatusApi;
+
     private string _playerIdentifier;
 
     void Start()
@@ -21,6 +26,8 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_gameNameText != null, "_gameNameText is null");
         Debug.Assert(!string.IsNullOrEmpty(_gameName), "_gameName is null");
         Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
+        Debug.Assert(_taskTriggerApi != null, "_taskTriggerApi is null");
+        Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
         _playerIdentifier = GeneratePlayerId();
         _userNameText.text = "临时ID = " + _playerIdentifier;
@@ -72,6 +79,9 @@ public class LoginScene : MonoBehaviour
         // 3. 验证所有 Actor 的精灵资源
         ValidateActorSprites();
 
+        // 4. 触发任务 API 调用
+        //yield return TriggerTask();
+
         // 4. 切换场景
         SceneManager.LoadScene(_nextSceneName);
     }
@@ -88,6 +98,69 @@ public class LoginScene : MonoBehaviour
             //Debug.Log($"[LoginScene] Actor Entity {i}: {entity.ToString()}");
             var actorSprite = TextureManager.Instance.GetSprite(entity.name);
             Debug.Assert(actorSprite != null, $"Actor sprite is null for entity: {entity.name}");
+        }
+    }
+
+    /// <summary>
+    /// 触发任务API调用
+    /// 调用任务触发端点，发起异步任务执行
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator TestTriggerTask()
+    {
+        string url = GameContext.Instance.TasksTriggerUrl;
+        yield return _taskTriggerApi.Call(url);
+
+        if (_taskTriggerApi.ReqResult == null)
+        {
+            Debug.LogError($"Failed to trigger task from {url}: request result is null");
+            yield break;
+        }
+
+        if (!_taskTriggerApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"Failed to trigger task from {url}: {_taskTriggerApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_taskTriggerApi.RespData != null, "TaskTriggerApi response data is null");
+        Debug.Log($"Task triggered successfully. Task ID: {_taskTriggerApi.RespData.task_id}, Status: {_taskTriggerApi.RespData.status}");
+
+        //等待10秒
+        yield return new WaitForSeconds(10.0f);
+
+        //调用 QueryTasksStatus 来获取 _taskTriggerApi.RespData.task_id 的状态
+        List<string> taskIds = new() { _taskTriggerApi.RespData.task_id };
+        yield return QueryTasksStatus(taskIds);
+    }
+
+    /// <summary>
+    /// 查询多个任务的执行状态
+    /// 调用任务状态查询端点，获取指定任务ID列表的当前状态信息
+    /// </summary>
+    /// <param name="taskIds">要查询的任务ID列表</param>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator QueryTasksStatus(List<string> taskIds)
+    {
+        string url = GameContext.Instance.TasksStatusUrl;
+        yield return _tasksStatusApi.Call(url, taskIds);
+
+        if (_tasksStatusApi.ReqResult == null)
+        {
+            Debug.LogError($"Failed to query task status from {url}: request result is null");
+            yield break;
+        }
+
+        if (!_tasksStatusApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"Failed to query task status from {url}: {_tasksStatusApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_tasksStatusApi.RespData != null, "TasksStatusApi response data is null");
+        foreach (var taskStatus in _tasksStatusApi.RespData.tasks)
+        {
+            Debug.Log($"Task ID: {taskStatus.task_id}, Status: {taskStatus.status}");
         }
     }
 }

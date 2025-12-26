@@ -196,7 +196,7 @@ public class DungeonCombatPlayCardsResponse
 public class DungeonStateResponse
 {
     public Dictionary<string, List<string>> mapping = new();
-    public Dungeon dungeon = new Dungeon();
+    public Dungeon dungeon = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

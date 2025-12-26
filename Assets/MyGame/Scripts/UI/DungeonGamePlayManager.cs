@@ -138,7 +138,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 play_cards 端点执行打牌操作
     /// </summary>
     /// <returns>协程迭代器</returns>
-    public IEnumerator PlayCards(Action<bool, string> onComplete = null)
+    public IEnumerator PlayCards(Action<bool, string, string> onComplete = null)
     {
         // 调用地下城战斗打牌端点
         yield return _dungeonCombatPlayCardsApi.Call(
@@ -152,7 +152,7 @@ public class DungeonGamePlayManager : MonoBehaviour
             // 没有任何请求结果，这就是不需要继续的！
             string errorMsg = "DungeonCombatPlayCardsApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
+            onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
@@ -160,15 +160,24 @@ public class DungeonGamePlayManager : MonoBehaviour
         {
             string errorMsg = _dungeonCombatPlayCardsApi.ReqResult.responseText;
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg);
+            onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
         // 必有响应数据，即使是[]
         Debug.Assert(_dungeonCombatPlayCardsApi.RespData != null, "DungeonCombatPlayCardsApi response data is null");
+        if (
+            string.IsNullOrEmpty(_dungeonCombatPlayCardsApi.RespData.task_id) ||
+            _dungeonCombatPlayCardsApi.RespData.status != TaskStatus.RUNNING)
+        {
+            string errorMsg = "DungeonCombatPlayCardsApi response data is invalid";
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
 
         Debug.Log("[DungeonGamePlayManager] PlayCards completed successfully");
-        onComplete?.Invoke(true, "Play cards completed successfully");
+        onComplete?.Invoke(true, "Play cards completed successfully", _dungeonCombatPlayCardsApi.RespData.task_id);
     }
 
     /// <summary>
