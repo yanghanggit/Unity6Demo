@@ -181,7 +181,9 @@ public class DungeonCombatPlayCardsRequest
 [System.Serializable]
 public class DungeonCombatPlayCardsResponse
 {
-    public List<SessionMessage> session_messages = new();
+    public string task_id = "";
+    public string status = "";
+    public string message = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -239,6 +241,14 @@ public class SessionMessageResponse
 // Task Trigger request/response classes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+public static class TaskStatus
+{
+    public const string RUNNING = "running";
+    public const string COMPLETED = "completed";
+    public const string FAILED = "failed";
+}
+
+
 [System.Serializable]
 public class TaskTriggerResponse
 {
@@ -254,7 +264,7 @@ public class TaskTriggerResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [System.Serializable]
-public class TaskStatusDetail
+public class TaskRecord
 {
     public string task_id = "";
     public string status = "";
@@ -266,5 +276,5 @@ public class TaskStatusDetail
 [System.Serializable]
 public class TasksStatusResponse
 {
-    public List<TaskStatusDetail> tasks = new();
+    public List<TaskRecord> tasks = new();
 }

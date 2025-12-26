@@ -137,9 +137,8 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 打牌
     /// 调用 play_cards 端点执行打牌操作
     /// </summary>
-    /// <param name="onComplete">完成回调，参数为是否成功和消息</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator PlayCards(Action<bool, string, List<SessionMessage>> onComplete = null)
+    public IEnumerator PlayCards(Action<bool, string> onComplete = null)
     {
         // 调用地下城战斗打牌端点
         yield return _dungeonCombatPlayCardsApi.Call(
@@ -153,7 +152,7 @@ public class DungeonGamePlayManager : MonoBehaviour
             // 没有任何请求结果，这就是不需要继续的！
             string errorMsg = "DungeonCombatPlayCardsApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg, null);
+            onComplete?.Invoke(false, errorMsg);
             yield break;
         }
 
@@ -161,7 +160,7 @@ public class DungeonGamePlayManager : MonoBehaviour
         {
             string errorMsg = _dungeonCombatPlayCardsApi.ReqResult.responseText;
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
-            onComplete?.Invoke(false, errorMsg, null);
+            onComplete?.Invoke(false, errorMsg);
             yield break;
         }
 
@@ -169,7 +168,7 @@ public class DungeonGamePlayManager : MonoBehaviour
         Debug.Assert(_dungeonCombatPlayCardsApi.RespData != null, "DungeonCombatPlayCardsApi response data is null");
 
         Debug.Log("[DungeonGamePlayManager] PlayCards completed successfully");
-        onComplete?.Invoke(true, "Play cards completed successfully", _dungeonCombatPlayCardsApi.RespData.session_messages);
+        onComplete?.Invoke(true, "Play cards completed successfully");
     }
 
     /// <summary>

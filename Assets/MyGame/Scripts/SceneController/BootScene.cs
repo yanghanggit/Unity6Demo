@@ -112,7 +112,7 @@ public class BootScene : MonoBehaviour
         Debug.Log($"Task triggered successfully. Task ID: {_taskTriggerApi.RespData.task_id}, Status: {_taskTriggerApi.RespData.status}");
 
         //等待10秒
-        //yield return new WaitForSeconds(10.0f);
+        yield return new WaitForSeconds(10.0f);
 
         //调用 QueryTasksStatus 来获取 _taskTriggerApi.RespData.task_id 的状态
         List<string> taskIds = new() { _taskTriggerApi.RespData.task_id };
