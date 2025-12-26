@@ -46,6 +46,11 @@ public class SessionManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+        else
+        {
+            Debug.LogWarning("[SessionManager] Duplicate instance detected, destroying the new one.");
+            Destroy(gameObject);
+        }
     }
 
     private void Start()

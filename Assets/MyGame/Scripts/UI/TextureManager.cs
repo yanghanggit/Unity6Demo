@@ -69,6 +69,11 @@ public class TextureManager : MonoBehaviour
             if (autoPreloadOnStart)
                 InitializeTextures();
         }
+        else
+        {
+            Debug.LogWarning("[TextureManager] Duplicate instance detected, destroying the new one.");
+            Destroy(gameObject);
+        }
     }
 
     #endregion

@@ -41,6 +41,11 @@ public class GameStateSync : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+        else
+        {
+            Debug.LogWarning("[GameStateSync] Duplicate instance detected, destroying the new one.");
+            Destroy(gameObject);
+        }
     }
 
     private void Start()
