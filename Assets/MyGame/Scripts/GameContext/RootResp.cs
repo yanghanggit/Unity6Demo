@@ -26,19 +26,6 @@ public static class RootResp
     /// 设置根响应对象并验证所有必需的API端点是否存在
     /// </summary>
     /// <param name="resp">从服务器获取的根响应对象</param>
-    /// <remarks>
-    /// 该方法会验证以下关键端点:
-    /// - login: 用户登录
-    /// - logout: 用户登出
-    ///  /// - start: 游戏开始
-    /// - home_gameplay: 主界面游戏玩法
-    /// - stages_state: 关卡状态
-    /// - dungeon_state: 地牢状态
-    /// - entity_details: 实体详情
-    /// - home_trans_dungeon: 从主界面转换到地牢
-    /// - dungeon_gameplay: 地牢游戏玩法
-    /// - dungeon_trans_home: 从地牢转换到主界面
-    /// </remarks>
     public static void Set(RootResponse resp)
     {
         _rootResp = resp;
@@ -56,6 +43,7 @@ public static class RootResp
             // 游戏玩法相关端点
             Debug.Assert(endpoints.ContainsKey("home_gameplay"), "endpoints does not contain home_gameplay");
             Debug.Assert(endpoints.ContainsKey("dungeon_gameplay"), "endpoints does not contain dungeon_gameplay");
+            Debug.Assert(endpoints.ContainsKey("dungeon_combat_play_cards"), "endpoints does not contain dungeon_combat_play_cards");
 
             // 状态查询相关端点
             Debug.Assert(endpoints.ContainsKey("stages_state"), "endpoints does not contain stages_state");

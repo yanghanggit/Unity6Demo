@@ -239,7 +239,7 @@ public class DungeonCombatScene : MonoBehaviour
     {
         bool success = false;
         yield return DungeonGamePlayManager.Instance.PlayCards(
-            (result, message, sessionMessages) =>
+            (result, message) =>
             {
                 success = result;
                 if (result)

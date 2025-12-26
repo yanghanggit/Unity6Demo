@@ -480,6 +480,7 @@ GameObject:
   - component: {fileID: 290427724}
   - component: {fileID: 290427723}
   - component: {fileID: 290427722}
+  - component: {fileID: 290427725}
   m_Layer: 0
   m_Name: DungeonGamePlayManager
   m_TagString: Untagged
@@ -542,6 +543,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGamePlayManager
   _dungeonGamePlayApi: {fileID: 290427723}
   _transHomeApi: {fileID: 290427722}
+  _dungeonCombatPlayCardsApi: {fileID: 290427725}
+--- !u!114 &290427725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 290427720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 039666ae1e4d54f12ae33961e9b68def, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonCombatPlayCardsApi
+  requestTimeout: 30
 --- !u!1 &399892899
 GameObject:
   m_ObjectHideFlags: 0
