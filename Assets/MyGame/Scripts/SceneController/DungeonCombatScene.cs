@@ -272,69 +272,44 @@ public class DungeonCombatScene : MonoBehaviour
 
     /// <summary>
     /// 轮询查询任务状态直到完成或失败
-    /// 成功完成后调用 ShowPlayCardsResult 显示战斗结果
+    /// 委托 TasksStatusApi 执行轮询逻辑，成功完成后调用 ShowPlayCardsResult 显示战斗结果
     /// </summary>
     /// <param name="taskId">要查询的任务ID</param>
     /// <param name="pollInterval">轮询间隔时间（秒），默认2秒</param>
     /// <param name="maxAttempts">最大轮询次数，默认60次（即2分钟超时）</param>
-    private IEnumerator PollTaskStatus(string taskId, float pollInterval = 2.0f, int maxAttempts = 60)
+    private IEnumerator PollTaskStatus(string taskId)
     {
-        int attempts = 0;
+        bool isSuccess = false;
+        string message = "";
+        TaskRecord taskRecord = null;
 
-        while (attempts < maxAttempts)
+        // 调用 TasksStatusApi 的轮询方法，将轮询逻辑委托给API层处理
+        yield return _tasksStatusApi.PollTaskStatus(
+            GameContext.Instance.TasksStatusUrl,
+            taskId,
+            (success, msg, record) =>
+            {
+                isSuccess = success;
+                message = msg;
+                taskRecord = record;
+
+                // 失败时立即更新UI显示错误信息
+                if (!success)
+                {
+                    _mainText.text = msg;
+                }
+            }
+        );
+
+        // 任务未成功完成，直接返回（错误信息已在回调中显示）
+        if (!isSuccess)
         {
-            attempts++;
-
-            // 等待一段时间再查询
-            yield return new WaitForSeconds(pollInterval);
-
-            // 查询任务状态
-            List<string> taskIds = new() { taskId };
-            yield return _tasksStatusApi.Call(GameContext.Instance.TasksStatusUrl, taskIds);
-
-            if (_tasksStatusApi.ReqResult == null || !_tasksStatusApi.ReqResult.isSuccess)
-            {
-                Debug.LogWarning($"Failed to query task status (attempt {attempts}/{maxAttempts})");
-                continue;
-            }
-
-            if (_tasksStatusApi.RespData == null || _tasksStatusApi.RespData.tasks.Count == 0)
-            {
-                Debug.LogWarning($"No task data returned (attempt {attempts}/{maxAttempts})");
-                continue;
-            }
-
-            var taskRecord = _tasksStatusApi.RespData.tasks[0];
-            Debug.Log($"Task {taskId} status: {taskRecord.status} (attempt {attempts}/{maxAttempts})");
-
-            if (taskRecord.status == TaskStatus.COMPLETED)
-            {
-                Debug.Log($"Task {taskId} completed successfully");
-                _mainText.text = "打牌处理完成，正在加载结果...";
-
-                // 任务完成，执行后续显示逻辑
-                yield return ShowPlayCardsResult();
-                yield break;
-            }
-            else if (taskRecord.status == TaskStatus.FAILED)
-            {
-                string errorMsg = string.IsNullOrEmpty(taskRecord.error)
-                    ? "任务执行失败"
-                    : $"任务执行失败: {taskRecord.error}";
-                Debug.LogError(errorMsg);
-                _mainText.text = errorMsg;
-                yield break;
-            }
-            else if (taskRecord.status == TaskStatus.RUNNING)
-            {
-                // 继续轮询
-                Debug.Log($"Task {taskId} is still running, will poll again...");
-            }
+            yield break;
         }
 
-        // 超时
-        Debug.LogError($"Task {taskId} polling timeout after {maxAttempts} attempts");
-        _mainText.text = "打牌处理超时，请重试或联系管理员";
+        // 任务成功完成，更新UI并显示结果
+        _mainText.text = "打牌处理完成，正在加载结果...";
+        yield return ShowPlayCardsResult();
     }
 
     /// <summary>
