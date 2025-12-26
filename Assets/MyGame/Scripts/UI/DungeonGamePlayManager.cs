@@ -141,12 +141,11 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator PlayCards(Action<bool, string, List<SessionMessage>> onComplete = null)
     {
-        // 调用 play_cards 端点
+        // 调用地下城战斗打牌端点
         yield return _dungeonCombatPlayCardsApi.Call(
             GameContext.Instance.DungeonCombatPlayCardsUrl,
             GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "play_cards");
+            GameContext.Instance.GameName);
 
         // 检查API调用是否成功,
         if (_dungeonCombatPlayCardsApi.ReqResult == null)

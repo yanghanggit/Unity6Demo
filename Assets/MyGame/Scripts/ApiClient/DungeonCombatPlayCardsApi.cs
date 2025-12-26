@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
 /// <summary>
 /// DungeonCombatPlayCards API 客户端，用于处理地下城战斗打牌请求
@@ -24,16 +23,6 @@ public class DungeonCombatPlayCardsApi : BaseApiClient
     private string _gameName;
 
     /// <summary>
-    /// 用户输入标签
-    /// </summary>
-    private string _tag;
-
-    /// <summary>
-    /// 用户输入数据
-    /// </summary>
-    private Dictionary<string, string> _data;
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -46,33 +35,28 @@ public class DungeonCombatPlayCardsApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private DungeonGamePlayResponse _responseData;
+    private DungeonCombatPlayCardsResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public DungeonGamePlayResponse RespData => _responseData;
+    public DungeonCombatPlayCardsResponse RespData => _responseData;
 
     /// <summary>
-    /// 初始化地下城游戏玩法请求
+    /// 初始化地下城战斗打牌请求
     /// </summary>
     /// <param name="url">请求 URL</param>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
-    /// <param name="tag">用户输入标签</param>
-    /// <param name="data">用户输入数据</param>
-    private void Initialize(string url, string userName, string gameName, string tag, Dictionary<string, string> data = null)
+    private void Initialize(string url, string userName, string gameName)
     {
         _url = url;
         _userName = userName;
         _gameName = gameName;
-        _tag = tag;
-        _data = data ?? new Dictionary<string, string>();
         _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"DungeonCombatPlayCardsApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, UserInputTag: {_tag}");
-        Debug.Log($"Request data: {JsonConvert.SerializeObject(_data)}");
+        Debug.Log($"DungeonCombatPlayCardsApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
     }
 
     /// <summary>
@@ -81,12 +65,10 @@ public class DungeonCombatPlayCardsApi : BaseApiClient
     /// <param name="url">请求 URL</param>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
-    /// <param name="userInputTag">用户输入标签</param>
-    /// <param name="data">用户输入数据</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url, string userName, string gameName, string userInputTag, Dictionary<string, string> data = null)
+    public IEnumerator Call(string url, string userName, string gameName)
     {
-        Initialize(url, userName, gameName, userInputTag, data);
+        Initialize(url, userName, gameName);
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -96,11 +78,10 @@ public class DungeonCombatPlayCardsApi : BaseApiClient
         }
 
         // 创建请求数据
-        var requestData = new DungeonGamePlayRequest
+        var requestData = new DungeonCombatPlayCardsRequest
         {
             user_name = _userName,
-            game_name = _gameName,
-            user_input = new DungeonGamePlayUserInput { tag = _tag, data = _data }
+            game_name = _gameName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
@@ -132,7 +113,7 @@ public class DungeonCombatPlayCardsApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<DungeonGamePlayResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<DungeonCombatPlayCardsResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
