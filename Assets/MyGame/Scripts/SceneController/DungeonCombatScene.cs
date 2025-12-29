@@ -17,6 +17,9 @@ public class DungeonCombatScene : MonoBehaviour
     [SerializeField] private GameObject _actorAvatarPrefab;    // 角色头像预制体
     [SerializeField] private StringGameEvent _onActorAvatarsRefreshEvent; // 角色头像刷新事件
 
+    [Header("API Components")]
+    [SerializeField] private TasksStatusApi _tasksStatusApi;
+
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
@@ -24,6 +27,7 @@ public class DungeonCombatScene : MonoBehaviour
         Debug.Assert(_enemyAvatarContainer != null, "_enemyAvatarContainer is null");
         Debug.Assert(_actorAvatarPrefab != null, "_actorAvatarPrefab is null");
         Debug.Assert(_onActorAvatarsRefreshEvent != null, "_onActorAvatarsRefreshEvent is null");
+        Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
         // 检查是否已经连接服务器
         if (RootResp.Get() != null)
@@ -232,33 +236,89 @@ public class DungeonCombatScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 执行打牌操作并显示战斗仲裁结果
-    /// 调用服务器 play_cards 接口，获取战斗事件并显示战斗日志和叙述文本
+    /// 执行打牌操作并轮询任务状态，完成后显示结果
+    /// 调用服务器 play_cards 接口，获取任务ID后轮询查询任务状态
+    /// 当任务完成时，刷新数据并显示战斗仲裁结果
     /// </summary>
     private IEnumerator ExecutePlayCardsAndShowResult()
     {
         bool success = false;
+        string taskId = null;
+
         yield return DungeonGamePlayManager.Instance.PlayCards(
-            (result, message) =>
+            (result, message, id) =>
             {
                 success = result;
+                taskId = id;
                 if (result)
                 {
-                    // 显示战斗仲裁结果
-                    Debug.Log("PlayCards action succeeded, displaying combat arbitration results");
+                    Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
+                    _mainText.text = "打牌请求已提交，正在处理中...";
                 }
                 else
                 {
-                    // 显示错误消息
                     _mainText.text = message;
                 }
             });
 
-        if (!success)
+        if (!success || string.IsNullOrEmpty(taskId))
         {
             yield break;
         }
 
+        // 轮询查询任务状态
+        yield return PollTaskStatus(taskId);
+    }
+
+    /// <summary>
+    /// 轮询查询任务状态直到完成或失败
+    /// 委托 TasksStatusApi 执行轮询逻辑，成功完成后调用 ShowPlayCardsResult 显示战斗结果
+    /// </summary>
+    /// <param name="taskId">要查询的任务ID</param>
+    /// <param name="pollInterval">轮询间隔时间（秒），默认2秒</param>
+    /// <param name="maxAttempts">最大轮询次数，默认60次（即2分钟超时）</param>
+    private IEnumerator PollTaskStatus(string taskId)
+    {
+        bool isSuccess = false;
+        string message = "";
+        TaskRecord taskRecord = null;
+
+        // 调用 TasksStatusApi 的轮询方法，将轮询逻辑委托给API层处理
+        yield return _tasksStatusApi.PollTaskStatus(
+            GameContext.Instance.TasksStatusUrl,
+            taskId,
+            (success, msg, record) =>
+            {
+                isSuccess = success;
+                message = msg;
+                taskRecord = record;
+
+                // 失败时立即更新UI显示错误信息
+                if (!success)
+                {
+                    _mainText.text = msg;
+                }
+            }
+        );
+
+        // 任务未成功完成，直接返回（错误信息已在回调中显示）
+        if (!isSuccess)
+        {
+            yield break;
+        }
+
+        // 任务成功完成，更新UI并显示结果
+        _mainText.text = "打牌处理完成，正在加载结果...";
+        yield return ShowPlayCardsResult();
+    }
+
+    /// <summary>
+    /// 显示打牌结果
+    /// 刷新地下城和角色数据，更新角色头像状态，显示最新回合的战斗仲裁信息
+    /// (原 ExecutePlayCardsAndShowResult 的后半段逻辑)
+    /// </summary>
+    private IEnumerator ShowPlayCardsResult()
+    {
         // 刷新地下城和角色数据
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
@@ -270,7 +330,7 @@ public class DungeonCombatScene : MonoBehaviour
         if (round == null)
         {
             Debug.LogWarning("No rounds found in dungeon after playing cards");
-            _mainText.text = "No round information available after playing cards.";
+            _mainText.text = "打牌完成，但未找到回合信息";
             yield break;
         }
 
@@ -283,6 +343,7 @@ public class DungeonCombatScene : MonoBehaviour
         else
         {
             Debug.LogWarning("No combat arbitration info available in dungeon state");
+            _mainText.text = "打牌完成，但未找到战斗仲裁信息";
         }
     }
 

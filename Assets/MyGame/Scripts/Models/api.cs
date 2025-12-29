@@ -196,7 +196,7 @@ public class DungeonCombatPlayCardsResponse
 public class DungeonStateResponse
 {
     public Dictionary<string, List<string>> mapping = new();
-    public Dungeon dungeon = new Dungeon();
+    public Dungeon dungeon = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -241,13 +241,6 @@ public class SessionMessageResponse
 // Task Trigger request/response classes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-public static class TaskStatus
-{
-    public const string RUNNING = "running";
-    public const string COMPLETED = "completed";
-    public const string FAILED = "failed";
-}
-
 
 [System.Serializable]
 public class TaskTriggerResponse
@@ -262,16 +255,6 @@ public class TaskTriggerResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Task Status request/response classes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-[System.Serializable]
-public class TaskRecord
-{
-    public string task_id = "";
-    public string status = "";
-    public string start_time = "";
-    public string end_time = "";
-    public string error = "";
-}
 
 [System.Serializable]
 public class TasksStatusResponse
