@@ -17,6 +17,6 @@ public enum MessageType
 public sealed class SessionMessage
 {
     public int message_type = (int)MessageType.NONE;
-    public Dictionary<string, object> data = new Dictionary<string, object>();
+    public Dictionary<string, object> data = new();
     public int sequence_id = 0;
 }

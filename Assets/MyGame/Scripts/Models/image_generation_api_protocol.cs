@@ -5,7 +5,7 @@ using System.Collections.Generic;
 [Serializable]
 public class GenerateImagesRequest
 {
-    public List<string> prompts = new List<string>();
+    public List<string> prompts = new();
     public string model_name = "sdxl-lightning";
     public string negative_prompt = "worst quality, low quality, blurry";
     public int width = 768;
@@ -30,14 +30,14 @@ public class GenerateImagesResponse
 {
     public bool success = false;
     public string message = "";
-    public List<ImageInfo> images = new List<ImageInfo>();
+    public List<ImageInfo> images = new();
 }
 
 // 图片列表响应模型
 [Serializable]
 public class ImageListResponse
 {
-    public List<string> images = new List<string>();
+    public List<string> images = new();
 }
 
 

@@ -160,12 +160,12 @@ public class CharacterStats
 public class Actor
 {
     public string name = "";
-    public ActorCharacterSheet character_sheet = new ActorCharacterSheet();
+    public ActorCharacterSheet character_sheet = new();
     public string system_message = "";
     public string kick_off_message = "";
-    public CharacterStats character_stats = new CharacterStats();
-    public List<Item> items = new List<Item>();
-    public List<Skill> skills = new List<Skill>();
+    public CharacterStats character_stats = new();
+    public List<Item> items = new();
+    public List<Skill> skills = new();
 }
 
 /**
@@ -175,10 +175,10 @@ public class Actor
 public class Stage
 {
     public string name = "";
-    public StageCharacterSheet character_sheet = new StageCharacterSheet();
+    public StageCharacterSheet character_sheet = new();
     public string system_message = "";
     public string kick_off_message = "";
-    public List<Actor> actors = new List<Actor>();
+    public List<Actor> actors = new();
 }
 
 /**

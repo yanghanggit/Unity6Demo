@@ -47,7 +47,7 @@ public sealed class Card
 {
     public string name = "";        // 卡牌名称
     public string description = ""; // 卡牌效果、作用方式及使用代价
-    public List<string> targets = new List<string>();      // 目标对象
+    public List<string> targets = new();      // 目标对象
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +58,7 @@ public sealed class Card
 public sealed class Round
 {
     public string tag = "";                                // 回合标签，记录回合序号等信息
-    public List<string> action_order = new List<string>(); // 行动顺序，按顺序记录角色名称
+    public List<string> action_order = new(); // 行动顺序，按顺序记录角色名称
     public string combat_log = "";                         // 战斗计算日志
     public string narrative = "";                          // 叙事文本/演出描述
 }
@@ -83,7 +83,7 @@ public sealed class Combat
 [System.Serializable]
 public sealed class CombatSequence
 {
-    public List<Combat> combats = new List<Combat>();
+    public List<Combat> combats = new();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,8 +94,8 @@ public sealed class CombatSequence
 public sealed class Dungeon
 {
     public string name = "";
-    public List<Stage> stages = new List<Stage>();
-    public CombatSequence combat_sequence = new CombatSequence();
+    public List<Stage> stages = new();
+    public CombatSequence combat_sequence = new();
     public int current_stage_index = -1;
 }
 

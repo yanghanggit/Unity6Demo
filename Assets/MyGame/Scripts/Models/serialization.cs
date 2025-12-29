@@ -8,12 +8,12 @@ using System.Collections.Generic;
 public class ComponentSerialization
 {
     public string name = "";
-    public Dictionary<string, object> data = new Dictionary<string, object>();
+    public Dictionary<string, object> data = new();
 }
 
 [System.Serializable]
 public class EntitySerialization
 {
     public string name = "";
-    public List<ComponentSerialization> components = new List<ComponentSerialization>();
+    public List<ComponentSerialization> components = new();
 }
