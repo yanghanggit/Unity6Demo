@@ -88,4 +88,13 @@ public partial class ImageServiceContext
             return _baseUrl.TrimEnd('/') + RootResp.GetImageRoot().endpoints["generate"];
         }
     }
+
+    //"static_images"
+    public string StaticImagesApiUrl
+    {
+        get
+        {
+            return _baseUrl.TrimEnd('/') + RootResp.GetImageRoot().endpoints["static_images"];
+        }
+    }
 }

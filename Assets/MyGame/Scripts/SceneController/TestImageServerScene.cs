@@ -111,5 +111,44 @@ public class TestImageServerScene : MonoBehaviour
         {
             Debug.Log($"Image: {img.filename}, URL: {img.url}, Prompt: {img.prompt}, Model: {img.model}");
         }
+
+        // 加载并显示生成的第一张图片
+        if (_generateImageApi.RespData.images.Count > 0)
+        {
+            var firstImage = _generateImageApi.RespData.images[0];
+            Debug.Log($"[TestImageServerScene] Loading image from: {firstImage.url}");
+
+            //
+            yield return _textureLoader.LoadTexture(
+                ImageServiceContext.Instance.BaseUrl.TrimEnd('/') + firstImage.url
+            );
+
+            if (_textureLoader.Result != null && _textureLoader.Result.IsSuccess)
+            {
+                // 销毁旧的 Sprite 防止内存泄漏
+                if (_imageDisplay.sprite != null)
+                {
+                    DestroyImmediate(_imageDisplay.sprite, true);
+                }
+
+                // 创建新的 Sprite 并显示
+                var texture = _textureLoader.LoadedTexture;
+                _imageDisplay.sprite = Sprite.Create(
+                    texture,
+                    new Rect(0, 0, texture.width, texture.height),
+                    new Vector2(0.5f, 0.5f)
+                );
+
+                Debug.Log($"[TestImageServerScene] Image displayed: {texture.width}x{texture.height}");
+            }
+            else
+            {
+                Debug.LogError($"[TestImageServerScene] Failed to load image: {_textureLoader.Result?.Error}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[TestImageServerScene] No images generated");
+        }
     }
 }

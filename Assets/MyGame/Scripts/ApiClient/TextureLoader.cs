@@ -50,7 +50,7 @@ public class TextureLoader : MonoBehaviour
         if (_result?.Texture != null)
         {
             Debug.Log($"[TextureLoader] Cleaning up previous texture: {_result.Texture.name}");
-            Destroy(_result.Texture);
+            DestroyImmediate(_result.Texture, true);
         }
 
         using (var request = UnityWebRequestTexture.GetTexture(url, true))
