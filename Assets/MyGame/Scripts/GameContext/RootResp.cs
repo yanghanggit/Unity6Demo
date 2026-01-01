@@ -14,6 +14,12 @@ public static class RootResp
     private static RootResponse _rootResp;
 
     /// <summary>
+    /// 存储图片服务根响应数据的私有静态字段
+    /// 用于管理图片生成、列表查询等相关API端点
+    /// </summary>
+    private static ImageRootResponse _imageRootResponse;
+
+    /// <summary>
     /// 获取当前存储的根响应对象
     /// </summary>
     /// <returns>返回RootResponse对象,如果未设置则返回null</returns>
@@ -58,6 +64,36 @@ public static class RootResp
             Debug.Assert(endpoints.ContainsKey("tasks_trigger"), "endpoints does not contain tasks_trigger");
             Debug.Assert(endpoints.ContainsKey("tasks_status"), "endpoints does not contain tasks_status");
 
+        }
+    }
+
+    /// <summary>
+    /// 获取当前存储的图片服务根响应对象
+    /// </summary>
+    /// <returns>返回ImageRootResponse对象,如果未设置则返回null</returns>
+    public static ImageRootResponse GetImageRoot()
+    {
+        return _imageRootResponse;
+    }
+
+    /// <summary>
+    /// 设置图片服务根响应对象并验证所有必需的API端点是否存在
+    /// </summary>
+    /// <param name="resp">从图片服务器获取的根响应对象</param>
+    public static void SetImageRoot(ImageRootResponse resp)
+    {
+        _imageRootResponse = resp;
+
+        // 验证所有必要的图片服务端点是否存在
+        if (_imageRootResponse != null)
+        {
+            var endpoints = _imageRootResponse.endpoints;
+
+            // 图片生成与管理相关端点
+            Debug.Assert(endpoints.ContainsKey("generate"), "endpoints does not contain generate");
+            Debug.Assert(endpoints.ContainsKey("images_list"), "endpoints does not contain images_list");
+            Debug.Assert(endpoints.ContainsKey("static_images"), "endpoints does not contain static_images");
+            Debug.Assert(endpoints.ContainsKey("docs"), "endpoints does not contain docs");
         }
     }
 }

@@ -6,11 +6,17 @@ using System.Collections.Generic;
 public class TestImageServerScene : MonoBehaviour
 {
     [Header("Network Settings")]
-    [SerializeField] private string _baseUrl = "http://192.168.2.121:8000/";
+    [SerializeField] private string _baseImageServerUrl = "http://192.168.2.121:8300/";
+
+    [Header("API Components")]
+    [SerializeField] private ImageRootApi _imageRootApi;
 
     void Start()
     {
-       
+        Debug.Assert(_imageRootApi != null, "_imageRootApi is null");
+        Debug.Assert(!string.IsNullOrEmpty(_baseImageServerUrl), "_baseImageServerUrl is null");
+
+        StartCoroutine(InitializeApiEndpoints());
     }
 
     public void OnClickLoad()
@@ -33,6 +39,34 @@ public class TestImageServerScene : MonoBehaviour
     {
         //StartCoroutine(GenerateBatchImageAndApply());
     }
+
+    /// <summary>
+    /// 异步初始化API端点配置
+    /// 从指定的基础URL获取根API配置，成功后激活登录按钮
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator InitializeApiEndpoints()
+    {
+        yield return _imageRootApi.Call(_baseImageServerUrl);
+
+        if (_imageRootApi.ReqResult == null)
+        {
+            Debug.LogError($"Failed to initialize API endpoints from {_baseImageServerUrl}: request result is null");
+            yield break;
+        }
+
+        if (!_imageRootApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"Failed to initialize API endpoints from {_baseImageServerUrl}: {_imageRootApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_imageRootApi.RespData != null, "ImageRootApi response data is null");
+
+        // 设置图片服务根响应数据
+        RootResp.SetImageRoot(_imageRootApi.RespData);
+    }
+
 
     // private IEnumerator LoadTextureAndApplyToImage()
     // {
