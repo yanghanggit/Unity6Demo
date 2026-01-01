@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 
 /// <summary>
-/// HomeGamePlay API 客户端，用于处理家园游戏玩法请求
+/// GenerateImage API 客户端，用于处理图片生成请求
 /// </summary>
-public class HomeGamePlayApi : BaseApiClient
+public class GenerateImageApi : BaseApiClient
 {
     /// <summary>
     /// 请求 URL
@@ -14,24 +14,9 @@ public class HomeGamePlayApi : BaseApiClient
     private string _url;
 
     /// <summary>
-    /// 用户名
+    /// 图片生成配置列表
     /// </summary>
-    private string _userName;
-
-    /// <summary>
-    /// 游戏名
-    /// </summary>
-    private string _gameName;
-
-    /// <summary>
-    /// 用户输入标签
-    /// </summary>
-    private string _tag;
-
-    /// <summary>
-    /// 用户输入数据
-    /// </summary>
-    private Dictionary<string, string> _data;
+    private List<ImageGenerationConfig> _configs;
 
     /// <summary>
     /// 请求结果
@@ -46,49 +31,39 @@ public class HomeGamePlayApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private HomeGamePlayResponse _responseData;
+    private ImageGenerationResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public HomeGamePlayResponse RespData => _responseData;
+    public ImageGenerationResponse RespData => _responseData;
 
     /// <summary>
-    /// 初始化家园游戏玩法请求
+    /// 初始化图片生成请求
     /// </summary>
     /// <param name="url">请求 URL</param>
-    /// <param name="userName">用户名</param>
-    /// <param name="gameName">游戏名</param>
-    /// <param name="tag">用户输入标签</param>
-    /// <param name="data">用户输入数据</param>
-    private void Initialize(string url, string userName, string gameName, string tag, Dictionary<string, string> data = null)
+    /// <param name="configs">图片生成配置列表</param>
+    private void Initialize(string url, List<ImageGenerationConfig> configs)
     {
         _url = url;
-        _userName = userName;
-        _gameName = gameName;
-        _tag = tag;
-        _data = data ?? new Dictionary<string, string>();
+        _configs = configs ?? new List<ImageGenerationConfig>();
         _requestResult = null;
         _responseData = null;
 
-        Debug.Log($"HomeGamePlayApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, UserInputTag: {_tag}");
-        Debug.Log($"Request data: {JsonConvert.SerializeObject(_data)}");
+        Debug.Log($"GenerateImageApi initialized with URL: {_url}");
+        Debug.Log($"Request configs count: {_configs.Count}");
+        Debug.Log($"Request data: {JsonConvert.SerializeObject(_configs)}");
     }
 
-
-
     /// <summary>
-    /// 调用家园游戏玩法 API
+    /// 调用图片生成 API
     /// </summary>
     /// <param name="url">请求 URL</param>
-    /// <param name="userName">用户名</param>
-    /// <param name="gameName">游戏名</param>
-    /// <param name="userInputTag">用户输入标签</param>
-    /// <param name="data">用户输入数据</param>
+    /// <param name="configs">图片生成配置列表</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url, string userName, string gameName, string userInputTag, Dictionary<string, string> data = null)
+    public IEnumerator Call(string url, List<ImageGenerationConfig> configs)
     {
-        Initialize(url, userName, gameName, userInputTag, data);
+        Initialize(url, configs);
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -98,11 +73,9 @@ public class HomeGamePlayApi : BaseApiClient
         }
 
         // 创建请求数据
-        var requestData = new HomeGamePlayRequest
+        var requestData = new ImageGenerationRequest
         {
-            user_name = _userName,
-            game_name = _gameName,
-            user_input = new HomeGamePlayUserInput { tag = _tag, data = _data }
+            configs = _configs
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
@@ -134,15 +107,14 @@ public class HomeGamePlayApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<HomeGamePlayResponse>(_requestResult.responseText);
-
+            _responseData = JsonConvert.DeserializeObject<ImageGenerationResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
                 yield break;
             }
 
-            Debug.Log("Home gameplay successful");
+            Debug.Log($"Image generation successful, generated {_responseData.images.Count} images, elapsed time: {_responseData.elapsed_time}s");
         }
         catch (System.Exception ex)
         {

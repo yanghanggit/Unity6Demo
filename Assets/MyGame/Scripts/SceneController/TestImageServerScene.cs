@@ -10,11 +10,26 @@ public class TestImageServerScene : MonoBehaviour
 
     [Header("API Components")]
     [SerializeField] private ImageRootApi _imageRootApi;
+    [SerializeField] private GenerateImageApi _generateImageApi;
+
+
+    public string GenerateImageApiUrl
+    {
+        get
+        {
+            //_baseImageServerUrl 移除最尾部的一个/，然后再拼接端点
+            return _baseImageServerUrl.TrimEnd('/') + RootResp.GetImageRoot().endpoints["generate"];
+
+            //return _baseImageServerUrl + RootResp.GetImageRoot().endpoints["generate"];
+        }
+    }
+
 
     void Start()
     {
-        Debug.Assert(_imageRootApi != null, "_imageRootApi is null");
         Debug.Assert(!string.IsNullOrEmpty(_baseImageServerUrl), "_baseImageServerUrl is null");
+        Debug.Assert(_imageRootApi != null, "_imageRootApi is null");
+        Debug.Assert(_generateImageApi != null, "_generateImageApi is null");
 
         StartCoroutine(InitializeApiEndpoints());
     }
@@ -30,6 +45,7 @@ public class TestImageServerScene : MonoBehaviour
     public void OnClickGenerateSingle()
     {
         //StartCoroutine(GenerateSingleImageAndApply());
+        StartCoroutine(TestGenerateImage());
     }
 
     /// <summary>
@@ -67,153 +83,37 @@ public class TestImageServerScene : MonoBehaviour
         RootResp.SetImageRoot(_imageRootApi.RespData);
     }
 
+    /// <summary>
+    /// 使用 _generateImageApi 组件进行图片生成测试
+    /// 只生成一张图片，提示词为 "A cute cat sitting on a beach"
+    /// </summary>
+    private IEnumerator TestGenerateImage()
+    {
+        var configs = new List<ImageGenerationConfig>
+        {
+            new() { prompt = "A cute cat sitting on a beach", model = "nano-banana", width = 768, height = 1024, num_inference_steps = 4}
+        };
 
-    // private IEnumerator LoadTextureAndApplyToImage()
-    // {
-    //     // 使用 LoadTextureAction 加载纹理
-    //     yield return StartCoroutine(_loadTextureAction.LoadAndApply(imageUrl));
+        yield return _generateImageApi.Call(GenerateImageApiUrl, configs);
 
-    //     // 检查是否加载成功
-    //     if (_loadTextureAction.HasTexture())
-    //     {
-    //         // 创建 Sprite 并应用到 Image
-    //         var sprite = _loadTextureAction.CreateSpriteFromCurrentTexture(100f);
-    //         if (sprite != null)
-    //         {
-    //             targetImage.sprite = sprite;
-    //             Debug.Log($"Image applied successfully: {_loadTextureAction.GetTextureInfo()}");
-    //         }
-    //         else
-    //         {
-    //             Debug.LogError("Failed to create sprite from loaded texture");
-    //         }
-    //     }
-    //     else
-    //     {
-    //         Debug.LogWarning("Texture loading failed, keeping placeholder image");
-    //     }
-    // }
+        if (_generateImageApi.ReqResult == null)
+        {
+            Debug.LogError("GenerateImageApi request result is null");
+            yield break;
+        }
 
-    // /// <summary>
-    // /// 生成单张图片并应用到UI
-    // /// 流程：GenerateImageAction生成 -> LoadTextureAction下载 -> 应用到Image
-    // /// </summary>
-    // private IEnumerator GenerateSingleImageAndApply()
-    // {
-    //     Debug.Log($"开始生成单张图片: {defaultPrompt}，使用模型: {customModelName}");
+        if (!_generateImageApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"GenerateImageApi call failed: {_generateImageApi.ReqResult.responseText}");
+            yield break;
+        }
 
-    //     // 创建自定义请求，指定模型（使用新的数据结构）
-    //     var request = new GenerateImagesRequest
-    //     {
-    //         prompts = new List<string> { defaultPrompt },
-    //         model_name = customModelName // 使用本页指定的模型而不是默认的 sdxl-lightning
-    //     };
+        Debug.Assert(_generateImageApi.RespData != null, "GenerateImageApi response data is null");
 
-    //     // 第一步：使用 GenerateImageAction 生成图片
-    //     GenerateImagesResponse generateResult = null;
-    //     yield return StartCoroutine(_generateImageAction.GenerateImagesCoroutine(request, (result) =>
-    //     {
-    //         generateResult = result;
-    //     }));
-
-    //     // 检查生成是否成功
-    //     if (generateResult == null || !generateResult.success || generateResult.images == null || generateResult.images.Count == 0)
-    //     {
-    //         Debug.LogError($"图片生成失败: {generateResult?.message}");
-    //         yield break;
-    //     }
-
-    //     // 获取第一张生成的图片
-    //     var firstImage = generateResult.images[0];
-    //     Debug.Log($"图片生成成功: {firstImage.image_url}");
-
-    //     // 第二步：使用 LoadTextureAction 下载生成的图片
-    //     yield return StartCoroutine(_loadTextureAction.LoadAndApply(firstImage.image_url));
-
-    //     // 第三步：应用到UI
-    //     if (_loadTextureAction.HasTexture())
-    //     {
-    //         var sprite = _loadTextureAction.CreateSpriteFromCurrentTexture(100f);
-    //         if (sprite != null)
-    //         {
-    //             targetImage.sprite = sprite;
-    //             Debug.Log($"生成的图片已应用到UI: {_loadTextureAction.GetTextureInfo()}");
-    //         }
-    //         else
-    //         {
-    //             Debug.LogError("Failed to create sprite from generated texture");
-    //         }
-    //     }
-    //     else
-    //     {
-    //         Debug.LogWarning("生成的图片下载失败");
-    //     }
-    // }
-
-    // /// <summary>
-    // /// 批量生成图片并应用第一张到UI
-    // /// 流程：GenerateImageAction批量生成 -> 选择第一张 -> LoadTextureAction下载 -> 应用到Image
-    // /// </summary>
-    // private IEnumerator GenerateBatchImageAndApply()
-    // {
-    //     if (batchPrompts.Count == 0)
-    //     {
-    //         Debug.LogError("批量提示词列表为空");
-    //         yield break;
-    //     }
-
-    //     Debug.Log($"开始批量生成图片: {batchPrompts.Count} 张，使用模型: {customModelName}");
-
-    //     // 创建自定义请求，指定模型（使用新的数据结构）
-    //     var request = new GenerateImagesRequest
-    //     {
-    //         prompts = batchPrompts,
-    //         model_name = customModelName // 使用本页指定的模型而不是默认的 sdxl-lightning
-    //     };
-
-    //     // 第一步：使用 GenerateImageAction 批量生成图片
-    //     GenerateImagesResponse batchResult = null;
-    //     yield return StartCoroutine(_generateImageAction.GenerateImagesCoroutine(request, (result) =>
-    //     {
-    //         batchResult = result;
-    //     }));
-
-    //     // 检查生成是否成功
-    //     if (batchResult == null || !batchResult.success || batchResult.images == null || batchResult.images.Count == 0)
-    //     {
-    //         Debug.LogError($"批量图片生成失败: {batchResult?.message}");
-    //         yield break;
-    //     }
-
-    //     Debug.Log($"批量图片生成成功: {batchResult.images.Count} 张");
-
-    //     // 第二步：随机选择一张图片进行下载
-    //     int randomIndex = Random.Range(0, batchResult.images.Count);
-    //     var randomImage = batchResult.images[randomIndex];
-    //     Debug.Log($"随机选择第 {randomIndex + 1} 张图片进行下载: {randomImage.image_url}");
-
-    //     // 第三步：使用 LoadTextureAction 下载选中的图片
-    //     yield return StartCoroutine(_loadTextureAction.LoadAndApply(randomImage.image_url));
-
-    //     // 第四步：应用到UI
-    //     if (_loadTextureAction.HasTexture())
-    //     {
-    //         var sprite = _loadTextureAction.CreateSpriteFromCurrentTexture(100f);
-    //         if (sprite != null)
-    //         {
-    //             targetImage.sprite = sprite;
-    //             Debug.Log($"批量生成的随机图片已应用到UI: {_loadTextureAction.GetTextureInfo()}");
-    //             Debug.Log($"该图片提示词: {randomImage.prompt}");
-    //         }
-    //         else
-    //         {
-    //             Debug.LogError("Failed to create sprite from batch generated texture");
-    //         }
-    //     }
-    //     else
-    //     {
-    //         Debug.LogWarning("批量生成的图片下载失败");
-    //     }
-    // }
-
+        Debug.Log($"Generated {_generateImageApi.RespData.images.Count} images, elapsed time: {_generateImageApi.RespData.elapsed_time}s");
+        foreach (var img in _generateImageApi.RespData.images)
+        {
+            Debug.Log($"Image: {img.filename}, URL: {img.url}, Prompt: {img.prompt}, Model: {img.model}");
+        }
+    }
 }
