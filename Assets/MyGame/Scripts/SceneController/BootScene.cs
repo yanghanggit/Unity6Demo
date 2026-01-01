@@ -70,7 +70,7 @@ public class BootScene : MonoBehaviour
         GameContext.Instance.BaseUrl = _baseUrl;
 
         // 设置根响应数据
-        RootResp.Set(_rootApi.RespData);
+        RootResp.SetGameRoot(_rootApi.RespData);
     }
 
     /// <summary>

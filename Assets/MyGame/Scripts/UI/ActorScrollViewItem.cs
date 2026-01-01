@@ -69,7 +69,7 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
 
         // 获取当前场景中除了玩家角色外的其他角色列表
         
-        if (RootResp.Get() != null)
+        if (RootResp.GetGameRoot() != null)
         {
             var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
         

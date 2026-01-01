@@ -166,7 +166,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["login"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["login"];
         }
     }
 
@@ -177,7 +177,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["logout"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["logout"];
         }
     }
 
@@ -188,7 +188,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["home_gameplay"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["home_gameplay"];
         }
     }
 
@@ -200,7 +200,7 @@ public partial class GameContext
     {
         get
         {
-            var stagesStateEndpoint = RootResp.Get().endpoints["stages_state"];
+            var stagesStateEndpoint = RootResp.GetGameRoot().endpoints["stages_state"];
             return _baseUrl.TrimEnd('/') + $"{stagesStateEndpoint}{UserName}/{GameName}/state";
         }
     }
@@ -213,7 +213,7 @@ public partial class GameContext
     {
         get
         {
-            var dungeonStateEndpoint = RootResp.Get().endpoints["dungeon_state"];
+            var dungeonStateEndpoint = RootResp.GetGameRoot().endpoints["dungeon_state"];
             return _baseUrl.TrimEnd('/') + $"{dungeonStateEndpoint}{UserName}/{GameName}/state";
         }
     }
@@ -226,7 +226,7 @@ public partial class GameContext
     {
         get
         {
-            var entityDetailsEndpoint = RootResp.Get().endpoints["entity_details"];
+            var entityDetailsEndpoint = RootResp.GetGameRoot().endpoints["entity_details"];
             return _baseUrl.TrimEnd('/') + $"{entityDetailsEndpoint}{UserName}/{GameName}/details";
         }
     }
@@ -238,7 +238,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["start"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["start"];
         }
     }
 
@@ -249,7 +249,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["home_trans_dungeon"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["home_trans_dungeon"];
         }
     }
 
@@ -260,7 +260,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["dungeon_gameplay"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["dungeon_gameplay"];
         }
     }
 
@@ -271,7 +271,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["dungeon_combat_play_cards"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["dungeon_combat_play_cards"];
         }
     }
 
@@ -282,7 +282,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["dungeon_trans_home"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["dungeon_trans_home"];
         }
     }
 
@@ -294,7 +294,7 @@ public partial class GameContext
     {
         get
         {
-            var sessionMessagesEndpoint = RootResp.Get().endpoints["session_messages"];
+            var sessionMessagesEndpoint = RootResp.GetGameRoot().endpoints["session_messages"];
             return _baseUrl.TrimEnd('/') + $"{sessionMessagesEndpoint}{UserName}/{GameName}/since";
         }
     }
@@ -306,7 +306,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["tasks_trigger"];
+            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["tasks_trigger"];
         }
     }
 
@@ -318,7 +318,7 @@ public partial class GameContext
     {
         get
         {
-            var tasksStatusEndpointUrl = RootResp.Get().endpoints["tasks_status"];
+            var tasksStatusEndpointUrl = RootResp.GetGameRoot().endpoints["tasks_status"];
             return _baseUrl.TrimEnd('/') + tasksStatusEndpointUrl;
         }
     }

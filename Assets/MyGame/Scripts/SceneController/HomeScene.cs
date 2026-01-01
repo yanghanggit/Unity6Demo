@@ -210,7 +210,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// </summary>
     private void RefreshActorList()
     {
-        if (RootResp.Get() != null)
+        if (RootResp.GetGameRoot() != null)
         {
             // 走到这里就是有正规登陆的，加载当前场景的角色列表
             var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
@@ -370,7 +370,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     private IEnumerator ReturnToMainScene()
     {
         // 检查游戏是否已正确初始化
-        if (RootResp.Get() != null)
+        if (RootResp.GetGameRoot() != null)
         {
             // 切换到监视之屋（如果需要）
             bool switchSuccess = false;
@@ -490,7 +490,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     public void OnClickSendMessage()
     {
         Debug.Log("Send Message button clicked");
-        if (RootResp.Get() != null && !string.IsNullOrEmpty(_selectedActorName) && !string.IsNullOrEmpty(_inputField.text))
+        if (RootResp.GetGameRoot() != null && !string.IsNullOrEmpty(_selectedActorName) && !string.IsNullOrEmpty(_inputField.text))
         {
             StartCoroutine(ExecuteSpeakAction(_selectedActorName, _inputField.text));
         }
@@ -542,7 +542,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     public void OnAllyButtonClicked()
     {
         Debug.Log("Ally button clicked in HomeScene.");
-        if (RootResp.Get() != null && !string.IsNullOrEmpty(_selectedActorName))
+        if (RootResp.GetGameRoot() != null && !string.IsNullOrEmpty(_selectedActorName))
         {
             StartCoroutine(ExecuteAllyAction(_selectedActorName));
         }

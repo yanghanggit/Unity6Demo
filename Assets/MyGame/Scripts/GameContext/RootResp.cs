@@ -11,7 +11,7 @@ public static class RootResp
     /// <summary>
     /// 存储根响应数据的私有静态字段
     /// </summary>
-    private static RootResponse _rootResp;
+    private static RootResponse _gameRootResponse;
 
     /// <summary>
     /// 存储图片服务根响应数据的私有静态字段
@@ -23,23 +23,23 @@ public static class RootResp
     /// 获取当前存储的根响应对象
     /// </summary>
     /// <returns>返回RootResponse对象,如果未设置则返回null</returns>
-    public static RootResponse Get()
+    public static RootResponse GetGameRoot()
     {
-        return _rootResp;
+        return _gameRootResponse;
     }
 
     /// <summary>
     /// 设置根响应对象并验证所有必需的API端点是否存在
     /// </summary>
     /// <param name="resp">从服务器获取的根响应对象</param>
-    public static void Set(RootResponse resp)
+    public static void SetGameRoot(RootResponse resp)
     {
-        _rootResp = resp;
+        _gameRootResponse = resp;
 
         // 验证所有必要的端点是否存在
-        if (_rootResp != null)
+        if (_gameRootResponse != null)
         {
-            var endpoints = _rootResp.endpoints;
+            var endpoints = _gameRootResponse.endpoints;
 
             // 用户认证与游戏创建相关端点
             Debug.Assert(endpoints.ContainsKey("login"), "endpoints does not contain login");

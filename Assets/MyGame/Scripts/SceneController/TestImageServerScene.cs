@@ -12,19 +12,6 @@ public class TestImageServerScene : MonoBehaviour
     [SerializeField] private ImageRootApi _imageRootApi;
     [SerializeField] private GenerateImageApi _generateImageApi;
 
-
-    public string GenerateImageApiUrl
-    {
-        get
-        {
-            //_baseImageServerUrl 移除最尾部的一个/，然后再拼接端点
-            return _baseImageServerUrl.TrimEnd('/') + RootResp.GetImageRoot().endpoints["generate"];
-
-            //return _baseImageServerUrl + RootResp.GetImageRoot().endpoints["generate"];
-        }
-    }
-
-
     void Start()
     {
         Debug.Assert(!string.IsNullOrEmpty(_baseImageServerUrl), "_baseImageServerUrl is null");
@@ -79,6 +66,9 @@ public class TestImageServerScene : MonoBehaviour
 
         Debug.Assert(_imageRootApi.RespData != null, "ImageRootApi response data is null");
 
+        // 设置ImageServerContext的基础URL
+        ImageServerContext.Instance.BaseUrl = _baseImageServerUrl;
+
         // 设置图片服务根响应数据
         RootResp.SetImageRoot(_imageRootApi.RespData);
     }
@@ -94,7 +84,7 @@ public class TestImageServerScene : MonoBehaviour
             new() { prompt = "A cute cat sitting on a beach", model = "nano-banana", width = 768, height = 1024, num_inference_steps = 4}
         };
 
-        yield return _generateImageApi.Call(GenerateImageApiUrl, configs);
+        yield return _generateImageApi.Call(ImageServerContext.Instance.GenerateImageApiUrl, configs);
 
         if (_generateImageApi.ReqResult == null)
         {
