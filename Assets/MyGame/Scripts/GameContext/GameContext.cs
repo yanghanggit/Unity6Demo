@@ -58,6 +58,11 @@ public partial class GameContext
     }
 
     /// <summary>
+    /// 基础URL，用于构建API请求的完整地址
+    /// </summary>
+    private string _baseUrl;
+
+    /// <summary>
     /// 用户名
     /// </summary>
     private string _userName;
@@ -71,7 +76,6 @@ public partial class GameContext
     /// 角色名称
     /// </summary>
     private string _actorName;
-
 
 
     /// <summary>
@@ -92,6 +96,21 @@ public partial class GameContext
         {
             Debug.Assert(value >= 0, "LastSequenceId cannot be negative");
             _lastSequenceId = value;
+        }
+    }
+
+    /// <summary>
+    /// 获取或设置基础URL
+    /// </summary>
+    public string BaseUrl
+    {
+        get
+        {
+            return _baseUrl;
+        }
+        set
+        {
+            _baseUrl = value;
         }
     }
 
@@ -147,8 +166,7 @@ public partial class GameContext
     {
         get
         {
-
-            return RootResp.Get().endpoints["login"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["login"];
         }
     }
 
@@ -159,7 +177,7 @@ public partial class GameContext
     {
         get
         {
-            return RootResp.Get().endpoints["logout"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["logout"];
         }
     }
 
@@ -170,7 +188,7 @@ public partial class GameContext
     {
         get
         {
-            return RootResp.Get().endpoints["home_gameplay"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["home_gameplay"];
         }
     }
 
@@ -182,8 +200,8 @@ public partial class GameContext
     {
         get
         {
-            var baseUrl = RootResp.Get().endpoints["stages_state"];
-            return $"{baseUrl}{UserName}/{GameName}/state";
+            var stagesStateEndpoint = RootResp.Get().endpoints["stages_state"];
+            return _baseUrl.TrimEnd('/') + $"{stagesStateEndpoint}{UserName}/{GameName}/state";
         }
     }
 
@@ -195,8 +213,8 @@ public partial class GameContext
     {
         get
         {
-            var baseUrl = RootResp.Get().endpoints["dungeon_state"];
-            return $"{baseUrl}{UserName}/{GameName}/state";
+            var dungeonStateEndpoint = RootResp.Get().endpoints["dungeon_state"];
+            return _baseUrl.TrimEnd('/') + $"{dungeonStateEndpoint}{UserName}/{GameName}/state";
         }
     }
 
@@ -208,8 +226,8 @@ public partial class GameContext
     {
         get
         {
-            var baseUrl = RootResp.Get().endpoints["entity_details"];
-            return $"{baseUrl}{UserName}/{GameName}/details";
+            var entityDetailsEndpoint = RootResp.Get().endpoints["entity_details"];
+            return _baseUrl.TrimEnd('/') + $"{entityDetailsEndpoint}{UserName}/{GameName}/details";
         }
     }
 
@@ -220,7 +238,7 @@ public partial class GameContext
     {
         get
         {
-            return RootResp.Get().endpoints["start"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["start"];
         }
     }
 
@@ -231,7 +249,7 @@ public partial class GameContext
     {
         get
         {
-            return RootResp.Get().endpoints["home_trans_dungeon"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["home_trans_dungeon"];
         }
     }
 
@@ -242,7 +260,7 @@ public partial class GameContext
     {
         get
         {
-            return RootResp.Get().endpoints["dungeon_gameplay"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["dungeon_gameplay"];
         }
     }
 
@@ -253,7 +271,7 @@ public partial class GameContext
     {
         get
         {
-            return RootResp.Get().endpoints["dungeon_combat_play_cards"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["dungeon_combat_play_cards"];
         }
     }
 
@@ -264,7 +282,7 @@ public partial class GameContext
     {
         get
         {
-            return RootResp.Get().endpoints["dungeon_trans_home"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["dungeon_trans_home"];
         }
     }
 
@@ -276,8 +294,8 @@ public partial class GameContext
     {
         get
         {
-            var baseUrl = RootResp.Get().endpoints["session_messages"];
-            return $"{baseUrl}{UserName}/{GameName}/since";
+            var sessionMessagesEndpoint = RootResp.Get().endpoints["session_messages"];
+            return _baseUrl.TrimEnd('/') + $"{sessionMessagesEndpoint}{UserName}/{GameName}/since";
         }
     }
 
@@ -288,7 +306,7 @@ public partial class GameContext
     {
         get
         {
-            return RootResp.Get().endpoints["tasks_trigger"];
+            return _baseUrl.TrimEnd('/') + RootResp.Get().endpoints["tasks_trigger"];
         }
     }
 
@@ -300,9 +318,8 @@ public partial class GameContext
     {
         get
         {
-            var baseUrl = RootResp.Get().endpoints["tasks_status"];
-            return baseUrl;
+            var tasksStatusEndpointUrl = RootResp.Get().endpoints["tasks_status"];
+            return _baseUrl.TrimEnd('/') + tasksStatusEndpointUrl;
         }
     }
-
 }

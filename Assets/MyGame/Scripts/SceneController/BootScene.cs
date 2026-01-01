@@ -66,6 +66,10 @@ public class BootScene : MonoBehaviour
 
         _loginButton.gameObject.SetActive(true);
 
+        // 设置全局游戏上下文的基础URL和根响应数据
+        GameContext.Instance.BaseUrl = _baseUrl;
+
+        // 设置根响应数据
         RootResp.Set(_rootApi.RespData);
     }
 
