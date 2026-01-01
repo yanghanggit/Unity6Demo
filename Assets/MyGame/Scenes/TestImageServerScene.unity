@@ -620,6 +620,7 @@ GameObject:
   - component: {fileID: 399892901}
   - component: {fileID: 399892902}
   - component: {fileID: 399892903}
+  - component: {fileID: 399892904}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -654,9 +655,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3afdb11a1c75342d79acc77eb71cc787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseImageServerUrl: http://192.168.2.134:8300/
+  _baseUrl: http://192.168.2.134:8300/
   _imageRootApi: {fileID: 399892902}
   _generateImageApi: {fileID: 399892903}
+  _textureLoader: {fileID: 399892904}
+  _imageDisplay: {fileID: 1214769496}
 --- !u!114 &399892902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -683,6 +686,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GenerateImageApi
   requestTimeout: 30
+--- !u!114 &399892904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49fb6417db8e640d09344703e629bbd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LoadTextureApi
 --- !u!1 &501442151
 GameObject:
   m_ObjectHideFlags: 0

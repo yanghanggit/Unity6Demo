@@ -6,12 +6,12 @@ using System.Diagnostics;
 /// 用于管理图片服务器的全局状态，包括API端点配置
 /// 采用线程安全的单例模式实现
 /// </summary>
-public partial class ImageServerContext
+public partial class ImageServiceContext
 {
     /// <summary>
     /// 单例实例
     /// </summary>
-    private static ImageServerContext _instance;
+    private static ImageServiceContext _instance;
 
     /// <summary>
     /// 线程锁对象，用于确保单例模式的线程安全
@@ -25,13 +25,13 @@ public partial class ImageServerContext
     /// 获取GameContext的单例实例
     /// 使用双重检查锁定模式确保线程安全
     /// </summary>
-    public static ImageServerContext Instance
+    public static ImageServiceContext Instance
     {
         get
         {
             lock (_lockObj)
             {
-                _instance ??= new ImageServerContext();
+                _instance ??= new ImageServiceContext();
                 return _instance;
             }
         }
@@ -53,7 +53,7 @@ public partial class ImageServerContext
     /// <summary>
     /// 私有构造函数，防止外部实例化
     /// </summary>
-    private ImageServerContext()
+    private ImageServiceContext()
     {
     }
 

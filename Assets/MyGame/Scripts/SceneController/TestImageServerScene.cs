@@ -6,17 +6,23 @@ using System.Collections.Generic;
 public class TestImageServerScene : MonoBehaviour
 {
     [Header("Network Settings")]
-    [SerializeField] private string _baseImageServerUrl = "http://192.168.2.121:8300/";
+    [SerializeField] private string _baseUrl = "http://192.168.2.134:8300/";
 
     [Header("API Components")]
     [SerializeField] private ImageRootApi _imageRootApi;
     [SerializeField] private GenerateImageApi _generateImageApi;
+    [SerializeField] private TextureLoader _textureLoader;
+
+    [Header("UI Components")]
+    [SerializeField] private Image _imageDisplay;
 
     void Start()
     {
-        Debug.Assert(!string.IsNullOrEmpty(_baseImageServerUrl), "_baseImageServerUrl is null");
+        Debug.Assert(!string.IsNullOrEmpty(_baseUrl), "_baseImageServerUrl is null");
         Debug.Assert(_imageRootApi != null, "_imageRootApi is null");
         Debug.Assert(_generateImageApi != null, "_generateImageApi is null");
+        Debug.Assert(_textureLoader != null, "_textureLoader is null");
+        Debug.Assert(_imageDisplay != null, "_imageDisplay is null");
 
         StartCoroutine(InitializeApiEndpoints());
     }
@@ -50,24 +56,24 @@ public class TestImageServerScene : MonoBehaviour
     /// <returns>协程迭代器</returns>
     private IEnumerator InitializeApiEndpoints()
     {
-        yield return _imageRootApi.Call(_baseImageServerUrl);
+        yield return _imageRootApi.Call(_baseUrl);
 
         if (_imageRootApi.ReqResult == null)
         {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseImageServerUrl}: request result is null");
+            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: request result is null");
             yield break;
         }
 
         if (!_imageRootApi.ReqResult.isSuccess)
         {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseImageServerUrl}: {_imageRootApi.ReqResult.responseText}");
+            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: {_imageRootApi.ReqResult.responseText}");
             yield break;
         }
 
         Debug.Assert(_imageRootApi.RespData != null, "ImageRootApi response data is null");
 
         // 设置ImageServerContext的基础URL
-        ImageServerContext.Instance.BaseUrl = _baseImageServerUrl;
+        ImageServiceContext.Instance.BaseUrl = _baseUrl;
 
         // 设置图片服务根响应数据
         RootResp.SetImageRoot(_imageRootApi.RespData);
@@ -84,7 +90,7 @@ public class TestImageServerScene : MonoBehaviour
             new() { prompt = "A cute cat sitting on a beach", model = "nano-banana", width = 768, height = 1024, num_inference_steps = 4}
         };
 
-        yield return _generateImageApi.Call(ImageServerContext.Instance.GenerateImageApiUrl, configs);
+        yield return _generateImageApi.Call(ImageServiceContext.Instance.GenerateImageApiUrl, configs);
 
         if (_generateImageApi.ReqResult == null)
         {
