@@ -103,6 +103,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -240,6 +241,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -285,6 +287,8 @@ GameObject:
   - component: {fileID: 699377205699155445}
   - component: {fileID: 7830659437053083182}
   - component: {fileID: 5519767174978143521}
+  - component: {fileID: 308851871442399892}
+  - component: {fileID: 1726826109704896706}
   m_Layer: 5
   m_Name: PlayerInfoBar
   m_TagString: Untagged
@@ -365,6 +369,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInfo
   _headIconButton: {fileID: 3555784645291397705}
   _playerInfoText: {fileID: 563191670925627199}
+  _generateImageApi: {fileID: 308851871442399892}
+  _textureLoader: {fileID: 1726826109704896706}
+--- !u!114 &308851871442399892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4623680880295188424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd4b503f13e054866a0823b080cffcf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GenerateImageApi
+  requestTimeout: 30
+--- !u!114 &1726826109704896706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4623680880295188424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49fb6417db8e640d09344703e629bbd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TextureLoader
 --- !u!1 &8621837785297388426
 GameObject:
   m_ObjectHideFlags: 0

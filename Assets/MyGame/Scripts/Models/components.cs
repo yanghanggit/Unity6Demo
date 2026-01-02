@@ -1,5 +1,17 @@
 using System.Collections.Generic;
 
+
+/// <summary>
+/// 角色外观信息组件。
+/// </summary>
+[System.Serializable]
+public sealed class AppearanceComponent
+{
+    public string name = "";
+    public string appearance = "";
+}
+
+
 /// <summary>
 /// 盟友组件。
 /// </summary>
