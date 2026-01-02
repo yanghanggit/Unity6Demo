@@ -87,7 +87,7 @@ public class TestImageServerScene : MonoBehaviour
     {
         var configs = new List<ImageGenerationConfig>
         {
-            new() { prompt = "A cute cat sitting on a beach", model = "nano-banana", width = 768, height = 1024, num_inference_steps = 4}
+            new() { prompt = "可爱的小狗坐在椅子上～", model = "nano-banana", width = 768, height = 1024, num_inference_steps = 4}
         };
 
         yield return _generateImageApi.Call(ImageServiceContext.Instance.GenerateImageApiUrl, configs);

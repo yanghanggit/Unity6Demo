@@ -53,6 +53,9 @@ public class TextureLoader : MonoBehaviour
             DestroyImmediate(_result.Texture, true);
         }
 
+        // 重置加载结果
+        _result = null;
+
         using (var request = UnityWebRequestTexture.GetTexture(url, true))
         {
             SetCommonHeaders(request);
