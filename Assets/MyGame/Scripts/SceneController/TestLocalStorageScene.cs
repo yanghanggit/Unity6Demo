@@ -40,4 +40,14 @@ public class TestLocalStorageScene : MonoBehaviour
             PlayerPrefs.Save(); // 页面失去焦点时保存
         }
     }
+
+    /// <summary>
+    /// 清除存储的值
+    /// </summary>
+    public void OnClickDeleteAll()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save(); // 确保删除操作在 WebGL 中被立即保存
+        _mainText.text = "Cleared stored value.";
+    }
 }

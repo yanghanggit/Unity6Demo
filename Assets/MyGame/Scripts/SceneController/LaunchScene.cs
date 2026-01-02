@@ -6,13 +6,15 @@ using UnityEngine.UI;
 public class LaunchScene : MonoBehaviour
 {
     [Header("Network Settings")]
-    [SerializeField] private string _baseUrl = "http://192.168.2.134:8000/";
+    [SerializeField] private string _gameApiBaseUrl = "http://192.168.2.134:8000/";
+    [SerializeField] private string _imageApiBaseUrl = "http://192.168.2.134:8300/";
 
     [Header("Scene Settings")]
     [SerializeField] private string _nextSceneName = "LoginScene";
 
     [Header("API Components")]
     [SerializeField] private RootApi _rootApi;
+    [SerializeField] private ImageRootApi _imageRootApi;
 
     [Header("UI Components")]
     [SerializeField] private Button _loginButton;
@@ -24,12 +26,14 @@ public class LaunchScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_rootApi != null, "_rootApi is null");
+        Debug.Assert(_imageRootApi != null, "_imageRootApi is null");
         Debug.Assert(_loginButton != null, "_loginButton is null");
-        Debug.Assert(!string.IsNullOrEmpty(_baseUrl), "_baseUrl is null");
+        Debug.Assert(!string.IsNullOrEmpty(_gameApiBaseUrl), "_baseUrl is null");
         Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
 
         _loginButton.gameObject.SetActive(false);
-        StartCoroutine(InitializeApiEndpoints());
+        StartCoroutine(InitializeGameApiEndpoints());
+        StartCoroutine(InitializeImageApiEndpoints());
     }
 
     /// <summary>
@@ -46,19 +50,19 @@ public class LaunchScene : MonoBehaviour
     /// 从指定的基础URL获取根API配置，成功后激活登录按钮
     /// </summary>
     /// <returns>协程迭代器</returns>
-    private IEnumerator InitializeApiEndpoints()
+    private IEnumerator InitializeGameApiEndpoints()
     {
-        yield return _rootApi.Call(_baseUrl);
+        yield return _rootApi.Call(_gameApiBaseUrl);
 
         if (_rootApi.ReqResult == null)
         {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: request result is null");
+            Debug.LogError($"Failed to initialize API endpoints from {_gameApiBaseUrl}: request result is null");
             yield break;
         }
 
         if (!_rootApi.ReqResult.isSuccess)
         {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: {_rootApi.ReqResult.responseText}");
+            Debug.LogError($"Failed to initialize API endpoints from {_gameApiBaseUrl}: {_rootApi.ReqResult.responseText}");
             yield break;
         }
 
@@ -67,10 +71,40 @@ public class LaunchScene : MonoBehaviour
         _loginButton.gameObject.SetActive(true);
 
         // 设置全局游戏上下文的基础URL和根响应数据
-        ApiEndpointsManager.GameApiBaseUrl = _baseUrl;
+        ApiEndpointsManager.GameApiBaseUrl = _gameApiBaseUrl;
 
         // 设置根响应数据
         ApiEndpointsManager.GameRootResponse = _rootApi.RespData;
+    }
+
+    /// <summary>
+    /// 异步初始化API端点配置
+    /// 从指定的基础URL获取根API配置，成功后激活登录按钮
+    /// </summary>
+    /// <returns>协程迭代器</returns>
+    private IEnumerator InitializeImageApiEndpoints()
+    {
+        yield return _imageRootApi.Call(_imageApiBaseUrl);
+
+        if (_imageRootApi.ReqResult == null)
+        {
+            Debug.LogError($"Failed to initialize API endpoints from {_imageApiBaseUrl}: request result is null");
+            yield break;
+        }
+
+        if (!_imageRootApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"Failed to initialize API endpoints from {_imageApiBaseUrl}: {_imageRootApi.ReqResult.responseText}");
+            yield break;
+        }
+
+        Debug.Assert(_imageRootApi.RespData != null, "ImageRootApi response data is null");
+
+        // 设置ImageServerContext的基础URL
+        ApiEndpointsManager.ImageApiBaseUrl = _imageApiBaseUrl;
+
+        // 设置图片服务根响应数据
+        ApiEndpointsManager.ImageRootResponse = _imageRootApi.RespData;
     }
 
     /// <summary>
