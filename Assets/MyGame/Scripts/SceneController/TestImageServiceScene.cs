@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class TestImageServerScene : MonoBehaviour
+public class TestImageServiceScene : MonoBehaviour
 {
     [Header("Network Settings")]
     [SerializeField] private string _baseUrl = "http://192.168.2.134:8300/";

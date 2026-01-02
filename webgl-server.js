@@ -40,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'WebApp')));
 
 app.listen(PORT, () => {
   console.log(`Unity WebGL Server running at:`);
+  console.log(`需要查看本机的地址，如果是局域网其他设备访问，请使用局域网IP地址，通过ifconfig或者ipconfig命令查看`);
   console.log(`  http://localhost:${PORT}`);
   console.log(`  http://127.0.0.1:${PORT}`);
   console.log(`  http://192.168.2.121:${PORT}`);
