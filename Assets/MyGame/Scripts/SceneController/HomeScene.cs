@@ -75,7 +75,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
 
         // 设置背景图像
-        var stageSprite = TextureManager.Instance.GetSprite(_homeSceneConfig.StageName);
+        var stageSprite = SpriteManager.Instance.GetSprite(_homeSceneConfig.StageName);
         if (stageSprite != null)
         {
             _background.GetComponent<SpriteRenderer>().sprite = stageSprite;
@@ -255,7 +255,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         _speechBubbleText.text = $"你选择了: {selectedActorName}"; // 更新提示文本
 
         // 更新当前角色的Sprite显示
-        var actorSprite = TextureManager.Instance.GetSprite(selectedActorName);
+        var actorSprite = SpriteManager.Instance.GetSprite(selectedActorName);
         Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + selectedActorName);
         _currentActor.GetComponent<SpriteRenderer>().sprite = actorSprite;
 

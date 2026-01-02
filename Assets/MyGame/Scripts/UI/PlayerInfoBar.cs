@@ -37,7 +37,7 @@ public class PlayerInfoBar : MonoBehaviour
         Debug.Assert(playerActor != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.ActorName);
         if (playerActor != null)
         {
-            var actorSprite = TextureManager.Instance.GetSprite(playerActor.name);
+            var actorSprite = SpriteManager.Instance.GetSprite(playerActor.name);
             Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + playerActor.name);
             var buttonImage = _headIconButton.GetComponent<Image>();
             buttonImage.sprite = actorSprite;

@@ -96,7 +96,7 @@ public class LoginScene : MonoBehaviour
         {
             var entity = actorEntitiesSerialization[i];
             //Debug.Log($"[LoginScene] Actor Entity {i}: {entity.ToString()}");
-            var actorSprite = TextureManager.Instance.GetSprite(entity.name);
+            var actorSprite = SpriteManager.Instance.GetSprite(entity.name);
             Debug.Assert(actorSprite != null, $"Actor sprite is null for entity: {entity.name}");
         }
     }

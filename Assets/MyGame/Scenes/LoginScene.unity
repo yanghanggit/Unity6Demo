@@ -1305,7 +1305,7 @@ GameObject:
   - component: {fileID: 1455665588}
   - component: {fileID: 1455665587}
   m_Layer: 0
-  m_Name: TextureManager
+  m_Name: ImageService
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1345,9 +1345,7 @@ MonoBehaviour:
   - "\u89D2\u8272.\u516C\u4F1A\u6267\u884C\u5B98.D"
   pixelsPerUnit: 100
   spritePivot: {x: 0.5, y: 0.5}
-  autoPreloadOnStart: 1
   resourcesTexturePath: Textures
-  enableDebugLog: 1
 --- !u!4 &1455665588
 Transform:
   m_ObjectHideFlags: 0

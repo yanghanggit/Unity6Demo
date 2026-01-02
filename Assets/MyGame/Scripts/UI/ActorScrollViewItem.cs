@@ -84,7 +84,7 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
             _title.text = _actorName;
 
             // 更新UI显示:从纹理管理器加载并设置角色图标
-            var actorSprite = TextureManager.Instance.GetSprite(_actorName);
+            var actorSprite = SpriteManager.Instance.GetSprite(_actorName);
             Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + _actorName);
             _icon.sprite = actorSprite;
         }

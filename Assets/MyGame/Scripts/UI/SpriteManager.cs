@@ -3,11 +3,11 @@ using UnityEngine;
 
 /// <summary>
 /// 纹理管理器，使用单例模式 + DontDestroyOnLoad 保持全局存在
-/// 使用：TextureManager.Instance.GetSprite("texture_key")
+/// 使用：SpriteManager.Instance.GetSprite("texture_key")
 /// </summary>
-public class TextureManager : MonoBehaviour
+public class SpriteManager : MonoBehaviour
 {
-    public static TextureManager Instance { get; private set; }
+    public static SpriteManager Instance { get; private set; }
 
     [Header("预加载纹理配置")]
     [Tooltip("需要预加载的纹理数组")]
