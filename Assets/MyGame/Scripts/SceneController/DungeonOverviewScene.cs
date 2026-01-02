@@ -11,7 +11,7 @@ using TMPro;
 public class DungeonOverviewScene : MonoBehaviour
 {
     [Header("Scene Settings")]
-    [SerializeField] private string _preScene = "MainScene2";
+    [SerializeField] private string _preScene = "MainScene";
     [SerializeField] private string _nextScene = "DungeonCombatScene";
 
     [Header("UI Components")]
@@ -100,7 +100,7 @@ public class DungeonOverviewScene : MonoBehaviour
     {
         if (RootResp.GetGameRoot() != null)
         {
-            Debug.Log("Returning to MainScene2");
+            Debug.Log("Returning to MainScene");
             yield return new WaitForSeconds(0);
             SceneManager.LoadScene(_preScene);
         }

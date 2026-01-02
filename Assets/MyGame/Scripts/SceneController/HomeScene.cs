@@ -13,7 +13,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 {
     /// <summary>
     /// 静态属性用于在场景切换时传递 HomeSceneConfig 配置数据
-    /// MainScene2 会在切换场景前设置此属性,HomeScene 在 Awake 时读取并清空
+    /// MainScene 会在切换场景前设置此属性,HomeScene 在 Awake 时读取并清空
     /// </summary>
     public static HomeSceneConfig PendingHomeSceneConfig { get; set; }
     // UI组件引用
@@ -30,7 +30,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     // 配置和API
     [Header("Scene Config")]
     [SerializeField] private HomeSceneConfig _homeSceneConfig; // 场景配置数据
-    [SerializeField] private string _preScene = "MainScene2";   // 上一个场景名称
+    [SerializeField] private string _preScene = "MainScene";   // 上一个场景名称
     [SerializeField] private string _monitoringHouseStageName = "场景.监视之屋"; // 监视之屋场景名称
 
     // 事件系统

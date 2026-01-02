@@ -963,7 +963,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fd8f5a41b78b422d813d0c05bf1ee70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _preScene: MainScene2
+  _preScene: MainScene
   _nextScene: DungeonCombatScene
   _mainText: {fileID: 74078432}
   _allyAvatarContainer: {fileID: 594855132}
@@ -986,6 +986,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TasksStatusApi
   requestTimeout: 30
+  _pollInterval: 2
+  _maxAttempts: 60
 --- !u!1 &437181629
 GameObject:
   m_ObjectHideFlags: 0

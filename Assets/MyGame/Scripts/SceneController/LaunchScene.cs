@@ -3,10 +3,10 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
 
-public class BootScene : MonoBehaviour
+public class LaunchScene : MonoBehaviour
 {
     [Header("Network Settings")]
-    [SerializeField] private string _baseUrl = "http://192.168.2.121:8000/";
+    [SerializeField] private string _baseUrl = "http://192.168.2.134:8000/";
 
     [Header("Scene Settings")]
     [SerializeField] private string _nextSceneName = "LoginScene";

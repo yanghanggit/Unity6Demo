@@ -949,7 +949,7 @@ MonoBehaviour:
   _inputField: {fileID: 1502517026}
   _scrollView: {fileID: 876004725}
   _homeSceneConfig: {fileID: 11400000, guid: d1ec0cda2b05e497c8c83f991cf28dd9, type: 2}
-  _preScene: MainScene2
+  _preScene: MainScene
   _monitoringHouseStageName: "\u573A\u666F.\u76D1\u89C6\u4E4B\u5C4B"
   _onActorClickedEvent: {fileID: 11400000, guid: cdb300192ace1475990159f868b47bcc,
     type: 2}

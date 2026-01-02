@@ -11,7 +11,7 @@ public class LoginScene : MonoBehaviour
     [SerializeField] private TMP_Text _gameNameText;
 
     [Header("Scene Settings")]
-    [SerializeField] private string _nextSceneName = "MainScene2";
+    [SerializeField] private string _nextSceneName = "MainScene";
     [SerializeField] private string _gameName = "Game1";
 
     [Header("API Components")]

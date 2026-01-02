@@ -438,7 +438,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a28138419bbc4c4ebac36bfbdfe0d58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _preScene: MainScene2
+  _preScene: MainScene
   _nextScene: DungeonCombatScene
   _mainText: {fileID: 3871845}
 --- !u!1 &433063512

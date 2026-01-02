@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 主场景控制器(MainScene2)
+/// 主场景控制器(MainScene)
 /// 负责管理主场景的UI交互、场景切换、玩家信息显示等核心功能
 /// 作为玩家进入游戏后的主要控制中心,提供前往不同游戏场景的入口
 /// </summary>
-public class MainScene2 : MonoBehaviour
+public class MainScene : MonoBehaviour
 {
 
     [Header("Scene Settings")]
@@ -168,7 +168,7 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     public void OnClickRun()
     {
-        Debug.Log("Run button clicked in MainScene2.");
+        Debug.Log("Run button clicked in MainScene.");
         StartCoroutine(AdvanceGameState());
     }
 
@@ -178,7 +178,7 @@ public class MainScene2 : MonoBehaviour
     /// </summary>
     private void OnHeadIconClicked()
     {
-        //Debug.Log("Head icon clicked in MainScene2!");
+        //Debug.Log("Head icon clicked in MainScene!");
         _playerInfoDetails.SetActive(true);
     }
 
@@ -218,7 +218,7 @@ public class MainScene2 : MonoBehaviour
         // 检查登出是否成功
         if (!logoutSuccess)
         {
-            Debug.LogError("[MainScene2] Logout failed");
+            Debug.LogError("[MainScene] Logout failed");
             yield break;
         }
 
@@ -261,11 +261,11 @@ public class MainScene2 : MonoBehaviour
         // 检查推进是否成功
         if (!advanceSuccess)
         {
-            Debug.LogError("[MainScene2] AdvanceGame failed");
+            Debug.LogError("[MainScene] AdvanceGame failed");
             yield break;
         }
 
-        Debug.Log("[MainScene2] Game state advanced successfully");
+        Debug.Log("[MainScene] Game state advanced successfully");
 
         // 刷新游戏状态以确保数据同步
         yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
@@ -304,7 +304,7 @@ public class MainScene2 : MonoBehaviour
             // 检查切换是否成功
             if (!switchSuccess)
             {
-                Debug.LogError($"[MainScene2] SwitchStage to {sceneConfig.StageName} failed");
+                Debug.LogError($"[MainScene] SwitchStage to {sceneConfig.StageName} failed");
                 yield break;
             }
 

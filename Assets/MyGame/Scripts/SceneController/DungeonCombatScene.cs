@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class DungeonCombatScene : MonoBehaviour
 {
     [Header("Scene Settings")]
-    [SerializeField] private string _preScene = "MainScene2";
+    [SerializeField] private string _preScene = "MainScene";
     [SerializeField] private string _nextScene = "DungeonCombatScene";
 
     [Header("UI Components")]

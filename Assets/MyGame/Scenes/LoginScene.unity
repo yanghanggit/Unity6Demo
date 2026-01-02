@@ -605,7 +605,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _userNameText: {fileID: 470425677}
   _gameNameText: {fileID: 143863052}
-  _nextSceneName: MainScene2
+  _nextSceneName: MainScene
   _gameName: Game1
   _taskTriggerApi: {fileID: 399892903}
   _tasksStatusApi: {fileID: 399892902}
@@ -622,6 +622,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TasksStatusApi
   requestTimeout: 30
+  _pollInterval: 2
+  _maxAttempts: 60
 --- !u!114 &399892903
 MonoBehaviour:
   m_ObjectHideFlags: 0
