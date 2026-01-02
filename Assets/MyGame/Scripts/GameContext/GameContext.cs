@@ -58,11 +58,6 @@ public partial class GameContext
     }
 
     /// <summary>
-    /// 基础URL，用于构建API请求的完整地址
-    /// </summary>
-    private string _baseUrl;
-
-    /// <summary>
     /// 用户名
     /// </summary>
     private string _userName;
@@ -96,21 +91,6 @@ public partial class GameContext
         {
             Debug.Assert(value >= 0, "LastSequenceId cannot be negative");
             _lastSequenceId = value;
-        }
-    }
-
-    /// <summary>
-    /// 获取或设置基础URL
-    /// </summary>
-    public string BaseUrl
-    {
-        get
-        {
-            return _baseUrl;
-        }
-        set
-        {
-            _baseUrl = value;
         }
     }
 
@@ -166,7 +146,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["login"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["login"];
         }
     }
 
@@ -177,7 +157,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["logout"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["logout"];
         }
     }
 
@@ -188,7 +168,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["home_gameplay"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["home_gameplay"];
         }
     }
 
@@ -200,8 +180,8 @@ public partial class GameContext
     {
         get
         {
-            var stagesStateEndpoint = RootResp.GetGameRoot().endpoints["stages_state"];
-            return _baseUrl.TrimEnd('/') + $"{stagesStateEndpoint}{UserName}/{GameName}/state";
+            var stagesStateEndpoint = ApiEndpointsManager.GameRootResponse.endpoints["stages_state"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + $"{stagesStateEndpoint}{UserName}/{GameName}/state";
         }
     }
 
@@ -213,8 +193,8 @@ public partial class GameContext
     {
         get
         {
-            var dungeonStateEndpoint = RootResp.GetGameRoot().endpoints["dungeon_state"];
-            return _baseUrl.TrimEnd('/') + $"{dungeonStateEndpoint}{UserName}/{GameName}/state";
+            var dungeonStateEndpoint = ApiEndpointsManager.GameRootResponse.endpoints["dungeon_state"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + $"{dungeonStateEndpoint}{UserName}/{GameName}/state";
         }
     }
 
@@ -226,8 +206,8 @@ public partial class GameContext
     {
         get
         {
-            var entityDetailsEndpoint = RootResp.GetGameRoot().endpoints["entity_details"];
-            return _baseUrl.TrimEnd('/') + $"{entityDetailsEndpoint}{UserName}/{GameName}/details";
+            var entityDetailsEndpoint = ApiEndpointsManager.GameRootResponse.endpoints["entity_details"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + $"{entityDetailsEndpoint}{UserName}/{GameName}/details";
         }
     }
 
@@ -238,7 +218,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["start"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["start"];
         }
     }
 
@@ -249,7 +229,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["home_trans_dungeon"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["home_trans_dungeon"];
         }
     }
 
@@ -260,7 +240,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["dungeon_gameplay"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["dungeon_gameplay"];
         }
     }
 
@@ -271,7 +251,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["dungeon_combat_play_cards"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["dungeon_combat_play_cards"];
         }
     }
 
@@ -282,7 +262,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["dungeon_trans_home"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["dungeon_trans_home"];
         }
     }
 
@@ -294,8 +274,8 @@ public partial class GameContext
     {
         get
         {
-            var sessionMessagesEndpoint = RootResp.GetGameRoot().endpoints["session_messages"];
-            return _baseUrl.TrimEnd('/') + $"{sessionMessagesEndpoint}{UserName}/{GameName}/since";
+            var sessionMessagesEndpoint = ApiEndpointsManager.GameRootResponse.endpoints["session_messages"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + $"{sessionMessagesEndpoint}{UserName}/{GameName}/since";
         }
     }
 
@@ -306,7 +286,7 @@ public partial class GameContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetGameRoot().endpoints["tasks_trigger"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["tasks_trigger"];
         }
     }
 
@@ -318,8 +298,8 @@ public partial class GameContext
     {
         get
         {
-            var tasksStatusEndpointUrl = RootResp.GetGameRoot().endpoints["tasks_status"];
-            return _baseUrl.TrimEnd('/') + tasksStatusEndpointUrl;
+            var tasksStatusEndpointUrl = ApiEndpointsManager.GameRootResponse.endpoints["tasks_status"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + tasksStatusEndpointUrl;
         }
     }
 }

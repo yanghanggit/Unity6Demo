@@ -66,10 +66,10 @@ public class TestImageServiceScene : MonoBehaviour
         Debug.Assert(_imageRootApi.RespData != null, "ImageRootApi response data is null");
 
         // 设置ImageServerContext的基础URL
-        ImageServiceContext.Instance.BaseUrl = _baseUrl;
+        ApiEndpointsManager.ImageApiBaseUrl = _baseUrl;
 
         // 设置图片服务根响应数据
-        RootResp.SetImageRoot(_imageRootApi.RespData);
+        ApiEndpointsManager.ImageRootResponse = _imageRootApi.RespData;
     }
 
     /// <summary>
@@ -166,7 +166,7 @@ public class TestImageServiceScene : MonoBehaviour
 
         // 加载图片纹理
         yield return _textureLoader.LoadTexture(
-            ImageServiceContext.Instance.BaseUrl.TrimEnd('/') + imageInfo.url
+            ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + imageInfo.url
         );
 
         if (_textureLoader.Result != null && _textureLoader.Result.IsSuccess)

@@ -67,10 +67,10 @@ public class LaunchScene : MonoBehaviour
         _loginButton.gameObject.SetActive(true);
 
         // 设置全局游戏上下文的基础URL和根响应数据
-        GameContext.Instance.BaseUrl = _baseUrl;
+        ApiEndpointsManager.GameApiBaseUrl = _baseUrl;
 
         // 设置根响应数据
-        RootResp.SetGameRoot(_rootApi.RespData);
+        ApiEndpointsManager.GameRootResponse = _rootApi.RespData;
     }
 
     /// <summary>

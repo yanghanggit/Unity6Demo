@@ -58,34 +58,13 @@ public partial class ImageServiceContext
     }
 
     /// <summary>
-    /// 基础URL，用于构建API请求的完整地址
-    /// </summary>
-    private string _baseUrl;
-
-    /// <summary>
-    /// 获取或设置基础URL
-    /// </summary>
-    public string BaseUrl
-    {
-        get
-        {
-            return _baseUrl;
-        }
-        set
-        {
-            _baseUrl = value;
-        }
-    }
-
-
-    /// <summary>
     /// 获取生成图片API的URL地址
     /// </summary>
     public string GenerateImageApiUrl
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetImageRoot().endpoints["generate"];
+            return ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.ImageRootResponse.endpoints["generate"];
         }
     }
 
@@ -94,7 +73,7 @@ public partial class ImageServiceContext
     {
         get
         {
-            return _baseUrl.TrimEnd('/') + RootResp.GetImageRoot().endpoints["static_images"];
+            return ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.ImageRootResponse.endpoints["static_images"];
         }
     }
 }

@@ -46,7 +46,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     //
     void Awake()
     {
-        // 如果有从 MainScene2 传递过来的配置,使用它
+        // 如果有从 MainScene 传递过来的配置,使用它
         if (PendingHomeSceneConfig != null)
         {
             _homeSceneConfig = PendingHomeSceneConfig;
@@ -210,7 +210,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// </summary>
     private void RefreshActorList()
     {
-        if (RootResp.GetGameRoot() != null)
+        if (ApiEndpointsManager.GameRootResponse != null)
         {
             // 走到这里就是有正规登陆的，加载当前场景的角色列表
             var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
@@ -364,13 +364,13 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
 
     /// <summary>
     /// 返回主场景的协程
-    /// 检查游戏是否已正确设置,切换到监视之屋Stage,然后加载MainScene2场景
+    /// 检查游戏是否已正确设置,切换到监视之屋Stage,然后加载MainScene场景
     /// </summary>
     /// <returns>协程迭代器</returns>
     private IEnumerator ReturnToMainScene()
     {
         // 检查游戏是否已正确初始化
-        if (RootResp.GetGameRoot() != null)
+        if (ApiEndpointsManager.GameRootResponse != null)
         {
             // 切换到监视之屋（如果需要）
             bool switchSuccess = false;
@@ -389,7 +389,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
                 yield break;
             }
 
-            // 加载 MainScene2 场景
+            // 加载 MainScene 场景
             yield return new WaitForSeconds(0);
             SceneManager.LoadScene(_preScene);
         }
@@ -490,7 +490,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     public void OnClickSendMessage()
     {
         Debug.Log("Send Message button clicked");
-        if (RootResp.GetGameRoot() != null && !string.IsNullOrEmpty(_selectedActorName) && !string.IsNullOrEmpty(_inputField.text))
+        if (ApiEndpointsManager.GameRootResponse != null && !string.IsNullOrEmpty(_selectedActorName) && !string.IsNullOrEmpty(_inputField.text))
         {
             StartCoroutine(ExecuteSpeakAction(_selectedActorName, _inputField.text));
         }
@@ -542,7 +542,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     public void OnAllyButtonClicked()
     {
         Debug.Log("Ally button clicked in HomeScene.");
-        if (RootResp.GetGameRoot() != null && !string.IsNullOrEmpty(_selectedActorName))
+        if (ApiEndpointsManager.GameRootResponse != null && !string.IsNullOrEmpty(_selectedActorName))
         {
             StartCoroutine(ExecuteAllyAction(_selectedActorName));
         }

@@ -98,7 +98,7 @@ public class DungeonOverviewScene : MonoBehaviour
     /// </summary>
     private IEnumerator ReturnToMainScene()
     {
-        if (RootResp.GetGameRoot() != null)
+        if (ApiEndpointsManager.GameRootResponse != null)
         {
             Debug.Log("Returning to MainScene");
             yield return new WaitForSeconds(0);
