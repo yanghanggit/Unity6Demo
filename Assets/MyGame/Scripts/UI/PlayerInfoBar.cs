@@ -30,7 +30,7 @@ public class PlayerInfoBar : MonoBehaviour
 
 
         // 设置 ActorName，解耦对 GameContext 的直接依赖
-        imageDisplayController.EntityName = actorName;
+        imageDisplayController.ActorName = actorName;
 
         // 设置 PortraitPrompt
         var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(actorName);

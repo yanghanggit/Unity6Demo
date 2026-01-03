@@ -24,11 +24,6 @@ public class CachedRemoteImageController : MonoBehaviour
     [SerializeField] protected int _imageHeight = 512;
     [SerializeField] protected int _numInferenceSteps = 4;
 
-    [Header("Test Settings")]
-    [SerializeField] protected bool _useMockMode = false;
-    [SerializeField] protected float _mockGenerationDelay = 2.0f;
-    [SerializeField] protected string _mockImageUrl = "/images/nano-banana_fb300c55-3130-4ac2-9e9e-19ee8da8f3e1.png";
-
     protected virtual void Awake()
     {
         // 自动获取组件引用（如果未在Inspector中赋值）
@@ -60,86 +55,6 @@ public class CachedRemoteImageController : MonoBehaviour
             Debug.LogWarning("[CachedRemoteImageController] Target Image already has a sprite assigned, it will be replaced.");
             DestroyImmediate(_targetImage.sprite, true);
             _targetImage.sprite = null;
-        }
-    }
-
-    /// <summary>
-    /// 启动图片加载流程
-    /// 供派生类在适当时机调用
-    /// </summary>
-    /// <param name="prompt">图片生成提示词</param>
-    /// <param name="imageUrlStorageKey">图片URL存储键</param>
-    /// <param name="spriteCacheKey">精灵缓存键</param>
-    protected void StartImageLoadingProcess(string prompt, string imageUrlStorageKey, string spriteCacheKey)
-    {
-        // 检查是否已有缓存的Sprite, 有就直接显示
-        var cachedSprite = SpriteCacheManager.Instance.GetSprite(spriteCacheKey);
-        if (cachedSprite != null)
-        {
-            Debug.Log($"[CachedRemoteImageController] Found cached sprite with key '{spriteCacheKey}', displaying it directly.");
-            _targetImage.sprite = cachedSprite;
-            return;
-        }
-
-        // 未命中内存缓存，立即显示默认图标（后续需要网络操作）
-        var defaultActorIcon = SpriteCacheManager.Instance.GetSprite(SpriteCacheManager.DefaultIconKey);
-        _targetImage.sprite = defaultActorIcon;
-
-        // 检查图片生成服务器是否开启
-        if (ApiEndpointsManager.ImageRootResponse == null)
-        {
-            Debug.LogWarning("[CachedRemoteImageController] Image generation API endpoint is not configured, skipping all network operations");
-            return;
-        }
-
-        // 检查是否有持久化的URL映射
-        if (ImageService.HasImageUrl(imageUrlStorageKey))
-        {
-            string cachedUrl = ImageService.GetImageUrl(imageUrlStorageKey);
-            Debug.Log($"[CachedRemoteImageController] Found cached URL with key '{imageUrlStorageKey}', loading directly (skip generation)");
-
-            // Mock逻辑分叉：加载缓存URL
-            if (_useMockMode)
-            {
-                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl, imageUrlStorageKey, spriteCacheKey, (success) =>
-                {
-                    if (!success)
-                    {
-                        ImageService.RemoveImageUrl(imageUrlStorageKey);
-                        Debug.LogWarning($"[CachedRemoteImageController] Cached URL is invalid, removed mapping for key '{imageUrlStorageKey}'. Will regenerate on next launch.");
-                    }
-                }));
-            }
-            else
-            {
-                StartCoroutine(LoadAndDisplayImageFromUrl(cachedUrl, imageUrlStorageKey, spriteCacheKey, (success) =>
-                {
-                    if (!success)
-                    {
-                        ImageService.RemoveImageUrl(imageUrlStorageKey);
-                        Debug.LogWarning($"[CachedRemoteImageController] Cached URL is invalid, removed mapping for key '{imageUrlStorageKey}'. Will regenerate on next launch.");
-                    }
-                }));
-            }
-            return;
-        }
-
-        // 没有URL映射，需要生成新图片
-        Debug.Log($"[CachedRemoteImageController] No cached URL found, starting image generation with prompt: \n{prompt}");
-
-        // Mock逻辑分叉：生成图片
-        if (_useMockMode)
-        {
-            StartCoroutine(GenerateAndDisplayImageMock(imageUrlStorageKey, spriteCacheKey));
-        }
-        else
-        {
-            var configs = new List<ImageGenerationConfig>
-            {
-                new() { prompt = prompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
-            };
-
-            StartCoroutine(GenerateAndDisplayImage(configs, imageUrlStorageKey, spriteCacheKey));
         }
     }
 
@@ -318,56 +233,5 @@ public class CachedRemoteImageController : MonoBehaviour
         _targetImage.sprite = sprite;
         Debug.Log($"[CachedRemoteImageController] Image loaded from cached URL and displayed: {texture.width}x{texture.height}");
         onComplete?.Invoke(true);
-    }
-
-    /// <summary>
-    /// Mock实现：模拟从缓存URL加载图片
-    /// 用于测试缓存URL加载流程，使用mock URL替代实际URL
-    /// </summary>
-    /// <param name="originalUrl">原始URL（仅用于日志记录）</param>
-    /// <param name="imageUrlStorageKey">图片URL存储键，用于失败时删除映射</param>
-    /// <param name="spriteCacheKey">精灵缓存键</param>
-    /// <param name="onComplete">加载完成回调，参数为加载是否成功</param>
-    protected IEnumerator LoadAndDisplayImageFromUrlMock(string originalUrl, string imageUrlStorageKey, string spriteCacheKey, System.Action<bool> onComplete)
-    {
-        Debug.Log($"[CachedRemoteImageController] 🔧 Mock模式：模拟从缓存URL加载");
-        Debug.Log($"[CachedRemoteImageController] 🔧 原始URL: {originalUrl}");
-        Debug.Log($"[CachedRemoteImageController] 🔧 使用Mock URL: {_mockImageUrl}");
-
-        // 模拟网络延迟
-        yield return new WaitForSeconds(_mockGenerationDelay);
-
-        Debug.Log($"[CachedRemoteImageController] ✅ Mock加载完成");
-
-        // 使用mock URL加载
-        yield return LoadAndDisplayImageFromUrl(_mockImageUrl, imageUrlStorageKey, spriteCacheKey, onComplete);
-    }
-
-    /// <summary>
-    /// Mock实现：模拟图片生成并显示
-    /// 用于测试图片加载和显示功能，跳过实际的AI生成API调用
-    /// </summary>
-    /// <param name="imageUrlStorageKey">图片URL存储键</param>
-    /// <param name="spriteCacheKey">精灵缓存键</param>
-    protected IEnumerator GenerateAndDisplayImageMock(string imageUrlStorageKey, string spriteCacheKey)
-    {
-        Debug.Log($"[CachedRemoteImageController] 🔧 Mock模式启动，模拟生成延迟: {_mockGenerationDelay}秒");
-
-        // 模拟生成等待
-        yield return new WaitForSeconds(_mockGenerationDelay);
-
-        Debug.Log($"[CachedRemoteImageController] ✅ Mock生成完成，使用URL: {_mockImageUrl}");
-
-        // 创建模拟的图片信息对象
-        var mockImageInfo = new GeneratedImage
-        {
-            url = _mockImageUrl,
-            filename = System.IO.Path.GetFileName(_mockImageUrl),
-            prompt = "Mock test image",
-            model = "nano-banana"
-        };
-
-        // 加载并显示图片
-        yield return LoadAndDisplayImage(mockImageInfo, imageUrlStorageKey, spriteCacheKey);
     }
 }
