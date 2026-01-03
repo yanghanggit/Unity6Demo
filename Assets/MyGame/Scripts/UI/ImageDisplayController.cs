@@ -46,8 +46,30 @@ public class ImageDisplayController : MonoBehaviour
 
         // 组件检测
         Debug.Assert(_targetImage != null, "[ImageDisplayController] Image component is null on GameObject: " + gameObject.name);
+        Debug.Assert(_targetImage.sprite == null, "[ImageDisplayController] Image component already has a sprite assigned on GameObject: " + gameObject.name); //这里必须要删除，否则后续会出现内存错误。
         Debug.Assert(_generateImageApi != null, "[ImageDisplayController] GenerateImageApi is null");
         Debug.Assert(_textureLoader != null, "[ImageDisplayController] TextureLoader is null");
+
+        // 保险用，后续只用 SpriteManager 来管理默认图标
+        if (_targetImage.sprite != null)
+        {
+            Debug.LogWarning("[ImageDisplayController] Target Image already has a sprite assigned, it will be replaced.");
+            DestroyImmediate(_targetImage.sprite, true);
+            _targetImage.sprite = null;
+        }
+
+        // 检查是否已有缓存的Sprite, 有就直接显示
+        var cachedSprite = SpriteManager.Instance.GetSprite(GameContext.Instance.ActorName);
+        if (cachedSprite != null)
+        {
+            Debug.Log($"[ImageDisplayController] Found cached sprite for actor '{GameContext.Instance.ActorName}', displaying it directly.");
+            _targetImage.sprite = cachedSprite;
+            return;
+        }
+
+        // 显示默认图标，因为后面会等待图片生成完成后替换
+        var defaultActorIcon = SpriteManager.Instance.GetSprite(SpriteManager.DefaultIconKey);
+        _targetImage.sprite = defaultActorIcon;
 
         // 测试生成图片，有可能图片生成服务器是不开的，所以要加个判断
         if (ApiEndpointsManager.ImageRootResponse != null)
@@ -62,6 +84,11 @@ public class ImageDisplayController : MonoBehaviour
             Debug.Log($"[ImageDisplayController] Starting image generation with prompt: \n{prompt}");
             StartCoroutine(GenerateAndDisplayImage(prompt));
         }
+        else
+        {
+            //不会替换了，因为服务器没开
+            Debug.LogWarning("[ImageDisplayController] Image generation API endpoint is not configured, skipping image generation test");
+        }
     }
 
     /// <summary>
@@ -72,6 +99,7 @@ public class ImageDisplayController : MonoBehaviour
     private IEnumerator GenerateAndDisplayImage(string prompt)
     {
         // Mock模式：跳过API调用，直接使用模拟URL
+        _useMockMode = true;
         if (_useMockMode)
         {
             yield return GenerateAndDisplayImageMock();
@@ -171,21 +199,21 @@ public class ImageDisplayController : MonoBehaviour
 
         if (_textureLoader.Result != null && _textureLoader.Result.IsSuccess)
         {
-            // 销毁旧的 Sprite 防止内存泄漏
-            if (_targetImage.sprite != null)
-            {
-                DestroyImmediate(_targetImage.sprite, true);
-            }
-
-            // 创建新的 Sprite 并显示
+            // 通过 SpriteManager 创建、缓存并显示 Sprite
             var texture = _textureLoader.LoadedTexture;
-            _targetImage.sprite = Sprite.Create(
-                texture,
-                new Rect(0, 0, texture.width, texture.height),
-                new Vector2(0.5f, 0.5f)
-            );
+            string spriteKey = GameContext.Instance.ActorName;
+            //$"GeneratedImage_{imageInfo.filename}";
 
-            Debug.Log($"[ImageDisplayController] Image displayed: {texture.width}x{texture.height}");
+            var sprite = SpriteManager.Instance.AddSprite(spriteKey, texture);
+            if (sprite != null)
+            {
+                _targetImage.sprite = sprite;
+                Debug.Log($"[ImageDisplayController] Image displayed and cached with key '{spriteKey}': {texture.width}x{texture.height}");
+            }
+            else
+            {
+                Debug.LogError($"[ImageDisplayController] Failed to create sprite from texture");
+            }
         }
         else
         {

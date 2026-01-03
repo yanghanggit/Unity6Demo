@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public class SpriteManager : MonoBehaviour
 {
+    // 默认图标键值
+    public static readonly string DefaultIconKey = "测试默认";
+
     public static SpriteManager Instance { get; private set; }
 
     [Header("预加载纹理配置")]
@@ -27,7 +30,7 @@ public class SpriteManager : MonoBehaviour
     [Tooltip("Resources文件夹路径，用于运行时加载纹理")]
     [SerializeField] private string resourcesTexturePath = "Textures";
 
-    private Dictionary<string, Sprite> spriteCache = new Dictionary<string, Sprite>();
+    private Dictionary<string, Sprite> spriteCache = new();
 
     private void Awake()
     {
@@ -52,6 +55,47 @@ public class SpriteManager : MonoBehaviour
     {
         LoadPreConfiguredTextures();
         Debug.Log($"TextureManager: Initialization completed. Total cached sprites: {spriteCache.Count}");
+    }
+
+    /// <summary>
+    /// 添加 Sprite 到缓存
+    /// 从 Texture2D 创建 Sprite，缓存后返回
+    /// 如果 key 已存在，会先移除旧的 Sprite 再添加新的
+    /// </summary>
+    /// <param name="key">缓存键值</param>
+    /// <param name="texture">源纹理</param>
+    /// <returns>创建并缓存的 Sprite，失败则返回 null</returns>
+    public Sprite AddSprite(string key, Texture2D texture)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            Debug.LogWarning("TextureManager: AddSprite called with null or empty key");
+            return null;
+        }
+
+        if (texture == null)
+        {
+            Debug.LogWarning($"TextureManager: AddSprite called with null texture for key '{key}'");
+            return null;
+        }
+
+        // 如果已存在同名 Sprite，先移除
+        if (spriteCache.ContainsKey(key))
+        {
+            Debug.LogWarning($"TextureManager: Key '{key}' already exists, removing old sprite");
+            RemoveSprite(key);
+        }
+
+        // 创建新的 Sprite
+        Sprite sprite = CreateSpriteFromTexture(texture, key, pixelsPerUnit, spritePivot);
+        if (sprite != null)
+        {
+            spriteCache[key] = sprite;
+            Debug.Log($"TextureManager: Added sprite '{key}' to cache ({texture.width}x{texture.height})");
+            return sprite;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -183,7 +227,7 @@ public class SpriteManager : MonoBehaviour
     /// <summary>
     /// 从 Texture2D 创建 Sprite
     /// </summary>
-    private Sprite CreateSpriteFromTexture(Texture2D texture, string spriteName, float pixelsPerUnit, Vector2 pivot)
+    public Sprite CreateSpriteFromTexture(Texture2D texture, string spriteName, float pixelsPerUnit, Vector2 pivot)
     {
         if (texture == null)
             return null;
