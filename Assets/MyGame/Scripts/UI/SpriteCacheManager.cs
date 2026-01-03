@@ -2,15 +2,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 纹理管理器，使用单例模式 + DontDestroyOnLoad 保持全局存在
-/// 使用：SpriteManager.Instance.GetSprite("texture_key")
+/// Sprite 缓存管理器，使用单例模式 + DontDestroyOnLoad 保持全局存在
+/// 使用：SpriteCacheManager.Instance.GetSprite("sprite_key")
 /// </summary>
-public class SpriteManager : MonoBehaviour
+public class SpriteCacheManager : MonoBehaviour
 {
     // 默认图标键值
     public static readonly string DefaultIconKey = "测试默认";
 
-    public static SpriteManager Instance { get; private set; }
+    public static SpriteCacheManager Instance { get; private set; }
 
     [Header("预加载纹理配置")]
     [Tooltip("需要预加载的纹理数组")]
@@ -30,7 +30,7 @@ public class SpriteManager : MonoBehaviour
     [Tooltip("Resources文件夹路径，用于运行时加载纹理")]
     [SerializeField] private string resourcesTexturePath = "Textures";
 
-    private Dictionary<string, Sprite> spriteCache = new();
+    private readonly Dictionary<string, Sprite> spriteCache = new();
 
     private void Awake()
     {
@@ -38,23 +38,23 @@ public class SpriteManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            Debug.Log("TextureManager: Instance created and marked as DontDestroyOnLoad");
+            Debug.Log("SpriteCacheManager: Instance created and marked as DontDestroyOnLoad");
             InitializeTextures();
         }
         else
         {
-            Debug.LogWarning("[TextureManager] Duplicate instance detected, destroying the new one.");
+            Debug.LogWarning("[SpriteCacheManager] Duplicate instance detected, destroying the new one.");
             Destroy(gameObject);
         }
     }
 
     /// <summary>
-    /// 初始化纹理管理器
+    /// 初始化 Sprite 缓存管理器
     /// </summary>
     private void InitializeTextures()
     {
         LoadPreConfiguredTextures();
-        Debug.Log($"TextureManager: Initialization completed. Total cached sprites: {spriteCache.Count}");
+        Debug.Log($"SpriteCacheManager: Initialization completed. Total cached sprites: {spriteCache.Count}");
     }
 
     /// <summary>
@@ -69,20 +69,20 @@ public class SpriteManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(key))
         {
-            Debug.LogWarning("TextureManager: AddSprite called with null or empty key");
+            Debug.LogWarning("SpriteCacheManager: AddSprite called with null or empty key");
             return null;
         }
 
         if (texture == null)
         {
-            Debug.LogWarning($"TextureManager: AddSprite called with null texture for key '{key}'");
+            Debug.LogWarning($"SpriteCacheManager: AddSprite called with null texture for key '{key}'");
             return null;
         }
 
         // 如果已存在同名 Sprite，先移除
         if (spriteCache.ContainsKey(key))
         {
-            Debug.LogWarning($"TextureManager: Key '{key}' already exists, removing old sprite");
+            Debug.LogWarning($"SpriteCacheManager: Key '{key}' already exists, removing old sprite");
             RemoveSprite(key);
         }
 
@@ -91,7 +91,7 @@ public class SpriteManager : MonoBehaviour
         if (sprite != null)
         {
             spriteCache[key] = sprite;
-            Debug.Log($"TextureManager: Added sprite '{key}' to cache ({texture.width}x{texture.height})");
+            Debug.Log($"SpriteCacheManager: Added sprite '{key}' to cache ({texture.width}x{texture.height})");
             return sprite;
         }
 
@@ -105,7 +105,7 @@ public class SpriteManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(key))
         {
-            Debug.LogWarning("TextureManager: GetSprite called with null or empty key");
+            Debug.LogWarning("SpriteCacheManager: GetSprite called with null or empty key");
             return null;
         }
 
@@ -150,7 +150,7 @@ public class SpriteManager : MonoBehaviour
                 }
             }
 
-            Debug.Log($"TextureManager: Removed sprite '{key}' from cache (sprite and texture destroyed)");
+            Debug.Log($"SpriteCacheManager: Removed sprite '{key}' from cache (sprite and texture destroyed)");
             return true;
         }
 
@@ -177,7 +177,7 @@ public class SpriteManager : MonoBehaviour
         }
 
         spriteCache.Clear();
-        Debug.Log("TextureManager: Cache cleared (sprites and textures destroyed)");
+        Debug.Log("SpriteCacheManager: Cache cleared (sprites and textures destroyed)");
     }
 
     /// <summary>
@@ -187,7 +187,7 @@ public class SpriteManager : MonoBehaviour
     {
         if (preloadTextures == null || textureKeys == null)
         {
-            Debug.LogWarning("TextureManager: Preload textures or keys array is null");
+            Debug.LogWarning("SpriteCacheManager: Preload textures or keys array is null");
             return;
         }
 
@@ -207,11 +207,11 @@ public class SpriteManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"TextureManager: Skipping invalid texture at index {i}");
+                Debug.LogWarning($"SpriteCacheManager: Skipping invalid texture at index {i}");
             }
         }
 
-        Debug.Log($"TextureManager: Preloaded {loadedCount} textures from configuration");
+        Debug.Log($"SpriteCacheManager: Preloaded {loadedCount} textures from configuration");
     }
 
     /// <summary>
@@ -228,13 +228,13 @@ public class SpriteManager : MonoBehaviour
             if (sprite != null)
             {
                 spriteCache[key] = sprite;
-                Debug.Log($"TextureManager: Loaded sprite '{key}' from Resources");
+                Debug.Log($"SpriteCacheManager: Loaded sprite '{key}' from Resources");
                 return sprite;
             }
         }
         else
         {
-            Debug.LogWarning($"TextureManager: Failed to load texture '{key}' from Resources path '{fullPath}'");
+            Debug.LogWarning($"SpriteCacheManager: Failed to load texture '{key}' from Resources path '{fullPath}'");
         }
 
         return null;
@@ -262,7 +262,7 @@ public class SpriteManager : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogError($"TextureManager: Failed to create sprite '{spriteName}': {e.Message}");
+            Debug.LogError($"SpriteCacheManager: Failed to create sprite '{spriteName}': {e.Message}");
             return null;
         }
     }

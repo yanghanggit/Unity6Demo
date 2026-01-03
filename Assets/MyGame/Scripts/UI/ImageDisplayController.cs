@@ -3,19 +3,12 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-/* 测试数据记录
-30 - ✅ 图片生成完成! 总耗时: 10.64秒, 平均: 10.64秒/张
-INFO:     192.168.2.134:56001 - "POST /api/generate/v1 HTTP/1.1" 200 OK
-INFO:     192.168.2.134:56001 - "GET /images/nano-banana_6d2db373-3e7f-41cb-88b7-d63a81f18255.png HTTP/1.1" 200 OK
-*/
-
-[RequireComponent(typeof(Image))]
-
 /// <summary>
 /// 图片显示控制器
 /// 用于生成AI图片并显示在Image组件上
 /// 需要挂载在包含Image组件的GameObject上
 /// </summary>
+[RequireComponent(typeof(Image))]
 public class ImageDisplayController : MonoBehaviour
 {
     [Header("Actor Settings")]
@@ -35,9 +28,9 @@ public class ImageDisplayController : MonoBehaviour
     [SerializeField] private int _numInferenceSteps = 4;
 
     [Header("Test Settings")]
-    [SerializeField] private bool _useMockMode = true;
+    [SerializeField] private bool _useMockMode = false;
     [SerializeField] private float _mockGenerationDelay = 2.0f;
-    [SerializeField] private string _mockImageUrl = "/images/nano-banana_fb300c55-3130-4ac2-9e9e-19ee8da8f3e1.png";
+    [SerializeField] private string _mockImageUrl = "/images/nano-banana_fb300c55-3130-4ac2-9e9e-19ee8da8f3e1.png"; //服务器上的一张测试图片，确保有，需要服务器开发确认！目前是有的。
 
     void Awake()
     {
@@ -63,7 +56,8 @@ public class ImageDisplayController : MonoBehaviour
         Debug.Assert(_generateImageApi != null, "[ImageDisplayController] GenerateImageApi is null");
         Debug.Assert(_textureLoader != null, "[ImageDisplayController] TextureLoader is null");
 
-        // 保险用，后续只用 SpriteManager 来管理默认图标
+        // 保险用，后续只用 SpriteManager 来管理默认图标，如果有残留的图标（例如是编辑器场景测试时留下的），则删除它。
+        // 否则使用 spriteManager 做生命周期管理时会出问题。
         if (_targetImage.sprite != null)
         {
             Debug.LogWarning("[ImageDisplayController] Target Image already has a sprite assigned, it will be replaced.");
@@ -75,7 +69,7 @@ public class ImageDisplayController : MonoBehaviour
     void Start()
     {
         // 检查是否已有缓存的Sprite, 有就直接显示
-        var cachedSprite = SpriteManager.Instance.GetSprite(ActorName);
+        var cachedSprite = SpriteCacheManager.Instance.GetSprite(ActorName);
         if (cachedSprite != null)
         {
             Debug.Log($"[ImageDisplayController] Found cached sprite for actor '{ActorName}', displaying it directly.");
@@ -83,98 +77,113 @@ public class ImageDisplayController : MonoBehaviour
             return;
         }
 
-        // 显示默认图标，因为后面会等待图片生成完成后替换
-        var defaultActorIcon = SpriteManager.Instance.GetSprite(SpriteManager.DefaultIconKey);
+        // 未命中内存缓存，立即显示默认图标（后续需要网络操作）
+        var defaultActorIcon = SpriteCacheManager.Instance.GetSprite(SpriteCacheManager.DefaultIconKey);
         _targetImage.sprite = defaultActorIcon;
 
-        // 测试生成图片，有可能图片生成服务器是不开的，所以要加个判断
-        if (ApiEndpointsManager.ImageRootResponse != null)
+        // 检查图片生成服务器是否开启
+        if (ApiEndpointsManager.ImageRootResponse == null)
         {
-            // 这里临时写死就是用玩家角色的外观作为提示词
-            var playerActor = GameContext.Instance.GetActorEntitySerialization(ActorName);
-            var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(playerActor);
-            Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + playerActor.name);
+            Debug.LogWarning("[ImageDisplayController] Image generation API endpoint is not configured, skipping all network operations");
+            return;
+        }
 
-            // 生成提示词，拿玩家角色的外观描述
-            var prompt = appearanceComponent.appearance;
-            Debug.Log($"[ImageDisplayController] Starting image generation with prompt: \n{prompt}");
-            StartCoroutine(GenerateAndDisplayImage(prompt));
+        // 获取提示词
+        var genPrompt = GetPrompt();
+
+        // 检查是否有持久化的URL映射
+        if (ImageService.HasImageUrl(GameContext.Instance.UserName, GameContext.Instance.GameName, ActorName, genPrompt))
+        {
+            string cachedUrl = ImageService.GetImageUrl(GameContext.Instance.UserName, GameContext.Instance.GameName, ActorName, genPrompt);
+            Debug.Log($"[ImageDisplayController] Found cached URL for actor '{ActorName}', loading directly (skip generation)");
+
+            // Mock逻辑分叉：加载缓存URL
+            if (_useMockMode)
+            {
+                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl));
+            }
+            else
+            {
+                StartCoroutine(LoadAndDisplayImageFromUrl(cachedUrl));
+            }
+            return;
+        }
+
+        // 没有URL映射，需要生成新图片
+        Debug.Log($"[ImageDisplayController] No cached URL found, starting image generation with prompt: \n{genPrompt}");
+
+        // Mock逻辑分叉：生成图片
+        if (_useMockMode)
+        {
+            StartCoroutine(GenerateAndDisplayImageMock());
         }
         else
         {
-            //不会替换了，因为服务器没开
-            Debug.LogWarning("[ImageDisplayController] Image generation API endpoint is not configured, skipping image generation test");
+            var configs = new List<ImageGenerationConfig>
+            {
+                new() { prompt = genPrompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
+            };
+
+            StartCoroutine(GenerateAndDisplayImage(configs));
         }
+
+    }
+
+    /// <summary>
+    /// 获取角色的图片生成提示词
+    /// </summary>
+    /// <returns>角色外观描述</returns>
+    private string GetPrompt()
+    {
+        var playerActor = GameContext.Instance.GetActorEntitySerialization(ActorName);
+        var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(playerActor);
+        Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + playerActor.name);
+        return appearanceComponent.appearance;
     }
 
     /// <summary>
     /// 协调函数：生成图片并显示
     /// 调用 GenerateImage 生成图片，然后在回调中调用 LoadAndDisplayImage 显示图片
     /// </summary>
-    /// <param name="prompt">生成图片的提示词</param>
-    private IEnumerator GenerateAndDisplayImage(string prompt)
+    /// <param name="configs">图片生成配置列表，包含提示词、模型、尺寸等参数</param>
+    private IEnumerator GenerateAndDisplayImage(List<ImageGenerationConfig> configs)
     {
-        // Mock模式：跳过API调用，直接使用模拟URL
-        _useMockMode = true;
-        if (_useMockMode)
+        // Early return: 检查参数
+        if (configs == null || configs.Count == 0)
         {
-            yield return GenerateAndDisplayImageMock();
+            Debug.LogError("[ImageDisplayController] Configs is null or empty");
             yield break;
         }
 
         yield return GenerateImage(
-            prompt,
-            _modelName,
-            _imageWidth,
-            _imageHeight,
-            _numInferenceSteps,
+            configs,
             (generateResult) =>
             {
-                // 图片生成完成后的回调
-                if (generateResult != null && generateResult.images.Count > 0)
-                {
-                    // 加载并显示第一张图片
-                    StartCoroutine(LoadAndDisplayImage(generateResult.images[0]));
-                }
-                else
+                // Early return: 检查生成结果
+                if (generateResult == null || generateResult.images.Count == 0)
                 {
                     Debug.LogWarning("[ImageDisplayController] No images generated in callback");
+                    return;
                 }
+
+                // 成功路径：加载并显示第一张图片
+                StartCoroutine(LoadAndDisplayImage(generateResult.images[0]));
             }
         );
     }
 
     /// <summary>
-    /// 第一步：调用图片生成API并返回生成结果
+    /// 调用图片生成API并返回生成结果
     /// </summary>
-    /// <param name="prompt">提示词</param>
-    /// <param name="modelName">模型名称</param>
-    /// <param name="width">图片宽度</param>
-    /// <param name="height">图片高度</param>
-    /// <param name="numInferenceSteps">推理步数</param>
+    /// <param name="configs">图片生成配置列表，包含提示词、模型名称、图片尺寸、推理步数等参数</param>
     /// <param name="onComplete">生成完成后的回调函数，接收生成结果</param>
     private IEnumerator GenerateImage(
-        string prompt,
-        string modelName,
-        int width,
-        int height,
-        int numInferenceSteps,
+        List<ImageGenerationConfig> configs,
         System.Action<ImageGenerationResponse> onComplete)
     {
-        var configs = new List<ImageGenerationConfig>
-        {
-            new() { prompt = prompt, model = modelName, width = width, height = height, num_inference_steps = numInferenceSteps}
-        };
-
         yield return _generateImageApi.Call(ImageService.GenerateImageApiUrl, configs);
 
-        if (!_generateImageApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"[ImageDisplayController] GenerateImageApi call failed: {_generateImageApi.ReqResult.responseText}");
-            onComplete?.Invoke(null);
-            yield break;
-        }
-
+        // Early return: 先检查 ReqResult 是否为 null
         if (_generateImageApi.ReqResult == null)
         {
             Debug.LogError("[ImageDisplayController] GenerateImageApi request result is null");
@@ -182,16 +191,29 @@ public class ImageDisplayController : MonoBehaviour
             yield break;
         }
 
+        // Early return: 检查请求是否成功
+        if (!_generateImageApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[ImageDisplayController] GenerateImageApi call failed: {_generateImageApi.ReqResult.responseText}");
+            onComplete?.Invoke(null);
+            yield break;
+        }
 
-        Debug.Assert(_generateImageApi.RespData != null, "[ImageDisplayController] GenerateImageApi response data is null");
+        // Early return: 检查响应数据
+        if (_generateImageApi.RespData == null)
+        {
+            Debug.LogError("[ImageDisplayController] GenerateImageApi response data is null");
+            onComplete?.Invoke(null);
+            yield break;
+        }
 
+        // 成功路径
         Debug.Log($"[ImageDisplayController] Generated {_generateImageApi.RespData.images.Count} images, elapsed time: {_generateImageApi.RespData.elapsed_time}s");
         foreach (var img in _generateImageApi.RespData.images)
         {
             Debug.Log($"[ImageDisplayController] Image: {img.filename}, URL: {img.url}, Prompt: {img.prompt}, Model: {img.model}");
         }
 
-        // 调用回调函数，传递生成结果
         onComplete?.Invoke(_generateImageApi.RespData);
     }
 
@@ -201,6 +223,7 @@ public class ImageDisplayController : MonoBehaviour
     /// <param name="imageInfo">图片信息对象</param>
     private IEnumerator LoadAndDisplayImage(GeneratedImage imageInfo)
     {
+        // Early return: 检查参数
         if (imageInfo == null)
         {
             Debug.LogError("[ImageDisplayController] ImageInfo is null");
@@ -214,27 +237,88 @@ public class ImageDisplayController : MonoBehaviour
             ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + imageInfo.url
         );
 
-        if (_textureLoader.Result.IsSuccess && _textureLoader.Result != null)
-        {
-            // 通过 SpriteManager 创建、缓存并显示 Sprite
-            var texture = _textureLoader.LoadedTexture;
-            string spriteKey = ActorName;
-
-            var sprite = SpriteManager.Instance.AddSprite(spriteKey, texture);
-            if (sprite != null)
-            {
-                _targetImage.sprite = sprite;
-                Debug.Log($"[ImageDisplayController] Image displayed and cached with key '{spriteKey}': {texture.width}x{texture.height}");
-            }
-            else
-            {
-                Debug.LogError($"[ImageDisplayController] Failed to create sprite from texture");
-            }
-        }
-        else
+        // Early return: 检查加载结果
+        if (_textureLoader.Result == null || !_textureLoader.Result.IsSuccess)
         {
             Debug.LogError($"[ImageDisplayController] Failed to load image: {_textureLoader.Result?.Error}");
+            yield break;
         }
+
+        // 保存URL映射到持久化存储
+        ImageService.SetImageUrl(GameContext.Instance.UserName, GameContext.Instance.GameName, ActorName, imageInfo.prompt, imageInfo.url);
+        Debug.Log($"[ImageDisplayController] Saved URL mapping for actor '{ActorName}'");
+
+        // 通过 SpriteManager 创建、缓存并显示 Sprite
+        var texture = _textureLoader.LoadedTexture;
+        string spriteKey = ActorName;
+
+        var sprite = SpriteCacheManager.Instance.AddSprite(spriteKey, texture);
+        if (sprite == null)
+        {
+            Debug.LogError($"[ImageDisplayController] Failed to create sprite from texture");
+            yield break;
+        }
+
+        // 成功路径
+        _targetImage.sprite = sprite;
+        Debug.Log($"[ImageDisplayController] Image displayed and cached with key '{spriteKey}': {texture.width}x{texture.height}");
+    }
+
+    /// <summary>
+    /// 直接从URL加载并显示图片
+    /// 用于加载已知URL的图片，跳过生成步骤
+    /// </summary>
+    /// <param name="imageUrl">图片URL（相对路径）</param>
+    private IEnumerator LoadAndDisplayImageFromUrl(string imageUrl)
+    {
+        Debug.Log($"[ImageDisplayController] Loading image from cached URL: {imageUrl}");
+
+        // 加载图片纹理
+        yield return _textureLoader.LoadTexture(
+            ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + imageUrl
+        );
+
+        // Early return: 检查加载结果
+        if (_textureLoader.Result == null || !_textureLoader.Result.IsSuccess)
+        {
+            Debug.LogError($"[ImageDisplayController] Failed to load image from cached URL: {_textureLoader.Result?.Error}");
+            yield break;
+        }
+
+        // 通过 SpriteManager 创建、缓存并显示 Sprite
+        var texture = _textureLoader.LoadedTexture;
+        string spriteKey = ActorName;
+
+        var sprite = SpriteCacheManager.Instance.AddSprite(spriteKey, texture);
+        if (sprite == null)
+        {
+            Debug.LogError($"[ImageDisplayController] Failed to create sprite from texture");
+            yield break;
+        }
+
+        // 成功路径
+        _targetImage.sprite = sprite;
+        Debug.Log($"[ImageDisplayController] Image loaded from cached URL and displayed: {texture.width}x{texture.height}");
+    }
+
+    /// <summary>
+    /// Mock实现：模拟从缓存URL加载图片
+    /// 用于测试缓存URL加载流程，使用mock URL替代实际URL
+    /// </summary>
+    /// <param name="originalUrl">原始URL（仅用于日志记录）</param>
+    private IEnumerator LoadAndDisplayImageFromUrlMock(string originalUrl)
+    {
+        Debug.Log($"[ImageDisplayController] 🔧 Mock模式：模拟从缓存URL加载");
+        Debug.Log($"[ImageDisplayController] 🔧 原始URL: {originalUrl}");
+        Debug.Log($"[ImageDisplayController] 🔧 使用Mock URL: {_mockImageUrl}");
+
+        // 模拟网络延迟
+        yield return new WaitForSeconds(_mockGenerationDelay);
+
+        Debug.Log($"[ImageDisplayController] ✅ Mock加载完成");
+
+        // 使用mock URL加载
+        yield return LoadAndDisplayImageFromUrl(_mockImageUrl);
     }
 
     /// <summary>

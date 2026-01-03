@@ -522,6 +522,7 @@ MonoBehaviour:
   _rootApi: {fileID: 399892903}
   _imageRootApi: {fileID: 399892904}
   _loginButton: {fileID: 1202936521}
+  _clearPlayerPrefsOnStart: 1
 --- !u!114 &399892903
 MonoBehaviour:
   m_ObjectHideFlags: 0

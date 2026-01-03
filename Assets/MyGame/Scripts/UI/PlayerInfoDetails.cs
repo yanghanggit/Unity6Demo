@@ -37,7 +37,7 @@ public class PlayerInfoDetails : MonoBehaviour
             return;
         }
 
-        var actorSprite = SpriteManager.Instance.GetSprite(playerActorEntitySerialization.name);
+        var actorSprite = SpriteCacheManager.Instance.GetSprite(playerActorEntitySerialization.name);
         Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + playerActorEntitySerialization.name);
         //_playerImage.sprite = actorSprite;
         _playerImage.gameObject.SetActive(false); // 先隐藏图片，避免空白显示

@@ -91,12 +91,12 @@ public class ActorMiniIcon : MonoBehaviour, IStringGameEventListener
     private Sprite GetActorAvatarSprite(string actorName)
     {
         // 第一层防御：优先尝试加载头像素材（键值格式：角色名_头像）
-        var avatarSprite = SpriteManager.Instance.GetSprite(actorName + "_头像");
+        var avatarSprite = SpriteCacheManager.Instance.GetSprite(actorName + "_头像");
 
         // 第二层防御：如果没有头像素材，降级使用全身图
         if (avatarSprite == null)
         {
-            avatarSprite = SpriteManager.Instance.GetSprite(actorName);
+            avatarSprite = SpriteCacheManager.Instance.GetSprite(actorName);
         }
 
         return avatarSprite;

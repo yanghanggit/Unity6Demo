@@ -19,12 +19,25 @@ public class LaunchScene : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private Button _loginButton;
 
+    [Header("Settings")]
+
+    [Tooltip("是否在启动时清除本地存储的PlayerPrefs, 注意！仅用于测试用途！")]
+    [SerializeField] private bool _clearPlayerPrefsOnStart = true;
+
     /// <summary>
     /// Unity生命周期方法：初始化启动场景
     /// 验证必要组件的有效性，隐藏登录按钮并开始API端点初始化
     /// </summary>
     void Start()
     {
+        // 测试用！
+        if (_clearPlayerPrefsOnStart)
+        {
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.Save(); // 确保删除操作在 WebGL 中被立即保存
+            Debug.Log("LaunchScene: Cleared PlayerPrefs for testing purposes.");
+        }
+
         Debug.Assert(_rootApi != null, "_rootApi is null");
         Debug.Assert(_imageRootApi != null, "_imageRootApi is null");
         Debug.Assert(_loginButton != null, "_loginButton is null");

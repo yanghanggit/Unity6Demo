@@ -567,8 +567,6 @@ GameObject:
   m_Component:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
-  - component: {fileID: 399892903}
-  - component: {fileID: 399892902}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -607,36 +605,7 @@ MonoBehaviour:
   _gameNameText: {fileID: 143863052}
   _nextSceneName: MainScene
   _gameName: Game1
-  _taskTriggerApi: {fileID: 399892903}
-  _tasksStatusApi: {fileID: 399892902}
---- !u!114 &399892902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48b4b41fbe39740799fa3830acf2686f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TasksStatusApi
-  requestTimeout: 30
-  _pollInterval: 2
-  _maxAttempts: 60
---- !u!114 &399892903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 871dff9bb95394267bfe1666d2585397, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TaskTriggerApi
-  requestTimeout: 30
+  _fixedPlayerId: 
 --- !u!1 &470425675
 GameObject:
   m_ObjectHideFlags: 0
@@ -1305,7 +1274,7 @@ GameObject:
   - component: {fileID: 1455665588}
   - component: {fileID: 1455665587}
   m_Layer: 0
-  m_Name: ImageService
+  m_Name: SpriteCacheManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
