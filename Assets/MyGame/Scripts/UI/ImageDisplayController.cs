@@ -25,6 +25,12 @@ public class ImageDisplayController : MonoBehaviour
     [SerializeField] private GenerateImageApi _generateImageApi;
     [SerializeField] private TextureLoader _textureLoader;
 
+    [Header("Generation Settings")]
+    [SerializeField] private string _modelName = "nano-banana";
+    [SerializeField] private int _imageWidth = 512;
+    [SerializeField] private int _imageHeight = 512;
+    [SerializeField] private int _numInferenceSteps = 4;
+
     [Header("Test Settings")]
     [SerializeField] private bool _useMockMode = false;
     [SerializeField] private float _mockGenerationDelay = 10f;
@@ -43,10 +49,18 @@ public class ImageDisplayController : MonoBehaviour
         Debug.Assert(_generateImageApi != null, "[ImageDisplayController] GenerateImageApi is null");
         Debug.Assert(_textureLoader != null, "[ImageDisplayController] TextureLoader is null");
 
-        // 测试生成图片
+        // 测试生成图片，有可能图片生成服务器是不开的，所以要加个判断
         if (ApiEndpointsManager.ImageRootResponse != null)
         {
-            StartCoroutine(GenerateAndDisplayImage());
+            // 这里临时写死就是用玩家角色的外观作为提示词
+            var playerActor = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
+            var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(playerActor);
+            Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + playerActor.name);
+
+            // 生成提示词，拿玩家角色的外观描述
+            var prompt = appearanceComponent.appearance;
+            Debug.Log($"[ImageDisplayController] Starting image generation with prompt: \n{prompt}");
+            StartCoroutine(GenerateAndDisplayImage(prompt));
         }
     }
 
@@ -54,7 +68,8 @@ public class ImageDisplayController : MonoBehaviour
     /// 协调函数：生成图片并显示
     /// 调用 GenerateImage 生成图片，然后在回调中调用 LoadAndDisplayImage 显示图片
     /// </summary>
-    private IEnumerator GenerateAndDisplayImage()
+    /// <param name="prompt">生成图片的提示词</param>
+    private IEnumerator GenerateAndDisplayImage(string prompt)
     {
         // Mock模式：跳过API调用，直接使用模拟URL
         if (_useMockMode)
@@ -63,22 +78,12 @@ public class ImageDisplayController : MonoBehaviour
             yield break;
         }
 
-        var playerActor = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
-        var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(playerActor);
-        Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + playerActor.name);
-
-        var prompt = appearanceComponent.appearance;
-        var modelName = "nano-banana";
-        var imageWidth = 1024;
-        var imageHeight = 1024;
-        var numInferenceSteps = 4;
-
         yield return GenerateImage(
             prompt,
-            modelName,
-            imageWidth,
-            imageHeight,
-            numInferenceSteps,
+            _modelName,
+            _imageWidth,
+            _imageHeight,
+            _numInferenceSteps,
             (generateResult) =>
             {
                 // 图片生成完成后的回调
@@ -214,3 +219,4 @@ public class ImageDisplayController : MonoBehaviour
         yield return LoadAndDisplayImage(mockImageInfo);
     }
 }
+
