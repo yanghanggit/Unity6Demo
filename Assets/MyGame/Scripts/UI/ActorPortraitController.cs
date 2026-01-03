@@ -12,8 +12,8 @@ using System.Collections.Generic;
 public class ActorPortraitController : MonoBehaviour
 {
     [Header("Actor Settings")]
-    public string ActorName { get; set; }
-    public string PortraitPrompt { get; set; }
+    public string EntityName { get; set; }
+    public string Prompt { get; set; }
     public string ImageUrlStorageKey { get; set; }
     public string SpriteCacheKey { get; set; }
 
@@ -72,10 +72,11 @@ public class ActorPortraitController : MonoBehaviour
 
     void Start()
     {
-        Debug.Assert(!string.IsNullOrEmpty(ActorName), "[ImageDisplayController] ActorName is null or empty");
-        Debug.Assert(!string.IsNullOrEmpty(PortraitPrompt), "[ImageDisplayController] PortraitPrompt is null or empty");
+        Debug.Assert(!string.IsNullOrEmpty(EntityName), "[ImageDisplayController] ActorName is null or empty");
+        Debug.Assert(!string.IsNullOrEmpty(Prompt), "[ImageDisplayController] Prompt is null or empty");
         Debug.Assert(!string.IsNullOrEmpty(ImageUrlStorageKey), "[ImageDisplayController] ImageUrlStorageKey is null or empty");
         Debug.Assert(!string.IsNullOrEmpty(SpriteCacheKey), "[ImageDisplayController] SpriteCacheKey is null or empty");
+        Debug.Assert(ImageUrlStorageKey == SpriteCacheKey, "[ImageDisplayController] For simplicity, ImageUrlStorageKey should equal SpriteCacheKey in current implementation");
 
         // 检查是否已有缓存的Sprite, 有就直接显示
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(SpriteCacheKey);
@@ -133,7 +134,7 @@ public class ActorPortraitController : MonoBehaviour
         }
 
         // 没有URL映射，需要生成新图片
-        Debug.Log($"[ImageDisplayController] No cached URL found, starting image generation with prompt: \n{PortraitPrompt}");
+        Debug.Log($"[ImageDisplayController] No cached URL found, starting image generation with prompt: \n{Prompt}");
 
         // Mock逻辑分叉：生成图片
         if (_useMockMode)
@@ -144,26 +145,13 @@ public class ActorPortraitController : MonoBehaviour
         {
             var configs = new List<ImageGenerationConfig>
             {
-                new() { prompt = PortraitPrompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
+                new() { prompt = Prompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
             };
 
             StartCoroutine(GenerateAndDisplayImage(configs));
         }
 
     }
-
-    /// <summary>
-    /// 获取角色的图片生成提示词
-    /// </summary>
-    /// <returns>角色外观描述</returns>
-    // private string GetPrompt()
-    // {
-    //     var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(ActorName);
-    //     var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(actorEntitySerialization);
-    //     Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + actorEntitySerialization.name);
-    //     //return appearanceComponent.appearance;
-    //     return ImageService.WrapActorPortraitPromptForGeneration(appearanceComponent.name, appearanceComponent.appearance);
-    // }
 
     /// <summary>
     /// 协调函数：生成图片并显示
