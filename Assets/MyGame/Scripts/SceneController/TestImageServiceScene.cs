@@ -122,7 +122,7 @@ public class TestImageServiceScene : MonoBehaviour
             new() { prompt = prompt, model = modelName, width = width, height = height, num_inference_steps = numInferenceSteps}
         };
 
-        yield return _generateImageApi.Call(ImageServiceContext.Instance.GenerateImageApiUrl, configs);
+        yield return _generateImageApi.Call(ImageService.GenerateImageApiUrl, configs);
 
         if (_generateImageApi.ReqResult == null)
         {
