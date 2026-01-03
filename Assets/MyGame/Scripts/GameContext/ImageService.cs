@@ -29,14 +29,15 @@ public static partial class ImageService
     }
 
     /// <summary>
-    /// 生成图片资源的唯一标识Key
+    /// 生成用于本地永久存储图片URL的唯一键值
+    /// 该键值用于在PlayerPrefs中存储远程图片URL的映射关系
     /// </summary>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名称</param>
     /// <param name="entityName">实体类型（如：actor/stage/item等）</param>
     /// <param name="imageDescription">描述信息（将被Base64编码）</param>
-    /// <returns>格式为 "{userName}/{gameName}/{entityName}/{base64EncodedDescription}" 的key字符串</returns>
-    public static string GenerateImageKey(string userName, string gameName, string entityName, string imageDescription)
+    /// <returns>格式为 "{userName}/{gameName}/{entityName}/{base64EncodedDescription}" 的存储键值</returns>
+    public static string GenerateImageUrlStorageKey(string userName, string gameName, string entityName, string imageDescription)
     {
         Debug.Assert(!string.IsNullOrEmpty(userName), "userName is null or empty");
         Debug.Assert(!string.IsNullOrEmpty(gameName), "gameName is null or empty");
@@ -53,55 +54,47 @@ public static partial class ImageService
 
     /// <summary>
     /// 设置图片URL映射
-    /// 将远程图片URL存储到本地，使用生成的key作为索引
+    /// 将远程图片URL存储到本地永久存储（PlayerPrefs）中
     /// </summary>
-    /// <param name="userName">用户名</param>
-    /// <param name="gameName">游戏名称</param>
-    /// <param name="entityName">实体类型（如：actor/stage/item等）</param>
-    /// <param name="imageDescription">图片描述信息</param>
+    /// <param name="key">图片URL的存储键值</param>
     /// <param name="imageUrl">远程图片URL</param>
-    public static void SetImageUrl(string userName, string gameName, string entityName, string imageDescription, string imageUrl)
+    public static void SetImageUrl(string key, string imageUrl)
     {
+        Debug.Assert(!string.IsNullOrEmpty(key), "key is null or empty");
         Debug.Assert(!string.IsNullOrEmpty(imageUrl), "imageUrl is null or empty");
-        string key = GenerateImageKey(userName, gameName, entityName, imageDescription);
         PlayerPrefs.SetString(key, imageUrl);
         PlayerPrefs.Save(); // 立即保存，确保数据持久化
     }
 
     /// <summary>
     /// 获取图片URL映射
-    /// 根据key从本地获取存储的远程图片URL
+    /// 根据key从本地永久存储（PlayerPrefs）中获取远程图片URL
     /// </summary>
-    /// <param name="userName">用户名</param>
-    /// <param name="gameName">游戏名称</param>
-    /// <param name="entityName">实体类型（如：actor/stage/item等）</param>
-    /// <param name="imageDescription">图片描述信息</param>
+    /// <param name="key">图片URL的存储键值</param>
     /// <returns>存储的远程图片URL，如果不存在则返回空字符串</returns>
-    public static string GetImageUrl(string userName, string gameName, string entityName, string imageDescription)
+    public static string GetImageUrl(string key)
     {
-        string key = GenerateImageKey(userName, gameName, entityName, imageDescription);
+        Debug.Assert(!string.IsNullOrEmpty(key), "key is null or empty");
         return PlayerPrefs.GetString(key, string.Empty);
     }
 
     /// <summary>
     /// 检查指定图片URL映射是否存在
+    /// 在本地永久存储（PlayerPrefs）中查询是否存在该键值
     /// </summary>
-    /// <param name="userName">用户名</param>
-    /// <param name="gameName">游戏名称</param>
-    /// <param name="entityName">实体类型（如：actor/stage/item等）</param>
-    /// <param name="imageDescription">图片描述信息</param>
+    /// <param name="key">图片URL的存储键值</param>
     /// <returns>如果存在映射返回true，否则返回false</returns>
-    public static bool HasImageUrl(string userName, string gameName, string entityName, string imageDescription)
+    public static bool HasImageUrl(string key)
     {
-        string key = GenerateImageKey(userName, gameName, entityName, imageDescription);
+        Debug.Assert(!string.IsNullOrEmpty(key), "key is null or empty");
         return PlayerPrefs.HasKey(key);
     }
 
     /// <summary>
-    /// 删除图片URL映射（通过key）
-    /// 当远程图片URL失效时，移除本地存储的映射关系
+    /// 删除图片URL映射
+    /// 当远程图片URL失效时，从本地永久存储（PlayerPrefs）中移除映射关系
     /// </summary>
-    /// <param name="key">图片资源的唯一标识Key</param>
+    /// <param name="key">图片URL的存储键值</param>
     public static void RemoveImageUrl(string key)
     {
         Debug.Assert(!string.IsNullOrEmpty(key), "key is null or empty");
@@ -116,7 +109,7 @@ public static partial class ImageService
     /// <param name="actorName">角色名称</param>
     /// <param name="appearancePrompt">原始外观描述</param>
     /// <returns>Markdown格式的完整提示词</returns>
-    public static string WrapAppearancePromptForGeneration(string actorName, string appearancePrompt)
+    public static string WrapActorPortraitPromptForGeneration(string actorName, string appearancePrompt)
     {
         Debug.Assert(!string.IsNullOrEmpty(actorName), "actorName is null or empty");
         Debug.Assert(!string.IsNullOrEmpty(appearancePrompt), "appearancePrompt is null or empty");

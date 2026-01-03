@@ -27,8 +27,28 @@ public class PlayerInfoBar : MonoBehaviour
         {
             imageDisplayController = _headIconButton.gameObject.AddComponent<ActorPortraitController>();
         }
+
+
         // 设置 ActorName，解耦对 GameContext 的直接依赖
         imageDisplayController.ActorName = actorName;
+
+        // 设置 PortraitPrompt
+        var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(actorName);
+        var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(actorEntitySerialization);
+        Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + actorEntitySerialization.name);
+        var portraitPrompt = ImageService.WrapActorPortraitPromptForGeneration(appearanceComponent.name, appearanceComponent.appearance);
+        imageDisplayController.PortraitPrompt = portraitPrompt;
+
+        // 设置 ImageUrlStorageKey 和 SpriteCacheKey, 先简单一些，使用相同的key
+        var imageUrlStorageKey = ImageService.GenerateImageUrlStorageKey(
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                actorName,
+                portraitPrompt
+            );
+
+        imageDisplayController.ImageUrlStorageKey = imageUrlStorageKey;
+        imageDisplayController.SpriteCacheKey = imageUrlStorageKey;
     }
 
     public void OnHeadIconClicked()

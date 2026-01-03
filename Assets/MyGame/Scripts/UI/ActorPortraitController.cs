@@ -13,6 +13,9 @@ public class ActorPortraitController : MonoBehaviour
 {
     [Header("Actor Settings")]
     public string ActorName { get; set; }
+    public string PortraitPrompt { get; set; }
+    public string ImageUrlStorageKey { get; set; }
+    public string SpriteCacheKey { get; set; }
 
     [Header("Target Components")]
     [SerializeField] private Image _targetImage;
@@ -31,6 +34,7 @@ public class ActorPortraitController : MonoBehaviour
     [SerializeField] private bool _useMockMode = false;
     [SerializeField] private float _mockGenerationDelay = 2.0f;
     [SerializeField] private string _mockImageUrl = "/images/nano-banana_fb300c55-3130-4ac2-9e9e-19ee8da8f3e1.png"; //服务器上的一张测试图片，确保有，需要服务器开发确认！目前是有的。
+
 
     void Awake()
     {
@@ -68,11 +72,16 @@ public class ActorPortraitController : MonoBehaviour
 
     void Start()
     {
+        Debug.Assert(!string.IsNullOrEmpty(ActorName), "[ImageDisplayController] ActorName is null or empty");
+        Debug.Assert(!string.IsNullOrEmpty(PortraitPrompt), "[ImageDisplayController] PortraitPrompt is null or empty");
+        Debug.Assert(!string.IsNullOrEmpty(ImageUrlStorageKey), "[ImageDisplayController] ImageUrlStorageKey is null or empty");
+        Debug.Assert(!string.IsNullOrEmpty(SpriteCacheKey), "[ImageDisplayController] SpriteCacheKey is null or empty");
+
         // 检查是否已有缓存的Sprite, 有就直接显示
-        var cachedSprite = SpriteCacheManager.Instance.GetSprite(ActorName);
+        var cachedSprite = SpriteCacheManager.Instance.GetSprite(SpriteCacheKey);
         if (cachedSprite != null)
         {
-            Debug.Log($"[ImageDisplayController] Found cached sprite for actor '{ActorName}', displaying it directly.");
+            Debug.Log($"[ImageDisplayController] Found cached sprite with key '{SpriteCacheKey}', displaying it directly.");
             _targetImage.sprite = cachedSprite;
             return;
         }
@@ -89,31 +98,23 @@ public class ActorPortraitController : MonoBehaviour
         }
 
         // 获取提示词
-        var genPrompt = GetPrompt();
+        //var genPrompt = GetPrompt();
 
         // 检查是否有持久化的URL映射
-        if (ImageService.HasImageUrl(GameContext.Instance.UserName, GameContext.Instance.GameName, ActorName, genPrompt))
+        if (ImageService.HasImageUrl(ImageUrlStorageKey))
         {
-            // 生成 key（只生成一次）
-            string imageKey = ImageService.GenerateImageKey(
-                GameContext.Instance.UserName,
-                GameContext.Instance.GameName,
-                ActorName,
-                genPrompt
-            );
-
-            string cachedUrl = PlayerPrefs.GetString(imageKey);
-            Debug.Log($"[ImageDisplayController] Found cached URL for actor '{ActorName}', loading directly (skip generation)");
+            string cachedUrl = ImageService.GetImageUrl(ImageUrlStorageKey);
+            Debug.Log($"[ImageDisplayController] Found cached URL with key '{ImageUrlStorageKey}', loading directly (skip generation)");
 
             // Mock逻辑分叉：加载缓存URL
             if (_useMockMode)
             {
-                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl, imageKey, (success) =>
+                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl, ImageUrlStorageKey, (success) =>
                 {
                     if (!success)
                     {
-                        ImageService.RemoveImageUrl(imageKey);
-                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for actor '{ActorName}'. Will regenerate on next launch.");
+                        ImageService.RemoveImageUrl(ImageUrlStorageKey);
+                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for key '{ImageUrlStorageKey}'. Will regenerate on next launch.");
                     }
                 }));
             }
@@ -123,8 +124,8 @@ public class ActorPortraitController : MonoBehaviour
                 {
                     if (!success)
                     {
-                        ImageService.RemoveImageUrl(imageKey);
-                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for actor '{ActorName}'. Will regenerate on next launch.");
+                        ImageService.RemoveImageUrl(ImageUrlStorageKey);
+                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for key '{ImageUrlStorageKey}'. Will regenerate on next launch.");
                     }
                 }));
             }
@@ -132,7 +133,7 @@ public class ActorPortraitController : MonoBehaviour
         }
 
         // 没有URL映射，需要生成新图片
-        Debug.Log($"[ImageDisplayController] No cached URL found, starting image generation with prompt: \n{genPrompt}");
+        Debug.Log($"[ImageDisplayController] No cached URL found, starting image generation with prompt: \n{PortraitPrompt}");
 
         // Mock逻辑分叉：生成图片
         if (_useMockMode)
@@ -143,7 +144,7 @@ public class ActorPortraitController : MonoBehaviour
         {
             var configs = new List<ImageGenerationConfig>
             {
-                new() { prompt = genPrompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
+                new() { prompt = PortraitPrompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
             };
 
             StartCoroutine(GenerateAndDisplayImage(configs));
@@ -155,14 +156,14 @@ public class ActorPortraitController : MonoBehaviour
     /// 获取角色的图片生成提示词
     /// </summary>
     /// <returns>角色外观描述</returns>
-    private string GetPrompt()
-    {
-        var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(ActorName);
-        var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(actorEntitySerialization);
-        Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + actorEntitySerialization.name);
-        //return appearanceComponent.appearance;
-        return ImageService.WrapAppearancePromptForGeneration(appearanceComponent.name, appearanceComponent.appearance);
-    }
+    // private string GetPrompt()
+    // {
+    //     var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(ActorName);
+    //     var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(actorEntitySerialization);
+    //     Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + actorEntitySerialization.name);
+    //     //return appearanceComponent.appearance;
+    //     return ImageService.WrapActorPortraitPromptForGeneration(appearanceComponent.name, appearanceComponent.appearance);
+    // }
 
     /// <summary>
     /// 协调函数：生成图片并显示
@@ -268,8 +269,8 @@ public class ActorPortraitController : MonoBehaviour
         }
 
         // 保存URL映射到持久化存储
-        ImageService.SetImageUrl(GameContext.Instance.UserName, GameContext.Instance.GameName, ActorName, imageInfo.prompt, imageInfo.url);
-        Debug.Log($"[ImageDisplayController] Saved URL mapping for actor '{ActorName}'");
+        ImageService.SetImageUrl(ImageUrlStorageKey, imageInfo.url);
+        Debug.Log($"[ImageDisplayController] Saved URL mapping for actor '{ImageUrlStorageKey}'");
 
         // 通过 SpriteManager 创建、缓存并显示 Sprite
         var texture = _textureLoader.LoadedTexture;
@@ -279,9 +280,9 @@ public class ActorPortraitController : MonoBehaviour
             yield break;
         }
 
-        string spriteKey = ActorName;
+        //string spriteKey = ActorName;
 
-        var sprite = SpriteCacheManager.Instance.AddSprite(spriteKey, texture);
+        var sprite = SpriteCacheManager.Instance.AddSprite(SpriteCacheKey, texture);
         if (sprite == null)
         {
             Debug.LogError($"[ImageDisplayController] Failed to create sprite from texture");
@@ -290,7 +291,7 @@ public class ActorPortraitController : MonoBehaviour
 
         // 成功路径
         _targetImage.sprite = sprite;
-        Debug.Log($"[ImageDisplayController] Image displayed and cached with key '{spriteKey}': {texture.width}x{texture.height}");
+        Debug.Log($"[ImageDisplayController] Image displayed and cached with key '{SpriteCacheKey}': {texture.width}x{texture.height}");
     }
 
     /// <summary>
@@ -325,9 +326,9 @@ public class ActorPortraitController : MonoBehaviour
             yield break;
         }
 
-        string spriteKey = ActorName;
+        //string spriteKey = ActorName;
 
-        var sprite = SpriteCacheManager.Instance.AddSprite(spriteKey, texture);
+        var sprite = SpriteCacheManager.Instance.AddSprite(SpriteCacheKey, texture);
         if (sprite == null)
         {
             Debug.LogError($"[ImageDisplayController] Failed to create sprite from texture");
