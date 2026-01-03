@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /// 需要挂载在包含Image组件的GameObject上
 /// </summary>
 [RequireComponent(typeof(Image))]
-public class ImageDisplayController : MonoBehaviour
+public class ActorPortraitController : MonoBehaviour
 {
     [Header("Actor Settings")]
     public string ActorName { get; set; }

@@ -22,10 +22,10 @@ public class PlayerInfoBar : MonoBehaviour
         _playerInfoText.text = $"{playerName}\n{GameUtils.GetDisplayName(actorName)}";
 
         // 给 _headIconButton 添加 ImageDisplayController 组件（如果还没有的话）
-        var imageDisplayController = _headIconButton.GetComponent<ImageDisplayController>();
+        var imageDisplayController = _headIconButton.GetComponent<ActorPortraitController>();
         if (imageDisplayController == null)
         {
-            imageDisplayController = _headIconButton.gameObject.AddComponent<ImageDisplayController>();
+            imageDisplayController = _headIconButton.gameObject.AddComponent<ActorPortraitController>();
         }
         // 设置 ActorName，解耦对 GameContext 的直接依赖
         imageDisplayController.ActorName = actorName;
