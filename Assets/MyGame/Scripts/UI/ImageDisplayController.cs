@@ -25,6 +25,11 @@ public class ImageDisplayController : MonoBehaviour
     [SerializeField] private GenerateImageApi _generateImageApi;
     [SerializeField] private TextureLoader _textureLoader;
 
+    [Header("Test Settings")]
+    [SerializeField] private bool _useMockMode = false;
+    [SerializeField] private float _mockGenerationDelay = 10f;
+    [SerializeField] private string _mockImageUrl = "/images/nano-banana_fb300c55-3130-4ac2-9e9e-19ee8da8f3e1.png";
+
     void Start()
     {
         // 自动获取Image组件
@@ -51,6 +56,13 @@ public class ImageDisplayController : MonoBehaviour
     /// </summary>
     private IEnumerator GenerateAndDisplayImage()
     {
+        // Mock模式：跳过API调用，直接使用模拟URL
+        if (_useMockMode)
+        {
+            yield return GenerateAndDisplayImageMock();
+            yield break;
+        }
+
         var playerActor = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
         var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(playerActor);
         Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + playerActor.name);
@@ -174,5 +186,31 @@ public class ImageDisplayController : MonoBehaviour
         {
             Debug.LogError($"[ImageDisplayController] Failed to load image: {_textureLoader.Result?.Error}");
         }
+    }
+
+    /// <summary>
+    /// Mock实现：模拟图片生成并显示
+    /// 用于测试图片加载和显示功能，跳过实际的AI生成API调用
+    /// </summary>
+    private IEnumerator GenerateAndDisplayImageMock()
+    {
+        Debug.Log($"[ImageDisplayController] 🔧 Mock模式启动，模拟生成延迟: {_mockGenerationDelay}秒");
+
+        // 模拟生成等待
+        yield return new WaitForSeconds(_mockGenerationDelay);
+
+        Debug.Log($"[ImageDisplayController] ✅ Mock生成完成，使用URL: {_mockImageUrl}");
+
+        // 创建模拟的图片信息对象
+        var mockImageInfo = new GeneratedImage
+        {
+            url = _mockImageUrl,
+            filename = System.IO.Path.GetFileName(_mockImageUrl),
+            prompt = "Mock test image",
+            model = "nano-banana"
+        };
+
+        // 加载并显示图片
+        yield return LoadAndDisplayImage(mockImageInfo);
     }
 }

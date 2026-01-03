@@ -518,6 +518,9 @@ MonoBehaviour:
   _targetImage: {fileID: 3689901843273596363}
   _generateImageApi: {fileID: 1703937933472995372}
   _textureLoader: {fileID: 3120695652235209237}
+  _useMockMode: 1
+  _mockGenerationDelay: 3
+  _mockImageUrl: /images/nano-banana_fb300c55-3130-4ac2-9e9e-19ee8da8f3e1.png
 --- !u!114 &1703937933472995372
 MonoBehaviour:
   m_ObjectHideFlags: 0
