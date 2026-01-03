@@ -46,14 +46,7 @@ public class TextureLoader : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator LoadTexture(string url)
     {
-        // 清理之前加载的纹理，防止内存泄漏
-        if (_result?.Texture != null)
-        {
-            Debug.Log($"[TextureLoader] Cleaning up previous texture: {_result.Texture.name}");
-            DestroyImmediate(_result.Texture, true);
-        }
-
-        // 重置加载结果
+        // 重置加载结果（不销毁纹理，因为纹理可能已被 Sprite 使用，生命周期由 SpriteManager 管理）
         _result = null;
 
         using (var request = UnityWebRequestTexture.GetTexture(url, true))

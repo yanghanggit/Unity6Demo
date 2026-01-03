@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-/*
+/* 测试数据记录
 30 - ✅ 图片生成完成! 总耗时: 10.64秒, 平均: 10.64秒/张
 INFO:     192.168.2.134:56001 - "POST /api/generate/v1 HTTP/1.1" 200 OK
 INFO:     192.168.2.134:56001 - "GET /images/nano-banana_6d2db373-3e7f-41cb-88b7-d63a81f18255.png HTTP/1.1" 200 OK
@@ -18,6 +18,9 @@ INFO:     192.168.2.134:56001 - "GET /images/nano-banana_6d2db373-3e7f-41cb-88b7
 /// </summary>
 public class ImageDisplayController : MonoBehaviour
 {
+    [Header("Actor Settings")]
+    public string ActorName { get; set; }
+
     [Header("Target Components")]
     [SerializeField] private Image _targetImage;
 
@@ -32,16 +35,26 @@ public class ImageDisplayController : MonoBehaviour
     [SerializeField] private int _numInferenceSteps = 4;
 
     [Header("Test Settings")]
-    [SerializeField] private bool _useMockMode = false;
-    [SerializeField] private float _mockGenerationDelay = 10f;
+    [SerializeField] private bool _useMockMode = true;
+    [SerializeField] private float _mockGenerationDelay = 2.0f;
     [SerializeField] private string _mockImageUrl = "/images/nano-banana_fb300c55-3130-4ac2-9e9e-19ee8da8f3e1.png";
 
-    void Start()
+    void Awake()
     {
-        // 自动获取Image组件
+        // 自动获取组件引用（如果未在Inspector中赋值）
         if (_targetImage == null)
         {
             _targetImage = GetComponent<Image>();
+        }
+
+        if (_generateImageApi == null)
+        {
+            _generateImageApi = gameObject.AddComponent<GenerateImageApi>();
+        }
+
+        if (_textureLoader == null)
+        {
+            _textureLoader = gameObject.AddComponent<TextureLoader>();
         }
 
         // 组件检测
@@ -57,12 +70,15 @@ public class ImageDisplayController : MonoBehaviour
             DestroyImmediate(_targetImage.sprite, true);
             _targetImage.sprite = null;
         }
+    }
 
+    void Start()
+    {
         // 检查是否已有缓存的Sprite, 有就直接显示
-        var cachedSprite = SpriteManager.Instance.GetSprite(GameContext.Instance.ActorName);
+        var cachedSprite = SpriteManager.Instance.GetSprite(ActorName);
         if (cachedSprite != null)
         {
-            Debug.Log($"[ImageDisplayController] Found cached sprite for actor '{GameContext.Instance.ActorName}', displaying it directly.");
+            Debug.Log($"[ImageDisplayController] Found cached sprite for actor '{ActorName}', displaying it directly.");
             _targetImage.sprite = cachedSprite;
             return;
         }
@@ -75,7 +91,7 @@ public class ImageDisplayController : MonoBehaviour
         if (ApiEndpointsManager.ImageRootResponse != null)
         {
             // 这里临时写死就是用玩家角色的外观作为提示词
-            var playerActor = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
+            var playerActor = GameContext.Instance.GetActorEntitySerialization(ActorName);
             var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(playerActor);
             Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + playerActor.name);
 
@@ -152,6 +168,13 @@ public class ImageDisplayController : MonoBehaviour
 
         yield return _generateImageApi.Call(ImageServiceContext.Instance.GenerateImageApiUrl, configs);
 
+        if (!_generateImageApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[ImageDisplayController] GenerateImageApi call failed: {_generateImageApi.ReqResult.responseText}");
+            onComplete?.Invoke(null);
+            yield break;
+        }
+
         if (_generateImageApi.ReqResult == null)
         {
             Debug.LogError("[ImageDisplayController] GenerateImageApi request result is null");
@@ -159,12 +182,6 @@ public class ImageDisplayController : MonoBehaviour
             yield break;
         }
 
-        if (!_generateImageApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"[ImageDisplayController] GenerateImageApi call failed: {_generateImageApi.ReqResult.responseText}");
-            onComplete?.Invoke(null);
-            yield break;
-        }
 
         Debug.Assert(_generateImageApi.RespData != null, "[ImageDisplayController] GenerateImageApi response data is null");
 
@@ -197,12 +214,11 @@ public class ImageDisplayController : MonoBehaviour
             ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + imageInfo.url
         );
 
-        if (_textureLoader.Result != null && _textureLoader.Result.IsSuccess)
+        if (_textureLoader.Result.IsSuccess && _textureLoader.Result != null)
         {
             // 通过 SpriteManager 创建、缓存并显示 Sprite
             var texture = _textureLoader.LoadedTexture;
-            string spriteKey = GameContext.Instance.ActorName;
-            //$"GeneratedImage_{imageInfo.filename}";
+            string spriteKey = ActorName;
 
             var sprite = SpriteManager.Instance.AddSprite(spriteKey, texture);
             if (sprite != null)

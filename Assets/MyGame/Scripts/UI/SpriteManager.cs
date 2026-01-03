@@ -140,9 +140,17 @@ public class SpriteManager : MonoBehaviour
         {
             spriteCache.Remove(key);
             if (sprite != null)
-                DestroyImmediate(sprite);
+            {
+                // 先销毁纹理，再销毁 Sprite
+                var texture = sprite.texture;
+                DestroyImmediate(sprite, true);
+                if (texture != null)
+                {
+                    DestroyImmediate(texture, true);
+                }
+            }
 
-            Debug.Log($"TextureManager: Removed sprite '{key}' from cache");
+            Debug.Log($"TextureManager: Removed sprite '{key}' from cache (sprite and texture destroyed)");
             return true;
         }
 
@@ -157,11 +165,19 @@ public class SpriteManager : MonoBehaviour
         foreach (var sprite in spriteCache.Values)
         {
             if (sprite != null)
-                DestroyImmediate(sprite);
+            {
+                // 先销毁纹理，再销毁 Sprite
+                var texture = sprite.texture;
+                DestroyImmediate(sprite, true);
+                if (texture != null)
+                {
+                    DestroyImmediate(texture, true);
+                }
+            }
         }
 
         spriteCache.Clear();
-        Debug.Log("TextureManager: Cache cleared");
+        Debug.Log("TextureManager: Cache cleared (sprites and textures destroyed)");
     }
 
     /// <summary>

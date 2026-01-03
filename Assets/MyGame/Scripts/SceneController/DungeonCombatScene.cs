@@ -593,7 +593,8 @@ public class DungeonCombatScene : MonoBehaviour
         //清除container所有的孩子
         foreach (Transform child in container.transform)
         {
-            DestroyImmediate(child.gameObject);
+            child.gameObject.SetActive(false);
+            Destroy(child.gameObject);
         }
 
         // 创建每个符合阵营条件的角色的头像
