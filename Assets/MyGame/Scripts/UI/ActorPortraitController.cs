@@ -94,17 +94,39 @@ public class ActorPortraitController : MonoBehaviour
         // 检查是否有持久化的URL映射
         if (ImageService.HasImageUrl(GameContext.Instance.UserName, GameContext.Instance.GameName, ActorName, genPrompt))
         {
-            string cachedUrl = ImageService.GetImageUrl(GameContext.Instance.UserName, GameContext.Instance.GameName, ActorName, genPrompt);
+            // 生成 key（只生成一次）
+            string imageKey = ImageService.GenerateImageKey(
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                ActorName,
+                genPrompt
+            );
+
+            string cachedUrl = PlayerPrefs.GetString(imageKey);
             Debug.Log($"[ImageDisplayController] Found cached URL for actor '{ActorName}', loading directly (skip generation)");
 
             // Mock逻辑分叉：加载缓存URL
             if (_useMockMode)
             {
-                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl));
+                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl, imageKey, (success) =>
+                {
+                    if (!success)
+                    {
+                        ImageService.RemoveImageUrl(imageKey);
+                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for actor '{ActorName}'. Will regenerate on next launch.");
+                    }
+                }));
             }
             else
             {
-                StartCoroutine(LoadAndDisplayImageFromUrl(cachedUrl));
+                StartCoroutine(LoadAndDisplayImageFromUrl(cachedUrl, (success) =>
+                {
+                    if (!success)
+                    {
+                        ImageService.RemoveImageUrl(imageKey);
+                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for actor '{ActorName}'. Will regenerate on next launch.");
+                    }
+                }));
             }
             return;
         }
@@ -135,10 +157,11 @@ public class ActorPortraitController : MonoBehaviour
     /// <returns>角色外观描述</returns>
     private string GetPrompt()
     {
-        var playerActor = GameContext.Instance.GetActorEntitySerialization(ActorName);
-        var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(playerActor);
-        Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + playerActor.name);
-        return appearanceComponent.appearance;
+        var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(ActorName);
+        var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(actorEntitySerialization);
+        Debug.Assert(appearanceComponent != null, "[ImageDisplayController] AppearanceComponent is null for player actor: " + actorEntitySerialization.name);
+        //return appearanceComponent.appearance;
+        return ImageService.WrapAppearancePromptForGeneration(appearanceComponent.name, appearanceComponent.appearance);
     }
 
     /// <summary>
@@ -250,6 +273,12 @@ public class ActorPortraitController : MonoBehaviour
 
         // 通过 SpriteManager 创建、缓存并显示 Sprite
         var texture = _textureLoader.LoadedTexture;
+        if (texture == null)
+        {
+            Debug.LogError($"[ImageDisplayController] Texture is null despite successful load result");
+            yield break;
+        }
+
         string spriteKey = ActorName;
 
         var sprite = SpriteCacheManager.Instance.AddSprite(spriteKey, texture);
@@ -269,7 +298,9 @@ public class ActorPortraitController : MonoBehaviour
     /// 用于加载已知URL的图片，跳过生成步骤
     /// </summary>
     /// <param name="imageUrl">图片URL（相对路径）</param>
-    private IEnumerator LoadAndDisplayImageFromUrl(string imageUrl)
+    /// <param name="imageKey">图片资源的唯一标识Key，用于失败时删除映射</param>
+    /// <param name="onComplete">加载完成回调，参数为加载是否成功</param>
+    private IEnumerator LoadAndDisplayImageFromUrl(string imageUrl, System.Action<bool> onComplete)
     {
         Debug.Log($"[ImageDisplayController] Loading image from cached URL: {imageUrl}");
 
@@ -282,11 +313,18 @@ public class ActorPortraitController : MonoBehaviour
         if (_textureLoader.Result == null || !_textureLoader.Result.IsSuccess)
         {
             Debug.LogError($"[ImageDisplayController] Failed to load image from cached URL: {_textureLoader.Result?.Error}");
+            onComplete?.Invoke(false);
             yield break;
         }
 
         // 通过 SpriteManager 创建、缓存并显示 Sprite
         var texture = _textureLoader.LoadedTexture;
+        if (texture == null)
+        {
+            Debug.LogError($"[ImageDisplayController] Texture is null despite successful load result");
+            yield break;
+        }
+
         string spriteKey = ActorName;
 
         var sprite = SpriteCacheManager.Instance.AddSprite(spriteKey, texture);
@@ -299,6 +337,7 @@ public class ActorPortraitController : MonoBehaviour
         // 成功路径
         _targetImage.sprite = sprite;
         Debug.Log($"[ImageDisplayController] Image loaded from cached URL and displayed: {texture.width}x{texture.height}");
+        onComplete?.Invoke(true);
     }
 
     /// <summary>
@@ -306,7 +345,9 @@ public class ActorPortraitController : MonoBehaviour
     /// 用于测试缓存URL加载流程，使用mock URL替代实际URL
     /// </summary>
     /// <param name="originalUrl">原始URL（仅用于日志记录）</param>
-    private IEnumerator LoadAndDisplayImageFromUrlMock(string originalUrl)
+    /// <param name="imageKey">图片资源的唯一标识Key，用于失败时删除映射</param>
+    /// <param name="onComplete">加载完成回调，参数为加载是否成功</param>
+    private IEnumerator LoadAndDisplayImageFromUrlMock(string originalUrl, string imageKey, System.Action<bool> onComplete)
     {
         Debug.Log($"[ImageDisplayController] 🔧 Mock模式：模拟从缓存URL加载");
         Debug.Log($"[ImageDisplayController] 🔧 原始URL: {originalUrl}");
@@ -318,7 +359,7 @@ public class ActorPortraitController : MonoBehaviour
         Debug.Log($"[ImageDisplayController] ✅ Mock加载完成");
 
         // 使用mock URL加载
-        yield return LoadAndDisplayImageFromUrl(_mockImageUrl);
+        yield return LoadAndDisplayImageFromUrl(_mockImageUrl, onComplete);
     }
 
     /// <summary>

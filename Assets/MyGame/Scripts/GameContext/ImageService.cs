@@ -97,4 +97,42 @@ public static partial class ImageService
         return PlayerPrefs.HasKey(key);
     }
 
+    /// <summary>
+    /// 删除图片URL映射（通过key）
+    /// 当远程图片URL失效时，移除本地存储的映射关系
+    /// </summary>
+    /// <param name="key">图片资源的唯一标识Key</param>
+    public static void RemoveImageUrl(string key)
+    {
+        Debug.Assert(!string.IsNullOrEmpty(key), "key is null or empty");
+        PlayerPrefs.DeleteKey(key);
+        PlayerPrefs.Save(); // 立即保存，确保删除持久化
+    }
+
+    /// <summary>
+    /// 包装外观描述为优化的图片生成提示词
+    /// 生成Markdown格式的结构化提示词，包含任务说明、外观信息和生成规则
+    /// </summary>
+    /// <param name="actorName">角色名称</param>
+    /// <param name="appearancePrompt">原始外观描述</param>
+    /// <returns>Markdown格式的完整提示词</returns>
+    public static string WrapAppearancePromptForGeneration(string actorName, string appearancePrompt)
+    {
+        Debug.Assert(!string.IsNullOrEmpty(actorName), "actorName is null or empty");
+        Debug.Assert(!string.IsNullOrEmpty(appearancePrompt), "appearancePrompt is null or empty");
+
+        return $@"# 生成图片任务！角色人物的立绘
+
+## 外观信息
+
+{appearancePrompt.Trim()}
+
+## 生成规则
+
+- 不要背景，用纯黑色背景
+- 角色人物要 日式卡通 风格
+- 正面视角，面向观众";
+    }
+
 }
+
