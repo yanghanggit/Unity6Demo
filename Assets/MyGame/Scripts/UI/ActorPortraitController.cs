@@ -78,11 +78,15 @@ public class ActorPortraitController : MonoBehaviour
         Debug.Assert(!string.IsNullOrEmpty(SpriteCacheKey), "[ImageDisplayController] SpriteCacheKey is null or empty");
         Debug.Assert(ImageUrlStorageKey == SpriteCacheKey, "[ImageDisplayController] For simplicity, ImageUrlStorageKey should equal SpriteCacheKey in current implementation");
 
+        // 缓存两个key到局部变量，后续调用链通过参数传递
+        string imageUrlStorageKey = ImageUrlStorageKey;
+        string spriteCacheKey = SpriteCacheKey;
+
         // 检查是否已有缓存的Sprite, 有就直接显示
-        var cachedSprite = SpriteCacheManager.Instance.GetSprite(SpriteCacheKey);
+        var cachedSprite = SpriteCacheManager.Instance.GetSprite(spriteCacheKey);
         if (cachedSprite != null)
         {
-            Debug.Log($"[ImageDisplayController] Found cached sprite with key '{SpriteCacheKey}', displaying it directly.");
+            Debug.Log($"[ImageDisplayController] Found cached sprite with key '{spriteCacheKey}', displaying it directly.");
             _targetImage.sprite = cachedSprite;
             return;
         }
@@ -102,31 +106,31 @@ public class ActorPortraitController : MonoBehaviour
         //var genPrompt = GetPrompt();
 
         // 检查是否有持久化的URL映射
-        if (ImageService.HasImageUrl(ImageUrlStorageKey))
+        if (ImageService.HasImageUrl(imageUrlStorageKey))
         {
-            string cachedUrl = ImageService.GetImageUrl(ImageUrlStorageKey);
-            Debug.Log($"[ImageDisplayController] Found cached URL with key '{ImageUrlStorageKey}', loading directly (skip generation)");
+            string cachedUrl = ImageService.GetImageUrl(imageUrlStorageKey);
+            Debug.Log($"[ImageDisplayController] Found cached URL with key '{imageUrlStorageKey}', loading directly (skip generation)");
 
             // Mock逻辑分叉：加载缓存URL
             if (_useMockMode)
             {
-                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl, ImageUrlStorageKey, (success) =>
+                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl, imageUrlStorageKey, spriteCacheKey, (success) =>
                 {
                     if (!success)
                     {
-                        ImageService.RemoveImageUrl(ImageUrlStorageKey);
-                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for key '{ImageUrlStorageKey}'. Will regenerate on next launch.");
+                        ImageService.RemoveImageUrl(imageUrlStorageKey);
+                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for key '{imageUrlStorageKey}'. Will regenerate on next launch.");
                     }
                 }));
             }
             else
             {
-                StartCoroutine(LoadAndDisplayImageFromUrl(cachedUrl, (success) =>
+                StartCoroutine(LoadAndDisplayImageFromUrl(cachedUrl, imageUrlStorageKey, spriteCacheKey, (success) =>
                 {
                     if (!success)
                     {
-                        ImageService.RemoveImageUrl(ImageUrlStorageKey);
-                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for key '{ImageUrlStorageKey}'. Will regenerate on next launch.");
+                        ImageService.RemoveImageUrl(imageUrlStorageKey);
+                        Debug.LogWarning($"[ImageDisplayController] Cached URL is invalid, removed mapping for key '{imageUrlStorageKey}'. Will regenerate on next launch.");
                     }
                 }));
             }
@@ -139,7 +143,7 @@ public class ActorPortraitController : MonoBehaviour
         // Mock逻辑分叉：生成图片
         if (_useMockMode)
         {
-            StartCoroutine(GenerateAndDisplayImageMock());
+            StartCoroutine(GenerateAndDisplayImageMock(imageUrlStorageKey, spriteCacheKey));
         }
         else
         {
@@ -148,7 +152,7 @@ public class ActorPortraitController : MonoBehaviour
                 new() { prompt = Prompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
             };
 
-            StartCoroutine(GenerateAndDisplayImage(configs));
+            StartCoroutine(GenerateAndDisplayImage(configs, imageUrlStorageKey, spriteCacheKey));
         }
 
     }
@@ -158,7 +162,9 @@ public class ActorPortraitController : MonoBehaviour
     /// 调用 GenerateImage 生成图片，然后在回调中调用 LoadAndDisplayImage 显示图片
     /// </summary>
     /// <param name="configs">图片生成配置列表，包含提示词、模型、尺寸等参数</param>
-    private IEnumerator GenerateAndDisplayImage(List<ImageGenerationConfig> configs)
+    /// <param name="imageUrlStorageKey">图片URL存储键</param>
+    /// <param name="spriteCacheKey">精灵缓存键</param>
+    private IEnumerator GenerateAndDisplayImage(List<ImageGenerationConfig> configs, string imageUrlStorageKey, string spriteCacheKey)
     {
         // Early return: 检查参数
         if (configs == null || configs.Count == 0)
@@ -179,7 +185,7 @@ public class ActorPortraitController : MonoBehaviour
                 }
 
                 // 成功路径：加载并显示第一张图片
-                StartCoroutine(LoadAndDisplayImage(generateResult.images[0]));
+                StartCoroutine(LoadAndDisplayImage(generateResult.images[0], imageUrlStorageKey, spriteCacheKey));
             }
         );
     }
@@ -233,7 +239,9 @@ public class ActorPortraitController : MonoBehaviour
     /// 第二步：根据生成结果加载并显示图片
     /// </summary>
     /// <param name="imageInfo">图片信息对象</param>
-    private IEnumerator LoadAndDisplayImage(GeneratedImage imageInfo)
+    /// <param name="imageUrlStorageKey">图片URL存储键</param>
+    /// <param name="spriteCacheKey">精灵缓存键</param>
+    private IEnumerator LoadAndDisplayImage(GeneratedImage imageInfo, string imageUrlStorageKey, string spriteCacheKey)
     {
         // Early return: 检查参数
         if (imageInfo == null)
@@ -257,8 +265,8 @@ public class ActorPortraitController : MonoBehaviour
         }
 
         // 保存URL映射到持久化存储
-        ImageService.SetImageUrl(ImageUrlStorageKey, imageInfo.url);
-        Debug.Log($"[ImageDisplayController] Saved URL mapping for actor '{ImageUrlStorageKey}'");
+        ImageService.SetImageUrl(imageUrlStorageKey, imageInfo.url);
+        Debug.Log($"[ImageDisplayController] Saved URL mapping for actor '{imageUrlStorageKey}'");
 
         // 通过 SpriteManager 创建、缓存并显示 Sprite
         var texture = _textureLoader.LoadedTexture;
@@ -270,7 +278,7 @@ public class ActorPortraitController : MonoBehaviour
 
         //string spriteKey = ActorName;
 
-        var sprite = SpriteCacheManager.Instance.AddSprite(SpriteCacheKey, texture);
+        var sprite = SpriteCacheManager.Instance.AddSprite(spriteCacheKey, texture);
         if (sprite == null)
         {
             Debug.LogError($"[ImageDisplayController] Failed to create sprite from texture");
@@ -279,7 +287,7 @@ public class ActorPortraitController : MonoBehaviour
 
         // 成功路径
         _targetImage.sprite = sprite;
-        Debug.Log($"[ImageDisplayController] Image displayed and cached with key '{SpriteCacheKey}': {texture.width}x{texture.height}");
+        Debug.Log($"[ImageDisplayController] Image displayed and cached with key '{spriteCacheKey}': {texture.width}x{texture.height}");
     }
 
     /// <summary>
@@ -287,9 +295,10 @@ public class ActorPortraitController : MonoBehaviour
     /// 用于加载已知URL的图片，跳过生成步骤
     /// </summary>
     /// <param name="imageUrl">图片URL（相对路径）</param>
-    /// <param name="imageKey">图片资源的唯一标识Key，用于失败时删除映射</param>
+    /// <param name="imageUrlStorageKey">图片URL存储键，用于失败时删除映射</param>
+    /// <param name="spriteCacheKey">精灵缓存键</param>
     /// <param name="onComplete">加载完成回调，参数为加载是否成功</param>
-    private IEnumerator LoadAndDisplayImageFromUrl(string imageUrl, System.Action<bool> onComplete)
+    private IEnumerator LoadAndDisplayImageFromUrl(string imageUrl, string imageUrlStorageKey, string spriteCacheKey, System.Action<bool> onComplete)
     {
         Debug.Log($"[ImageDisplayController] Loading image from cached URL: {imageUrl}");
 
@@ -316,7 +325,7 @@ public class ActorPortraitController : MonoBehaviour
 
         //string spriteKey = ActorName;
 
-        var sprite = SpriteCacheManager.Instance.AddSprite(SpriteCacheKey, texture);
+        var sprite = SpriteCacheManager.Instance.AddSprite(spriteCacheKey, texture);
         if (sprite == null)
         {
             Debug.LogError($"[ImageDisplayController] Failed to create sprite from texture");
@@ -334,9 +343,10 @@ public class ActorPortraitController : MonoBehaviour
     /// 用于测试缓存URL加载流程，使用mock URL替代实际URL
     /// </summary>
     /// <param name="originalUrl">原始URL（仅用于日志记录）</param>
-    /// <param name="imageKey">图片资源的唯一标识Key，用于失败时删除映射</param>
+    /// <param name="imageUrlStorageKey">图片URL存储键，用于失败时删除映射</param>
+    /// <param name="spriteCacheKey">精灵缓存键</param>
     /// <param name="onComplete">加载完成回调，参数为加载是否成功</param>
-    private IEnumerator LoadAndDisplayImageFromUrlMock(string originalUrl, string imageKey, System.Action<bool> onComplete)
+    private IEnumerator LoadAndDisplayImageFromUrlMock(string originalUrl, string imageUrlStorageKey, string spriteCacheKey, System.Action<bool> onComplete)
     {
         Debug.Log($"[ImageDisplayController] 🔧 Mock模式：模拟从缓存URL加载");
         Debug.Log($"[ImageDisplayController] 🔧 原始URL: {originalUrl}");
@@ -348,14 +358,16 @@ public class ActorPortraitController : MonoBehaviour
         Debug.Log($"[ImageDisplayController] ✅ Mock加载完成");
 
         // 使用mock URL加载
-        yield return LoadAndDisplayImageFromUrl(_mockImageUrl, onComplete);
+        yield return LoadAndDisplayImageFromUrl(_mockImageUrl, imageUrlStorageKey, spriteCacheKey, onComplete);
     }
 
     /// <summary>
     /// Mock实现：模拟图片生成并显示
     /// 用于测试图片加载和显示功能，跳过实际的AI生成API调用
     /// </summary>
-    private IEnumerator GenerateAndDisplayImageMock()
+    /// <param name="imageUrlStorageKey">图片URL存储键</param>
+    /// <param name="spriteCacheKey">精灵缓存键</param>
+    private IEnumerator GenerateAndDisplayImageMock(string imageUrlStorageKey, string spriteCacheKey)
     {
         Debug.Log($"[ImageDisplayController] 🔧 Mock模式启动，模拟生成延迟: {_mockGenerationDelay}秒");
 
@@ -374,7 +386,9 @@ public class ActorPortraitController : MonoBehaviour
         };
 
         // 加载并显示图片
-        yield return LoadAndDisplayImage(mockImageInfo);
+        yield return LoadAndDisplayImage(mockImageInfo, imageUrlStorageKey, spriteCacheKey);
     }
 }
+
+
 
