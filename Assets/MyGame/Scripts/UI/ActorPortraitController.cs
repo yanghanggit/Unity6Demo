@@ -29,23 +29,17 @@ public class ActorPortraitController : CachedRemoteImageController
         Debug.Assert(!string.IsNullOrEmpty(SpriteCacheKey), "[ActorPortraitController] SpriteCacheKey is null or empty");
         Debug.Assert(ImageUrlStorageKey == SpriteCacheKey, "[ActorPortraitController] For simplicity, ImageUrlStorageKey should equal SpriteCacheKey in current implementation");
 
-        // 缓存两个key到局部变量
-        string imageUrlStorageKey = ImageUrlStorageKey;
-        string spriteCacheKey = SpriteCacheKey;
-        string prompt = Prompt;
-
-        // 检查是否已有缓存的Sprite, 有就直接显示
-        var cachedSprite = SpriteCacheManager.Instance.GetSprite(spriteCacheKey);
+        //检查是否已有缓存的Sprite, 有就直接显示
+        var cachedSprite = SpriteCacheManager.Instance.GetSprite(SpriteCacheKey);
         if (cachedSprite != null)
         {
-            Debug.Log($"[ActorPortraitController] Found cached sprite with key '{spriteCacheKey}', displaying it directly.");
+            Debug.Log($"[ActorPortraitController] Found cached sprite with key '{SpriteCacheKey}', displaying it directly.");
             _targetImage.sprite = cachedSprite;
             return;
         }
 
         // 未命中内存缓存，立即显示默认图标（后续需要网络操作）
-        var defaultActorIcon = SpriteCacheManager.Instance.GetSprite(SpriteCacheManager.DefaultIconKey);
-        _targetImage.sprite = defaultActorIcon;
+        _targetImage.sprite = SpriteCacheManager.Instance.GetSprite(SpriteCacheManager.DefaultIconKey);
 
         // 检查图片生成服务器是否开启
         if (ApiEndpointsManager.ImageRootResponse == null)
@@ -55,31 +49,31 @@ public class ActorPortraitController : CachedRemoteImageController
         }
 
         // 检查是否有持久化的URL映射
-        if (ImageService.HasImageUrl(imageUrlStorageKey))
+        if (ImageService.HasImageUrl(ImageUrlStorageKey))
         {
-            string cachedUrl = ImageService.GetImageUrl(imageUrlStorageKey);
-            Debug.Log($"[ActorPortraitController] Found cached URL with key '{imageUrlStorageKey}', loading directly (skip generation)");
+            string cachedUrl = ImageService.GetImageUrl(ImageUrlStorageKey);
+            Debug.Log($"[ActorPortraitController] Found cached URL with key '{ImageUrlStorageKey}', loading directly (skip generation)");
 
             // Mock逻辑分叉：加载缓存URL
             if (_useMockMode)
             {
-                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl, imageUrlStorageKey, spriteCacheKey, (success) =>
+                StartCoroutine(LoadAndDisplayImageFromUrlMock(cachedUrl, ImageUrlStorageKey, SpriteCacheKey, (success) =>
                 {
                     if (!success)
                     {
-                        ImageService.RemoveImageUrl(imageUrlStorageKey);
-                        Debug.LogWarning($"[ActorPortraitController] Cached URL is invalid, removed mapping for key '{imageUrlStorageKey}'. Will regenerate on next launch.");
+                        ImageService.RemoveImageUrl(ImageUrlStorageKey);
+                        Debug.LogWarning($"[ActorPortraitController] Cached URL is invalid, removed mapping for key '{ImageUrlStorageKey}'. Will regenerate on next launch.");
                     }
                 }));
             }
             else
             {
-                StartCoroutine(LoadAndDisplayImageFromUrl(cachedUrl, imageUrlStorageKey, spriteCacheKey, (success) =>
+                StartCoroutine(LoadAndDisplayImageFromUrl(cachedUrl, ImageUrlStorageKey, SpriteCacheKey, (success) =>
                 {
                     if (!success)
                     {
-                        ImageService.RemoveImageUrl(imageUrlStorageKey);
-                        Debug.LogWarning($"[ActorPortraitController] Cached URL is invalid, removed mapping for key '{imageUrlStorageKey}'. Will regenerate on next launch.");
+                        ImageService.RemoveImageUrl(ImageUrlStorageKey);
+                        Debug.LogWarning($"[ActorPortraitController] Cached URL is invalid, removed mapping for key '{ImageUrlStorageKey}'. Will regenerate on next launch.");
                     }
                 }));
             }
@@ -87,21 +81,21 @@ public class ActorPortraitController : CachedRemoteImageController
         }
 
         // 没有URL映射，需要生成新图片
-        Debug.Log($"[ActorPortraitController] No cached URL found, starting image generation with prompt: \n{prompt}");
+        Debug.Log($"[ActorPortraitController] No cached URL found, starting image generation with prompt: \n{Prompt}");
 
         // Mock逻辑分叉：生成图片
         if (_useMockMode)
         {
-            StartCoroutine(GenerateAndDisplayImageMock(imageUrlStorageKey, spriteCacheKey));
+            StartCoroutine(GenerateAndDisplayImageMock(ImageUrlStorageKey, SpriteCacheKey));
         }
         else
         {
             var configs = new List<ImageGenerationConfig>
             {
-                new() { prompt = prompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
+                new() { prompt = Prompt, model = _modelName, width = _imageWidth, height = _imageHeight, num_inference_steps = _numInferenceSteps}
             };
 
-            StartCoroutine(GenerateAndDisplayImage(configs, imageUrlStorageKey, spriteCacheKey));
+            StartCoroutine(GenerateAndDisplayImage(configs, ImageUrlStorageKey, SpriteCacheKey));
         }
     }
 
