@@ -106,51 +106,19 @@ public class Skill
 }
 
 /**
- * 角色属性类
+ * 角色属性类 - 简化版本，只包含核心战斗属性
  */
 [System.Serializable]
 public class CharacterStats
 {
-    public int experience = 0;
-    public int initial_level = 1;
+    // 当前生命值
     public int hp = 0;
-
-    // 基础属性
-    public int base_max_hp = 50;
-    public int base_strength = 5;
-    public int base_dexterity = 6;
-    public int base_wisdom = 5;
-
-    // 基础战斗属性
-    public int base_physical_attack = 8;
-    public int base_physical_defense = 5;
-    public int base_magic_attack = 7;
-    // public int base_magic_defense = 6;
-
-    // 成长系数
-    public int strength_per_level = 2;
-    public int dexterity_per_level = 1;
-    public int wisdom_per_level = 1;
-
-    public int max_hp => base_max_hp + (strength * 10);
-    
-    public int progression_level => experience / 1000;
-
-    public int level => initial_level + progression_level;
-
-    public int strength => base_strength + (strength_per_level * progression_level);
-
-    public int dexterity => base_dexterity + (dexterity_per_level * progression_level);
-
-    public int wisdom => base_wisdom + (wisdom_per_level * progression_level);
-
-    public int physical_attack => base_physical_attack + (strength * 2);
-
-    public int physical_defense => base_physical_defense + strength;
-
-    public int magic_attack => base_magic_attack + (wisdom * 2);
-
-    // public int magic_defense => base_magic_defense + wisdom;
+    // 最大生命值
+    public int max_hp = 50;
+    // 攻击力
+    public int attack = 10;
+    // 防御力
+    public int defense = 5;
 }
 
 /**

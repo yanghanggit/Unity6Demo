@@ -83,14 +83,9 @@ public static partial class GameUtils
             return string.Empty;
 
         var stats = combatStatsComponent.stats;
-        var text = $"{GetDisplayName(combatStatsComponent.name)} = LV:{stats.level}, HP:{stats.hp}/{stats.max_hp}," +
-                   $" Strength:{stats.strength}," +
-                   $" Dexterity:{stats.dexterity}," +
-                   $" Wisdom:{stats.wisdom}," +
-                   $" Physical Attack:{stats.physical_attack}," +
-                   $" Physical Defense:{stats.physical_defense}," +
-                   $" Magic Attack:{stats.magic_attack}," +
-                   // $" Magic Defense:{stats.magic_defense}\n";
+        var text = $"{GetDisplayName(combatStatsComponent.name)} = HP:{stats.hp}/{stats.max_hp}," +
+                   $" Attack:{stats.attack}," +
+                   $" Defense:{stats.defense}" +
                    "\n";
 
         if (combatStatsComponent.status_effects.Count > 0)
