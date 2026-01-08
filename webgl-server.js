@@ -1,7 +1,9 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const app = express();
 const PORT = 58497;
+const WEBAPP_DIR = 'Web';
 
 // 为 .gz 文件设置正确的 Content-Encoding 头
 app.use((req, res, next) => {
@@ -35,8 +37,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// 检查 Web 目录是否存在
+const webappPath = path.join(__dirname, WEBAPP_DIR);
+if (!fs.existsSync(webappPath)) {
+  console.error(`❌ 错误: ${WEBAPP_DIR} 目录不存在: ${webappPath}`);
+  console.error(`请先在 Unity 中构建 WebGL 项目到 ${WEBAPP_DIR} 目录`);
+  process.exit(1);
+}
+
 // 静态文件服务
-app.use(express.static(path.join(__dirname, 'WebApp')));
+app.use(express.static(webappPath));
 
 app.listen(PORT, () => {
   console.log(`Unity WebGL Server running at:`);

@@ -4,7 +4,7 @@
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "buildOutputDirList",
-                "value": "{\"m_Value\":\"/Users/yanghang/Documents/GitHub/Unity6Demo/Temp/UnityTempFile-8a8941ff98ec1477e8df96eecf2b5865/PlayerWithTests/PlayerWithTests;D:/柏林/Unity6Demo/WebApp;D:/AI-RPG-Game;D:/WerewolfGame;/Users/yanghang/Documents/GitHub/Unity6Demo/WebApp;/Users/yanghang/Project3/WebApp;;;;\"}"
+                "value": "{\"m_Value\":\"/Users/yanghang/Documents/GitHub/Unity6Demo/Web;/Users/yanghang/Documents/GitHub/Unity6Demo/Temp/UnityTempFile-8a8941ff98ec1477e8df96eecf2b5865/PlayerWithTests/PlayerWithTests;D:/柏林/Unity6Demo/WebApp;D:/AI-RPG-Game;D:/WerewolfGame;/Users/yanghang/Documents/GitHub/Unity6Demo/WebApp;/Users/yanghang/Project3/WebApp;;;\"}"
             },
             {
                 "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
