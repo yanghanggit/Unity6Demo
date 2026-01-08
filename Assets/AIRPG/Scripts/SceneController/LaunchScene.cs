@@ -46,7 +46,7 @@ public class LaunchScene : MonoBehaviour
 
         _loginButton.gameObject.SetActive(false);
         StartCoroutine(InitializeGameApiEndpoints());
-        StartCoroutine(InitializeImageApiEndpoints());
+        //StartCoroutine(InitializeImageApiEndpoints());
     }
 
     /// <summary>
