@@ -37,28 +37,6 @@ public static class ActorType
 }
 
 /**
- * 狼人杀角色名称（对应 Python StrEnum）
- */
-public static class WerewolfCharacterSheetName
-{
-    public const string MODERATOR = "ww.moderator";
-    public const string WEREWOLF = "ww.werewolf";
-    public const string SEER = "ww.seer";
-    public const string WITCH = "ww.witch";
-    public const string VILLAGER = "ww.villager";
-    public const string HUNTER = "ww.hunter";
-}
-
-/**
- * 女巫道具名称（对应 Python StrEnum）
- */
-public static class WitchItemName
-{
-    public const string CURE = "道具.解药";
-    public const string POISON = "道具.毒药";
-}
-
-/**
  * 场景类型（对应 Python StrEnum）
  */
 public static class StageType

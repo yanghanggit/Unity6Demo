@@ -8,6 +8,7 @@ using System.Collections.Generic;
 public sealed class AppearanceComponent
 {
     public string name = "";
+    public string base_body = "";
     public string appearance = "";
 }
 
