@@ -6,7 +6,7 @@ using System.Collections.Generic;
  * 
  */
 [System.Serializable]
-public class ActorCharacterSheet
+public class CharacterSheet
 {
     public string name = "";
     public string type = "";
@@ -18,7 +18,7 @@ public class ActorCharacterSheet
  * 
  */
 [System.Serializable]
-public class StageCharacterSheet
+public class StageProfile
 {
     public string name = "";
     public string type = "";
@@ -33,7 +33,6 @@ public static class ActorType
     public const string NONE = "None";
     public const string ALLY = "Ally";        // 我方/盟友/好人阵营
     public const string ENEMY = "Enemy";      // 敌方/怪物/坏人阵营
-    public const string NEUTRAL = "Neutral";  // 中立角色
 }
 
 /**
@@ -106,7 +105,7 @@ public class CharacterStats
 public class Actor
 {
     public string name = "";
-    public ActorCharacterSheet character_sheet = new();
+    public CharacterSheet character_sheet = new();
     public string system_message = "";
     public string kick_off_message = "";
     public CharacterStats character_stats = new();
@@ -121,7 +120,7 @@ public class Actor
 public class Stage
 {
     public string name = "";
-    public StageCharacterSheet character_sheet = new();
+    public StageProfile stage_profile = new();
     public string system_message = "";
     public string kick_off_message = "";
     public List<Actor> actors = new();
