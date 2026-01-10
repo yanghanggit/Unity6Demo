@@ -17,15 +17,15 @@ public class PlayerInfoBar : MonoBehaviour
         Debug.Assert(_playerInfoText != null, "_playerInfoText is null");
 
         // 显示玩家文字信息
-        _playerInfoText.text = $"{GameContext.Instance.UserName}\n{GameUtils.GetDisplayName(GameContext.Instance.ActorName)}";
+        _playerInfoText.text = $"{GameContext.Instance.UserName}\n{GameUtils.GetDisplayName(GameContext.Instance.PlayerActor)}";
 
         // 获取角色实体序列化数据
-        var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
-        Debug.Assert(actorEntitySerialization != null, "Actor entity serialization is null for actor: " + GameContext.Instance.ActorName);
+        var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.PlayerActor);
+        Debug.Assert(actorEntitySerialization != null, "Actor entity serialization is null for actor: " + GameContext.Instance.PlayerActor);
 
         // 默认的显示逻辑
         // 显示头像
-        var cachedSprite = SpriteCacheManager.Instance.GetSprite(GameContext.Instance.ActorName + "_头像");
+        var cachedSprite = SpriteCacheManager.Instance.GetSprite(GameContext.Instance.PlayerActor + "_头像");
         //cachedSprite = null; // 强制测试头像生成逻辑
         if (cachedSprite != null)
         {
@@ -53,7 +53,7 @@ public class PlayerInfoBar : MonoBehaviour
         }
 
         // 设置 ActorName，解耦对 GameContext 的直接依赖
-        imageDisplayController.ActorName = GameContext.Instance.ActorName;
+        imageDisplayController.ActorName = GameContext.Instance.PlayerActor;
 
         // 设置 PortraitPrompt
         var appearanceComponent = GameUtils.GetComponent<AppearanceComponent>(actorEntitySerialization);
@@ -65,7 +65,7 @@ public class PlayerInfoBar : MonoBehaviour
         var imageUrlStorageKey = ImageService.GenerateImageUrlStorageKey(
                 GameContext.Instance.UserName,
                 GameContext.Instance.GameName,
-                GameContext.Instance.ActorName,
+                GameContext.Instance.PlayerActor,
                 portraitPrompt
             );
 

@@ -33,7 +33,7 @@ public class DungeonCombatScene : MonoBehaviour
         if (ApiEndpointsManager.GameRootResponse != null)
         {
             // 已经连接服务器，开始初始化战斗场景
-            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
             _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
 
             StartCoroutine(ExecuteCombatInit());
@@ -420,7 +420,7 @@ public class DungeonCombatScene : MonoBehaviour
         RefreshActorAvatars();
 
         // 获取当前角色所在场景及该场景中的所有角色
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
         Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
 
         // 需要所有的角色名称列表！
@@ -540,7 +540,7 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private void InitializeActorAvatars()
     {
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
         Debug.Assert(stageName != "", "[DungeonCombatScene] Current actor's stage name is empty");
 
         // 获取该场景中的所有角色名称

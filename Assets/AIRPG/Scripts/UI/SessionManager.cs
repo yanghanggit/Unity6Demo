@@ -86,7 +86,7 @@ public class SessionManager : MonoBehaviour
         // 保存基本信息到 GameContext
         GameContext.Instance.UserName = userName;
         GameContext.Instance.GameName = gameName;
-        GameContext.Instance.ActorName = string.Empty; // 尚未分配角色
+        GameContext.Instance.PlayerActor = string.Empty; // 尚未分配角色
 
         //Debug.Log($"[SessionManager] Login completed successfully: {userName}");
         onComplete?.Invoke(true);
@@ -116,7 +116,8 @@ public class SessionManager : MonoBehaviour
         }
 
         // 保存角色信息到 GameContext
-        GameContext.Instance.ActorName = _startApi.RespData.player_actor;
+        GameContext.Instance.PlayerActor = _startApi.RespData.blueprint.player_actor;
+        GameContext.Instance.PlayerOnlyStage = _startApi.RespData.blueprint.player_only_stage;
 
         //Debug.Log($"[SessionManager] StartGame completed successfully: {GameContext.Instance.ActorName}");
         onComplete?.Invoke(true);

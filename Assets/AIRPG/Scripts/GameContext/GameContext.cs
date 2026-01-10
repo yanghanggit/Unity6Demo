@@ -70,7 +70,12 @@ public partial class GameContext
     /// <summary>
     /// 角色名称
     /// </summary>
-    private string _actorName;
+    private string _playerActor;
+
+    /// <summary>
+    /// 仅玩家可进入的关卡名称
+    /// </summary>
+    private string _playerOnlyStage = "";
 
 
     /// <summary>
@@ -127,15 +132,30 @@ public partial class GameContext
     /// <summary>
     /// 获取或设置角色名称
     /// </summary>
-    public string ActorName
+    public string PlayerActor
     {
         get
         {
-            return _actorName;
+            return _playerActor;
         }
         set
         {
-            _actorName = value;
+            _playerActor = value;
+        }
+    }
+
+    /// <summary>
+    /// 获取或设置仅玩家可进入的关卡名称
+    /// </summary>
+    public string PlayerOnlyStage
+    {
+        get
+        {
+            return _playerOnlyStage;
+        }
+        set
+        {
+            _playerOnlyStage = value;
         }
     }
 

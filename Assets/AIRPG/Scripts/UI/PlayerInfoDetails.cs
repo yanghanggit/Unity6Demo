@@ -30,8 +30,8 @@ public class PlayerInfoDetails : MonoBehaviour
     private void RefreshPlayerDetails()
     {
         // 获取玩家实体
-        var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.ActorName);
-        Debug.Assert(playerActorEntitySerialization != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.ActorName);
+        var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.PlayerActor);
+        Debug.Assert(playerActorEntitySerialization != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActor);
         if (playerActorEntitySerialization == null)
         {
             return;

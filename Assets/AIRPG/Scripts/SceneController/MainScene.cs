@@ -286,7 +286,7 @@ public class MainScene : MonoBehaviour
     private IEnumerator TransitionToScene(HomeSceneConfig sceneConfig)
     {
         // 获取玩家当前所在的 Stage 名称
-        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
 
         // 检查玩家是否已在目标 Stage 中
         if (currentStageName != sceneConfig.StageName)
@@ -342,7 +342,7 @@ public class MainScene : MonoBehaviour
         foreach (var actorName in allActors)
         {
             // 跳过玩家自己
-            if (actorName == GameContext.Instance.ActorName)
+            if (actorName == GameContext.Instance.PlayerActor)
             {
                 continue;
             }

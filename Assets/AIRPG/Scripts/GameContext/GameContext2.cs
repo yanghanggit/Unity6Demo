@@ -116,14 +116,14 @@ public partial class GameContext
     public List<string> GetOtherActorsInCurrentStage()
     {
         // 获取当前角色所属场景
-        var stageName = GetActorStage(ActorName);
+        var stageName = GetActorStage(PlayerActor);
         Debug.Assert(stageName != "", "[GameContext] Current actor's stage name is empty");
         
         // 获取该场景中的所有角色
         var actorsInStage = GetActorsInStage(stageName);
         
         // 移除当前角色自己
-        actorsInStage.Remove(ActorName);
+        actorsInStage.Remove(PlayerActor);
         
         return actorsInStage;
     }

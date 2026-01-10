@@ -70,9 +70,7 @@ public class StartRequest
 [System.Serializable]
 public class StartResponse
 {
-    public string message = "";
-
-    public string player_actor = "";
+    public Blueprint blueprint = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

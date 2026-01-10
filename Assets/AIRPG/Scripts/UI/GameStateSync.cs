@@ -63,7 +63,7 @@ public class GameStateSync : MonoBehaviour
     /// <returns>协程迭代器，成功返回true，失败返回false</returns>
     public IEnumerator RefreshMappingFromServer(Action<bool, string> onComplete = null)
     {
-        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.ActorName))
+        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActor))
         {
             string errorMsg = "[GameStateSync] UserName, GameName, or ActorName is not set in GameContext";
             Debug.LogError(errorMsg);
@@ -348,7 +348,7 @@ public class GameStateSync : MonoBehaviour
     /// <returns>协程迭代器</returns>
     public IEnumerator RefreshDungeonFromServer(Action<bool, string> onComplete = null)
     {
-        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.ActorName))
+        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActor))
         {
             string errorMsg = "[GameStateSync] UserName, GameName, or ActorName is not set in GameContext";
             Debug.LogError(errorMsg);
@@ -410,7 +410,7 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 步骤2: 获取当前演员所在场景的所有演员列表
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
         if (string.IsNullOrEmpty(stageName))
         {
             string errorMsg = "[GameStateSync] Current actor's stage not found in mapping";

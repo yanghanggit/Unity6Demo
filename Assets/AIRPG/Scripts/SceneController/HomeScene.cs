@@ -31,7 +31,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     [Header("Scene Config")]
     [SerializeField] private HomeSceneConfig _homeSceneConfig; // 场景配置数据
     [SerializeField] private string _preScene = "MainScene";   // 上一个场景名称
-    [SerializeField] private string _monitoringHouseStageName = "场景.监视之屋"; // 监视之屋场景名称
 
     // 事件系统
     [Header("Events")]
@@ -326,7 +325,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     private IEnumerator SwitchToStageIfNeeded(string targetStageName, System.Action<bool> onComplete)
     {
         // 获取玩家当前所在的 Stage 名称
-        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.ActorName);
+        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
 
         // 检查玩家是否已在目标 Stage 中
         if (currentStageName != targetStageName)
@@ -375,7 +374,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             // 切换到监视之屋（如果需要）
             bool switchSuccess = false;
             yield return SwitchToStageIfNeeded(
-                _monitoringHouseStageName,
+                GameContext.Instance.PlayerOnlyStage,
                 (success) =>
                 {
                     switchSuccess = success;
@@ -385,7 +384,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             // 检查是否成功进入监视之屋
             if (!switchSuccess)
             {
-                Debug.LogError($"[HomeScene] Failed to ensure in {_monitoringHouseStageName}");
+                Debug.LogError($"[HomeScene] Failed to ensure in {GameContext.Instance.PlayerOnlyStage}");
                 yield break;
             }
 

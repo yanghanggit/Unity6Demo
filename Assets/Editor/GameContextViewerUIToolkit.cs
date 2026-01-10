@@ -190,7 +190,7 @@ public class GameContextViewerUIToolkit : EditorWindow
         if (gamenameField != null)
             gamenameField.value = GameContext.Instance.GameName ?? "未设置";
         if (actornameField != null)
-            actornameField.value = GameContext.Instance.ActorName ?? "未设置";
+            actornameField.value = GameContext.Instance.PlayerActor ?? "未设置";
         if (sequenceIdField != null)
             sequenceIdField.value = GameContext.Instance.LastSequenceId.ToString();
     }
