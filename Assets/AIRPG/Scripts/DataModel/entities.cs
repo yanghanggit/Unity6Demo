@@ -51,7 +51,7 @@ public static class StageType
 public static class ItemType
 {
     public const string WEAPON = "Weapon";          // 武器
-    public const string Equipment = "Equipment";           // 装备
+    public const string EQUIPMENT = "Equipment";           // 装备
     public const string CONSUMABLE = "Consumable";  // 消耗品
     public const string MATERIAL = "Material";      // 材料
     public const string UNIQUE = "Unique"; // 独特物品/任务物品
