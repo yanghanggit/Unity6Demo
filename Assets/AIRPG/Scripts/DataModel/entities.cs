@@ -50,13 +50,11 @@ public static class StageType
  */
 public static class ItemType
 {
-    public const string NONE = "None";
     public const string WEAPON = "Weapon";          // 武器
-    public const string ARMOR = "Armor";            // 防具
+    public const string Equipment = "Equipment";           // 装备
     public const string CONSUMABLE = "Consumable";  // 消耗品
     public const string MATERIAL = "Material";      // 材料
-    public const string ACCESSORY = "Accessory";    // 饰品
-    public const string UNIQUE_ITEM = "UniqueItem"; // 独特物品/任务物品
+    public const string UNIQUE = "Unique"; // 独特物品/任务物品
 }
 
 /**
@@ -67,7 +65,7 @@ public class Item
 {
     public string name = "";
     public string uuid = "";
-    public string type = ItemType.NONE;  // 使用 string 类型存储
+    public string type = "";  // 使用 string 类型存储
     public string description = "";
     public int count = 1;  // 物品数量，默认为1
 }
