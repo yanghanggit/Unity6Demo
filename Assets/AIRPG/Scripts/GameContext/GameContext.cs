@@ -75,7 +75,7 @@ public partial class GameContext
     /// <summary>
     /// 仅玩家可进入的关卡名称
     /// </summary>
-    private string _playerOnlyStage = "";
+    private string _playerOnlyStage;
 
 
     /// <summary>

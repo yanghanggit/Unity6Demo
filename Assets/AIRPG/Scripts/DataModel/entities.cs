@@ -50,11 +50,11 @@ public static class StageType
  */
 public static class ItemType
 {
-    public const string WEAPON = "Weapon";          // 武器
-    public const string EQUIPMENT = "Equipment";           // 装备
-    public const string CONSUMABLE = "Consumable";  // 消耗品
-    public const string MATERIAL = "Material";      // 材料
-    public const string UNIQUE = "Unique"; // 独特物品/任务物品
+    public const string WEAPON_ITEM = "WeaponItem";          // 武器
+    public const string EQUIPMENT_ITEM = "EquipmentItem";           // 装备
+    public const string CONSUMABLE_ITEM = "ConsumableItem";  // 消耗品
+    public const string MATERIAL_ITEM = "MaterialItem";      // 材料
+    public const string UNIQUE_ITEM = "UniqueItem"; // 独特物品/任务物品
 }
 
 /**
@@ -65,9 +65,69 @@ public class Item
 {
     public string name = "";
     public string uuid = "";
-    public string type = "";  // 使用 string 类型存储
     public string description = "";
+    public string type = "";  // 使用 string 类型存储
     public int count = 1;  // 物品数量，默认为1
+}
+
+/**
+ * 武器类，继承自物品基类
+ */
+[System.Serializable]
+public class WeaponItem : Item
+{
+    public WeaponItem()
+    {
+        type = ItemType.WEAPON_ITEM;
+    }
+}
+
+/**
+ * 装备类，继承自物品基类
+ */
+[System.Serializable]
+public class EquipmentItem : Item
+{
+    public EquipmentItem()
+    {
+        type = ItemType.EQUIPMENT_ITEM;
+    }
+}
+
+/**
+ * 消耗品类，继承自物品基类
+ */
+[System.Serializable]
+public class ConsumableItem : Item
+{
+    public ConsumableItem()
+    {
+        type = ItemType.CONSUMABLE_ITEM;
+    }
+}
+
+/**
+ * 材料类，继承自物品基类
+ */
+[System.Serializable]
+public class MaterialItem : Item
+{
+    public MaterialItem()
+    {
+        type = ItemType.MATERIAL_ITEM;
+    }
+}
+
+/**
+ * 珍贵物品类，继承自物品基类
+ */
+[System.Serializable]
+public class UniqueItem : Item
+{
+    public UniqueItem()
+    {
+        type = ItemType.UNIQUE_ITEM;
+    }
 }
 
 /**
