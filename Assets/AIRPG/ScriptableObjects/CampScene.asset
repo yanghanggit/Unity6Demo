@@ -12,5 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89816302969964d2ab99ab5ca4b955ed, type: 3}
   m_Name: CampScene
   m_EditorClassIdentifier: Assembly-CSharp::HomeSceneConfig
-  StageName: "\u573A\u666F.\u5B89\u5168\u5C4B"
-  SceneDisplayName: CampScene
+  StageName: "\u573A\u666F.\u730E\u4EBA\u5907\u7269\u6240"
