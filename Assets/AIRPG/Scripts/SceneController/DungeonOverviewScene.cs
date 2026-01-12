@@ -26,7 +26,12 @@ public class DungeonOverviewScene : MonoBehaviour
         Debug.Assert(_mainText != null, "_mainText is null");
 
         _mainText.text = "Loading dungeon data...";
-        StartCoroutine(LoadDungeonOverview());
+
+        if (ApiEndpointsManager.GameRootResponse != null)
+        {
+            StartCoroutine(LoadDungeonOverview());
+        }
+
     }
 
     /// <summary>
