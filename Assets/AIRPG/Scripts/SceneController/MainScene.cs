@@ -31,12 +31,16 @@ public class MainScene : MonoBehaviour
     /// <summary>
     /// 营地场景配置数据(包含 StageName 和 SceneDisplayName)
     /// </summary>
-    [SerializeField] private HomeSceneConfig _campSceneConfig;
+    // [SerializeField] private HomeSceneConfig _campSceneConfig;
 
-    /// <summary>
-    /// 餐厅场景配置数据(包含 StageName 和 SceneDisplayName)
-    /// </summary>
-    [SerializeField] private HomeSceneConfig _restaurantSceneConfig;
+    // /// <summary>
+    // /// 餐厅场景配置数据(包含 StageName 和 SceneDisplayName)
+    // /// </summary>
+    // [SerializeField] private HomeSceneConfig _restaurantSceneConfig;
+
+    [Header("Home Scene Names and Objects")]
+    [SerializeField] private string[] _homeSceneNames;
+    [SerializeField] private GameObject[] _homeSceneObjects;
 
     [Header("UI Components")]
     /// <summary>
@@ -55,16 +59,6 @@ public class MainScene : MonoBehaviour
     [SerializeField] private GameObject _playerInfoDetails;
 
     /// <summary>
-    /// 营地区域角色图标容器
-    /// </summary>
-    [SerializeField] private GameObject _campActorIconsContainer;
-
-    /// <summary>
-    /// 餐厅区域角色图标容器
-    /// </summary>
-    [SerializeField] private GameObject _restaurantActorIconsContainer;
-
-    /// <summary>
     /// 角色迷你图标预制件
     /// </summary>
     [SerializeField] private GameObject _actorAvatarPrefab;
@@ -77,10 +71,6 @@ public class MainScene : MonoBehaviour
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
         Debug.Assert(_playerInfoBar != null, "_playerInfoBar is null");
         Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
-        Debug.Assert(_campSceneConfig != null, "_campSceneConfig is null");
-        Debug.Assert(_restaurantSceneConfig != null, "_restaurantSceneConfig is null");
-        Debug.Assert(_campActorIconsContainer != null, "_campActorIconsContainer is null");
-        Debug.Assert(_restaurantActorIconsContainer != null, "_restaurantActorIconsContainer is null");
         Debug.Assert(_actorAvatarPrefab != null, "_actorMiniIconPrefab is null");
         Debug.Assert(_actorAvatarPrefab.GetComponent<ActorMiniIcon>() != null, "ActorMiniIcon component not found on _actorMiniIconPrefab");
 
@@ -138,8 +128,7 @@ public class MainScene : MonoBehaviour
     /// </summary>
     public void OnClickCamp()
     {
-        //Debug.Log("OnClickCamp");
-        StartCoroutine(TransitionToScene(_campSceneConfig));
+        OnClickHomeScene(0);
     }
 
     /// <summary>
@@ -148,8 +137,25 @@ public class MainScene : MonoBehaviour
     /// </summary>
     public void OnClickRestaurant()
     {
-        //Debug.Log("OnClickRestaurant");
-        StartCoroutine(TransitionToScene(_restaurantSceneConfig));
+        OnClickHomeScene(1);
+    }
+
+    /// <summary>
+    /// 家园场景按钮点击事件处理
+    /// 根据索引选择对应的家园场景进行转换
+    /// </summary>
+    private void OnClickHomeScene(int index)
+    {
+        if (index < 0 || index >= _homeSceneNames.Length || index >= _homeSceneObjects.Length)
+        {
+            Debug.LogError("Invalid home scene index: " + index);
+            return;
+        }
+
+        var sceneName = _homeSceneNames[index];
+        var tempConfig = ScriptableObject.CreateInstance<HomeSceneConfig>();
+        tempConfig.StageName = sceneName;
+        StartCoroutine(TransitionToScene(tempConfig));
     }
 
     /// <summary>
@@ -334,8 +340,10 @@ public class MainScene : MonoBehaviour
     private void RefreshActorLocations()
     {
         // 清空现有图标
-        ClearActorIcons(_campActorIconsContainer);
-        ClearActorIcons(_restaurantActorIconsContainer);
+        for (int i = 0; i < _homeSceneObjects.Length; i++)
+        {
+            ClearActorIcons(_homeSceneObjects[i]);
+        }
 
         // 获取所有角色(排除玩家自己)
         var allActors = GameContext.Instance.AllActors;
@@ -351,13 +359,13 @@ public class MainScene : MonoBehaviour
             var actorStage = GameContext.Instance.GetActorStage(actorName);
 
             // 根据 Stage 在对应区域显示角色图标
-            if (actorStage == _campSceneConfig.StageName)
+            for (int i = 0; i < _homeSceneNames.Length; i++)
             {
-                CreateActorIcon(actorName, _campActorIconsContainer);
-            }
-            else if (actorStage == _restaurantSceneConfig.StageName)
-            {
-                CreateActorIcon(actorName, _restaurantActorIconsContainer);
+                if (actorStage == _homeSceneNames[i])
+                {
+                    CreateActorIcon(actorName, _homeSceneObjects[i]);
+                    break;
+                }
             }
         }
     }

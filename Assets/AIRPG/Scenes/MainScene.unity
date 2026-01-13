@@ -984,9 +984,12 @@ MonoBehaviour:
   _preScene: LoginScene
   _nextScene: HomeScene
   _dungeonOverviewScene: DungeonOverviewScene
-  _campSceneConfig: {fileID: 11400000, guid: d1ec0cda2b05e497c8c83f991cf28dd9, type: 2}
-  _restaurantSceneConfig: {fileID: 11400000, guid: 9ff95a2f1582743b59a0310250d83c24,
-    type: 2}
+  _homeSceneNames:
+  - "\u573A\u666F.\u730E\u4EBA\u5907\u7269\u6240"
+  - "\u573A\u666F.\u6751\u4E2D\u8BAE\u4E8B\u5802"
+  _homeSceneObjects:
+  - {fileID: 1059999693}
+  - {fileID: 100838}
   _dungeonButton: {fileID: 1416183366}
   _playerInfoBar: {fileID: 8281322745747966233}
   _playerInfoDetails: {fileID: 1318025743}
