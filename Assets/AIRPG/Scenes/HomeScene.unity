@@ -951,7 +951,6 @@ MonoBehaviour:
   _scrollView: {fileID: 876004725}
   _homeSceneConfig: {fileID: 11400000, guid: d1ec0cda2b05e497c8c83f991cf28dd9, type: 2}
   _preScene: MainScene
-  _monitoringHouseStageName: "\u573A\u666F.\u76D1\u89C6\u4E4B\u5C4B"
   _onActorClickedEvent: {fileID: 11400000, guid: cdb300192ace1475990159f868b47bcc,
     type: 2}
 --- !u!1 &456567907
@@ -1621,15 +1620,15 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 1981068757, guid: 40f6764d9e61a468c96368dc67fc7171, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 10.24, y: 15.36}
+  m_Size: {x: 2.56, y: 3.41}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!4 &809303519
 Transform:
@@ -1696,8 +1695,8 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 10.24, y: 15.36}
-    newSize: {x: 10.24, y: 15.36}
+    oldSize: {x: 2.56, y: 3.41}
+    newSize: {x: 2.56, y: 3.41}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0

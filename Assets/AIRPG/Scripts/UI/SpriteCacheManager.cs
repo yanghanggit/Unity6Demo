@@ -30,6 +30,12 @@ public class SpriteCacheManager : MonoBehaviour
     [Tooltip("Resources文件夹路径，用于运行时加载纹理")]
     [SerializeField] private string resourcesTexturePath = "Textures";
 
+    // 新添加的数据
+    [Header("直接在Inspector中配置的精灵来自图集")]
+    [SerializeField] private Sprite[] preloadSprites; // 在Inspector中赋值
+    [SerializeField] private string[] preloadSpriteKeys; // 在Inspector中赋值
+
+    // 精灵缓存字典
     private readonly Dictionary<string, Sprite> spriteCache = new();
 
     private void Awake()
@@ -39,22 +45,14 @@ public class SpriteCacheManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             Debug.Log("SpriteCacheManager: Instance created and marked as DontDestroyOnLoad");
-            InitializeTextures();
+            LoadPreConfiguredTextures();
+            LoadPreConfiguredSprites();
         }
         else
         {
             Debug.LogWarning("[SpriteCacheManager] Duplicate instance detected, destroying the new one.");
             Destroy(gameObject);
         }
-    }
-
-    /// <summary>
-    /// 初始化 Sprite 缓存管理器
-    /// </summary>
-    private void InitializeTextures()
-    {
-        LoadPreConfiguredTextures();
-        Debug.Log($"SpriteCacheManager: Initialization completed. Total cached sprites: {spriteCache.Count}");
     }
 
     /// <summary>
@@ -212,6 +210,40 @@ public class SpriteCacheManager : MonoBehaviour
         }
 
         Debug.Log($"SpriteCacheManager: Preloaded {loadedCount} textures from configuration");
+    }
+
+    /// <summary>
+    /// 加载预配置的精灵（来自图集）
+    /// </summary>
+    private void LoadPreConfiguredSprites()
+    {
+        if (preloadSprites == null || preloadSpriteKeys == null)
+        {
+            Debug.LogWarning("SpriteCacheManager: Preload sprites or sprite keys array is null");
+            return;
+        }
+
+        int loadedCount = 0;
+        int maxCount = Mathf.Min(preloadSprites.Length, preloadSpriteKeys.Length);
+
+        for (int i = 0; i < maxCount; i++)
+        {
+            if (preloadSprites[i] != null && !string.IsNullOrEmpty(preloadSpriteKeys[i]))
+            {
+                // 直接使用已有的 Sprite，无需创建
+               // Debug.Assert(spriteCache[preloadSpriteKeys[i]] == null, $"SpriteCacheManager: Key '{preloadSpriteKeys[i]}' already exists in cache");
+                
+                Debug.Assert(!spriteCache.ContainsKey(preloadSpriteKeys[i]), $"SpriteCacheManager: Key '{preloadSpriteKeys[i]}' already exists in cache");
+                spriteCache[preloadSpriteKeys[i]] = preloadSprites[i];
+                loadedCount++;
+            }
+            else
+            {
+                Debug.LogWarning($"SpriteCacheManager: Skipping invalid sprite at index {i}");
+            }
+        }
+
+        Debug.Log($"SpriteCacheManager: Preloaded {loadedCount} sprites from configuration");
     }
 
     /// <summary>

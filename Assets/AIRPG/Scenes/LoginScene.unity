@@ -1240,34 +1240,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TextureManager
   preloadTextures:
-  - {fileID: 2800000, guid: 026c0241e1dca4342b4142a832a163e3, type: 3}
-  - {fileID: 2800000, guid: d8bdf524df0e74052a70abab3c97fc5b, type: 3}
-  - {fileID: 2800000, guid: f0043eb4733ce4300ae901efc39e856f, type: 3}
-  - {fileID: 2800000, guid: f6a0269184b4245f5a8824992cb99fd7, type: 3}
   - {fileID: 2800000, guid: a942918b7a09a4b0cb70b9b43f10f3dc, type: 3}
   - {fileID: 2800000, guid: 2326d98614a12471f850363c85831689, type: 3}
-  - {fileID: 2800000, guid: a79d30067d1c3604e940e7f05dbdd5e9, type: 3}
-  - {fileID: 2800000, guid: 8506ff6100473d34b8e5130c13c53831, type: 3}
-  - {fileID: 2800000, guid: ccc2bb51676095646b2350f522bdddd2, type: 3}
-  - {fileID: 2800000, guid: ccc2bb51676095646b2350f522bdddd2, type: 3}
   - {fileID: 2800000, guid: a5e8d2d02c9ac4b8883afeedcbabdb6f, type: 3}
   - {fileID: 2800000, guid: 7a5e391422cf94750a4ef4f7f323c9c8, type: 3}
   textureKeys:
-  - "\u89D2\u8272.\u730E\u4EBA.\u77F3\u575A"
-  - "\u89D2\u8272.\u672F\u58EB.\u4E91\u97F3"
-  - "\u89D2\u8272.\u7CBE\u602A.\u5C71\u9B48"
-  - "\u89D2\u8272.\u5927\u5996.\u5C71\u4E2D\u864E"
   - "\u573A\u666F.\u730E\u4EBA\u5907\u7269\u6240"
   - "\u573A\u666F.\u6751\u4E2D\u8BAE\u4E8B\u5802"
-  - "\u89D2\u8272.\u730E\u4EBA.\u77F3\u575A_\u5934\u50CF"
-  - "\u89D2\u8272.\u672F\u58EB.\u4E91\u97F3_\u5934\u50CF"
-  - "\u89D2\u8272.\u516C\u4F1A\u6267\u884C\u5B98.D"
-  - "\u6D4B\u8BD5\u9ED8\u8BA4"
   - "\u573A\u666F.\u5C71\u6797\u8FB9\u7F18"
   - "\u573A\u666F.\u5BC6\u6797\u6DF1\u5904"
   pixelsPerUnit: 100
   spritePivot: {x: 0.5, y: 0.5}
   resourcesTexturePath: Textures
+  preloadSprites:
+  - {fileID: -939533432, guid: 40f6764d9e61a468c96368dc67fc7171, type: 3}
+  - {fileID: 1981068757, guid: 40f6764d9e61a468c96368dc67fc7171, type: 3}
+  preloadSpriteKeys:
+  - "\u89D2\u8272.\u730E\u4EBA.\u77F3\u575A"
+  - "\u89D2\u8272.\u672F\u58EB.\u4E91\u97F3"
 --- !u!4 &1455665588
 Transform:
   m_ObjectHideFlags: 0

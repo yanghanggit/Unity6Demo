@@ -25,7 +25,7 @@ public class PlayerInfoBar : MonoBehaviour
 
         // 默认的显示逻辑
         // 显示头像
-        var cachedSprite = SpriteCacheManager.Instance.GetSprite(GameContext.Instance.PlayerActor + "_头像");
+        var cachedSprite = SpriteCacheManager.Instance.GetSprite(GameContext.Instance.PlayerActor);
         //cachedSprite = null; // 强制测试头像生成逻辑
         if (cachedSprite != null)
         {
