@@ -406,9 +406,10 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// <returns>协程迭代器</returns>
     private IEnumerator AdvanceHomeState()
     {
-        // 使用 HomeGamePlayManager 推进游戏
+        // 使用 HomeGamePlayManager 推进游戏（空列表表示推进所有角色）
         bool advanceSuccess = false;
         yield return HomeGamePlayManager.Instance.AdvanceGame(
+            new List<string>(),
             (success) =>
             {
                 advanceSuccess = success;
@@ -543,40 +544,40 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Log("Ally button clicked in HomeScene.");
         if (ApiEndpointsManager.GameRootResponse != null && !string.IsNullOrEmpty(_selectedActorName))
         {
-            StartCoroutine(ExecuteAllyAction(_selectedActorName));
+            StartCoroutine(AdvanceActorState(_selectedActorName));
         }
         else
         {
-            Debug.LogWarning("Cannot execute ally action. Ensure game is set up and a sprite is selected.");
+            Debug.LogWarning("Cannot advance actor state. Ensure game is set up and a sprite is selected.");
         }
     }
 
     /// <summary>
-    /// 执行盟友行动的协程
-    /// 调用 HomeGamePlayManager 为目标角色执行盟友行动,并同步最新的游戏状态
+    /// 推进单个角色状态的协程
+    /// 调用 HomeGamePlayManager 推进指定角色的行动,并同步最新的游戏状态
     /// </summary>
     /// <param name="actorName">目标角色名称</param>
     /// <returns>协程迭代器</returns>
-    private IEnumerator ExecuteAllyAction(string actorName)
+    private IEnumerator AdvanceActorState(string actorName)
     {
-        // 使用 HomeGamePlayManager 执行盟友行动
-        bool allyActionSuccess = false;
-        yield return HomeGamePlayManager.Instance.AllyPlanAction(
-            actorName,
+        // 使用 HomeGamePlayManager 推进指定角色
+        bool advanceSuccess = false;
+        yield return HomeGamePlayManager.Instance.AdvanceGame(
+            new List<string> { actorName },
             (success) =>
             {
-                allyActionSuccess = success;
+                advanceSuccess = success;
             }
         );
 
         // 检查是否成功
-        if (!allyActionSuccess)
+        if (!advanceSuccess)
         {
-            Debug.LogError("[HomeScene] AllyPlanAction failed");
+            Debug.LogError($"[HomeScene] AdvanceActorState failed for {actorName}");
             yield break;
         }
 
-        Debug.Log($"[HomeScene] Ally action completed successfully for {actorName}");
+        Debug.Log($"[HomeScene] Actor state advanced successfully for {actorName}");
 
         // 更新角色显示(可能已变化)
         UpdateActorDisplay(_selectedActorName);

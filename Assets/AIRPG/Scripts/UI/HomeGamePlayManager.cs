@@ -26,6 +26,11 @@ public class HomeGamePlayManager : MonoBehaviour
     /// </summary>
     [SerializeField] private TransDungeonApi _transDungeonApi;
 
+    /// <summary>
+    /// 家园推进API接口
+    /// </summary>
+    [SerializeField] private HomeAdvanceApi _homeAdvanceApi;
+
     private void Awake()
     {
         // 单例模式处理
@@ -45,41 +50,44 @@ public class HomeGamePlayManager : MonoBehaviour
     {
         Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
         Debug.Assert(_transDungeonApi != null, "_transDungeonApi is null");
+        Debug.Assert(_homeAdvanceApi != null, "_homeAdvanceApi is null");
     }
 
     /// <summary>
     /// 推进游戏状态
-    /// 调用 /advancing 端点推进场景中所有角色的行动
+    /// 调用 home_advance API 推进指定角色的行动
+    /// 传入空列表则推进所有角色，服务器会自动处理
     /// 自动获取最新会话消息
     /// </summary>
+    /// <param name="actors">角色名称列表，传入空列表则推进所有角色</param>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator AdvanceGame(Action<bool> onComplete = null)
+    public IEnumerator AdvanceGame(List<string> actors, Action<bool> onComplete = null)
     {
-        // 调用 HomeGameplay API 的 /advancing 端点
-        yield return _homeGamePlayApi.Call(
-            GameContext.Instance.HomeGamePlayUrl,
+        // 使用 HomeAdvance API 推进角色
+        yield return _homeAdvanceApi.Call(
+            GameContext.Instance.HomeAdvanceUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-            "/advancing");
+            actors);
 
         // 检查API调用是否成功
-        if (_homeGamePlayApi.ReqResult == null)
+        if (_homeAdvanceApi.ReqResult == null)
         {
-            Debug.LogError("[HomeGamePlayManager] /advancing request failed");
+            Debug.LogError($"[HomeGamePlayManager] home_advance request failed for actors: [{string.Join(", ", actors)}]");
             onComplete?.Invoke(false);
             yield break;
         }
 
         // 进一步检查响应结果的成功标志
-        if (!_homeGamePlayApi.ReqResult.isSuccess)
+        if (!_homeAdvanceApi.ReqResult.isSuccess)
         {
-            Debug.LogError($"[HomeGamePlayManager] /advancing request failed: {_homeGamePlayApi.ReqResult.responseText}");
+            Debug.LogError($"[HomeGamePlayManager] home_advance request failed: {_homeAdvanceApi.ReqResult.responseText}");
             onComplete?.Invoke(false);
             yield break;
         }
 
-        Debug.Assert(_homeGamePlayApi.RespData != null, "[HomeGamePlayManager] /advancing response data is null");
+        Debug.Assert(_homeAdvanceApi.RespData != null, "[HomeGamePlayManager] home_advance response data is null");
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
@@ -104,7 +112,7 @@ public class HomeGamePlayManager : MonoBehaviour
             yield break;
         }
 
-        Debug.Log("[HomeGamePlayManager] AdvanceGame completed successfully");
+        Debug.Log($"[HomeGamePlayManager] AdvanceGame completed successfully for actors: [{string.Join(", ", actors)}]");
         onComplete?.Invoke(true);
     }
 
@@ -313,79 +321,6 @@ public class HomeGamePlayManager : MonoBehaviour
         }
 
         Debug.Log("[HomeGamePlayManager] TransDungeon completed successfully");
-        onComplete?.Invoke(true);
-    }
-
-    /// <summary>
-    /// 执行盟友行动
-    /// 调用 /ally 端点为指定角色添加plan action并执行
-    /// 自动获取最新会话消息
-    /// </summary>
-    /// <param name="actorName">目标角色名称</param>
-    /// <param name="onComplete">完成回调，参数为是否成功</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator AllyPlanAction(string actorName, Action<bool> onComplete = null)
-    {
-        if (string.IsNullOrEmpty(actorName))
-        {
-            Debug.LogError("[HomeGamePlayManager] Actor name is empty");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
-        // 调用 /ally_plan 端点
-        yield return _homeGamePlayApi.Call(
-            GameContext.Instance.HomeGamePlayUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "/ally_plan",
-            new Dictionary<string, string>
-            {
-                ["allies"] = actorName
-            });
-
-        // 检查API调用是否成功
-        if (_homeGamePlayApi.ReqResult == null)
-        {
-            Debug.LogError($"[HomeGamePlayManager] /ally request for {actorName} failed");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
-        // 进一步检查响应结果的成功标志
-        if (!_homeGamePlayApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"[HomeGamePlayManager] /ally request for {actorName} failed: {_homeGamePlayApi.ReqResult.responseText}");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
-        Debug.Assert(_homeGamePlayApi.RespData != null, $"[HomeGamePlayManager] /ally for {actorName} response data is null");
-
-        // 从服务器获取并同步最新的会话消息
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
-                {
-                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after ally action");
-                    // 收集AgentEvents 事件到 GameContext
-                    GameContext.Instance.CollectEventsByActor(sessionMessages);
-                }
-            }
-        );
-
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
-        {
-            Debug.LogError($"[HomeGamePlayManager] Failed to fetch session messages after ally action for {actorName}");
-            onComplete?.Invoke(false);
-            yield break;
-        }
-
-        Debug.Log($"[HomeGamePlayManager] AllyPlanAction completed successfully for: {actorName}");
         onComplete?.Invoke(true);
     }
 }

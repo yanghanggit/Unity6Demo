@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -255,9 +256,10 @@ public class MainScene : MonoBehaviour
     /// <returns>协程迭代器</returns>
     private IEnumerator AdvanceGameState()
     {
-        // 使用 HomeGamePlayManager 推进游戏
+        // 使用 HomeGamePlayManager 推进游戏（空列表表示推进所有角色）
         bool advanceSuccess = false;
         yield return HomeGamePlayManager.Instance.AdvanceGame(
+            new List<string>(),
             (success) =>
             {
                 advanceSuccess = success;

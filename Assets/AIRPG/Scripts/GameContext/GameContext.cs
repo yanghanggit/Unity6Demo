@@ -193,6 +193,17 @@ public partial class GameContext
     }
 
     /// <summary>
+    /// 获取主场景进阶API的URL地址
+    /// </summary>
+    public string HomeAdvanceUrl
+    {
+        get
+        {
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["home_advance"];
+        }
+    }
+
+    /// <summary>
     /// 获取关卡状态API的URL地址
     /// 根据用户名和游戏名称动态构建完整的URL
     /// </summary>

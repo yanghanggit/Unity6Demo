@@ -71,6 +71,7 @@ public static class ApiEndpointsManager
 
                 // 游戏玩法相关端点
                 Debug.Assert(endpoints.ContainsKey("home_gameplay"), "endpoints does not contain home_gameplay");
+                Debug.Assert(endpoints.ContainsKey("home_advance"), "endpoints does not contain home_advance");
                 Debug.Assert(endpoints.ContainsKey("dungeon_gameplay"), "endpoints does not contain dungeon_gameplay");
                 Debug.Assert(endpoints.ContainsKey("dungeon_combat_play_cards"), "endpoints does not contain dungeon_combat_play_cards");
 
