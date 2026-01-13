@@ -81,7 +81,7 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
             _actorName = actorsInStage[index];
 
             // 更新UI显示:设置角色名称文本
-            _title.text = _actorName;
+            _title.text = GameUtils.GetDisplayName(_actorName);
 
             // 更新UI显示:从纹理管理器加载并设置角色图标
             var actorSprite = SpriteCacheManager.Instance.GetSprite(_actorName);
