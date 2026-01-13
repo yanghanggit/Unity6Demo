@@ -1250,6 +1250,8 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 8506ff6100473d34b8e5130c13c53831, type: 3}
   - {fileID: 2800000, guid: ccc2bb51676095646b2350f522bdddd2, type: 3}
   - {fileID: 2800000, guid: ccc2bb51676095646b2350f522bdddd2, type: 3}
+  - {fileID: 2800000, guid: a5e8d2d02c9ac4b8883afeedcbabdb6f, type: 3}
+  - {fileID: 2800000, guid: 7a5e391422cf94750a4ef4f7f323c9c8, type: 3}
   textureKeys:
   - "\u89D2\u8272.\u730E\u4EBA.\u77F3\u575A"
   - "\u89D2\u8272.\u672F\u58EB.\u4E91\u97F3"
@@ -1261,6 +1263,8 @@ MonoBehaviour:
   - "\u89D2\u8272.\u672F\u58EB.\u4E91\u97F3_\u5934\u50CF"
   - "\u89D2\u8272.\u516C\u4F1A\u6267\u884C\u5B98.D"
   - "\u6D4B\u8BD5\u9ED8\u8BA4"
+  - "\u573A\u666F.\u5C71\u6797\u8FB9\u7F18"
+  - "\u573A\u666F.\u5BC6\u6797\u6DF1\u5904"
   pixelsPerUnit: 100
   spritePivot: {x: 0.5, y: 0.5}
   resourcesTexturePath: Textures

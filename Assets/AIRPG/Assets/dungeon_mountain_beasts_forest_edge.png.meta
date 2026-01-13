@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7daf0527d9df841808f0889b3ec2fd3b
+guid: a5e8d2d02c9ac4b8883afeedcbabdb6f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5810473317657866127
-    second: nano-banana_dfcd6640-2d4f-4c7d-8229-f29a86857d57_0
+      213: 1538812652504048846
+    second: nano-banana_9a8c4a90-b64b-4e50-b007-16e172fd7aad_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: nano-banana_dfcd6640-2d4f-4c7d-8229-f29a86857d57_0
+      name: nano-banana_9a8c4a90-b64b-4e50-b007-16e172fd7aad_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f8fe1eb72b2f2a050800000000000000
-      internalID: 5810473317657866127
+      spriteID: ec4616854f5fa5510800000000000000
+      internalID: 1538812652504048846
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      nano-banana_dfcd6640-2d4f-4c7d-8229-f29a86857d57_0: 5810473317657866127
+      nano-banana_9a8c4a90-b64b-4e50-b007-16e172fd7aad_0: 1538812652504048846
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
