@@ -11,18 +11,18 @@ public class ActorMiniIcon : MonoBehaviour, IStringGameEventListener
     [Header("UI Components")]
     [SerializeField] private Image _actorImage;          // 角色头像图片
     [SerializeField] private TMP_Text _actorNameText;    // 角色名称文本
-    [SerializeField] private GameObject _deathOverlay;    // 死亡覆盖标记（例如骷髅图标或X标记）
+    //[SerializeField] private GameObject _deathOverlay;    // 死亡覆盖标记（例如骷髅图标或X标记）
     [SerializeField] private StringGameEvent _onActorAvatarsRefreshEvent; // 角色头像刷新事件
 
     void Start()
     {
         Debug.Assert(_actorImage != null, "_actorImage is null");
         Debug.Assert(_actorNameText != null, "_actorNameText is null");
-        Debug.Assert(_deathOverlay != null, "_deathOverlay is null");
+        //Debug.Assert(_deathOverlay != null, "_deathOverlay is null");
         Debug.Assert(_onActorAvatarsRefreshEvent != null, "_onActorAvatarsRefreshEvent is null");
 
         // 初始隐藏死亡覆盖标记
-        _deathOverlay.SetActive(false);
+        //_deathOverlay.SetActive(false);
 
         // 注册事件监听
         _onActorAvatarsRefreshEvent.RegisterListener(this);
@@ -70,7 +70,7 @@ public class ActorMiniIcon : MonoBehaviour, IStringGameEventListener
         // 更新死亡状态显示，注意！如果从地下城回来，是会移除死亡组件的，所以即使在main2场景刷新也不会刷出死亡状态！
         var deathComponent = GameUtils.GetComponent<DeathComponent>(actorEntity);
         var isDead = deathComponent != null;
-        _deathOverlay.SetActive(isDead);
+        //_deathOverlay.SetActive(isDead);
         _actorImage.color = isDead ? new Color(0.5f, 0.5f, 0.5f, 1f) : Color.white;
         _actorNameText.color = isDead ? Color.red : Color.black;
     }
