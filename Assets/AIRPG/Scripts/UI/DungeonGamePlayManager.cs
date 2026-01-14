@@ -31,6 +31,11 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// </summary>
     [SerializeField] private DungeonCombatPlayCardsApi _dungeonCombatPlayCardsApi;
 
+    /// <summary>
+    /// Dungeon战斗抽牌API接口
+    /// </summary>
+    [SerializeField] private DungeonCombatDrawCardsApi _dungeonCombatDrawCardsApi;
+
     private void Awake()
     {
         // 单例模式处理
@@ -51,6 +56,7 @@ public class DungeonGamePlayManager : MonoBehaviour
         Debug.Assert(_dungeonGamePlayApi != null, "_dungeonGamePlayApi is null");
         Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
         Debug.Assert(_dungeonCombatPlayCardsApi != null, "_dungeonCombatPlayCardsApi is null");
+        Debug.Assert(_dungeonCombatDrawCardsApi != null, "_dungeonCombatDrawCardsApi is null");
     }
 
     /// <summary>
@@ -95,42 +101,50 @@ public class DungeonGamePlayManager : MonoBehaviour
 
     /// <summary>
     /// 抽卡
-    /// 调用 draw_cards 端点执行抽卡操作
+    /// 调用地下城战斗抽牌端点执行抽卡操作
     /// </summary>
-    /// <param name="onComplete">完成回调，参数为是否成功、消息和会话消息列表</param>
+    /// <param name="onComplete">完成回调，参数为是否成功、消息和任务ID</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator DrawCards(Action<bool, string, List<SessionMessage>> onComplete = null)
+    public IEnumerator DrawCards(Action<bool, string, string> onComplete = null)
     {
-        // 调用 draw_cards 端点
-        yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGamePlayUrl,
+        // 调用地下城战斗抽牌端点
+        yield return _dungeonCombatDrawCardsApi.Call(
+            GameContext.Instance.DungeonCombatDrawCardsUrl,
             GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            "draw_cards");
+            GameContext.Instance.GameName);
 
         // 检查API调用是否成功
-        if (_dungeonGamePlayApi.ReqResult == null)
+        if (_dungeonCombatDrawCardsApi.ReqResult == null)
         {
             // 没有任何请求结果，这就是不需要继续的！
-            string errorMsg = "DungeonGamePlayApi request result is null";
+            string errorMsg = "DungeonCombatDrawCardsApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
-        if (!_dungeonGamePlayApi.ReqResult.isSuccess)
+        if (!_dungeonCombatDrawCardsApi.ReqResult.isSuccess)
         {
-            string errorMsg = _dungeonGamePlayApi.ReqResult.responseText;
+            string errorMsg = _dungeonCombatDrawCardsApi.ReqResult.responseText;
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
         // 必有响应数据，即使是[]
-        Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
+        Debug.Assert(_dungeonCombatDrawCardsApi.RespData != null, "DungeonCombatDrawCardsApi response data is null");
+        if (
+            string.IsNullOrEmpty(_dungeonCombatDrawCardsApi.RespData.task_id) ||
+            _dungeonCombatDrawCardsApi.RespData.status != TaskStatus.RUNNING)
+        {
+            string errorMsg = "DungeonCombatDrawCardsApi response data is invalid";
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
 
-        //Debug.Log("[DungeonGamePlayManager] DrawCards completed successfully");
-        onComplete?.Invoke(true, "Draw cards completed successfully", _dungeonGamePlayApi.RespData.session_messages);
+        Debug.Log("[DungeonGamePlayManager] DrawCards completed successfully");
+        onComplete?.Invoke(true, "Draw cards completed successfully", _dungeonCombatDrawCardsApi.RespData.task_id);
     }
 
     /// <summary>

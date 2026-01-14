@@ -111,8 +111,9 @@ public class DungeonCombatScene : MonoBehaviour
     }
 
     /// <summary>
-    /// 执行抽卡操作并显示所有角色的手牌
-    /// 调用服务器 draw_cards 接口，刷新角色数据后显示每个角色的手牌信息
+    /// 执行抽卡操作并轮询任务状态，完成后显示手牌
+    /// 调用服务器 draw_cards 接口，获取任务ID后轮询查询任务状态
+    /// 当任务完成时，刷新数据并显示角色手牌信息
     /// </summary>
     private IEnumerator ExecuteDrawCardsAndShowHands()
     {
@@ -135,40 +136,56 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 正式的抽卡操作
-        // 步骤函数定义
         bool success = false;
-        List<SessionMessage> sessionMessages = null;
+        string taskId = null;
+
         yield return DungeonGamePlayManager.Instance.DrawCards(
-            (result, message, messages) =>
+            (result, message, id) =>
             {
                 success = result;
-                sessionMessages = messages;
-                if (!result)
+                taskId = id;
+                if (result)
+                {
+                    Debug.Log($"DrawCards initiated successfully, task ID: {taskId}");
+                    _mainText.text = "抽卡请求已提交，正在处理中...";
+                }
+                else
                 {
                     _mainText.text = message;
                 }
             });
 
-        // Early return: 抽卡失败
-        if (!success)
+        if (!success || string.IsNullOrEmpty(taskId))
         {
-            Debug.LogWarning("DrawCards action failed");
             yield break;
         }
 
-        // 检查是否有战斗完成事件
-        var combatCompleteEvents = GetCombatCompleteEvents(sessionMessages);
-        if (combatCompleteEvents.Count > 0)
+        // 轮询查询任务状态
+        bool pollSuccess = false;
+        yield return PollTaskStatus(taskId, (isSuccess, msg, taskRecord) =>
         {
-            DisplayCombatCompleteEvents(combatCompleteEvents);
+            pollSuccess = isSuccess;
+            if (!isSuccess)
+            {
+                _mainText.text = msg;
+            }
+        });
 
-            yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-
-            // 已经显示战斗完成结果，直接返回，不要再显示手牌信息！
-            yield break;
+        // 轮询成功后显示抽卡结果
+        if (pollSuccess)
+        {
+            _mainText.text = "抽卡处理完成，正在加载结果...";
+            yield return ShowDrawCardsResult();
         }
+    }
 
-        // 刷新角色数据并显示手牌信息
+    /// <summary>
+    /// 显示抽卡结果
+    /// 刷新地下城和角色数据，显示所有角色的手牌信息
+    /// </summary>
+    private IEnumerator ShowDrawCardsResult()
+    {
+        // 刷新角色数据
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
         // 显示所有角色的手牌信息
@@ -261,17 +278,31 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 轮询查询任务状态
-        yield return PollTaskStatus(taskId);
+        bool pollSuccess = false;
+        yield return PollTaskStatus(taskId, (isSuccess, msg, taskRecord) =>
+        {
+            pollSuccess = isSuccess;
+            if (!isSuccess)
+            {
+                _mainText.text = msg;
+            }
+        });
+
+        // 轮询成功后显示打牌结果
+        if (pollSuccess)
+        {
+            _mainText.text = "打牌处理完成，正在加载结果...";
+            yield return ShowPlayCardsResult();
+        }
     }
 
     /// <summary>
     /// 轮询查询任务状态直到完成或失败
-    /// 委托 TasksStatusApi 执行轮询逻辑，成功完成后调用 ShowPlayCardsResult 显示战斗结果
+    /// 委托 TasksStatusApi 执行轮询逻辑，完成后通过回调函数返回结果
     /// </summary>
     /// <param name="taskId">要查询的任务ID</param>
-    /// <param name="pollInterval">轮询间隔时间（秒），默认2秒</param>
-    /// <param name="maxAttempts">最大轮询次数，默认60次（即2分钟超时）</param>
-    private IEnumerator PollTaskStatus(string taskId)
+    /// <param name="onComplete">轮询完成后的回调函数，参数为(成功标志, 消息, 任务记录)</param>
+    private IEnumerator PollTaskStatus(string taskId, System.Action<bool, string, TaskRecord> onComplete)
     {
         bool isSuccess = false;
         string message = "";
@@ -286,24 +317,11 @@ public class DungeonCombatScene : MonoBehaviour
                 isSuccess = success;
                 message = msg;
                 taskRecord = record;
-
-                // 失败时立即更新UI显示错误信息
-                if (!success)
-                {
-                    _mainText.text = msg;
-                }
             }
         );
 
-        // 任务未成功完成，直接返回（错误信息已在回调中显示）
-        if (!isSuccess)
-        {
-            yield break;
-        }
-
-        // 任务成功完成，更新UI并显示结果
-        _mainText.text = "打牌处理完成，正在加载结果...";
-        yield return ShowPlayCardsResult();
+        // 通过回调函数返回轮询结果
+        onComplete?.Invoke(isSuccess, message, taskRecord);
     }
 
     /// <summary>

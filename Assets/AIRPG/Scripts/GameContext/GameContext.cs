@@ -277,6 +277,17 @@ public partial class GameContext
     }
 
     /// <summary>
+    /// 获取地牢战斗抽卡API的URL地址
+    /// </summary>
+    public string DungeonCombatDrawCardsUrl
+    {
+        get
+        {
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["dungeon_combat_draw_cards"];
+        }
+    }
+
+    /// <summary>
     /// 获取地牢战斗出牌API的URL地址
     /// </summary>
     public string DungeonCombatPlayCardsUrl
