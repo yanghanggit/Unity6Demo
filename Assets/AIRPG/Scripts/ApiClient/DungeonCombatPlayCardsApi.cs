@@ -8,21 +8,6 @@ using Newtonsoft.Json;
 public class DungeonCombatPlayCardsApi : BaseApiClient
 {
     /// <summary>
-    /// 请求 URL
-    /// </summary>
-    private string _url;
-
-    /// <summary>
-    /// 用户名
-    /// </summary>
-    private string _userName;
-
-    /// <summary>
-    /// 游戏名
-    /// </summary>
-    private string _gameName;
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -43,23 +28,6 @@ public class DungeonCombatPlayCardsApi : BaseApiClient
     public DungeonCombatPlayCardsResponse RespData => _responseData;
 
     /// <summary>
-    /// 初始化地下城战斗打牌请求
-    /// </summary>
-    /// <param name="url">请求 URL</param>
-    /// <param name="userName">用户名</param>
-    /// <param name="gameName">游戏名</param>
-    private void Initialize(string url, string userName, string gameName)
-    {
-        _url = url;
-        _userName = userName;
-        _gameName = gameName;
-        _requestResult = null;
-        _responseData = null;
-
-        Debug.Log($"DungeonCombatPlayCardsApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
-    }
-
-    /// <summary>
     /// 调用地下城战斗打牌 API
     /// </summary>
     /// <param name="url">请求 URL</param>
@@ -68,7 +36,14 @@ public class DungeonCombatPlayCardsApi : BaseApiClient
     /// <returns>协程枚举器</returns>
     public IEnumerator Call(string url, string userName, string gameName)
     {
-        Initialize(url, userName, gameName);
+        Debug.Log("Starting DungeonCombatPlayCardsApi call...");
+        Debug.Log($"URL: {url}");
+        Debug.Log($"UserName: {userName}");
+        Debug.Log($"GameName: {gameName}");
+
+        // 清除
+        _requestResult = null;
+        _responseData = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -80,13 +55,13 @@ public class DungeonCombatPlayCardsApi : BaseApiClient
         // 创建请求数据
         var requestData = new DungeonCombatPlayCardsRequest
         {
-            user_name = _userName,
-            game_name = _gameName
+            user_name = userName,
+            game_name = gameName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         // 发送请求
-        var task = PostRequestAsync(_url, jsonData);
+        var task = PostRequestAsync(url, jsonData);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)

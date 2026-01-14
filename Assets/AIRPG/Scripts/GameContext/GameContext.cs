@@ -184,11 +184,12 @@ public partial class GameContext
     /// <summary>
     /// 获取主场景游戏玩法API的URL地址
     /// </summary>
-    public string HomeGamePlayUrl
+    /// "home_player_action": "/api/home/player_action/v1/", HomePlayerActionUrl
+    public string HomePlayerActionUrl
     {
         get
         {
-            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["home_gameplay"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["home_player_action"];
         }
     }
 

@@ -8,11 +8,6 @@ using Newtonsoft.Json;
 public class DungeonStateApi : BaseApiClient
 {
     /// <summary>
-    /// 请求 URL
-    /// </summary>
-    private string _url;
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -32,17 +27,6 @@ public class DungeonStateApi : BaseApiClient
     /// </summary>
     public DungeonStateResponse RespData => _responseData;
 
-    /// <summary>
-    /// 初始化地下城状态请求
-    /// </summary>
-    /// <param name="url">请求 URL</param>
-    private void Initialize(string url)
-    {
-        _url = url;
-        _requestResult = null;
-        _responseData = null;
-        Debug.Log($"DungeonStateApi initialized with URL: {_url}");
-    }
 
     /// <summary>
     /// 调用获取地下城状态 API
@@ -51,7 +35,13 @@ public class DungeonStateApi : BaseApiClient
     /// <returns>协程枚举器</returns>
     public IEnumerator Call(string url)
     {
-        Initialize(url);
+        // 记录请求信息
+        Debug.Log("Starting DungeonStateApi call...");
+        Debug.Log($"URL: {url}");
+
+        // 清除请求状态
+        _requestResult = null;
+        _responseData = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -61,7 +51,7 @@ public class DungeonStateApi : BaseApiClient
         }
 
         // 发送请求
-        var task = GetRequestAsync(_url);
+        var task = GetRequestAsync(url);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)

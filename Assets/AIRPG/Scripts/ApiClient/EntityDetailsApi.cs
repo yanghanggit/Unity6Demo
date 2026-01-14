@@ -9,21 +9,6 @@ using System.Collections.Generic;
 public class EntityDetailsApi : BaseApiClient
 {
     /// <summary>
-    /// 基础请求 URL
-    /// </summary>
-    private string _url;
-
-    /// <summary>
-    /// 实体名称列表
-    /// </summary>
-    private List<string> _entitiyNames;
-
-    /// <summary>
-    /// 包含查询参数的完整请求 URL
-    /// </summary>
-    private string _requestUrl;
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -44,26 +29,6 @@ public class EntityDetailsApi : BaseApiClient
     public EntitiesDetailsResponse RespData => _responseData;
 
     /// <summary>
-    /// 初始化实体详情请求
-    /// </summary>
-    /// <param name="url">基础请求 URL</param>
-    /// <param name="entityNames">实体名称列表</param>
-    private void Initialize(string url, List<string> entityNames)
-    {
-        _url = url;
-        _entitiyNames = entityNames;
-        _responseData = null;
-        _requestResult = null;
-
-        // Debug.Log($"EntityDetailsApi initialized with URL: {_url} and {entityNames?.Count ?? 0} entities");
-        // for (int i = 0; i < entityNames.Count; i++)
-        // {
-        //     Debug.Log($"Entity {i}: {entityNames[i]}");
-        // }
-        _requestUrl = BuildRequestUrl(_entitiyNames);
-    }
-
-    /// <summary>
     /// 调用获取实体详情 API
     /// </summary>
     /// <param name="url">请求 URL</param>
@@ -77,7 +42,18 @@ public class EntityDetailsApi : BaseApiClient
             yield break;
         }
 
-        Initialize(url, actors);
+        // 记录请求信息
+        Debug.Log("Starting EntityDetailsApi call...");
+        Debug.Log($"URL: {url}");
+        Debug.Log($"Entities: {JsonConvert.SerializeObject(actors)}");
+
+        var requestUrl = BuildRequestUrl(url, actors);
+        Debug.Log("Starting EntityDetailsApi call...");
+        Debug.Log($"Request URL: {requestUrl}");
+
+        // 清除请求状态
+        _responseData = null;
+        _requestResult = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -87,7 +63,7 @@ public class EntityDetailsApi : BaseApiClient
         }
 
         // 发送请求
-        var task = GetRequestAsync(_requestUrl);
+        var task = GetRequestAsync(requestUrl);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)
@@ -134,14 +110,14 @@ public class EntityDetailsApi : BaseApiClient
     /// </summary>
     /// <param name="actors">实体名称列表</param>
     /// <returns>完整的请求 URL</returns>
-    private string BuildRequestUrl(List<string> actors)
+    private string BuildRequestUrl(string baseUrl, List<string> actors)
     {
         var parameters = new List<KeyValuePair<string, string>>();
         foreach (var actor in actors)
         {
             parameters.Add(new KeyValuePair<string, string>("entities", actor));
         }
-        return BuildUrlWithQueryParams(_url, parameters);
+        return BuildUrlWithQueryParams(baseUrl, parameters);
     }
 
 }

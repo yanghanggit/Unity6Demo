@@ -19,7 +19,7 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <summary>
     /// Home游戏玩法API接口
     /// </summary>
-    [SerializeField] private HomeGamePlayApi _homeGamePlayApi;
+    [SerializeField] private HomePlayerActionApi _homePlayerActionApi;
 
     /// <summary>
     /// 传送到地下城API接口
@@ -48,7 +48,7 @@ public class HomeGamePlayManager : MonoBehaviour
 
     private void Start()
     {
-        Debug.Assert(_homeGamePlayApi != null, "_homeGamePlayApi is null");
+        Debug.Assert(_homePlayerActionApi != null, "_homeGamePlayApi is null");
         Debug.Assert(_transDungeonApi != null, "_transDungeonApi is null");
         Debug.Assert(_homeAdvanceApi != null, "_homeAdvanceApi is null");
     }
@@ -135,11 +135,11 @@ public class HomeGamePlayManager : MonoBehaviour
         }
 
         // 调用 /speak 端点
-        yield return _homeGamePlayApi.Call(
-            GameContext.Instance.HomeGamePlayUrl,
+        yield return _homePlayerActionApi.Call(
+            GameContext.Instance.HomePlayerActionUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-            "/speak",
+            HomePlayerActionType.SPEAK,
             new Dictionary<string, string>
             {
                 ["target"] = targetActorName,
@@ -147,7 +147,7 @@ public class HomeGamePlayManager : MonoBehaviour
             });
 
         // 检查API调用是否成功
-        if (_homeGamePlayApi.ReqResult == null)
+        if (_homePlayerActionApi.ReqResult == null)
         {
             Debug.LogError("[HomeGamePlayManager] /speak request failed");
             onComplete?.Invoke(false);
@@ -155,14 +155,14 @@ public class HomeGamePlayManager : MonoBehaviour
         }
 
         // 进一步检查响应结果的成功标志
-        if (!_homeGamePlayApi.ReqResult.isSuccess)
+        if (!_homePlayerActionApi.ReqResult.isSuccess)
         {
-            Debug.LogError($"[HomeGamePlayManager] /speak request failed: {_homeGamePlayApi.ReqResult.responseText}");
+            Debug.LogError($"[HomeGamePlayManager] /speak request failed: {_homePlayerActionApi.ReqResult.responseText}");
             onComplete?.Invoke(false);
             yield break;
         }
 
-        Debug.Assert(_homeGamePlayApi.RespData != null, "[HomeGamePlayManager] /speak response data is null");
+        Debug.Assert(_homePlayerActionApi.RespData != null, "[HomeGamePlayManager] /speak response data is null");
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;
@@ -209,18 +209,18 @@ public class HomeGamePlayManager : MonoBehaviour
         }
 
         // 调用 /switch_stage 端点
-        yield return _homeGamePlayApi.Call(
-            GameContext.Instance.HomeGamePlayUrl,
+        yield return _homePlayerActionApi.Call(
+            GameContext.Instance.HomePlayerActionUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-            "/switch_stage",
+            HomePlayerActionType.SWITCH_STAGE,
             new Dictionary<string, string>
             {
                 ["stage_name"] = stageName
             });
 
         // 检查API调用是否成功
-        if (_homeGamePlayApi.ReqResult == null)
+        if (_homePlayerActionApi.ReqResult == null)
         {
             Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed");
             onComplete?.Invoke(false);
@@ -228,14 +228,14 @@ public class HomeGamePlayManager : MonoBehaviour
         }
 
         // 进一步检查响应结果的成功标志
-        if (!_homeGamePlayApi.ReqResult.isSuccess)
+        if (!_homePlayerActionApi.ReqResult.isSuccess)
         {
-            Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed: {_homeGamePlayApi.ReqResult.responseText}");
+            Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed: {_homePlayerActionApi.ReqResult.responseText}");
             onComplete?.Invoke(false);
             yield break;
         }
 
-        Debug.Assert(_homeGamePlayApi.RespData != null, $"[HomeGamePlayManager] /switch_stage to {stageName} response data is null");
+        Debug.Assert(_homePlayerActionApi.RespData != null, $"[HomeGamePlayManager] /switch_stage to {stageName} response data is null");
 
         // 从服务器获取并同步最新的会话消息
         bool fetchSuccess = false;

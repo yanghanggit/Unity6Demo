@@ -9,16 +9,6 @@ using System.Collections.Generic;
 public class GenerateImageApi : BaseApiClient
 {
     /// <summary>
-    /// 请求 URL
-    /// </summary>
-    private string _url;
-
-    /// <summary>
-    /// 图片生成配置列表
-    /// </summary>
-    private List<ImageGenerationConfig> _configs;
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -39,23 +29,6 @@ public class GenerateImageApi : BaseApiClient
     public ImageGenerationResponse RespData => _responseData;
 
     /// <summary>
-    /// 初始化图片生成请求
-    /// </summary>
-    /// <param name="url">请求 URL</param>
-    /// <param name="configs">图片生成配置列表</param>
-    private void Initialize(string url, List<ImageGenerationConfig> configs)
-    {
-        _url = url;
-        _configs = configs ?? new List<ImageGenerationConfig>();
-        _requestResult = null;
-        _responseData = null;
-
-        Debug.Log($"GenerateImageApi initialized with URL: {_url}");
-        Debug.Log($"Request configs count: {_configs.Count}");
-        Debug.Log($"Request data: {JsonConvert.SerializeObject(_configs)}");
-    }
-
-    /// <summary>
     /// 调用图片生成 API
     /// </summary>
     /// <param name="url">请求 URL</param>
@@ -63,7 +36,15 @@ public class GenerateImageApi : BaseApiClient
     /// <returns>协程枚举器</returns>
     public IEnumerator Call(string url, List<ImageGenerationConfig> configs)
     {
-        Initialize(url, configs);
+        // 记录请求信息
+        Debug.Log("Starting GenerateImageApi call...");
+        Debug.Log($"URL: {url}");
+        Debug.Log($"Configs: {JsonConvert.SerializeObject(configs)}");
+
+        // 清除请求状态
+        _requestResult = null;
+        _responseData = null;
+
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -75,12 +56,12 @@ public class GenerateImageApi : BaseApiClient
         // 创建请求数据
         var requestData = new ImageGenerationRequest
         {
-            configs = _configs
+            configs = configs
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         // 发送请求
-        var task = PostRequestAsync(_url, jsonData);
+        var task = PostRequestAsync(url, jsonData);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)

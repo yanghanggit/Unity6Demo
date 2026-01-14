@@ -8,21 +8,6 @@ using Newtonsoft.Json;
 public class StartApi : BaseApiClient
 {
     /// <summary>
-    /// 请求 URL
-    /// </summary>
-    private string _url;
-
-    /// <summary>
-    /// 用户名
-    /// </summary>
-    private string _userName;
-
-    /// <summary>
-    /// 游戏名
-    /// </summary>
-    private string _gameName;
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -43,24 +28,6 @@ public class StartApi : BaseApiClient
     public StartResponse RespData => _responseData;
 
     /// <summary>
-    /// 初始化开始游戏请求
-    /// </summary>
-    /// <param name="url">请求 URL</param>
-    /// <param name="userName">用户名</param>
-    /// <param name="gameName">游戏名</param>
-    /// <param name="actorName">角色名</param>
-    private void Initialize(string url, string userName, string gameName)
-    {
-        _url = url;
-        _userName = userName;
-        _gameName = gameName;
-        _requestResult = null;
-        _responseData = null;
-
-        //Debug.Log($"StartApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}");
-    }
-
-    /// <summary>
     /// 调用开始游戏 API
     /// </summary>
     /// <param name="url">请求 URL</param>
@@ -70,7 +37,15 @@ public class StartApi : BaseApiClient
     /// <returns>协程枚举器</returns>
     public IEnumerator Call(string url, string user, string game)
     {
-        Initialize(url, user, game);
+        // 记录请求信息
+        Debug.Log("Starting StartApi call...");
+        Debug.Log($"URL: {url}");
+        Debug.Log($"User: {user}");
+        Debug.Log($"Game: {game}");
+
+        // 清除请求状态
+        _requestResult = null;
+        _responseData = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -82,14 +57,14 @@ public class StartApi : BaseApiClient
         // 创建请求数据
         var requestData = new StartRequest
         {
-            user_name = _userName,
-            game_name = _gameName,
+            user_name = user,
+            game_name = game,
             //actor_name = _actorName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         // 发送请求
-        var task = PostRequestAsync(_url, jsonData);
+        var task = PostRequestAsync(url, jsonData);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)
@@ -123,8 +98,6 @@ public class StartApi : BaseApiClient
                 Debug.LogError("Deserialized response data is null");
                 yield break;
             }
-
-            //Debug.Log($"Start game successful. Message: {_responseData.message}");
         }
         catch (System.Exception ex)
         {

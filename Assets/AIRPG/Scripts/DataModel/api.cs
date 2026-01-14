@@ -97,23 +97,24 @@ public class HomeAdvanceResponse
 // Home gameplay request/response classes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-[System.Serializable]
-public class HomeGamePlayUserInput
+public sealed class HomePlayerActionType
 {
-    public string tag = "";
-    public Dictionary<string, string> data = new();
+    public static readonly string SPEAK = "/speak";
+    public static readonly string SWITCH_STAGE = "/switch_stage";
 }
 
 [System.Serializable]
-public class HomeGamePlayRequest
+public class HomePlayerActionRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public HomeGamePlayUserInput user_input = new();
+    public string action = "";
+
+    public Dictionary<string, string> arguments = new();
 }
 
 [System.Serializable]
-public class HomeGamePlayResponse
+public class HomePlayerActionResponse
 {
     public List<SessionMessage> session_messages = new();
 }

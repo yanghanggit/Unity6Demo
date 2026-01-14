@@ -9,26 +9,6 @@ using System.Collections.Generic;
 public class SessionMessagesApi : BaseApiClient
 {
     /// <summary>
-    /// 基础请求 URL
-    /// </summary>
-    private string _url;
-
-    /// <summary>
-    /// 用户名
-    /// </summary>
-    private string _userName;
-
-    /// <summary>
-    /// 游戏名
-    /// </summary>
-    private string _gameName;
-
-    /// <summary>
-    /// 请求的上次序列 ID
-    /// </summary>
-    private int _requestLastSequenceId;
-
-    /// <summary>
     /// 获取响应中的最后一条消息的序列 ID
     /// </summary>
     public int RespLastSequenceId
@@ -43,11 +23,6 @@ public class SessionMessagesApi : BaseApiClient
             return -1;
         }
     }
-
-    /// <summary>
-    /// 包含查询参数的完整请求 URL
-    /// </summary>
-    private string _requestUrl;
 
     /// <summary>
     /// 请求结果
@@ -69,40 +44,18 @@ public class SessionMessagesApi : BaseApiClient
     /// </summary>
     public SessionMessageResponse RespData => _responseData;
 
-
-    /// <summary>
-    /// 初始化会话消息请求
-    /// </summary>
-    /// <param name="url">基础请求 URL</param>
-    /// <param name="userName">用户名</param>
-    /// <param name="gameName">游戏名</param>
-    /// <param name="requestLastSequenceId">上次请求的序列 ID</param>
-    private void Initialize(string url, string userName, string gameName, int requestLastSequenceId)
-    {
-        _url = url;
-        _userName = userName;
-        _gameName = gameName;
-        _requestLastSequenceId = requestLastSequenceId;
-        _requestResult = null;
-        _responseData = null;
-        _requestUrl = BuildRequestUrl(requestLastSequenceId);
-
-        Debug.Log($"SessionMessagesApi initialized with URL: {_url}, UserName: {_userName}, GameName: {_gameName}, LastSequenceId: {_requestLastSequenceId}");
-        Debug.Log($"Request URL: {_requestUrl}");
-    }
-
     /// <summary>
     /// 构建包含查询参数的请求 URL
     /// </summary>
     /// <param name="lastSequenceId">上次请求的序列 ID</param>
     /// <returns>完整的请求 URL</returns>
-    private string BuildRequestUrl(int lastSequenceId)
+    private string BuildRequestUrl(string url, int lastSequenceId)
     {
         var parameters = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("last_sequence_id", lastSequenceId.ToString())
+            new("last_sequence_id", lastSequenceId.ToString())
         };
-        return BuildUrlWithQueryParams(_url, parameters);
+        return BuildUrlWithQueryParams(url, parameters);
     }
 
     /// <summary>
@@ -115,7 +68,20 @@ public class SessionMessagesApi : BaseApiClient
     /// <returns>协程枚举器</returns>
     public IEnumerator Call(string url, string userName, string gameName, int requestLastSequenceId)
     {
-        Initialize(url, userName, gameName, requestLastSequenceId);
+        //Initialize(url, userName, gameName, requestLastSequenceId);
+
+        // 记录请求信息
+        Debug.Log("Starting SessionMessagesApi call...");
+        Debug.Log($"URL: {url}");
+        Debug.Log($"UserName: {userName}");
+        Debug.Log($"GameName: {gameName}");
+        Debug.Log($"RequestLastSequenceId: {requestLastSequenceId}");
+        var buildRequestUrl = BuildRequestUrl(url, requestLastSequenceId);
+        Debug.Log($"Sending request to URL: {buildRequestUrl}");
+
+        // 清除请求状态
+        _requestResult = null;
+        _responseData = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -125,7 +91,7 @@ public class SessionMessagesApi : BaseApiClient
         }
 
         // 发送请求
-        var task = GetRequestAsync(_requestUrl);
+        var task = GetRequestAsync(buildRequestUrl);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)

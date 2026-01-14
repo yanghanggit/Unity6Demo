@@ -205,7 +205,7 @@ public class GameContextViewerUIToolkit : EditorWindow
         {
             { "Login URL", GameContext.Instance.LoginUrl },
             { "Logout URL", GameContext.Instance.LogoutUrl },
-            { "Home GamePlay URL", GameContext.Instance.HomeGamePlayUrl },
+            { "Home GamePlay URL", GameContext.Instance.HomePlayerActionUrl },
             { "Stages State URL", GameContext.Instance.StagesStateUrl },
             { "Dungeon State URL", GameContext.Instance.DungeonStateUrl },
             { "Entity Details URL", GameContext.Instance.EntityDetailsUrl },

@@ -8,11 +8,6 @@ using Newtonsoft.Json;
 public class TaskTriggerApi : BaseApiClient
 {
     /// <summary>
-    /// 请求 URL
-    /// </summary>
-    private string _url;
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -32,16 +27,6 @@ public class TaskTriggerApi : BaseApiClient
     /// </summary>
     public TaskTriggerResponse RespData => _responseData;
 
-    /// <summary>
-    /// 初始化任务触发请求
-    /// </summary>
-    /// <param name="url">请求 URL</param>
-    private void Initialize(string url)
-    {
-        _url = url;
-        _requestResult = null;
-        _responseData = null;
-    }
 
     /// <summary>
     /// 调用任务触发 API
@@ -50,7 +35,13 @@ public class TaskTriggerApi : BaseApiClient
     /// <returns>协程枚举器</returns>
     public IEnumerator Call(string url)
     {
-        Initialize(url);
+        // 记录请求信息
+        Debug.Log("Starting TaskTriggerApi call...");
+        Debug.Log($"URL: {url}");
+
+        // 清除请求状态
+        _requestResult = null;
+        _responseData = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -60,7 +51,7 @@ public class TaskTriggerApi : BaseApiClient
         }
 
         // 发送请求
-        var task = PostRequestAsync(_url, null);
+        var task = PostRequestAsync(url, null);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)

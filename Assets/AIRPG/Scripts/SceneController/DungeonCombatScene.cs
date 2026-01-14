@@ -14,8 +14,6 @@ public class DungeonCombatScene : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText;
     [SerializeField] private GameObject _backgroundImage; // (暂未使用)
-    // [SerializeField] private GameObject _allyAvatarContainer;  // 我方角色头像容器(左侧)
-    // [SerializeField] private GameObject _enemyAvatarContainer; // 敌方角色头像容器(右侧)
     [SerializeField] private GameObject _actorAvatarPrefab;    // 角色头像预制体
     [SerializeField] private StringGameEvent _onActorAvatarsRefreshEvent; // 角色头像刷新事件
 
@@ -26,12 +24,9 @@ public class DungeonCombatScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        // Debug.Assert(_allyAvatarContainer != null, "_allyAvatarContainer is null");
-        // Debug.Assert(_enemyAvatarContainer != null, "_enemyAvatarContainer is null");
         Debug.Assert(_actorAvatarPrefab != null, "_actorAvatarPrefab is null");
         Debug.Assert(_onActorAvatarsRefreshEvent != null, "_onActorAvatarsRefreshEvent is null");
         Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
-        //Debug.Assert(_backgroundImage != null, "_backgroundImage is null");
 
         // 检查是否已经连接服务器
         if (ApiEndpointsManager.GameRootResponse != null)
@@ -169,17 +164,12 @@ public class DungeonCombatScene : MonoBehaviour
 
             yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
-            //RefreshActorAvatars();
-
             // 已经显示战斗完成结果，直接返回，不要再显示手牌信息！
             yield break;
         }
 
         // 刷新角色数据并显示手牌信息
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-
-        // 更新角色头像的死亡状态
-        //RefreshActorAvatars();
 
         // 显示所有角色的手牌信息
         DisplayAllActorsHands();
@@ -325,9 +315,6 @@ public class DungeonCombatScene : MonoBehaviour
     {
         // 刷新地下城和角色数据
         yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-
-        // 更新角色头像的死亡状态
-        //RefreshActorAvatars();
 
         // 获取最新的地下城回合信息
         Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
@@ -548,88 +535,5 @@ public class DungeonCombatScene : MonoBehaviour
             SceneManager.LoadScene(_preScene);
         }
     }
-
-    /// <summary>
-    /// 初始化战斗场景中的角色头像显示
-    /// 获取当前场景中的所有角色，按阵营(盟友/敌人)分类后，分别在对应容器中创建头像UI
-    /// 该方法在战斗场景初始化时调用一次，负责完整的头像系统设置
-    /// </summary>
-    // private void InitializeActorAvatars()
-    // {
-    //     var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
-    //     Debug.Assert(stageName != "", "[DungeonCombatScene] Current actor's stage name is empty");
-
-    //     // 获取该场景中的所有角色名称
-    //     var actorNames = GameContext.Instance.GetActorsInStage(stageName);
-
-    //     List<EntitySerialization> allyEntities = new();
-    //     List<EntitySerialization> enemyEntities = new();
-    //     foreach (var actorName in actorNames)
-    //     {
-    //         var actorEntity = GameContext.Instance.GetActorEntitySerialization(actorName);
-    //         if (actorEntity == null)
-    //         {
-    //             Debug.LogWarning($"Actor entity not found for: {actorName}");
-    //             continue;
-    //         }
-
-    //         if (GameUtils.GetComponent<AllyComponent>(actorEntity) != null)
-    //         {
-    //             allyEntities.Add(actorEntity);
-    //         }
-    //         else if (GameUtils.GetComponent<EnemyComponent>(actorEntity) != null)
-    //         {
-    //             enemyEntities.Add(actorEntity);
-    //         }
-    //         else
-    //         {
-    //             Debug.LogWarning($"Actor {actorName} has neither AllyComponent nor EnemyComponent");
-    //         }
-    //     }
-
-    //     // 创建并显示盟友头像
-    //     PopulateContainerWithAvatars(_allyAvatarContainer, allyEntities);
-
-    //     // 创建并显示敌人头像
-    //     PopulateContainerWithAvatars(_enemyAvatarContainer, enemyEntities);
-
-    //     // 刷新所有头像的死亡状态显示
-    //     RefreshActorAvatars();
-    // }
-
-    /// <summary>
-    /// 在指定容器中填充角色头像
-    /// 遍历角色实体列表，为每个角色实例化头像预制体并绑定数据
-    /// 这是底层UI创建方法，由 InitializeActorAvatars 调用
-    /// </summary>
-    /// <param name="container">目标头像容器(盟友容器或敌人容器)</param>
-    /// <param name="actorEntities">要创建头像的角色实体列表</param>
-    // private void PopulateContainerWithAvatars(GameObject container, List<EntitySerialization> actorEntities)
-    // {
-    //     //清除container所有的孩子
-    //     foreach (Transform child in container.transform)
-    //     {
-    //         child.gameObject.SetActive(false);
-    //         Destroy(child.gameObject);
-    //     }
-
-    //     // 创建每个符合阵营条件的角色的头像
-    //     foreach (var actorEntity in actorEntities)
-    //     {
-    //         // 创建头像
-    //         GameObject actorAvatarInstance = Instantiate(_actorAvatarPrefab, container.transform);
-    //         actorAvatarInstance.name = actorEntity.name;
-    //     }
-    // }
-
-    /// <summary>
-    /// 更新所有已显示的角色头像的死亡状态
-    /// 在战斗过程中调用，用于刷新角色的死亡状态显示
-    /// </summary>
-    // private void RefreshActorAvatars()
-    // {
-    //     // 获取当前场景的名字，给到
-    //     _onActorAvatarsRefreshEvent.Raise(SceneManager.GetActiveScene().name);
-    // }
 }
 

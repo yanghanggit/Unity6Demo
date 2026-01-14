@@ -303,7 +303,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 519685dc4bcd145cc83ed539bc39f511, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HomeGamePlayManager
-  _homeGamePlayApi: {fileID: 128522043}
+  _homePlayerActionApi: {fileID: 128522043}
   _transDungeonApi: {fileID: 128522044}
   _homeAdvanceApi: {fileID: 128522045}
 --- !u!114 &128522043

@@ -28,31 +28,19 @@ public class ImageRootApi : BaseApiClient
     public ImageRootResponse RespData => _responseData;
 
     /// <summary>
-    /// 请求 URL
-    /// </summary>
-    private string _url;
-
-    /// <summary>
-    /// 初始化 API 请求
-    /// </summary>
-    /// <param name="url">请求的根 URL</param>
-    private void Initialize(string url)
-    {
-        _url = url;
-        _requestResult = null;
-        _responseData = null;
-    }
-
-
-    /// <summary>
     /// 调用 Root API 获取配置信息
     /// </summary>
     /// <param name="rootUrl">根 URL 地址</param>
     /// <returns>协程枚举器</returns>
     public IEnumerator Call(string rootUrl)
     {
-        // 初始化
-        Initialize(rootUrl);
+        // 记录请求信息
+        Debug.Log("Starting ImageRootApi call...");
+        Debug.Log($"URL: {rootUrl}");
+
+        // 清除请求状态
+        _requestResult = null;
+        _responseData = null;
 
         // 检查网络连接
         if (!IsNetworkReachable())
@@ -62,7 +50,7 @@ public class ImageRootApi : BaseApiClient
         }
 
         // 发送请求
-        var task = GetRequestAsync(_url);
+        var task = GetRequestAsync(rootUrl);
         yield return new WaitUntil(() => task.IsCompleted);
 
         if (task.IsFaulted)

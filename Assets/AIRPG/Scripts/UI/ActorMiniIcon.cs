@@ -11,18 +11,13 @@ public class ActorMiniIcon : MonoBehaviour, IStringGameEventListener
     [Header("UI Components")]
     [SerializeField] private Image _actorImage;          // 角色头像图片
     [SerializeField] private TMP_Text _actorNameText;    // 角色名称文本
-    //[SerializeField] private GameObject _deathOverlay;    // 死亡覆盖标记（例如骷髅图标或X标记）
     [SerializeField] private StringGameEvent _onActorAvatarsRefreshEvent; // 角色头像刷新事件
 
     void Start()
     {
         Debug.Assert(_actorImage != null, "_actorImage is null");
         Debug.Assert(_actorNameText != null, "_actorNameText is null");
-        //Debug.Assert(_deathOverlay != null, "_deathOverlay is null");
         Debug.Assert(_onActorAvatarsRefreshEvent != null, "_onActorAvatarsRefreshEvent is null");
-
-        // 初始隐藏死亡覆盖标记
-        //_deathOverlay.SetActive(false);
 
         // 注册事件监听
         _onActorAvatarsRefreshEvent.RegisterListener(this);
@@ -91,7 +86,7 @@ public class ActorMiniIcon : MonoBehaviour, IStringGameEventListener
     private Sprite GetActorAvatarSprite(string actorName)
     {
         // 第一层防御：优先尝试加载头像素材（键值格式：角色名_头像）
-        var avatarSprite = SpriteCacheManager.Instance.GetSprite(actorName + "_头像");
+        var avatarSprite = SpriteCacheManager.Instance.GetSprite(actorName);
 
         // 第二层防御：如果没有头像素材，降级使用全身图
         if (avatarSprite == null)
