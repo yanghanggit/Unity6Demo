@@ -62,3 +62,14 @@ public sealed class DeathComponent
 {
     public string name = "";
 }
+
+
+/// <summary>
+/// 库存组件。
+/// </summary>
+[System.Serializable]
+public sealed class InventoryComponent
+{
+    public string name = "";
+    public List<Item> items = new();
+}

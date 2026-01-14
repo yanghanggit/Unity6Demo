@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 
 public class PlayerInfoDetails : MonoBehaviour
 {
-
     [Header("UI Components")]
     [SerializeField] private Image _playerImage;
     [SerializeField] private TMP_Text _playerInfoText;
@@ -31,36 +30,52 @@ public class PlayerInfoDetails : MonoBehaviour
     {
         // 获取玩家实体
         var playerActorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.PlayerActor);
-        Debug.Assert(playerActorEntitySerialization != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActor);
+        //Debug.Assert(playerActorEntitySerialization != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActor);
         if (playerActorEntitySerialization == null)
         {
+            Debug.LogError("Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActor);
             return;
         }
 
         var actorSprite = SpriteCacheManager.Instance.GetSprite(playerActorEntitySerialization.name);
         Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + playerActorEntitySerialization.name);
-        //_playerImage.sprite = actorSprite;
+        _playerImage.sprite = actorSprite;
         _playerImage.gameObject.SetActive(false); // 先隐藏图片，避免空白显示
 
         // 获取 CombatStatsComponent
         var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(playerActorEntitySerialization);
-        if (combatStatsComponent != null && combatStatsComponent.stats != null)
+        Debug.Assert(combatStatsComponent != null, "CombatStatsComponent is null for player actor: " + playerActorEntitySerialization.name);
+        Debug.Assert(combatStatsComponent.stats != null, "CombatStatsComponent.stats is null for player actor: " + playerActorEntitySerialization.name);
+
+        //InventoryComponent
+        var inventoryComponent = GameUtils.GetComponent<InventoryComponent>(playerActorEntitySerialization);
+        Debug.Assert(inventoryComponent != null, "InventoryComponent is null for player actor: " + playerActorEntitySerialization.name);
+        Debug.Assert(inventoryComponent.items != null, "InventoryComponent.items is null for player actor: " + playerActorEntitySerialization.name);
+
+        // 格式化显示 CombatStatsComponent 的属性
+        var stats = combatStatsComponent.stats;
+        string statsText = $"玩家属性\n\n";
+        statsText += $"当前HP: {stats.hp}\n";
+        statsText += $"最大HP: {stats.max_hp}\n";
+        statsText += $"攻击力: {stats.attack}\n";
+        statsText += $"防御力: {stats.defense}\n";
+
+        if (inventoryComponent.items.Count > 0)
         {
-            // 格式化显示 CombatStatsComponent 的属性
-            var stats = combatStatsComponent.stats;
-            string statsText = $"玩家属性\n\n";
-            statsText += $"当前HP: {stats.hp}\n";
-            statsText += $"最大HP: {stats.max_hp}\n";
-            statsText += $"攻击力: {stats.attack}\n";
-            statsText += $"防御力: {stats.defense}\n";
-            
-            _playerInfoText.text = statsText;
+            statsText += $"\n物品列表:\n";
+            foreach (var item in inventoryComponent.items)
+            {
+                // 这里直接添加 item 的json 反序列化后的字符串表示
+                string itemJson = JsonConvert.SerializeObject(item, Formatting.Indented);
+                statsText += $"{itemJson}\n";
+            }
         }
         else
         {
-            _playerInfoText.text = "未找到玩家战斗属性数据";
-            Debug.LogWarning("CombatStatsComponent not found for player");
+            statsText += "\n物品列表: 无\n";
         }
+
+        _playerInfoText.text = statsText;
     }
 
     public void OnClickClosePlayerInfoDetails()
