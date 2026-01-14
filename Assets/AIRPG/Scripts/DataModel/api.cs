@@ -162,24 +162,22 @@ public class DungeonTransHomeResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Dungeon gameplay request/response classes
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-[System.Serializable]
-public class DungeonGamePlayUserInput
+public sealed class DungeonProgressType
 {
-    public string tag = "";
-    public Dictionary<string, string> data = new();
+    public static readonly string INIT_COMBAT = "combat_init";  // 初始化战斗（STARTING → ONGOING）
+    public static readonly string ADVANCE_STAGE = "advance_next_dungeon";  // 推进下一关（战斗胜利后）
 }
 
 [System.Serializable]
-public class DungeonGamePlayRequest
+public class DungeonProgressRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public DungeonGamePlayUserInput user_input = new();
+    public string action = "";
 }
 
 [System.Serializable]
-public class DungeonGamePlayResponse
+public class DungeonProgressResponse
 {
     public List<SessionMessage> session_messages = new();
 }

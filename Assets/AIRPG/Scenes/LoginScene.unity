@@ -557,7 +557,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53254e3ce6ec84313b48fe460146f192, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGamePlayManager
-  _dungeonGamePlayApi: {fileID: 290427723}
+  _dungeonProgressApi: {fileID: 290427723}
   _transHomeApi: {fileID: 290427722}
   _dungeonCombatPlayCardsApi: {fileID: 290427725}
   _dungeonCombatDrawCardsApi: {fileID: 290427726}

@@ -17,9 +17,9 @@ public class DungeonGamePlayManager : MonoBehaviour
     public static DungeonGamePlayManager Instance { get; private set; }
 
     /// <summary>
-    /// Dungeon游戏玩法API接口
+    /// Dungeon进度API接口
     /// </summary>
-    [SerializeField] private DungeonGamePlayApi _dungeonGamePlayApi;
+    [SerializeField] private DungeonProgressApi _dungeonProgressApi;
 
     /// <summary>
     /// 传送回家API接口
@@ -53,7 +53,7 @@ public class DungeonGamePlayManager : MonoBehaviour
 
     private void Start()
     {
-        Debug.Assert(_dungeonGamePlayApi != null, "_dungeonGamePlayApi is null");
+        Debug.Assert(_dungeonProgressApi != null, "_dungeonProgressApi is null");
         Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
         Debug.Assert(_dungeonCombatPlayCardsApi != null, "_dungeonCombatPlayCardsApi is null");
         Debug.Assert(_dungeonCombatDrawCardsApi != null, "_dungeonCombatDrawCardsApi is null");
@@ -68,35 +68,35 @@ public class DungeonGamePlayManager : MonoBehaviour
     public IEnumerator CombatInit(Action<bool, string, List<SessionMessage>> onComplete = null)
     {
         // 调用 combat_init 端点
-        yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGamePlayUrl,
+        yield return _dungeonProgressApi.Call(
+            GameContext.Instance.DungeonProgressUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-            "combat_init");
+            DungeonProgressType.INIT_COMBAT);
 
         // 检查API调用是否成功
-        if (_dungeonGamePlayApi.ReqResult == null)
+        if (_dungeonProgressApi.ReqResult == null)
         {
             // 没有任何请求结果，这就是不需要继续的！
-            string errorMsg = "DungeonGamePlayApi request result is null";
+            string errorMsg = "DungeonProgressApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
-        if (!_dungeonGamePlayApi.ReqResult.isSuccess)
+        if (!_dungeonProgressApi.ReqResult.isSuccess)
         {
-            string errorMsg = _dungeonGamePlayApi.ReqResult.responseText;
+            string errorMsg = _dungeonProgressApi.ReqResult.responseText;
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
         // 必有响应数据，即使是[]
-        Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
+        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
 
         Debug.Log("[DungeonGamePlayManager] CombatInit completed successfully");
-        onComplete?.Invoke(true, "Combat init completed successfully", _dungeonGamePlayApi.RespData.session_messages);
+        onComplete?.Invoke(true, "Combat init completed successfully", _dungeonProgressApi.RespData.session_messages);
     }
 
     /// <summary>
@@ -203,35 +203,35 @@ public class DungeonGamePlayManager : MonoBehaviour
     public IEnumerator AdvanceNextDungeon(Action<bool, string, List<SessionMessage>> onComplete = null)
     {
         // 调用 advance_next_dungeon 端点
-        yield return _dungeonGamePlayApi.Call(
-            GameContext.Instance.DungeonGamePlayUrl,
+        yield return _dungeonProgressApi.Call(
+            GameContext.Instance.DungeonProgressUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
-            "advance_next_dungeon");
+            DungeonProgressType.ADVANCE_STAGE);
 
         // 检查API调用是否成功
-        if (_dungeonGamePlayApi.ReqResult == null)
+        if (_dungeonProgressApi.ReqResult == null)
         {
             // 没有任何请求结果，这就是不需要继续的！
-            string errorMsg = "DungeonGamePlayApi request result is null";
+            string errorMsg = "DungeonProgressApi request result is null";
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
-        if (!_dungeonGamePlayApi.ReqResult.isSuccess)
+        if (!_dungeonProgressApi.ReqResult.isSuccess)
         {
-            string errorMsg = _dungeonGamePlayApi.ReqResult.responseText;
+            string errorMsg = _dungeonProgressApi.ReqResult.responseText;
             Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
             onComplete?.Invoke(false, errorMsg, null);
             yield break;
         }
 
         // 必有响应数据，即使是[]
-        Debug.Assert(_dungeonGamePlayApi.RespData != null, "DungeonGamePlayApi response data is null");
+        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
 
         Debug.Log("[DungeonGamePlayManager] AdvanceNextDungeon completed successfully");
-        onComplete?.Invoke(true, "Advance dungeon completed successfully", _dungeonGamePlayApi.RespData.session_messages);
+        onComplete?.Invoke(true, "Advance dungeon completed successfully", _dungeonProgressApi.RespData.session_messages);
     }
 
     /// <summary>

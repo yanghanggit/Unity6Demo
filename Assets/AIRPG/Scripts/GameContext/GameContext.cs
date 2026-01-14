@@ -267,12 +267,12 @@ public partial class GameContext
 
     /// <summary>
     /// 获取地牢游戏玩法API的URL地址
-    /// </summary>
-    public string DungeonGamePlayUrl
+    /// </summary> dungeon_progress DungeonProgressUrl
+    public string DungeonProgressUrl
     {
         get
         {
-            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["dungeon_gameplay"];
+            return ApiEndpointsManager.GameApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.GameRootResponse.endpoints["dungeon_progress"];
         }
     }
 

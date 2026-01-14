@@ -1,12 +1,11 @@
 using UnityEngine;
 using System.Collections;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
 /// <summary>
-/// DungeonGamePlay API 客户端，用于处理地下城游戏玩法请求
+/// DungeonProgress API 客户端，用于处理地下城进度请求
 /// </summary>
-public class DungeonGamePlayApi : BaseApiClient
+public class DungeonProgressApi : BaseApiClient
 {
     /// <summary>
     /// 请求结果
@@ -21,33 +20,29 @@ public class DungeonGamePlayApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private DungeonGamePlayResponse _responseData;
+    private DungeonProgressResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public DungeonGamePlayResponse RespData => _responseData;
+    public DungeonProgressResponse RespData => _responseData;
 
     /// <summary>
-    /// 调用地下城游戏玩法 API
+    /// 调用地下城进度 API
     /// </summary>
     /// <param name="url">请求 URL</param>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
-    /// <param name="userInputTag">用户输入标签</param>
-    /// <param name="data">用户输入数据</param>
+    /// <param name="action">操作类型</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url, string userName, string gameName, string userInputTag, Dictionary<string, string> data = null)
+    public IEnumerator Call(string url, string userName, string gameName, string action)
     {
-        //Initialize(url, userName, gameName, userInputTag, data);
-
         // 记录请求信息
-        Debug.Log("Starting DungeonGamePlayApi call...");
+        Debug.Log("Starting DungeonProgressApi call...");
         Debug.Log($"URL: {url}");
         Debug.Log($"UserName: {userName}");
         Debug.Log($"GameName: {gameName}");
-        Debug.Log($"UserInputTag: {userInputTag}");
-        Debug.Log($"Request data: {JsonConvert.SerializeObject(data)}");
+        Debug.Log($"Action: {action}");
 
         //清除
         _requestResult = null;
@@ -61,11 +56,11 @@ public class DungeonGamePlayApi : BaseApiClient
         }
 
         // 创建请求数据
-        var requestData = new DungeonGamePlayRequest
+        var requestData = new DungeonProgressRequest
         {
             user_name = userName,
             game_name = gameName,
-            user_input = new DungeonGamePlayUserInput { tag = userInputTag, data = data ?? new Dictionary<string, string>() }
+            action = action
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
@@ -97,14 +92,12 @@ public class DungeonGamePlayApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<DungeonGamePlayResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<DungeonProgressResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
                 yield break;
             }
-
-            //Debug.Log("Dungeon gameplay successful");
         }
         catch (System.Exception ex)
         {

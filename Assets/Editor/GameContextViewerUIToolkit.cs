@@ -36,7 +36,7 @@ public class GameContextViewerUIToolkit : EditorWindow
     {
         // 加载UXML
         var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Editor/GameContextViewer.uxml");
-        
+
         if (visualTree != null)
         {
             visualTree.CloneTree(rootVisualElement);
@@ -211,7 +211,7 @@ public class GameContextViewerUIToolkit : EditorWindow
             { "Entity Details URL", GameContext.Instance.EntityDetailsUrl },
             { "Start URL", GameContext.Instance.StartUrl },
             { "Home Trans Dungeon URL", GameContext.Instance.HomeTransDungeonUrl },
-            { "Dungeon GamePlay URL", GameContext.Instance.DungeonGamePlayUrl },
+            { "Dungeon GamePlay URL", GameContext.Instance.DungeonProgressUrl },
             { "Dungeon Trans Home URL", GameContext.Instance.DungeonTransHomeUrl },
             { "Session Messages URL", GameContext.Instance.SessionMessagesUrl }
         };
