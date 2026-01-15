@@ -1283,8 +1283,8 @@ MonoBehaviour:
   spritePivot: {x: 0.5, y: 0.5}
   resourcesTexturePath: Textures
   preloadSprites:
-  - {fileID: -939533432, guid: 40f6764d9e61a468c96368dc67fc7171, type: 3}
-  - {fileID: 1981068757, guid: 40f6764d9e61a468c96368dc67fc7171, type: 3}
+  - {fileID: 1815724558, guid: 3307496cecfb843969bb84aad16eef5d, type: 3}
+  - {fileID: 1197627422, guid: 3307496cecfb843969bb84aad16eef5d, type: 3}
   preloadSpriteKeys:
   - "\u89D2\u8272.\u730E\u4EBA.\u77F3\u575A"
   - "\u89D2\u8272.\u672F\u58EB.\u4E91\u97F3"

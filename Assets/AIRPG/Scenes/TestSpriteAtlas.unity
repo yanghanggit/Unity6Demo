@@ -302,8 +302,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestSpriteAtlasScene
   _characterSprites:
-  - {fileID: -939533432, guid: 40f6764d9e61a468c96368dc67fc7171, type: 3}
-  - {fileID: 1981068757, guid: 40f6764d9e61a468c96368dc67fc7171, type: 3}
+  - {fileID: 1815724558, guid: 3307496cecfb843969bb84aad16eef5d, type: 3}
+  - {fileID: 1197627422, guid: 3307496cecfb843969bb84aad16eef5d, type: 3}
   _character: {fileID: 1238040757}
 --- !u!1 &1238040757
 GameObject:
@@ -386,7 +386,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -939533432, guid: 40f6764d9e61a468c96368dc67fc7171, type: 3}
+  m_Sprite: {fileID: 1815724558, guid: 3307496cecfb843969bb84aad16eef5d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

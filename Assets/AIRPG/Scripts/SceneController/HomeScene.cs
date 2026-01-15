@@ -72,17 +72,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(_scrollView != null, "_scrollView is null");
         Debug.Assert(_homeSceneConfig != null, "_homeSceneConfig is null");
         Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
-
-        // 设置背景图像
-        var stageSprite = SpriteCacheManager.Instance.GetSprite(_homeSceneConfig.StageName);
-        if (stageSprite != null)
-        {
-            _background.GetComponent<SpriteRenderer>().sprite = stageSprite;
-        }
-        else
-        {
-            Debug.LogWarning("Stage sprite not found for: " + _homeSceneConfig.StageName);
-        }
     }
 
     // Unity生命周期方法
@@ -120,6 +109,20 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         // 隐藏输入状态UI
         _inputState.SetActive(false);             // 隐藏输入状态UI
         _inputField.text = string.Empty;          // 清空输入字段
+
+        // 设置背景图像
+        if (ApiEndpointsManager.GameRootResponse != null)
+        {
+            var stageSprite = SpriteCacheManager.Instance.GetSprite(_homeSceneConfig.StageName);
+            if (stageSprite != null)
+            {
+                _background.GetComponent<SpriteRenderer>().sprite = stageSprite;
+            }
+            else
+            {
+                Debug.LogWarning("Stage sprite not found for: " + _homeSceneConfig.StageName);
+            }
+        }
     }
 
     /// <summary>
