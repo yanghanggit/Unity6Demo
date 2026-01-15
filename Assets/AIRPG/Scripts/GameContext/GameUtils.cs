@@ -143,8 +143,8 @@ public static partial class GameUtils
             case EventHead.COMBAT_ARBITRATION_EVENT:
                 return dataToken.ToObject<CombatArbitrationEvent>();
 
-            case EventHead.COMBAT_COMPLETE_EVENT:
-                return dataToken.ToObject<CombatCompleteEvent>();
+            case EventHead.COMBAT_ARCHIVE_EVENT:
+                return dataToken.ToObject<CombatArchiveEvent>();
 
             default:
                 Debug.LogWarning("Unknown agent event head: " + eventHead);

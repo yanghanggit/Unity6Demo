@@ -11,10 +11,7 @@ public enum EventHead
     QUERY_EVENT = 5,
     TRANS_STAGE_EVENT = 6,
     COMBAT_ARBITRATION_EVENT = 7,
-    COMBAT_COMPLETE_EVENT = 8,
-    DISCUSSION_EVENT = 9,
-    NIGHT_ACTION_EVENT = 10,
-    VOTE_EVENT = 11
+    COMBAT_ARCHIVE_EVENT = 8,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,45 +106,9 @@ public sealed class CombatArbitrationEvent : AgentEvent
  * 战斗完成事件
  */
 [System.Serializable]
-public sealed class CombatCompleteEvent : AgentEvent
+public sealed class CombatArchiveEvent : AgentEvent
 {
-    //public new int head = (int)EventHead.COMBAT_COMPLETE_EVENT;
+    //public new int head = (int)EventHead.COMBAT_ARCHIVE_EVENT;
     public string actor = "";
     public string summary = "";
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * 讨论事件
- */
-[System.Serializable]
-public sealed class DiscussionEvent : AgentEvent
-{
-    //public new int head = (int)EventHead.DISCUSSION_EVENT;
-    public string actor = "";
-    public string stage = "";
-    public string content = "";
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * 夜晚行动事件
- */
-[System.Serializable]
-public sealed class NightActionEvent : AgentEvent
-{
-    //public new int head = (int)EventHead.NIGHT_ACTION_EVENT;
-    public string actor = "";
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * 投票事件
- */
-[System.Serializable]
-public sealed class VoteEvent : AgentEvent
-{
-    //public new int head = (int)EventHead.VOTE_EVENT;
-    public string actor = "";
-    public string target = "";
 }
