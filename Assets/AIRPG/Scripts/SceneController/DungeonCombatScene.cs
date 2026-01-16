@@ -76,7 +76,20 @@ public class DungeonCombatScene : MonoBehaviour
     public void OnClickAdvanceNextDungeon()
     {
         Debug.Log("OnClickAdvanceNextDungeon");
-        StartCoroutine(ExecuteAdvanceNextDungeon());
+
+        // 检查当前战斗状态，决定执行哪个操作
+        Combat currentCombat = GameUtils.GetCurrentCombat(GameContext.Instance.Dungeon);
+
+        if (currentCombat != null && currentCombat.state == CombatState.COMPLETE)
+        {
+            // 战斗已完成，执行战斗后处理
+            StartCoroutine(ExecutePostCombat());
+        }
+        else
+        {
+            // 其他状态，推进到下一关
+            StartCoroutine(ExecuteAdvanceNextDungeon());
+        }
     }
 
     public void OnClickBackHome()
@@ -115,21 +128,6 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteDrawCardsAndShowHands()
     {
-        // 抓卡环节会判断血量从而改变战斗状态，所以这里要先判断战斗是否已经结束！
-        // 判断战斗是否已经结束（胜利或失败），如果是则不允许继续抽卡
-        if (GameUtils.IsLastCombatWin(GameContext.Instance.Dungeon))
-        {
-            Debug.Log("Combat already won, cannot draw cards");
-            _mainText.text = "战斗已经胜利，无法继续抽卡！";
-            yield break;
-        }
-        else if (GameUtils.IsLastCombatLose(GameContext.Instance.Dungeon))
-        {
-            Debug.Log("Combat already lost, cannot draw cards");
-            _mainText.text = "战斗已经失败，无法继续抽卡！";
-            yield break;
-        }
-
         // 正式的抽卡操作
         bool success = false;
         string taskId = null;
@@ -466,6 +464,62 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         DisplayAllActorsHands();
+    }
+
+    /// <summary>
+    /// 战斗后处理
+    /// 调用服务器 post_combat 接口进行战斗后处理，成功后刷新地下城状态显示
+    /// </summary>
+    private IEnumerator ExecutePostCombat()
+    {
+        _mainText.text = "正在执行战斗后处理...";
+
+        bool success = false;
+        List<SessionMessage> responseSessionMessages = new();
+        yield return DungeonGamePlayManager.Instance.PostCombat(
+            (result, message, sessionMessages) =>
+            {
+                success = result;
+                if (!result)
+                {
+                    _mainText.text = message;
+                }
+                else
+                {
+                    responseSessionMessages = sessionMessages;
+                }
+            });
+
+        if (!success)
+        {
+            yield break;
+        }
+
+        // 然后逐个处理返回的 SessionMessage，特别是 CombatArchiveEvent
+        for (int i = 0; i < responseSessionMessages.Count; i++)
+        {
+            SessionMessage sessionMessage = responseSessionMessages[i];
+            if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
+            {
+                continue;
+            }
+
+            var agentEvent = GameUtils.ParseAgentEvent(sessionMessage);
+            if (agentEvent == null)
+            {
+                Debug.LogWarning("Failed to parse agent event from session message");
+                continue;
+            }
+
+            if (agentEvent.head == (int)EventHead.COMBAT_ARCHIVE_EVENT)
+            {
+                Debug.Log("Processing CombatArchiveEvent from post combat");
+                if (agentEvent is CombatArchiveEvent combatArchiveEvent)
+                {
+                    _mainText.text += "\n\n" + combatArchiveEvent.actor + ":" + combatArchiveEvent.summary;
+                }
+            }
+        }
     }
 
     /// <summary>

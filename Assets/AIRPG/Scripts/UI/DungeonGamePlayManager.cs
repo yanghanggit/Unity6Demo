@@ -234,8 +234,46 @@ public class DungeonGamePlayManager : MonoBehaviour
         onComplete?.Invoke(true, "Advance dungeon completed successfully", _dungeonProgressApi.RespData.session_messages);
     }
 
-    /// <summary>
-    /// 传送回家
+    /// <summary>    /// 战斗后处理
+    /// 调用 post_combat 端点进行战斗后处理
+    /// </summary>
+    /// <param name="onComplete">完成回调，参数为是否成功、消息和会话消息列表</param>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator PostCombat(Action<bool, string, List<SessionMessage>> onComplete = null)
+    {
+        // 调用 post_combat 端点
+        yield return _dungeonProgressApi.Call(
+            GameContext.Instance.DungeonProgressUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            DungeonProgressType.POST_COMBAT);
+
+        // 检查API调用是否成功
+        if (_dungeonProgressApi.ReqResult == null)
+        {
+            // 没有任何请求结果，这就是不需要继续的！
+            string errorMsg = "DungeonProgressApi request result is null";
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
+
+        if (!_dungeonProgressApi.ReqResult.isSuccess)
+        {
+            string errorMsg = _dungeonProgressApi.ReqResult.responseText;
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
+
+        // 必有响应数据，即使是[]
+        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
+
+        Debug.Log("[DungeonGamePlayManager] PostCombat completed successfully");
+        onComplete?.Invoke(true, "Post combat completed successfully", _dungeonProgressApi.RespData.session_messages);
+    }
+
+    /// <summary>    /// 传送回家
     /// 调用传送回家端点，返回主场景
     /// </summary>
     /// <param name="onComplete">完成回调，参数为是否成功和消息</param>

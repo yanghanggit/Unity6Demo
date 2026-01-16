@@ -164,8 +164,9 @@ public class DungeonTransHomeResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 public sealed class DungeonProgressType
 {
-    public static readonly string INIT_COMBAT = "combat_init";  // 初始化战斗（STARTING → ONGOING）
-    public static readonly string ADVANCE_STAGE = "advance_next_dungeon";  // 推进下一关（战斗胜利后）
+    public static readonly string INIT_COMBAT = "initialization";
+    public static readonly string POST_COMBAT = "post_combat";
+    public static readonly string ADVANCE_STAGE = "advance_stage";
 }
 
 [System.Serializable]

@@ -140,6 +140,9 @@ public static partial class GameUtils
             case EventHead.TRANS_STAGE_EVENT:
                 return dataToken.ToObject<TransStageEvent>();
 
+            case EventHead.COMBAT_INITIATION_EVENT:
+                return dataToken.ToObject<CombatInitiationEvent>();
+
             case EventHead.COMBAT_ARBITRATION_EVENT:
                 return dataToken.ToObject<CombatArbitrationEvent>();
 
@@ -171,5 +174,55 @@ public static partial class GameUtils
             return null;
 
         return lastCombat.rounds[lastCombat.rounds.Count - 1];
+    }
+
+    /// <summary>
+    /// 获取地下城战斗序列中最后一场战斗
+    /// </summary>
+    /// <param name="dungeon">地下城对象</param>
+    /// <returns>如果存在则返回最后一场战斗，否则返回 null</returns>
+    public static Combat GetCurrentCombat(Dungeon dungeon)
+    {
+        if (dungeon?.combat_sequence?.combats == null || dungeon.combat_sequence.combats.Count == 0)
+            return null;
+
+        return dungeon.combat_sequence.combats[dungeon.combat_sequence.combats.Count - 1];
+    }
+
+    /// <summary>
+    /// 获取地下城最后一场战斗的结果
+    /// 从战斗序列中获取最后一个战斗对象的结果状态
+    /// </summary>
+    /// <param name="dungeon">地下城对象</param>
+    /// <returns>返回最后一场战斗的结果（WIN/LOSE/NONE），如果没有战斗则返回 CombatResult.NONE</returns>
+    public static CombatResult GetLastCombatResult(Dungeon dungeon)
+    {
+        if (dungeon?.combat_sequence?.combats == null || dungeon.combat_sequence.combats.Count == 0)
+            return CombatResult.NONE;
+
+        var lastCombat = dungeon.combat_sequence.combats[dungeon.combat_sequence.combats.Count - 1];
+        return lastCombat.result;
+    }
+
+    /// <summary>
+    /// 判断地下城最后一场战斗是否胜利
+    /// 严格判断最后一场战斗的结果是否为 WIN 状态
+    /// </summary>
+    /// <param name="dungeon">地下城对象</param>
+    /// <returns>如果最后一场战斗胜利（result == CombatResult.WIN）返回 true，否则返回 false</returns>
+    public static bool IsLastCombatWin(Dungeon dungeon)
+    {
+        return GetLastCombatResult(dungeon) == CombatResult.WIN;
+    }
+
+    /// <summary>
+    /// 判断地下城最后一场战斗是否失败
+    /// 严格判断最后一场战斗的结果是否为 LOSE 状态
+    /// </summary>
+    /// <param name="dungeon">地下城对象</param>
+    /// <returns>如果最后一场战斗失败（result == CombatResult.LOSE）返回 true，否则返回 false</returns>
+    public static bool IsLastCombatLose(Dungeon dungeon)
+    {
+        return GetLastCombatResult(dungeon) == CombatResult.LOSE;
     }
 }
