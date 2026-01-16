@@ -71,6 +71,9 @@ public class DungeonOverviewScene : MonoBehaviour
         // 2. 刷新全局游戏状态
         yield return GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
 
+        // 设置待进入的关卡名称为地下城的第一个关卡
+        //DungeonCombatScene.PendingStageName = GameContext.Instance.Dungeon.stages[0].name;
+
         // 3. 切换到地下城场景
         yield return new WaitForSeconds(0);
         SceneManager.LoadScene(_nextScene);

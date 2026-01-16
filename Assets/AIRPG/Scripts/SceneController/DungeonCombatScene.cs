@@ -7,6 +7,9 @@ using UnityEngine.UI;
 
 public class DungeonCombatScene : MonoBehaviour
 {
+    // 静态属性，记录待进入的关卡名称
+    //public static string PendingStageName { get; set; }
+
     [Header("Scene Settings")]
     [SerializeField] private string _preScene = "MainScene";
     [SerializeField] private string _nextScene = "DungeonCombatScene";
@@ -33,6 +36,13 @@ public class DungeonCombatScene : MonoBehaviour
             // 已经连接服务器，开始初始化战斗场景
             var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
             _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
+
+            // 更新背景图片
+            // if (!string.IsNullOrEmpty(PendingStageName))
+            // {
+            //     SetBackgroundImage(PendingStageName);
+            //     PendingStageName = string.Empty; // 重置为默认值
+            // }
 
             StartCoroutine(ExecuteCombatInit());
         }
@@ -368,26 +378,23 @@ public class DungeonCombatScene : MonoBehaviour
         var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
         Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
 
+        //
+        SetBackgroundImage(stageName);
+
         // 需要所有的角色名称列表！
         var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
 
         // 格式化并显示地下城状态（包括场景-角色映射和战斗序列信息）
         _mainText.text = GameUtils.FormatDungeonStateDisplay(GameContext.Instance.Dungeon, new Dictionary<string, List<string>> { { stageName, actorsInStage } });
-
-        // 更新背景图片
-        UpdateBackgroundImage();
     }
 
     /// <summary>
     /// 更新场景背景图片
     /// 根据当前角色所在场景从缓存中获取并更新背景图片，如果未找到则清空背景
     /// </summary>
-    private void UpdateBackgroundImage()
+    private void SetBackgroundImage(string stageName)
     {
         // 获取当前角色所在场景
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
-        Debug.Assert(stageName != "", "[DungeonCombatScene] Current actor's stage name is empty");
-
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(stageName);
         if (cachedSprite != null)
         {
@@ -496,6 +503,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 然后逐个处理返回的 SessionMessage，特别是 CombatArchiveEvent
+        _mainText.text = "";
         for (int i = 0; i < responseSessionMessages.Count; i++)
         {
             SessionMessage sessionMessage = responseSessionMessages[i];
@@ -520,6 +528,19 @@ public class DungeonCombatScene : MonoBehaviour
                 }
             }
         }
+
+        // 最后需要获取最新个的数据，因为服务器推进了地下城状态
+        yield return GameStateSync.Instance.RefreshDungeonFromServer((success, msg) =>
+        {
+            if (!success)
+            {
+                Debug.LogError($"Failed to refresh dungeon data after post combat: {msg}");
+            }
+            else
+            {
+                Debug.Log("Successfully refreshed dungeon data after post combat");
+            }
+        });
     }
 
     /// <summary>
