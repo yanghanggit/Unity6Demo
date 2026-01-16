@@ -115,25 +115,6 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private IEnumerator ExecuteDrawCardsAndShowHands()
     {
-        // 先刷新数据，确保有最新的角色和地下城状态
-        bool refreshSuccess = false;
-        string refreshMessage = "";
-
-        // 刷一次获取最新信息！
-        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer((success, msg) =>
-        {
-            refreshSuccess = success;
-            refreshMessage = msg;
-        });
-
-        // 检查刷新是否成功
-        if (!refreshSuccess)
-        {
-            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshMessage}");
-            _mainText.text = "刷新数据失败";
-            yield break;
-        }
-
         // 抓卡环节会判断血量从而改变战斗状态，所以这里要先判断战斗是否已经结束！
         // 判断战斗是否已经结束（胜利或失败），如果是则不允许继续抽卡
         if (GameUtils.IsLastCombatWin(GameContext.Instance.Dungeon))
@@ -146,13 +127,6 @@ public class DungeonCombatScene : MonoBehaviour
         {
             Debug.Log("Combat already lost, cannot draw cards");
             _mainText.text = "战斗已经失败，无法继续抽卡！";
-            yield break;
-        }
-
-        // 检查是否已有角色持有手牌
-        if (AnyActorHasHandCards())
-        {
-            _mainText.text = "当前已有角色持有手牌，无法重复抽卡。";
             yield break;
         }
 
@@ -197,49 +171,15 @@ public class DungeonCombatScene : MonoBehaviour
         if (!pollSuccess)
         {
             // 轮询失败
-            _mainText.text = "任务轮询失败";
+            _mainText.text = "任务轮询彻底失败";
             yield break;
         }
 
         // 抽卡任务完成，刷新数据并显示手牌
         _mainText.text = "处理完成，正在加载结果...";
 
-        // 再次刷新，因为抽卡会改变战斗状态！
-        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer((success, msg) =>
-        {
-            refreshSuccess = success;
-            refreshMessage = msg;
-        });
-
-        // 检查刷新是否成功
-        if (!refreshSuccess)
-        {
-            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshMessage}");
-            _mainText.text = "刷新数据失败";
-            yield break;
-        }
-
-        // 判断战斗是否已经结束（胜利或失败）
-        // isLastCombatWin = GameUtils.IsLastCombatWin(GameContext.Instance.Dungeon);
-        // isLastCombatLose = GameUtils.IsLastCombatLose(GameContext.Instance.Dungeon);
-        if (GameUtils.IsLastCombatWin(GameContext.Instance.Dungeon))
-        {
-            Debug.Log("Last combat was a WIN");
-            _mainText.text = "战斗胜利！";
-            yield break;
-        }
-        else if (GameUtils.IsLastCombatLose(GameContext.Instance.Dungeon))
-        {
-            Debug.Log("Last combat was a LOSE");
-            _mainText.text = "战斗失败！";
-            yield break;
-        }
-        else
-        {
-            Debug.Log("Last combat result is NONE");
-            // 显示所有角色的手牌信息
-            DisplayAllActorsHands();
-        }
+        // 刷新地下城和角色数据
+        StartCoroutine(ExecuteViewActorCards());
     }
 
     /// <summary>
@@ -577,27 +517,6 @@ public class DungeonCombatScene : MonoBehaviour
             yield return new WaitForSeconds(0);
             SceneManager.LoadScene(_preScene);
         }
-    }
-
-    /// <summary>
-    /// 检查是否有任意角色持有手牌
-    /// 遍历所有角色实体，检查其手牌组件是否包含卡牌
-    /// 用于在抽卡操作前判断是否需要跳过抽卡（避免重复抽卡）
-    /// </summary>
-    /// <returns>如果至少有一个角色持有手牌则返回 true，否则返回 false</returns>
-    private bool AnyActorHasHandCards()
-    {
-        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
-        foreach (var actorEntity in actorEntitiesSerialization)
-        {
-            var handComponent = GameUtils.GetComponent<HandComponent>(actorEntity);
-            if (handComponent != null && handComponent.cards.Count > 0)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
 

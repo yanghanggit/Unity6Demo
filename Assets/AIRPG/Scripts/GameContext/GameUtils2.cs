@@ -94,7 +94,7 @@ public static partial class GameUtils
             for (int i = 0; i < combatStatsComponent.status_effects.Count; i++)
             {
                 var statusEffect = combatStatsComponent.status_effects[i];
-                text += $"[{statusEffect.name}]: \n{statusEffect.description}({statusEffect.duration})";
+                text += $"[{statusEffect.name}]: \n{statusEffect.description}";
                 if (i < combatStatsComponent.status_effects.Count - 1)
                 {
                     text += "\n";
