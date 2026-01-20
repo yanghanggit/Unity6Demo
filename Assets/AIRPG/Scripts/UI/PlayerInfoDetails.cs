@@ -75,6 +75,17 @@ public class PlayerInfoDetails : MonoBehaviour
             statsText += "\n物品列表: 无\n";
         }
 
+        // 获取并显示 SkillBookComponent
+        var skillBookComponent = GameUtils.GetComponent<SkillBookComponent>(playerActorEntitySerialization);
+        if (skillBookComponent != null && skillBookComponent.skills != null && skillBookComponent.skills.Count > 0)
+        {
+            statsText += $"\n{GameUtils.FormatSkillBookComponent(skillBookComponent)}";
+        }
+        else
+        {
+            statsText += "\n技能列表: 无\n";
+        }
+
         _playerInfoText.text = statsText;
     }
 

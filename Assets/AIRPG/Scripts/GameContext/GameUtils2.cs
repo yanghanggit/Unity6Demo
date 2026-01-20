@@ -40,8 +40,7 @@ public static partial class GameUtils
         var sb = new System.Text.StringBuilder();
         foreach (var kvp in mapping)
         {
-            var displayNames = kvp.Value.Select(GetDisplayName);
-            sb.AppendLine($"{kvp.Key}: {string.Join(", ", displayNames)}");
+            sb.AppendLine($"{kvp.Key}: {string.Join(", ", kvp.Value)}");
         }
         return sb.ToString().TrimEnd();
     }
@@ -65,7 +64,7 @@ public static partial class GameUtils
         {
             var lastRound = lastCombat.rounds[lastCombat.rounds.Count - 1];
             sb.AppendLine($"Round: {lastRound.tag}");
-            sb.AppendLine($"Action Order: {string.Join(" --> ", lastRound.action_order.Select(GetDisplayName))}");
+            sb.AppendLine($"Action Order: {string.Join(" --> ", lastRound.action_order)}");
         }
 
         return sb.ToString().TrimEnd();
@@ -83,7 +82,7 @@ public static partial class GameUtils
             return string.Empty;
 
         var stats = combatStatsComponent.stats;
-        var text = $"{GetDisplayName(combatStatsComponent.name)} = HP:{stats.hp}/{stats.max_hp}," +
+        var text = $"{combatStatsComponent.name} = HP:{stats.hp}/{stats.max_hp}," +
                    $" Attack:{stats.attack}," +
                    $" Defense:{stats.defense}" +
                    "\n";
@@ -116,25 +115,79 @@ public static partial class GameUtils
         if (handComponent == null || handComponent.cards.Count == 0)
             return string.Empty;
 
-        var text = $"{GetDisplayName(handComponent.name)} Hand: \n";
+        var text = $"{handComponent.name} Hand: \n";
 
         for (int i = 0; i < handComponent.cards.Count; i++)
         {
             var card = handComponent.cards[i];
-            text += $"[{card.name}]:{card.description}";
+
+            // 卡牌基本信息
+            text += $"[{card.name}]: {card.description}\n";
+
+            // 卡牌属性（如果存在非零属性）
+            if (card.stats != null && (card.stats.hp != 0 || card.stats.max_hp != 0 ||
+                card.stats.attack != 0 || card.stats.defense != 0))
+            {
+                var statsParts = new List<string>();
+                if (card.stats.hp != 0 || card.stats.max_hp != 0)
+                    statsParts.Add($"HP:{card.stats.hp}/{card.stats.max_hp}");
+                if (card.stats.attack != 0)
+                    statsParts.Add($"Attack:{card.stats.attack}");
+                if (card.stats.defense != 0)
+                    statsParts.Add($"Defense:{card.stats.defense}");
+
+                text += $"  Stats: {string.Join(", ", statsParts)}\n";
+            }
+
+            // 目标信息
+            if (card.targets != null && card.targets.Count > 0)
+            {
+                text += $"  Targets: {string.Join(", ", card.targets)}\n";
+            }
+
+            // 状态效果
+            if (card.status_effects != null && card.status_effects.Count > 0)
+            {
+                text += "  Status Effects:\n";
+                foreach (var effect in card.status_effects)
+                {
+                    text += $"    [{effect.name}]: {effect.description}\n";
+                }
+            }
+
             if (i < handComponent.cards.Count - 1)
             {
                 text += "\n";
             }
         }
-        text += "\n";
 
-        for (int i = 0; i < handComponent.cards.Count; i++)
+        return text;
+    }
+
+    /// <summary>
+    /// 格式化技能书组件为显示文本
+    /// </summary>
+    /// <param name="skillBookComponent">技能书组件</param>
+    /// <returns>格式化后的技能书文本</returns>
+    public static string FormatSkillBookComponent(SkillBookComponent skillBookComponent)
+    {
+        if (skillBookComponent == null || skillBookComponent.skills.Count == 0)
+            return string.Empty;
+
+        var text = $"{skillBookComponent.name} Skills: \n";
+
+        for (int i = 0; i < skillBookComponent.skills.Count; i++)
         {
-            var card = handComponent.cards[i];
-            text += $"Card: {card.name}, Targets: {string.Join(", ", card.targets)}\n";
+            var skill = skillBookComponent.skills[i];
+
+            // 技能基本信息
+            text += $"[{skill.name}]: {skill.description}";
+
+            if (i < skillBookComponent.skills.Count - 1)
+            {
+                text += "\n";
+            }
         }
-        text += "\n";
 
         return text;
     }
@@ -198,7 +251,7 @@ public static partial class GameUtils
         for (int i = 0; i < dungeon.stages.Count; i++)
         {
             dungeonOverviewText += "第" + (i + 1) + "关 = " + dungeon.stages[i].name + "\n";
-            dungeonOverviewText += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => GetDisplayName(a.name))) + "\n";
+            dungeonOverviewText += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => a.name)) + "\n";
         }
 
         return dungeonOverviewText;
@@ -220,7 +273,7 @@ public static partial class GameUtils
 
         if (round.action_order != null && round.action_order.Count > 0)
         {
-            sb.AppendLine($"Action Order: {string.Join(" -> ", round.action_order.Select(GetDisplayName))}");
+            sb.AppendLine($"Action Order: {string.Join(" -> ", round.action_order)}");
         }
 
         if (!string.IsNullOrEmpty(round.combat_log))

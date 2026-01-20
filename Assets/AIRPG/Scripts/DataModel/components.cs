@@ -73,3 +73,13 @@ public sealed class InventoryComponent
     public string name = "";
     public List<Item> items = new();
 }
+
+/// <summary>
+/// 技能书组件。
+/// </summary>
+[System.Serializable]
+public sealed class SkillBookComponent
+{
+    public string name = "";
+    public List<Skill> skills = new();
+}

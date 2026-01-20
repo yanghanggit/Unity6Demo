@@ -44,9 +44,11 @@ public sealed class StatusEffect
 [System.Serializable]
 public sealed class Card
 {
-    public string name = "";        // 卡牌名称
-    public string description = ""; // 卡牌效果、作用方式及使用代价
-    public List<string> targets = new();      // 目标对象
+    public string name = "";
+    public string description = "";
+    public CharacterStats stats = new();
+    public List<string> targets = new();
+    public List<StatusEffect> status_effects = new();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
