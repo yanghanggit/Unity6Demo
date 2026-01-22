@@ -68,6 +68,7 @@ public class Item
     public string description = "";
     public string type = "";  // 使用 string 类型存储
     public int count = 1;  // 物品数量，默认为1
+    public List<string> affixes = new(); // 词条列表（类似暗黑破坏神的装备词条）
 }
 
 /**

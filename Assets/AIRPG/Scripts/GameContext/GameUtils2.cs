@@ -155,6 +155,12 @@ public static partial class GameUtils
                 }
             }
 
+            // 词缀信息
+            if (card.affixes != null && card.affixes.Count > 0)
+            {
+                text += $"  Affixes: {string.Join(", ", card.affixes)}\n";
+            }
+
             if (i < handComponent.cards.Count - 1)
             {
                 text += "\n";

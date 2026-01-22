@@ -49,6 +49,7 @@ public sealed class Card
     public CharacterStats stats = new();
     public List<string> targets = new();
     public List<StatusEffect> status_effects = new();
+    public List<string> affixes = new();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
