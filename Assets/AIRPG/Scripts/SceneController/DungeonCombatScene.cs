@@ -292,6 +292,9 @@ public class DungeonCombatScene : MonoBehaviour
 
         // 显示最新回合信息
         DisplayLastRoundInfo();
+
+        // 评估当前战斗状态
+        StartCoroutine(DungeonGamePlayManager.Instance.CombatStatusEvaluation());
     }
 
     /// <summary>

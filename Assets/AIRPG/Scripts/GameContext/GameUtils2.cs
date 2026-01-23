@@ -131,10 +131,9 @@ public static partial class GameUtils
                 var statsParts = new List<string>();
                 if (card.stats.hp != 0 || card.stats.max_hp != 0)
                     statsParts.Add($"HP:{card.stats.hp}/{card.stats.max_hp}");
-                if (card.stats.attack != 0)
-                    statsParts.Add($"Attack:{card.stats.attack}");
-                if (card.stats.defense != 0)
-                    statsParts.Add($"Defense:{card.stats.defense}");
+
+                statsParts.Add($"Attack:{card.stats.attack}");
+                statsParts.Add($"Defense:{card.stats.defense}");
 
                 text += $"  Stats: {string.Join(", ", statsParts)}\n";
             }

@@ -165,6 +165,7 @@ public class DungeonTransHomeResponse
 public sealed class DungeonProgressType
 {
     public static readonly string INIT_COMBAT = "initialization";
+    public static readonly string COMBAT_STATUS_EVALUATION = "combat_status_evaluation";
     public static readonly string POST_COMBAT = "post_combat";
     public static readonly string ADVANCE_STAGE = "advance_stage";
 }

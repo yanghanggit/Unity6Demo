@@ -99,8 +99,47 @@ public class DungeonGamePlayManager : MonoBehaviour
         onComplete?.Invoke(true, "Combat init completed successfully", _dungeonProgressApi.RespData.session_messages);
     }
 
-    /// <summary>
-    /// 抽卡
+    /// <summary>    
+    /// 状态评估
+    /// 调用 status_evaluation 端点进行状态评估
+    /// </summary>
+    /// <param name="onComplete">完成回调，参数为是否成功、消息和会话消息列表</param>
+    /// <returns>协程迭代器</returns>
+    public IEnumerator CombatStatusEvaluation(Action<bool, string, List<SessionMessage>> onComplete = null)
+    {
+        // 调用 status_evaluation 端点
+        yield return _dungeonProgressApi.Call(
+            GameContext.Instance.DungeonProgressUrl,
+            GameContext.Instance.UserName,
+            GameContext.Instance.GameName,
+            DungeonProgressType.COMBAT_STATUS_EVALUATION);
+
+        // 检查API调用是否成功
+        if (_dungeonProgressApi.ReqResult == null)
+        {
+            // 没有任何请求结果，这就是不需要继续的！
+            string errorMsg = "DungeonProgressApi request result is null";
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
+
+        if (!_dungeonProgressApi.ReqResult.isSuccess)
+        {
+            string errorMsg = _dungeonProgressApi.ReqResult.responseText;
+            Debug.LogError($"[DungeonGamePlayManager] {errorMsg}");
+            onComplete?.Invoke(false, errorMsg, null);
+            yield break;
+        }
+
+        // 必有响应数据，即使是[]
+        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
+
+        Debug.Log("[DungeonGamePlayManager] StatusEvaluation completed successfully");
+        onComplete?.Invoke(true, "Status evaluation completed successfully", _dungeonProgressApi.RespData.session_messages);
+    }
+
+    /// <summary>    /// 抽卡
     /// 调用地下城战斗抽牌端点执行抽卡操作
     /// </summary>
     /// <param name="onComplete">完成回调，参数为是否成功、消息和任务ID</param>
