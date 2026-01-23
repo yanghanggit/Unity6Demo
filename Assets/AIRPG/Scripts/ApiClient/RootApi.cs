@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 /// <summary>
 /// Root API 客户端，用于获取服务器根配置信息
@@ -18,14 +18,14 @@ public class RootApi : BaseApiClient
     public override RequestResult ReqResult => _requestResult;
 
     /// <summary>
-    /// 响应数据
+    /// 响应数据 - 使用 JToken 存储 JSON 响应，支持灵活访问和嵌套对象
     /// </summary>
-    private RootResponse _responseData;
+    private JToken _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public RootResponse RespData => _responseData;
+    public JToken RespData => _responseData;
 
     /// <summary>
     /// 调用 Root API 获取配置信息
@@ -77,7 +77,7 @@ public class RootApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<RootResponse>(_requestResult.responseText);
+            _responseData = JToken.Parse(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");

@@ -31,7 +31,7 @@ public class DungeonCombatScene : MonoBehaviour
         Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
         // 检查是否已经连接服务器
-        if (ApiEndpointsManager.GameRootResponse != null)
+        if (GameContext.Instance.IsLoggedIn)
         {
             // 已经连接服务器，开始初始化战斗场景
             var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);

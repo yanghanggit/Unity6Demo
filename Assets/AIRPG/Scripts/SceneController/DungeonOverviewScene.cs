@@ -27,7 +27,7 @@ public class DungeonOverviewScene : MonoBehaviour
 
         _mainText.text = "Loading dungeon data...";
 
-        if (ApiEndpointsManager.GameRootResponse != null)
+        if (GameContext.Instance.IsLoggedIn)
         {
             StartCoroutine(LoadDungeonOverview());
         }
@@ -106,7 +106,7 @@ public class DungeonOverviewScene : MonoBehaviour
     /// </summary>
     private IEnumerator ReturnToMainScene()
     {
-        if (ApiEndpointsManager.GameRootResponse != null)
+        if (GameContext.Instance.IsLoggedIn)
         {
             Debug.Log("Returning to MainScene");
             yield return new WaitForSeconds(0);

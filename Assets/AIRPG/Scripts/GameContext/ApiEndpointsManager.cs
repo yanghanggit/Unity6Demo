@@ -12,16 +12,34 @@ public static class ApiEndpointsManager
     /// <summary>
     /// 游戏API基础URL
     /// </summary>
-    private static string _gameApiBaseUrl;
+    private static string _baseUrl;
 
     /// <summary>
     /// 获取或设置游戏API基础URL
     /// </summary>
-    public static string GameApiBaseUrl
+    public static string BaseUrl
     {
-        get { return _gameApiBaseUrl; }
-        set { _gameApiBaseUrl = value; }
+        get { return _baseUrl; }
+        set { _baseUrl = value; }
     }
+
+    // 直接写所有端点为静态只读字段，方便其他地方引用
+    public static readonly string Login = "/api/login/v1/";
+    public static readonly string Logout = "/api/logout/v1/";
+    public static readonly string StartGame = "/api/start/v1/";
+    public static readonly string HomePlayerAction = "/api/home/player_action/v1/";
+    public static readonly string HomeAdvance = "/api/home/advance/v1/";
+    public static readonly string HomeTransDungeon = "/api/home/trans_dungeon/v1/";
+    public static readonly string DungeonProgress = "/api/dungeon/progress/v1/";
+    public static readonly string DungeonCombatDrawCards = "/api/dungeon/combat/draw_cards/v1/";
+    public static readonly string DungeonCombatPlayCards = "/api/dungeon/combat/play_cards/v1/";
+    public static readonly string DungeonTransHome = "/api/dungeon/trans_home/v1/";
+    public static readonly string DungeonState = "/api/dungeons/v1/";
+    public static readonly string SessionMessages = "/api/session_messages/v1/";
+    public static readonly string EntityDetails = "/api/entities/v1/";
+    public static readonly string StagesState = "/api/stages/v1/";
+    public static readonly string TasksTrigger = "/api/tasks/v1/trigger";
+    public static readonly string TasksStatus = "/api/tasks/v1/status";
 
     /// <summary> 
     /// 图片服务API基础URL
@@ -38,60 +56,9 @@ public static class ApiEndpointsManager
     }
 
     /// <summary>
-    /// 游戏API根响应数据的私有存储字段
-    /// </summary>
-    private static RootResponse _gameRootResponse;
-
-    /// <summary>
     /// 图片服务API根响应数据的私有存储字段
     /// </summary>
     private static ImageRootResponse _imageRootResponse;
-
-    /// <summary>
-    /// 游戏API根响应对象
-    /// 包含游戏相关的所有API端点配置(登录、登出、游戏玩法、状态查询、场景转换等)
-    /// 设置时会自动验证所有必需的端点是否存在
-    /// </summary>
-    public static RootResponse GameRootResponse
-    {
-        get { return _gameRootResponse; }
-        set
-        {
-            _gameRootResponse = value;
-
-            // 验证所有必要的端点是否存在
-            if (_gameRootResponse != null)
-            {
-                var endpoints = _gameRootResponse.endpoints;
-
-                // 用户认证与游戏创建相关端点
-                Debug.Assert(endpoints.ContainsKey("login"), "endpoints does not contain login");
-                Debug.Assert(endpoints.ContainsKey("logout"), "endpoints does not contain logout");
-                Debug.Assert(endpoints.ContainsKey("start"), "endpoints does not contain start");
-
-                // 游戏玩法相关端点
-                Debug.Assert(endpoints.ContainsKey("home_player_action"), "endpoints does not contain home_player_action");
-                Debug.Assert(endpoints.ContainsKey("home_advance"), "endpoints does not contain home_advance");
-                Debug.Assert(endpoints.ContainsKey("dungeon_progress"), "endpoints does not contain dungeon_progress");
-                Debug.Assert(endpoints.ContainsKey("dungeon_combat_draw_cards"), "endpoints does not contain dungeon_combat_draw_cards");
-                Debug.Assert(endpoints.ContainsKey("dungeon_combat_play_cards"), "endpoints does not contain dungeon_combat_play_cards");
-
-                // 状态查询相关端点
-                Debug.Assert(endpoints.ContainsKey("stages_state"), "endpoints does not contain stages_state");
-                Debug.Assert(endpoints.ContainsKey("dungeon_state"), "endpoints does not contain dungeon_state");
-                Debug.Assert(endpoints.ContainsKey("entity_details"), "endpoints does not contain entity_details");
-
-                // 场景转换相关端点
-                Debug.Assert(endpoints.ContainsKey("home_trans_dungeon"), "endpoints does not contain home_trans_dungeon");
-                Debug.Assert(endpoints.ContainsKey("dungeon_trans_home"), "endpoints does not contain dungeon_trans_home");
-
-                // 测试后台任务相关端点
-                Debug.Assert(endpoints.ContainsKey("tasks_trigger"), "endpoints does not contain tasks_trigger");
-                Debug.Assert(endpoints.ContainsKey("tasks_status"), "endpoints does not contain tasks_status");
-
-            }
-        }
-    }
 
     /// <summary>
     /// 图片服务API根响应对象

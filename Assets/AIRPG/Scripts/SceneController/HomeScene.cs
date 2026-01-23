@@ -111,7 +111,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         _inputField.text = string.Empty;          // 清空输入字段
 
         // 设置背景图像
-        if (ApiEndpointsManager.GameRootResponse != null)
+        if (GameContext.Instance.IsLoggedIn)
         {
             var stageSprite = SpriteCacheManager.Instance.GetSprite(_homeSceneConfig.StageName);
             if (stageSprite != null)
@@ -212,7 +212,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// </summary>
     private void RefreshActorList()
     {
-        if (ApiEndpointsManager.GameRootResponse != null)
+        if (GameContext.Instance.IsLoggedIn)
         {
             // 走到这里就是有正规登陆的，加载当前场景的角色列表
             var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
@@ -372,7 +372,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     private IEnumerator ReturnToMainScene()
     {
         // 检查游戏是否已正确初始化
-        if (ApiEndpointsManager.GameRootResponse != null)
+        if (GameContext.Instance.IsLoggedIn)
         {
             // 切换到监视之屋（如果需要）
             bool switchSuccess = false;
@@ -493,7 +493,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     public void OnClickSendMessage()
     {
         Debug.Log("Send Message button clicked");
-        if (ApiEndpointsManager.GameRootResponse != null && !string.IsNullOrEmpty(_selectedActorName) && !string.IsNullOrEmpty(_inputField.text))
+        if (GameContext.Instance.IsLoggedIn && !string.IsNullOrEmpty(_selectedActorName) && !string.IsNullOrEmpty(_inputField.text))
         {
             StartCoroutine(ExecuteSpeakAction(_selectedActorName, _inputField.text));
         }
@@ -545,7 +545,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     public void OnAllyButtonClicked()
     {
         Debug.Log("Ally button clicked in HomeScene.");
-        if (ApiEndpointsManager.GameRootResponse != null && !string.IsNullOrEmpty(_selectedActorName))
+        if (GameContext.Instance.IsLoggedIn && !string.IsNullOrEmpty(_selectedActorName))
         {
             StartCoroutine(AdvanceActorState(_selectedActorName));
         }
