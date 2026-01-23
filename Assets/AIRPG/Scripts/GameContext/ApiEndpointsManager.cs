@@ -1,5 +1,5 @@
 
-using UnityEngine;
+//using UnityEngine;
 
 /// <summary>
 /// API端点管理器 - 静态类
@@ -12,15 +12,15 @@ public static class ApiEndpointsManager
     /// <summary>
     /// 游戏API基础URL
     /// </summary>
-    private static string _baseUrl;
+    private static string _gameApiBaseUrl;
 
     /// <summary>
     /// 获取或设置游戏API基础URL
     /// </summary>
-    public static string BaseUrl
+    public static string GameApiBaseUrl
     {
-        get { return _baseUrl; }
-        set { _baseUrl = value; }
+        get { return _gameApiBaseUrl; }
+        set { _gameApiBaseUrl = value; }
     }
 
     // 直接写所有端点为静态只读字段，方便其他地方引用
@@ -56,33 +56,7 @@ public static class ApiEndpointsManager
     }
 
     /// <summary>
-    /// 图片服务API根响应数据的私有存储字段
+    /// 图片生成API端点
     /// </summary>
-    private static ImageRootResponse _imageRootResponse;
-
-    /// <summary>
-    /// 图片服务API根响应对象
-    /// 包含图片服务相关的所有API端点配置(图片生成、列表查询、静态图片访问等)
-    /// 设置时会自动验证所有必需的端点是否存在
-    /// </summary>
-    public static ImageRootResponse ImageRootResponse
-    {
-        get { return _imageRootResponse; }
-        set
-        {
-            _imageRootResponse = value;
-
-            // 验证所有必要的图片服务端点是否存在
-            if (_imageRootResponse != null)
-            {
-                var endpoints = _imageRootResponse.endpoints;
-
-                // 图片生成与管理相关端点
-                Debug.Assert(endpoints.ContainsKey("generate"), "endpoints does not contain generate");
-                Debug.Assert(endpoints.ContainsKey("images_list"), "endpoints does not contain images_list");
-                Debug.Assert(endpoints.ContainsKey("static_images"), "endpoints does not contain static_images");
-                Debug.Assert(endpoints.ContainsKey("docs"), "endpoints does not contain docs");
-            }
-        }
-    }
+    public static readonly string ImageGenerate = "/api/generate/v1";
 }

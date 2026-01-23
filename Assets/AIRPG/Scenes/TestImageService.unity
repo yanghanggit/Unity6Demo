@@ -342,9 +342,9 @@ GameObject:
   m_Component:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
-  - component: {fileID: 399892902}
   - component: {fileID: 399892903}
   - component: {fileID: 399892904}
+  - component: {fileID: 399892905}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -379,29 +379,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3afdb11a1c75342d79acc77eb71cc787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestImageServerScene
-  _baseUrl: http://192.168.2.134:8300/
+  _baseUrl: http://192.168.2.140:8300/
   _modelName: nano-banana
   _prompt: "\u53EF\u7231\u7684\u5C0F\u72D7\u5750\u5728\u6905\u5B50\u4E0A\uFF5E"
   _imageWidth: 1080
   _imageHeight: 1920
   _numInferenceSteps: 4
-  _imageRootApi: {fileID: 399892902}
+  _rootApi: {fileID: 399892905}
   _generateImageApi: {fileID: 399892903}
   _textureLoader: {fileID: 399892904}
   _imageDisplay: {fileID: 1214769496}
---- !u!114 &399892902
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c84413602bbc479c8317e0ef05dadbc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ImageRootApi
-  requestTimeout: 30
 --- !u!114 &399892903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -427,6 +414,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49fb6417db8e640d09344703e629bbd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoadTextureApi
+--- !u!114 &399892905
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399892899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a7b5dd5509e64e62b643ddf639ea270, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RootApi
+  requestTimeout: 30
 --- !u!1 &524838950
 GameObject:
   m_ObjectHideFlags: 0

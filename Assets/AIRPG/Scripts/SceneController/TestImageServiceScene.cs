@@ -16,7 +16,7 @@ public class TestImageServiceScene : MonoBehaviour
     [SerializeField] private int _numInferenceSteps = 4;
 
     [Header("API Components")]
-    [SerializeField] private ImageRootApi _imageRootApi;
+    [SerializeField] private RootApi _rootApi;
     [SerializeField] private GenerateImageApi _generateImageApi;
     [SerializeField] private TextureLoader _textureLoader;
 
@@ -26,11 +26,12 @@ public class TestImageServiceScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(!string.IsNullOrEmpty(_baseUrl), "_baseImageServerUrl is null");
-        Debug.Assert(_imageRootApi != null, "_imageRootApi is null");
+        Debug.Assert(_rootApi != null, "_rootApi is null");
         Debug.Assert(_generateImageApi != null, "_generateImageApi is null");
         Debug.Assert(_textureLoader != null, "_textureLoader is null");
         Debug.Assert(_imageDisplay != null, "_imageDisplay is null");
 
+        // 初始化API端点
         StartCoroutine(InitializeApiEndpoints());
     }
 
@@ -49,27 +50,24 @@ public class TestImageServiceScene : MonoBehaviour
     /// <returns>协程迭代器</returns>
     private IEnumerator InitializeApiEndpoints()
     {
-        yield return _imageRootApi.Call(_baseUrl);
+        yield return _rootApi.Call(_baseUrl);
 
-        if (_imageRootApi.ReqResult == null)
+        if (_rootApi.ReqResult == null)
         {
             Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: request result is null");
             yield break;
         }
 
-        if (!_imageRootApi.ReqResult.isSuccess)
+        if (!_rootApi.ReqResult.isSuccess)
         {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: {_imageRootApi.ReqResult.responseText}");
+            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: {_rootApi.ReqResult.responseText}");
             yield break;
         }
 
-        Debug.Assert(_imageRootApi.RespData != null, "ImageRootApi response data is null");
+        Debug.Assert(_rootApi.RespData != null, "ImageRootApi response data is null");
 
         // 设置ImageServerContext的基础URL
         ApiEndpointsManager.ImageApiBaseUrl = _baseUrl;
-
-        // 设置图片服务根响应数据
-        ApiEndpointsManager.ImageRootResponse = _imageRootApi.RespData;
     }
 
     /// <summary>

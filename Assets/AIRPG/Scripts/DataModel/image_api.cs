@@ -2,33 +2,6 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 图片服务根响应模型
-/// </summary>
-[Serializable]
-public class ImageRootResponse
-{
-    /// <summary>
-    /// 服务消息
-    /// </summary>
-    public string message = "";
-
-    /// <summary>
-    /// API版本号
-    /// </summary>
-    public string version = "";
-
-    /// <summary>
-    /// API端点字典，键为端点名称，值为端点路径
-    /// </summary>
-    public Dictionary<string, string> endpoints = new();
-
-    /// <summary>
-    /// 可用的图片生成模型列表
-    /// </summary>
-    public List<string> available_models = new();
-}
-
-/// <summary>
 /// 单张图片生成配置 - 对应一个完整的生成任务
 /// </summary>
 [Serializable]

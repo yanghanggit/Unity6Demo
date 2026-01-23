@@ -13,18 +13,7 @@ public static partial class ImageService
     {
         get
         {
-            return ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.ImageRootResponse.endpoints["generate"];
-        }
-    }
-
-    /// <summary>
-    /// 获取静态图片API的URL地址
-    /// </summary>
-    public static string StaticImagesApiUrl
-    {
-        get
-        {
-            return ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.ImageRootResponse.endpoints["static_images"];
+            return ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.ImageGenerate;
         }
     }
 
