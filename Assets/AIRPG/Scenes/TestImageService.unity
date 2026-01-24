@@ -379,9 +379,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3afdb11a1c75342d79acc77eb71cc787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TestImageServerScene
-  _baseUrl: http://192.168.2.140:8300/
+  _baseUrl: http://192.168.2.140:8200/
   _modelName: nano-banana
-  _prompt: "\u53EF\u7231\u7684\u5C0F\u72D7\u5750\u5728\u6905\u5B50\u4E0A\uFF5E"
+  _prompt: "\u53EF\u7231\u7684\u5C0F\u732A\u5750\u5728\u6905\u5B50\u4E0A\uFF5E"
   _imageWidth: 1080
   _imageHeight: 1920
   _numInferenceSteps: 4
