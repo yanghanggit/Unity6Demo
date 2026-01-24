@@ -1,29 +1,23 @@
-
-//using UnityEngine;
-
 /// <summary>
-/// API端点管理器 - 静态类
-/// 负责存储和管理从服务器获取的API根响应数据(RootResponse和ImageRootResponse)
-/// 包括游戏API和图片服务API的基础URL以及端点配置
-/// 设置响应对象时会自动验证所有必需的API端点是否存在
+/// 游戏API端点管理器
+/// 提供游戏服务器相关的API端点访问
 /// </summary>
-public static class ApiEndpointsManager
+public static class GameApiEndpointsManager
 {
     /// <summary>
     /// 游戏API基础URL
     /// </summary>
-    private static string _gameApiBaseUrl;
+    private static string _baseUrl;
 
     /// <summary>
     /// 获取或设置游戏API基础URL
     /// </summary>
-    public static string GameApiBaseUrl
+    public static string BaseUrl
     {
-        get { return _gameApiBaseUrl; }
-        set { _gameApiBaseUrl = value; }
+        get { return _baseUrl; }
+        set { _baseUrl = value; }
     }
 
-    // 直接写所有端点为静态只读字段，方便其他地方引用
     public static readonly string Login = "/api/login/v1/";
     public static readonly string Logout = "/api/logout/v1/";
     public static readonly string StartGame = "/api/start/v1/";
@@ -40,19 +34,26 @@ public static class ApiEndpointsManager
     public static readonly string StagesState = "/api/stages/v1/";
     public static readonly string TasksTrigger = "/api/tasks/v1/trigger";
     public static readonly string TasksStatus = "/api/tasks/v1/status";
+}
 
+/// <summary>
+/// 图片API端点管理器
+/// 提供图片服务器相关的API端点访问
+/// </summary>
+public static class ImageApiEndpointsManager
+{
     /// <summary> 
     /// 图片服务API基础URL
     /// </summary>
-    private static string _imageApiBaseUrl;
+    private static string _baseUrl;
 
     /// <summary>
     /// 获取或设置图片服务API基础URL
     /// </summary>
-    public static string ImageApiBaseUrl
+    public static string BaseUrl
     {
-        get { return _imageApiBaseUrl; }
-        set { _imageApiBaseUrl = value; }
+        get { return _baseUrl; }
+        set { _baseUrl = value; }
     }
 
     /// <summary>

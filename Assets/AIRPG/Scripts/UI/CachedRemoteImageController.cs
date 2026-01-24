@@ -155,7 +155,7 @@ public class CachedRemoteImageController : MonoBehaviour
 
         // 加载图片纹理
         yield return _textureLoader.LoadTexture(
-            ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + imageInfo.url
+            ImageApiEndpointsManager.BaseUrl.TrimEnd('/') + imageInfo.url
         );
 
         // Early return: 检查加载结果
@@ -203,7 +203,7 @@ public class CachedRemoteImageController : MonoBehaviour
 
         // 加载图片纹理
         yield return _textureLoader.LoadTexture(
-            ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + imageUrl
+            ImageApiEndpointsManager.BaseUrl.TrimEnd('/') + imageUrl
         );
 
         // Early return: 检查加载结果

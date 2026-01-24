@@ -13,7 +13,7 @@ public static partial class ImageService
     {
         get
         {
-            return ApiEndpointsManager.ImageApiBaseUrl.TrimEnd('/') + ApiEndpointsManager.ImageGenerate;
+            return ImageApiEndpointsManager.BaseUrl.TrimEnd('/') + ImageApiEndpointsManager.ImageGenerate;
         }
     }
 
