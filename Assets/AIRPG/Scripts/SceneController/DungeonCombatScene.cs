@@ -102,6 +102,14 @@ public class DungeonCombatScene : MonoBehaviour
         }
     }
 
+    // 这里调用撤退接口，需要用一个OnClick来封装，借鉴OnClickBackHome的其他相关的形式。后续我来在IDE中进行绑定
+
+    public void OnClickRetreatFromDungeon()
+    {
+        Debug.Log("OnClickRetreatFromDungeon");
+        StartCoroutine(ExecuteRetreatFromDungeon());
+    }
+
     public void OnClickBackHome()
     {
         Debug.Log("OnClickBackHome");
@@ -574,6 +582,32 @@ public class DungeonCombatScene : MonoBehaviour
     }
 
     /// <summary>
+    /// 从地下城撤退
+    /// 调用服务器撤退接口，成功后切换回主场景
+    /// </summary>
+    private IEnumerator ExecuteRetreatFromDungeon()
+    {
+        _mainText.text = "正在从地下城撤退...";
+
+        bool success = false;
+        yield return DungeonGamePlayManager.Instance.RetreatFromDungeon(
+            (result, message, sessionMessages) =>
+            {
+                success = result;
+                if (!result)
+                {
+                    _mainText.text = message;
+                }
+            });
+
+        if (success)
+        {
+            yield return new WaitForSeconds(0);
+            SceneManager.LoadScene(_preScene);
+        }
+    }
+
+    /// <summary>
     /// 返回主场景
     /// 调用服务器传送回家接口，成功后切换到主场景
     /// </summary>
@@ -597,4 +631,6 @@ public class DungeonCombatScene : MonoBehaviour
         }
     }
 }
+
+
 

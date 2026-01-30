@@ -97,6 +97,7 @@ public sealed class Dungeon
 {
     public string name = "";
     public List<Stage> stages = new();
+    public string description = "";
     public CombatSequence combat_sequence = new();
     public int current_stage_index = -1;
 }
