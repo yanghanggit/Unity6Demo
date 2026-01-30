@@ -40,6 +40,7 @@ public sealed class HandComponent
 {
     public string name = "";
     public List<Card> cards = new();
+    public int round = 0;
 }
 
 

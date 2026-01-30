@@ -117,6 +117,8 @@ public static partial class GameUtils
 
         var text = $"{handComponent.name} Hand: \n";
 
+        text += $"Round: {handComponent.round}\n";
+
         for (int i = 0; i < handComponent.cards.Count; i++)
         {
             var card = handComponent.cards[i];
