@@ -45,7 +45,7 @@ public sealed class StatusEffect
 public sealed class Card
 {
     public string name = "";
-    public string description = "";
+    public string action = "";
     public CharacterStats stats = new();
     public List<string> targets = new();
     public List<StatusEffect> status_effects = new();

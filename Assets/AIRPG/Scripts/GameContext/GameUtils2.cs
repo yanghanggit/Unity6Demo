@@ -124,7 +124,7 @@ public static partial class GameUtils
             var card = handComponent.cards[i];
 
             // 卡牌基本信息
-            text += $"[{card.name}]: {card.description}\n";
+            text += $"[{card.name}]: {card.action}\n";
 
             // 卡牌属性（如果存在非零属性）
             if (card.stats != null && (card.stats.hp != 0 || card.stats.max_hp != 0 ||
