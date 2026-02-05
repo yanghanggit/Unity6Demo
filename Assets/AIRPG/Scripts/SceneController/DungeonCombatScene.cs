@@ -632,7 +632,7 @@ public class DungeonCombatScene : MonoBehaviour
     private List<AllyDrawCardAction> GenerateAllyDrawCardActions()
     {
         var actions = new List<AllyDrawCardAction>();
-        var aliveAllies = GameContext.Instance.GetAliveAlliesInCurrentCombatStage();
+        var aliveAllies = GameContext.Instance.GetAliveExpeditionMembersInCurrentCombatStage();
         var aliveEnemies = GameContext.Instance.GetAliveEnemiesInCurrentCombatStage();
 
         // 如果没有敌人，无法生成攻击行动

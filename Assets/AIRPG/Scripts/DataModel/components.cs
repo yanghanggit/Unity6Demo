@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 
-
 /// <summary>
 /// 角色外观信息组件。
 /// </summary>
@@ -12,7 +11,6 @@ public sealed class AppearanceComponent
     public string appearance = "";
 }
 
-
 /// <summary>
 /// 盟友组件。
 /// </summary>
@@ -20,6 +18,13 @@ public sealed class AppearanceComponent
 public sealed class AllyComponent
 {
     public string name = "";
+}
+
+[System.Serializable]
+public sealed class ExpeditionMemberComponent
+{
+    public string name = "";
+    public string dungeon_name = "";
 }
 
 /// <summary>
@@ -31,7 +36,6 @@ public sealed class EnemyComponent
     public string name = "";
 }
 
-
 /// <summary>
 /// 手牌组件。
 /// </summary>
@@ -42,7 +46,6 @@ public sealed class HandComponent
     public List<Card> cards = new();
     public int round = 0;
 }
-
 
 /// <summary>
 /// 战斗属性组件。
@@ -63,7 +66,6 @@ public sealed class DeathComponent
 {
     public string name = "";
 }
-
 
 /// <summary>
 /// 库存组件。

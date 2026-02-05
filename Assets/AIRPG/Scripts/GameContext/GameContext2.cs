@@ -229,9 +229,9 @@ public partial class GameContext
     /// 获取当前舞台中所有活着的盟友实体
     /// </summary>
     /// <returns>活着的盟友实体列表</returns>
-    public List<EntitySerialization> GetAliveAlliesInCurrentCombatStage()
+    public List<EntitySerialization> GetAliveExpeditionMembersInCurrentCombatStage()
     {
-        var aliveAllies = new List<EntitySerialization>();
+        var aliveExpeditionMembers = new List<EntitySerialization>();
         var stageName = GetActorStage(PlayerActor);
         var actorsInStage = GetActorsInStage(stageName);
 
@@ -240,8 +240,8 @@ public partial class GameContext
             var actorEntity = GetActorEntitySerialization(actorsInStage[i]);
             Debug.Assert(actorEntity != null, "actorEntity is null");
 
-            var allyComponent = GameUtils.GetComponent<AllyComponent>(actorEntity);
-            if (allyComponent == null)
+            var expeditionMemberComponent = GameUtils.GetComponent<ExpeditionMemberComponent>(actorEntity);
+            if (expeditionMemberComponent == null)
             {
                 // 不是盟友，跳过
                 continue;
@@ -254,10 +254,10 @@ public partial class GameContext
                 continue;
             }
 
-            aliveAllies.Add(actorEntity);
+            aliveExpeditionMembers.Add(actorEntity);
         }
 
-        return aliveAllies;
+        return aliveExpeditionMembers;
     }
 
     /// <summary>
