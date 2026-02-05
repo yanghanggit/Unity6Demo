@@ -7,9 +7,6 @@ using UnityEngine.UI;
 
 public class DungeonCombatScene : MonoBehaviour
 {
-    // 静态属性，记录待进入的关卡名称
-    //public static string PendingStageName { get; set; }
-
     [Header("Scene Settings")]
     [SerializeField] private string _preScene = "MainScene";
     [SerializeField] private string _nextScene = "DungeonCombatScene";
@@ -37,13 +34,7 @@ public class DungeonCombatScene : MonoBehaviour
             var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
             _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
 
-            // 更新背景图片
-            // if (!string.IsNullOrEmpty(PendingStageName))
-            // {
-            //     SetBackgroundImage(PendingStageName);
-            //     PendingStageName = string.Empty; // 重置为默认值
-            // }
-
+            // 刷新场景初始化
             StartCoroutine(ExecuteCombatInit());
         }
         else
@@ -74,7 +65,8 @@ public class DungeonCombatScene : MonoBehaviour
     public void OnClickDrawCards()
     {
         Debug.Log("OnClickDrawCards");
-        StartCoroutine(ExecuteDrawCardsAndShowHands());
+        List<AllyDrawCardAction> specifiedActions = GenerateAllyDrawCardActions();
+        StartCoroutine(ExecuteDrawCardsAndShowHands(specifiedActions));
     }
 
     public void OnClickPlayCards()
@@ -144,7 +136,7 @@ public class DungeonCombatScene : MonoBehaviour
     /// 调用服务器 draw_cards 接口，获取任务ID后轮询查询任务状态
     /// 当任务完成时，刷新数据并显示角色手牌信息
     /// </summary>
-    private IEnumerator ExecuteDrawCardsAndShowHands()
+    private IEnumerator ExecuteDrawCardsAndShowHands(List<AllyDrawCardAction> specifiedActions)
     {
         // 正式的抽卡操作
         bool success = false;
@@ -152,7 +144,7 @@ public class DungeonCombatScene : MonoBehaviour
 
         // 开始发起抽卡请求
         yield return DungeonGamePlayManager.Instance.DrawCards(
-            new(),
+            specifiedActions,
             (result, message, id) =>
             {
                 success = result;
@@ -631,7 +623,70 @@ public class DungeonCombatScene : MonoBehaviour
             SceneManager.LoadScene(_preScene);
         }
     }
+
+    /// <summary>
+    /// 为所有活着的盟友生成抽卡行动
+    /// 每个盟友随机选择一个技能、一个敌人目标和一个状态效果
+    /// </summary>
+    /// <returns>盟友抽卡行动列表</returns>
+    private List<AllyDrawCardAction> GenerateAllyDrawCardActions()
+    {
+        var actions = new List<AllyDrawCardAction>();
+        var aliveAllies = GameContext.Instance.GetAliveAlliesInCurrentCombatStage();
+        var aliveEnemies = GameContext.Instance.GetAliveEnemiesInCurrentCombatStage();
+
+        // 如果没有敌人，无法生成攻击行动
+        if (aliveEnemies.Count == 0)
+        {
+            Debug.LogWarning("No alive enemies found, cannot generate draw card actions");
+            return actions;
+        }
+
+        foreach (var allyEntity in aliveAllies)
+        {
+            // 获取盟友的技能书组件
+            var skillBookComponent = GameUtils.GetComponent<SkillBookComponent>(allyEntity);
+            if (skillBookComponent == null || skillBookComponent.skills.Count == 0)
+            {
+                Debug.LogWarning($"Ally {allyEntity.name} has no skills, skipping");
+                continue;
+            }
+
+            // 获取盟友的战斗属性组件
+            var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(allyEntity);
+            if (combatStatsComponent == null)
+            {
+                Debug.LogWarning($"Ally {allyEntity.name} has no combat stats component, skipping");
+                continue;
+            }
+
+            // 随机选择一个技能
+            var randomSkill = skillBookComponent.skills[Random.Range(0, skillBookComponent.skills.Count)];
+
+            // 随机选择一个敌人作为目标
+            var randomEnemy = aliveEnemies[Random.Range(0, aliveEnemies.Count)];
+
+            // 随机选择一个状态效果（如果有）
+            var statusEffectNames = new List<string>();
+            if (combatStatsComponent.status_effects.Count > 0)
+            {
+                var randomStatusEffect = combatStatsComponent.status_effects[Random.Range(0, combatStatsComponent.status_effects.Count)];
+                statusEffectNames.Add(randomStatusEffect.name);
+            }
+
+            // 创建抽卡行动
+            var action = new AllyDrawCardAction
+            {
+                entity_name = allyEntity.name,
+                skill_name = randomSkill.name,
+                target_names = new List<string> { randomEnemy.name },
+                status_effect_names = statusEffectNames
+            };
+
+            actions.Add(action);
+            Debug.Log($"Generated draw card action: {allyEntity.name} uses {randomSkill.name} on {randomEnemy.name}");
+        }
+
+        return actions;
+    }
 }
-
-
-

@@ -11,22 +11,22 @@ public partial class GameContext
     /// 场景与角色的映射关系
     /// Key: 场景名称, Value: 该场景中的角色列表
     /// </summary>
-    private Dictionary<string, List<string>> _stageActorMapping = new Dictionary<string, List<string>>();
+    private Dictionary<string, List<string>> _stageActorMapping = new();
 
     /// <summary>
     /// 所有角色实体的序列化数据列表
     /// </summary>
-    private List<EntitySerialization> _actorEntitiesSerialization = new List<EntitySerialization>();
+    private List<EntitySerialization> _actorEntitiesSerialization = new();
 
     /// <summary>
     /// 所有场景实体的序列化数据列表
     /// </summary>
-    private List<EntitySerialization> _stageEntitiesSerialization = new List<EntitySerialization>();
+    private List<EntitySerialization> _stageEntitiesSerialization = new();
 
     /// <summary>
     /// 地牢数据对象
     /// </summary>
-    private Dungeon _dungeon = new Dungeon();
+    private Dungeon _dungeon = new();
 
     /// <summary>
     /// 获取或设置场景与角色的映射关系
@@ -58,7 +58,7 @@ public partial class GameContext
     {
         get
         {
-            List<string> allActors = new List<string>();
+            List<string> allActors = new();
             foreach (var kvp in _stageActorMapping)
             {
                 allActors.AddRange(kvp.Value);
@@ -118,13 +118,13 @@ public partial class GameContext
         // 获取当前角色所属场景
         var stageName = GetActorStage(PlayerActor);
         Debug.Assert(stageName != "", "[GameContext] Current actor's stage name is empty");
-        
+
         // 获取该场景中的所有角色
         var actorsInStage = GetActorsInStage(stageName);
-        
+
         // 移除当前角色自己
         actorsInStage.Remove(PlayerActor);
-        
+
         return actorsInStage;
     }
 
@@ -223,5 +223,75 @@ public partial class GameContext
             }
         }
         return null;
+    }
+
+    /// <summary>
+    /// 获取当前舞台中所有活着的盟友实体
+    /// </summary>
+    /// <returns>活着的盟友实体列表</returns>
+    public List<EntitySerialization> GetAliveAlliesInCurrentCombatStage()
+    {
+        var aliveAllies = new List<EntitySerialization>();
+        var stageName = GetActorStage(PlayerActor);
+        var actorsInStage = GetActorsInStage(stageName);
+
+        for (int i = 0; i < actorsInStage.Count; i++)
+        {
+            var actorEntity = GetActorEntitySerialization(actorsInStage[i]);
+            Debug.Assert(actorEntity != null, "actorEntity is null");
+
+            var allyComponent = GameUtils.GetComponent<AllyComponent>(actorEntity);
+            if (allyComponent == null)
+            {
+                // 不是盟友，跳过
+                continue;
+            }
+
+            var deathComponent = GameUtils.GetComponent<DeathComponent>(actorEntity);
+            if (deathComponent != null)
+            {
+                // 已经死亡，跳过
+                continue;
+            }
+
+            aliveAllies.Add(actorEntity);
+        }
+
+        return aliveAllies;
+    }
+
+    /// <summary>
+    /// 获取当前舞台中所有活着的敌人实体
+    /// </summary>
+    /// <returns>活着的敌人实体列表</returns>
+    public List<EntitySerialization> GetAliveEnemiesInCurrentCombatStage()
+    {
+        var aliveEnemies = new List<EntitySerialization>();
+        var stageName = GetActorStage(PlayerActor);
+        var actorsInStage = GetActorsInStage(stageName);
+
+        for (int i = 0; i < actorsInStage.Count; i++)
+        {
+            var actorEntity = GetActorEntitySerialization(actorsInStage[i]);
+            Debug.Assert(actorEntity != null, "actorEntity is null");
+
+            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntity);
+            if (enemyComponent == null)
+            {
+                // 不是敌人，跳过
+                continue;
+            }
+
+            var deathComponent = GameUtils.GetComponent<DeathComponent>(actorEntity);
+            if (deathComponent != null)
+            {
+                // 已经死亡，跳过
+                continue;
+            }
+
+            aliveEnemies.Add(actorEntity);
+        }
+
+        return aliveEnemies;
     }
 }
