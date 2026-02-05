@@ -142,15 +142,17 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <summary>    /// 抽卡
     /// 调用地下城战斗抽牌端点执行抽卡操作
     /// </summary>
+    /// <param name="specifiedActions">指定的盟友抽卡行动列表</param>
     /// <param name="onComplete">完成回调，参数为是否成功、消息和任务ID</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator DrawCards(Action<bool, string, string> onComplete = null)
+    public IEnumerator DrawCards(List<AllyDrawCardAction> specifiedActions, Action<bool, string, string> onComplete = null)
     {
         // 调用地下城战斗抽牌端点
         yield return _dungeonCombatDrawCardsApi.Call(
             GameContext.Instance.DungeonCombatDrawCardsUrl,
             GameContext.Instance.UserName,
-            GameContext.Instance.GameName);
+            GameContext.Instance.GameName,
+            specifiedActions);
 
         // 检查API调用是否成功
         if (_dungeonCombatDrawCardsApi.ReqResult == null)

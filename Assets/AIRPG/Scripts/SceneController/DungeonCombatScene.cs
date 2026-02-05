@@ -152,6 +152,7 @@ public class DungeonCombatScene : MonoBehaviour
 
         // 开始发起抽卡请求
         yield return DungeonGamePlayManager.Instance.DrawCards(
+            new(),
             (result, message, id) =>
             {
                 success = result;

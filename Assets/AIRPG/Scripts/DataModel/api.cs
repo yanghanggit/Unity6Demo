@@ -172,10 +172,20 @@ public class DungeonProgressResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [System.Serializable]
+public class AllyDrawCardAction
+{
+    public string entity_name = "";
+    public string skill_name = "";
+    public List<string> target_names = new();
+    public List<string> status_effect_names = new();
+}
+
+[System.Serializable]
 public class DungeonCombatDrawCardsRequest
 {
     public string user_name = "";
     public string game_name = "";
+    public List<AllyDrawCardAction> specified_actions = new();
 }
 
 [System.Serializable]

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -34,13 +35,15 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
     /// <param name="url">API 请求地址</param>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名称</param>
+    /// <param name="specifiedActions">指定的盟友抽卡行动列表</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url, string userName, string gameName)
+    public IEnumerator Call(string url, string userName, string gameName, List<AllyDrawCardAction> specifiedActions)
     {
         Debug.Log("Starting DungeonCombatDrawCardsApi call...");
         Debug.Log($"URL: {url}");
         Debug.Log($"UserName: {userName}");
         Debug.Log($"GameName: {gameName}");
+        Debug.Log($"SpecifiedActions count: {specifiedActions?.Count ?? 0}");
 
         // 清除之前的请求结果和响应数据
         _requestResult = null;
@@ -57,7 +60,8 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
         var requestData = new DungeonCombatDrawCardsRequest
         {
             user_name = userName,
-            game_name = gameName
+            game_name = gameName,
+            specified_actions = specifiedActions
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
