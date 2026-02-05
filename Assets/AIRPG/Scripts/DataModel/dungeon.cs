@@ -61,7 +61,7 @@ public sealed class Card
 [System.Serializable]
 public sealed class Round
 {
-    public string tag = "";                                // 回合标签，记录回合序号等信息
+    //public string tag = "";                                // 回合标签，记录回合序号等信息
     public List<string> action_order = new(); // 行动顺序，按顺序记录角色名称
     public string combat_log = "";                         // 战斗计算日志
     public string narrative = "";                          // 叙事文本/演出描述

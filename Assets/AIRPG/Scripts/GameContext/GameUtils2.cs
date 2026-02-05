@@ -63,7 +63,7 @@ public static partial class GameUtils
         if (lastCombat.rounds?.Count > 0)
         {
             var lastRound = lastCombat.rounds[lastCombat.rounds.Count - 1];
-            sb.AppendLine($"Round: {lastRound.tag}");
+            sb.AppendLine($"Round: {lastCombat.rounds.Count}");
             sb.AppendLine($"Action Order: {string.Join(" --> ", lastRound.action_order)}");
         }
 
@@ -281,7 +281,7 @@ public static partial class GameUtils
             return string.Empty;
 
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"Round: {round.tag}");
+        //sb.AppendLine($"Round: {round.tag}");
 
         if (round.action_order != null && round.action_order.Count > 0)
         {
