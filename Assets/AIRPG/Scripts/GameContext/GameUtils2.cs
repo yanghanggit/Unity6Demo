@@ -93,7 +93,9 @@ public static partial class GameUtils
             for (int i = 0; i < combatStatsComponent.status_effects.Count; i++)
             {
                 var statusEffect = combatStatsComponent.status_effects[i];
-                text += $"[{statusEffect.name}]: \n{statusEffect.description}";
+                text += $"[{statusEffect.name}] ({statusEffect.category})\n";
+                text += $"表现: {statusEffect.manifestation}\n";
+                text += $"效果: {statusEffect.effect}";
                 if (i < combatStatsComponent.status_effects.Count - 1)
                 {
                     text += "\n";
@@ -152,7 +154,9 @@ public static partial class GameUtils
                 text += "  Status Effects:\n";
                 foreach (var effect in card.status_effects)
                 {
-                    text += $"    [{effect.name}]: {effect.description}\n";
+                    text += $"    [{effect.name}] ({effect.category})\n";
+                    text += $"    表现: {effect.manifestation}\n";
+                    text += $"    效果: {effect.effect}\n";
                 }
             }
 
