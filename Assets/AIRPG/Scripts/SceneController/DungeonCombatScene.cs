@@ -12,10 +12,10 @@ public class DungeonCombatScene : MonoBehaviour
     [SerializeField] private string _nextScene = "DungeonCombatScene";
 
     [Header("UI Components")]
-    [SerializeField] private TMP_Text _mainText;
-    [SerializeField] private GameObject _backgroundImage; // (暂未使用)
-    [SerializeField] private GameObject _actorAvatarPrefab;    // 角色头像预制体
-    [SerializeField] private StringGameEvent _onActorAvatarsRefreshEvent; // 角色头像刷新事件
+    [SerializeField] private TMP_Text _mainText; // 主文本显示对象
+    [SerializeField] private GameObject _backgroundImage; // 背景图片对象
+    [SerializeField] private GameObject _combatSceneUI; // 战斗场景UI对象, 重构后的战斗UI
+    [SerializeField] private GameObject[] _actorAvatars; // 角色头像槽位数组
 
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi;
@@ -23,10 +23,12 @@ public class DungeonCombatScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-        Debug.Assert(_actorAvatarPrefab != null, "_actorAvatarPrefab is null");
-        Debug.Assert(_onActorAvatarsRefreshEvent != null, "_onActorAvatarsRefreshEvent is null");
+        Debug.Assert(_backgroundImage != null, "_backgroundImage is null");
+        Debug.Assert(_combatSceneUI != null, "_combatSceneUI is null");
         Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
+        _combatSceneUI.SetActive(false); // 确保战斗场景UI是关闭状态
+        
         // 检查是否已经连接服务器
         if (GameContext.Instance.IsLoggedIn)
         {
@@ -40,44 +42,102 @@ public class DungeonCombatScene : MonoBehaviour
         else
         {
             // 没有连接服务器，基本是本地测试模式
-            Debug.Log("DungeonCombatScene Start: RootResp is null, running in local test mode");
+            Debug.Log("DungeonCombatScene: Not logged in, running in local test mode");
+            _mainText.text = "本地测试模式：未连接服务器，无法进行完整战斗操作。";
         }
     }
 
     public void OnClickViewDungeon()
     {
-        Debug.Log("OnClickViewDungeon");
+        // 打开战斗场景UI
+        _combatSceneUI.SetActive(true);
+
+        // 用mock数据设置 _actorAvatars，每一个元素是一个Button。设置名字即可。
+        for (int i = 0; i < _actorAvatars.Length; i++)
+        {
+            var button = _actorAvatars[i].GetComponent<Button>();
+            var text = _actorAvatars[i].GetComponentInChildren<TMP_Text>();
+            if (button != null && text != null)
+            {
+                var name = $"Actor_{i + 1}";
+                text.text = name;
+                button.gameObject.name = name; // 设置Button对象的名字，方便在点击时识别
+                //int index = i; // 捕获当前索引
+                button.onClick.RemoveAllListeners(); // 清除之前的监听器
+                button.onClick.AddListener(() => OnClickCombatActor(button.gameObject)); // 添加新的监听器
+            }
+        }
+
+
+
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot view dungeon");
+            return;
+        }
+
+        //Debug.Log("OnClickViewDungeon");
         StartCoroutine(RefreshDungeonStateDisplay());
     }
 
     public void OnClickViewActor()
     {
-        Debug.Log("OnClickViewActor");
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot view actor");
+            return;
+        }
+
+        //Debug.Log("OnClickViewActor");
         StartCoroutine(ExecuteViewActorStats());
     }
 
     public void OnClickViewCards()
     {
-        Debug.Log("OnClickViewCards");
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot view cards");
+            return;
+        }
+
+        //Debug.Log("OnClickViewCards");
         StartCoroutine(ExecuteViewActorCards());
     }
 
     public void OnClickDrawCards()
     {
-        Debug.Log("OnClickDrawCards");
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot draw cards");
+            return;
+        }
+
+        //Debug.Log("OnClickDrawCards");
         List<AllyDrawCardAction> specifiedActions = GenerateAllyDrawCardActions();
         StartCoroutine(ExecuteDrawCardsAndShowHands(specifiedActions));
     }
 
     public void OnClickPlayCards()
     {
-        Debug.Log("OnClickPlayCards");
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot play cards");
+            return;
+        }
+
+        //Debug.Log("OnClickPlayCards");
         StartCoroutine(ExecutePlayCardsAndShowResult());
     }
 
     public void OnClickAdvanceNextDungeon()
     {
-        Debug.Log("OnClickAdvanceNextDungeon");
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot advance to next dungeon");
+            return;
+        }
+
+        //Debug.Log("OnClickAdvanceNextDungeon");
 
         // 检查当前战斗状态，决定执行哪个操作
         Combat currentCombat = GameUtils.GetCurrentCombat(GameContext.Instance.Dungeon);
@@ -94,18 +154,60 @@ public class DungeonCombatScene : MonoBehaviour
         }
     }
 
-    // 这里调用撤退接口，需要用一个OnClick来封装，借鉴OnClickBackHome的其他相关的形式。后续我来在IDE中进行绑定
-
     public void OnClickRetreatFromDungeon()
     {
-        Debug.Log("OnClickRetreatFromDungeon");
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot retreat from dungeon");
+            return;
+        }
+
+        //Debug.Log("OnClickRetreatFromDungeon");
         StartCoroutine(ExecuteRetreatFromDungeon());
     }
 
     public void OnClickBackHome()
     {
-        Debug.Log("OnClickBackHome");
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot go back home");
+            return;
+        }
+
+        //Debug.Log("OnClickBackHome");
         StartCoroutine(ExecuteBackHome());
+    }
+
+    //
+    public void OnClickCloseCombatSceneUI()
+    {
+        //Debug.Log("OnClickCloseCombatSceneUI");
+        _combatSceneUI.SetActive(false); // 关闭战斗场景UI
+    }
+
+    /// <summary>
+    /// 点击角色头像显示该角色的战斗属性信息
+    /// 根据点击的角色索引获取对应的角色实体，提取战斗属性组件并格式化显示
+    /// </summary>
+    public void OnClickCombatActor(GameObject gameObject)
+    {
+        Debug.Log($"OnClickCombatActor: Clicked on actor {gameObject.name}");
+    }
+
+    /// <summary>
+    /// 点击战斗运行操作
+    /// </summary>
+    public void OnClickCombatRun()
+    {
+        Debug.Log("OnClickCombatRun: Run action triggered");
+    }
+
+    /// <summary> 
+    /// 下一场战斗操作
+    /// </summary>
+    public void OnClickNextCombat()
+    {
+        Debug.Log("OnClickNextCombat: Next combat action triggered");
     }
 
     /// <summary>
