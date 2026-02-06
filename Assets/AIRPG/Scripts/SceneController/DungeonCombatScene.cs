@@ -114,7 +114,7 @@ public class DungeonCombatScene : MonoBehaviour
 
         //Debug.Log("OnClickDrawCards");
         List<AllyDrawCardAction> specifiedActions = GenerateAllyDrawCardActions();
-        StartCoroutine(ExecuteDrawCardsAndShowHands(specifiedActions));
+        StartCoroutine(ExecuteDrawCardsAndShowHands(specifiedActions, true));
     }
 
     public void OnClickPlayCards()
@@ -238,7 +238,7 @@ public class DungeonCombatScene : MonoBehaviour
     /// 调用服务器 draw_cards 接口，获取任务ID后轮询查询任务状态
     /// 当任务完成时，刷新数据并显示角色手牌信息
     /// </summary>
-    private IEnumerator ExecuteDrawCardsAndShowHands(List<AllyDrawCardAction> specifiedActions)
+    private IEnumerator ExecuteDrawCardsAndShowHands(List<AllyDrawCardAction> specifiedActions, bool enable_enemy_draw)
     {
         // 正式的抽卡操作
         bool success = false;
@@ -247,6 +247,7 @@ public class DungeonCombatScene : MonoBehaviour
         // 开始发起抽卡请求
         yield return DungeonGamePlayManager.Instance.DrawCards(
             specifiedActions,
+            enable_enemy_draw,
             (result, message, id) =>
             {
                 success = result;

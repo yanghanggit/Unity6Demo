@@ -36,8 +36,9 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名称</param>
     /// <param name="specifiedActions">指定的盟友抽卡行动列表</param>
+    /// <param name="enable_enemy_draw">是否启用敌人抽牌</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url, string userName, string gameName, List<AllyDrawCardAction> specifiedActions)
+    public IEnumerator Call(string url, string userName, string gameName, List<AllyDrawCardAction> specifiedActions, bool enable_enemy_draw)
     {
         Debug.Log("Starting DungeonCombatDrawCardsApi call...");
         Debug.Log($"URL: {url}");
@@ -61,7 +62,8 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
         {
             user_name = userName,
             game_name = gameName,
-            specified_actions = specifiedActions
+            specified_actions = specifiedActions,
+            enable_enemy_draw = enable_enemy_draw
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 

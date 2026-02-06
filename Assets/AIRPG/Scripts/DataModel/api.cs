@@ -186,6 +186,7 @@ public class DungeonCombatDrawCardsRequest
     public string user_name = "";
     public string game_name = "";
     public List<AllyDrawCardAction> specified_actions = new();
+    public bool enable_enemy_draw = true;
 }
 
 [System.Serializable]
