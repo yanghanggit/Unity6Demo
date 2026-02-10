@@ -19,6 +19,7 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
     // Mock 数据 - 用于测试
     private EntitySerialization[] _mockActorData;
     private CardElementData[] _mockCardElementData;
+    private CardBuildData _mockCardBuildData; // 用于测试的卡牌构建数据
 
     private void CreateMockActorData()
     {
@@ -102,6 +103,7 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         // 创建 mock 数据
         CreateMockActorData();
         CreateMockCardElementData();
+        _mockCardBuildData = new CardBuildData(); //先创建一个空的卡牌构建数据对象，后续可以根据需要填充数据
 
         //
         Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
@@ -121,15 +123,15 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         Debug.Assert(_mockCardElementData != null && _mockCardElementData.Length > 0, "Mock card element data is not initialized");
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
 
-
-        // 设置初始文本内容
-        _combatInfoText.text = "场景.测试地下城关卡-第1局";
-        _mainText.text = "这是一个测试";
-
         // 注册事件监听器
         _onCardClickedEvent.RegisterListener(this);
         _onActorSlotClickedEvent.RegisterListener(this);
-       
+
+        // 设置初始文本内容
+        _combatInfoText.text = "场景.测试地下城关卡-第1局";
+
+        // 显示卡牌构建数据的初始状态
+        _mainText.text = GameUtils.FormatCardBuildData(_mockCardBuildData); 
 
         // 将 mock 卡牌要素数据添加到 CardElementCollection
         CardElementCollection.Clear(); // 清空之前的数据
@@ -142,7 +144,6 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         //
         _scrollView.totalItemCount = CardElementCollection.Count; // 设置滚动视图的总项数，测试动态加载
         _scrollView.gameObject.SetActive(true); // 确保滚动视图对象被激活，能正确显示
-
 
         // 设置 mock 数据到 ActorOrderSlot
         for (int i = 0; i < _actorSlots.Length && i < _mockActorData.Length; i++)
@@ -200,5 +201,30 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         Debug.Log($"[TestDungeonCombatScenePrototype] {eventData}");
         Debug.Log($"OnEventRaised: {eventData.eventType}, TargetId: {eventData.targetId}, Index: {eventData.index}, ExtraData: {eventData.extraData}");
         _mainText.text = $"事件: {eventData.eventType}\n目标: {eventData.targetId}\n索引: {eventData.index}\n额外: {eventData.extraData}";
+
+        switch (eventData.eventType)
+        {
+            case UIEventType.CardElementScrollViewItemClick:
+                Debug.Log($"处理卡牌要素滚动视图项点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
+                break;
+
+            case UIEventType.ActorOrderSlotClick:
+                Debug.Log($"处理角色槽位点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
+                _mockCardBuildData = new CardBuildData
+                {
+                    owner = new EntitySerialization { name = eventData.targetId },
+                };
+                UpdateMainTextWithCardBuildData();
+                break;
+        }
+
+    }
+
+    /// <summary>
+    /// 更新主文本显示，展示当前卡牌构建数据的状态
+    /// </summary>
+    private void UpdateMainTextWithCardBuildData()
+    {
+        _mainText.text = GameUtils.FormatCardBuildData(_mockCardBuildData);
     }
 }

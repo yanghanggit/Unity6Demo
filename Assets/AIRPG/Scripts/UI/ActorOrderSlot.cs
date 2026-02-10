@@ -18,7 +18,7 @@ public class ActorOrderSlot : MonoBehaviour
         Debug.Assert(_overlayButton != null, "_overlayButton is null");
         Debug.Assert(_actorNameText != null, "_actorNameText is null");
         Debug.Assert(_onActorSlotClickedEvent != null, "_onActorSlotClickedEvent is null");
-    
+
         // 先移除listener，确保不会重复添加
         _overlayButton.onClick.RemoveListener(OnClick);
         _overlayButton.onClick.AddListener(OnClick);
@@ -30,12 +30,13 @@ public class ActorOrderSlot : MonoBehaviour
     public void OnClick()
     {
         Debug.Log("ActorOrderSlot button clicked" + gameObject.name);
+        Debug.Assert(_actorEntitySerialization != null, "Actor entity serialization data is null");
         // 创建并发送结构化的事件数据
         var eventData = new UIEventData(
             UIEventType.ActorOrderSlotClick, // 事件类型
-            _actorNameText.text,
+            _actorEntitySerialization.name, // 传递角色名称
             -1,
-            gameObject.name
+            ""
         );
         _onActorSlotClickedEvent.Raise(eventData);
     }

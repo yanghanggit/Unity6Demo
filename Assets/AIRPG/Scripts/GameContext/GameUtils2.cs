@@ -270,6 +270,78 @@ public static partial class GameUtils
     }
 
     /// <summary>
+    /// 格式化卡牌构建数据为显示文本
+    /// 将卡牌构建数据中的目标角色、技能和状态效果组织成便于调试和UI显示的字符串
+    /// </summary>
+    /// <param name="cardBuildData">要格式化的卡牌构建数据</param>
+    /// <returns>格式化后的卡牌构建数据文本</returns>
+    public static string FormatCardBuildData(CardBuildData cardBuildData)
+    {
+        if (cardBuildData == null)
+            return "[空卡牌构建数据]";
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("=== 卡牌构建数据 ===");
+
+        // 格式化构建者
+        if (cardBuildData.owner != null && !string.IsNullOrEmpty(cardBuildData.owner.name))
+        {
+            sb.AppendLine($"构建者: {cardBuildData.owner.name}");
+        }
+        else
+        {
+            sb.AppendLine("构建者: [未指定]");
+        }
+
+        // 格式化目标角色列表
+        if (cardBuildData.targetActors != null && cardBuildData.targetActors.Count > 0)
+        {
+            sb.AppendLine($"目标角色 ({cardBuildData.targetActors.Count}):");
+            for (int i = 0; i < cardBuildData.targetActors.Count; i++)
+            {
+                sb.AppendLine($"  {i + 1}. {cardBuildData.targetActors[i].name}");
+            }
+        }
+        else
+        {
+            sb.AppendLine("目标角色: [无]");
+        }
+
+        // 格式化技能
+        if (cardBuildData.skill != null && !string.IsNullOrEmpty(cardBuildData.skill.name))
+        {
+            sb.AppendLine($"技能: {cardBuildData.skill.name}");
+            if (!string.IsNullOrEmpty(cardBuildData.skill.description))
+            {
+                sb.AppendLine($"  描述: {cardBuildData.skill.description}");
+            }
+        }
+        else
+        {
+            sb.AppendLine("技能: [空技能]");
+        }
+
+        // 格式化状态效果列表
+        if (cardBuildData.statusEffects != null && cardBuildData.statusEffects.Count > 0)
+        {
+            sb.AppendLine($"状态效果 ({cardBuildData.statusEffects.Count}):");
+            for (int i = 0; i < cardBuildData.statusEffects.Count; i++)
+            {
+                var effect = cardBuildData.statusEffects[i];
+                sb.AppendLine($"  {i + 1}. [{effect.name}] ({effect.category})");
+                sb.AppendLine($"     表现: {effect.manifestation}");
+                sb.AppendLine($"     效果: {effect.effect}");
+            }
+        }
+        else
+        {
+            sb.AppendLine("状态效果: [无]");
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
+    /// <summary>
     /// 格式化战斗回合信息为显示文本
     /// 将回合的标签、行动顺序、战斗日志和叙事文本组织成便于UI显示的字符串
     /// </summary>
