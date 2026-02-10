@@ -21,7 +21,6 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
     // Mock 数据 - 用于测试
     private EntitySerialization[] _mockActorData;
     private CardElementData[] _mockCardElementData;
-    private CardBuildData _mockCardBuildData; // 用于测试的卡牌构建数据
 
     private void CreateMockActorData()
     {
@@ -105,7 +104,7 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         // 创建 mock 数据
         CreateMockActorData();
         CreateMockCardElementData();
-        _mockCardBuildData = new CardBuildData(); //先创建一个空的卡牌构建数据对象，后续可以根据需要填充数据
+        CardBuilder.Build = new CardBuildData(); //先创建一个空的卡牌构建数据对象，后续可以根据需要填充数据
 
         // 先关了。
         Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
@@ -133,19 +132,24 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         _combatInfoText.text = "场景.测试地下城关卡-第1局";
 
         // 显示卡牌构建数据的初始状态
-        _mockCardBuildData = new CardBuildData(); //先创建一个空的卡牌构建数据对象，后续可以根据需要填充数据
-        UpdateMainTextWithCardBuildData();
+        // 将 mock 卡牌要素数据添加到 CardElementCollection
+        CardBuilder.Clear(); // 清空之前的数据
+
+        //先创建一个空的卡牌构建数据对象，后续可以根据需要填充数据
+        CardBuilder.Build = new CardBuildData();
 
         // 将 mock 卡牌要素数据添加到 CardElementCollection
-        CardElementCollection.Clear(); // 清空之前的数据
         foreach (var element in _mockCardElementData)
         {
-            CardElementCollection.AddElement(element);
+            CardBuilder.AddElement(element);
         }
-        Debug.Log($"[TestDungeonCombatScenePrototype] 已添加 {CardElementCollection.Count} 个卡牌要素到 CardElementCollection");
+        Debug.Log($"[TestDungeonCombatScenePrototype] 已添加 {CardBuilder.Count} 个卡牌要素到 CardElementCollection");
 
         //
-        _scrollView.totalItemCount = CardElementCollection.Count; // 设置滚动视图的总项数，测试动态加载
+        UpdateMainTextWithCardBuildData();
+
+        // 设置滚动视图的总项数为 mock 卡牌要素数据的数量，测试动态加载
+        _scrollView.totalItemCount = CardBuilder.Count; // 设置滚动视图的总项数，测试动态加载
         _scrollView.gameObject.SetActive(true); // 确保滚动视图对象被激活，能正确显示
 
         // 设置 mock 数据到 ActorOrderSlot
@@ -208,7 +212,10 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         switch (eventData.eventType)
         {
             case UIEventType.CardElementScrollViewItemClick:
-                HandleCardElementScrollViewItemClick(eventData);
+                Debug.Log($"处理卡牌要素滚动视图项点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
+
+                // 更新主文本显示
+                UpdateMainTextWithCardBuildData();
                 break;
 
             case UIEventType.ActorOrderSlotClick:
@@ -223,104 +230,6 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
     }
 
     /// <summary>
-    /// 处理卡牌要素滚动视图项点击事件
-    /// 根据点击的要素类型，切换卡牌构建数据中的对应要素（存在则删除，不存在则添加）
-    /// </summary>
-    private void HandleCardElementScrollViewItemClick(UIEventData eventData)
-    {
-        Debug.Log($"处理卡牌要素滚动视图项点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
-
-        // 检查卡牌构建数据是否存在
-        if (_mockCardBuildData == null)
-        {
-            Debug.LogWarning("卡牌构建数据不存在，请先选择构建者（点击角色槽位）");
-            return;
-        }
-
-        // 从 CardElementCollection 获取对应的要素数据
-        var elementData = CardElementCollection.GetElement(eventData.index);
-        if (elementData == null)
-        {
-            Debug.LogWarning($"未找到索引为 {eventData.index} 的卡牌要素数据");
-            return;
-        }
-
-        // 根据要素类型进行处理
-        switch (elementData.elementType)
-        {
-            case CardElementType.TargetActor:
-                if (elementData.targetActor != null)
-                {
-                    // 检查是否已存在（根据 name 判断）
-                    var existingActorIndex = _mockCardBuildData.targetActors.FindIndex(
-                        actor => actor.name == elementData.targetActor.name);
-
-                    if (existingActorIndex >= 0)
-                    {
-                        // 已存在，删除该目标角色
-                        _mockCardBuildData.targetActors.RemoveAt(existingActorIndex);
-                        Debug.Log($"删除目标角色: {elementData.targetActor.name}");
-                    }
-                    else
-                    {
-                        // 不存在，添加新的目标角色
-                        _mockCardBuildData.targetActors.Add(elementData.targetActor);
-                        Debug.Log($"添加目标角色: {elementData.targetActor.name}");
-                    }
-                }
-                break;
-
-            case CardElementType.Skill:
-                // 检查当前技能是否与要操作的技能相同（根据 name 判断）
-                if (_mockCardBuildData.skill != null &&
-                    !string.IsNullOrEmpty(_mockCardBuildData.skill.name) &&
-                    _mockCardBuildData.skill.name == elementData.skill?.name)
-                {
-                    // 已存在相同技能，删除（设置为空技能）
-                    _mockCardBuildData.skill = new Skill();
-                    Debug.Log($"删除技能: {elementData.skill?.name}");
-                }
-                else
-                {
-                    // 不存在或不同，设置为新技能
-                    _mockCardBuildData.skill = elementData.skill;
-                    Debug.Log($"设置技能: {elementData.skill?.name ?? "[空技能]"}");
-                }
-                break;
-
-            case CardElementType.StatusEffect:
-                if (elementData.statusEffect != null)
-                {
-                    // 检查是否已存在（根据 name 判断）
-                    var existingEffectIndex = _mockCardBuildData.statusEffects.FindIndex(
-                        effect => effect.name == elementData.statusEffect.name);
-
-                    if (existingEffectIndex >= 0)
-                    {
-                        // 已存在，删除该状态效果
-                        _mockCardBuildData.statusEffects.RemoveAt(existingEffectIndex);
-                        Debug.Log($"删除状态效果: {elementData.statusEffect.name}");
-                    }
-                    else
-                    {
-                        // 不存在，添加新的状态效果
-                        _mockCardBuildData.statusEffects.Add(elementData.statusEffect);
-                        Debug.Log($"添加状态效果: {elementData.statusEffect.name}");
-                    }
-                }
-                break;
-
-            case CardElementType.None:
-            default:
-                Debug.LogWarning($"未知的卡牌要素类型: {elementData.elementType}");
-                break;
-        }
-
-        // 更新主文本显示
-        UpdateMainTextWithCardBuildData();
-    }
-
-    /// <summary>
     /// 处理角色槽位点击事件
     /// 根据点击的角色设置卡牌构建数据的构建者（owner）
     /// </summary>
@@ -332,7 +241,7 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         var selectedActor = System.Array.Find(_mockActorData, actor => actor.name == eventData.targetId);
         if (selectedActor != null)
         {
-            _mockCardBuildData = new CardBuildData
+            CardBuilder.Build = new CardBuildData
             {
                 owner = selectedActor,
             };
@@ -349,7 +258,8 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
     /// </summary>
     private void UpdateMainTextWithCardBuildData()
     {
-        _mainText.text = GameUtils.FormatCardBuildData(_mockCardBuildData);
+        Debug.Assert(CardBuilder.Build != null, "CardBuilder.Build is null");
+        _mainText.text = GameUtils.FormatCardBuildData(CardBuilder.Build);
     }
 }
 

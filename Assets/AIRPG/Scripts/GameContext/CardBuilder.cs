@@ -2,6 +2,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
+/// 卡牌构建数据
+/// </summary>
+[System.Serializable]
+public class CardBuildData
+{
+    public EntitySerialization owner = null;              // 卡牌构建者
+    public List<EntitySerialization> targetActors = new();
+    public Skill skill = new();
+    public List<StatusEffect> statusEffects = new();
+}
+
+
+/// <summary>
 /// 卡牌要素类型枚举
 /// </summary>
 public enum CardElementType
@@ -62,17 +75,27 @@ public class CardElementData
 }
 
 /// <summary>
-/// 卡牌要素集合管理器
-/// 管理当前正在构建的卡牌的所有要素
+/// 卡牌构建器
+/// 管理当前正在构建的卡牌的所有要素和构建数据
 /// </summary>
-public static class CardElementCollection
+public static class CardBuilder
 {
     private static readonly List<CardElementData> _elements = new();
+    private static CardBuildData _build = new();
 
     /// <summary>
     /// 获取所有卡牌要素（只读）
     /// </summary>
     public static IReadOnlyList<CardElementData> Elements => _elements.AsReadOnly();
+
+    /// <summary>
+    /// 获取或设置卡牌构建数据
+    /// </summary>
+    public static CardBuildData Build
+    {
+        get => _build;
+        set => _build = value ?? new CardBuildData();
+    }
 
     /// <summary>
     /// 添加一个卡牌要素
@@ -81,11 +104,11 @@ public static class CardElementCollection
     {
         if (element == null)
         {
-            Debug.LogWarning("[CardElementCollection] 尝试添加 null 要素");
+            Debug.LogWarning("[CardBuilder] 尝试添加 null 要素");
             return;
         }
         _elements.Add(element);
-        Debug.Log($"[CardElementCollection] 添加要素: {element.elementType}, 当前总数: {_elements.Count}");
+        Debug.Log($"[CardBuilder] 添加要素: {element.elementType}, 当前总数: {_elements.Count}");
     }
 
     /// <summary>
@@ -97,17 +120,18 @@ public static class CardElementCollection
         {
             var removed = _elements[index];
             _elements.RemoveAt(index);
-            Debug.Log($"[CardElementCollection] 移除要素: {removed.elementType}, 剩余: {_elements.Count}");
+            Debug.Log($"[CardBuilder] 移除要素: {removed.elementType}, 剩余: {_elements.Count}");
         }
     }
 
     /// <summary>
-    /// 清空所有要素
+    /// 清空所有要素和构建数据
     /// </summary>
     public static void Clear()
     {
         _elements.Clear();
-        Debug.Log("[CardElementCollection] 已清空所有要素");
+        _build = new CardBuildData();
+        Debug.Log("[CardBuilder] 已清空所有要素和构建数据");
     }
 
     /// <summary>

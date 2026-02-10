@@ -283,6 +283,8 @@ public static partial class GameUtils
         var sb = new System.Text.StringBuilder();
         sb.AppendLine("=== 卡牌构建数据 ===");
 
+        sb.AppendLine(); // 加空行
+
         // 格式化构建者
         if (cardBuildData.owner != null && !string.IsNullOrEmpty(cardBuildData.owner.name))
         {
@@ -292,6 +294,8 @@ public static partial class GameUtils
         {
             sb.AppendLine("构建者: [未指定]");
         }
+
+        sb.AppendLine(); // 加空行
 
         // 格式化目标角色列表
         if (cardBuildData.targetActors != null && cardBuildData.targetActors.Count > 0)
@@ -307,6 +311,8 @@ public static partial class GameUtils
             sb.AppendLine("目标角色: [无]");
         }
 
+        sb.AppendLine(); // 加空行
+
         // 格式化技能
         if (cardBuildData.skill != null && !string.IsNullOrEmpty(cardBuildData.skill.name))
         {
@@ -320,6 +326,8 @@ public static partial class GameUtils
         {
             sb.AppendLine("技能: [空技能]");
         }
+
+        sb.AppendLine(); // 加空行
 
         // 格式化状态效果列表
         if (cardBuildData.statusEffects != null && cardBuildData.statusEffects.Count > 0)
