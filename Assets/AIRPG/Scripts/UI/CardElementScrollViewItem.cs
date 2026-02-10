@@ -57,10 +57,12 @@ public class CardElementScrollViewItem : UIBehaviour, IDynamicScrollViewItem
     {
         Debug.Log($"Clicked on {_title.text} at index {_currentIndex}");
 
+        var elementData = CardElementCollection.GetElement(_currentIndex);
+
         // 创建并发送结构化的事件数据
         var eventData = new UIEventData(
             UIEventType.CardElementScrollViewItemClick, // 事件类型
-            _title.text,
+            elementData.Name, // 传递要素名称
             _currentIndex
         );
 

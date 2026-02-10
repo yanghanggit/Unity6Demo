@@ -286,7 +286,7 @@ public static partial class GameUtils
         // 格式化构建者
         if (cardBuildData.owner != null && !string.IsNullOrEmpty(cardBuildData.owner.name))
         {
-            sb.AppendLine($"构建者: {cardBuildData.owner.name}");
+            sb.AppendLine($"构建者: {GetDisplayName(cardBuildData.owner.name)}");
         }
         else
         {

@@ -26,6 +26,21 @@ public class CardElementData
     public Skill skill;                          // 当 elementType == Skill 时使用
     public StatusEffect statusEffect;            // 当 elementType == StatusEffect 时使用
 
+    // 方便获取要素名称的属性，根据类型返回对应的名字
+    public string Name
+    {
+        get
+        {
+            return elementType switch
+            {
+                CardElementType.TargetActor => targetActor?.name ?? "[空角色]",
+                CardElementType.Skill => skill?.name ?? "[空技能]",
+                CardElementType.StatusEffect => statusEffect?.name ?? "[空状态]",
+                _ => "[未知类型]"
+            };
+        }
+    }
+
     // 构造函数重载，方便创建不同类型的要素
     public CardElementData(EntitySerialization actor)
     {
@@ -52,7 +67,7 @@ public class CardElementData
 /// </summary>
 public static class CardElementCollection
 {
-    private static List<CardElementData> _elements = new List<CardElementData>();
+    private static readonly List<CardElementData> _elements = new();
 
     /// <summary>
     /// 获取所有卡牌要素（只读）
