@@ -6,10 +6,10 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/AIRPG/Scenes/TestUIInputField.unity
+    path: Assets/AIRPG/Scenes/TestScenes/TestUIInputField.unity
     guid: bc86846d1386440eaa18b7d8f17bce0b
   - enabled: 0
-    path: Assets/AIRPG/Scenes/TestLocalStorage.unity
+    path: Assets/AIRPG/Scenes/TestScenes/TestLocalStorage.unity
     guid: 71885cc1707b64fde91a7faae43fd4ad
   - enabled: 1
     path: Assets/AIRPG/Scenes/LaunchScene.unity

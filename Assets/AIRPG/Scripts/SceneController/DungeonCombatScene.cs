@@ -14,8 +14,6 @@ public class DungeonCombatScene : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText; // 主文本显示对象
     [SerializeField] private GameObject _backgroundImage; // 背景图片对象
-    [SerializeField] private GameObject _combatSceneUI; // 战斗场景UI对象, 重构后的战斗UI
-    [SerializeField] private GameObject[] _actorAvatars; // 角色头像槽位数组
 
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi;
@@ -24,11 +22,8 @@ public class DungeonCombatScene : MonoBehaviour
     {
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_backgroundImage != null, "_backgroundImage is null");
-        Debug.Assert(_combatSceneUI != null, "_combatSceneUI is null");
         Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
-        _combatSceneUI.SetActive(false); // 确保战斗场景UI是关闭状态
-        
         // 检查是否已经连接服务器
         if (GameContext.Instance.IsLoggedIn)
         {
@@ -49,34 +44,11 @@ public class DungeonCombatScene : MonoBehaviour
 
     public void OnClickViewDungeon()
     {
-        // 打开战斗场景UI
-        _combatSceneUI.SetActive(true);
-
-        // 用mock数据设置 _actorAvatars，每一个元素是一个Button。设置名字即可。
-        for (int i = 0; i < _actorAvatars.Length; i++)
-        {
-            var button = _actorAvatars[i].GetComponent<Button>();
-            var text = _actorAvatars[i].GetComponentInChildren<TMP_Text>();
-            if (button != null && text != null)
-            {
-                var name = $"Actor_{i + 1}";
-                text.text = name;
-                button.gameObject.name = name; // 设置Button对象的名字，方便在点击时识别
-                //int index = i; // 捕获当前索引
-                button.onClick.RemoveAllListeners(); // 清除之前的监听器
-                button.onClick.AddListener(() => OnClickCombatActor(button.gameObject)); // 添加新的监听器
-            }
-        }
-
-
-
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("Not logged in, cannot view dungeon");
             return;
         }
-
-        //Debug.Log("OnClickViewDungeon");
         StartCoroutine(RefreshDungeonStateDisplay());
     }
 
@@ -176,13 +148,6 @@ public class DungeonCombatScene : MonoBehaviour
 
         //Debug.Log("OnClickBackHome");
         StartCoroutine(ExecuteBackHome());
-    }
-
-    //
-    public void OnClickCloseCombatSceneUI()
-    {
-        //Debug.Log("OnClickCloseCombatSceneUI");
-        _combatSceneUI.SetActive(false); // 关闭战斗场景UI
     }
 
     /// <summary>
