@@ -3551,7 +3551,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86bfed4dcb5acc64db55d25d5ebd570a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mosframe.DynamicHScrollView
-  totalItemCount: 10
+  totalItemCount: 0
   itemPrototype: {fileID: 1857457672}
 --- !u!114 &1637056503
 MonoBehaviour:
