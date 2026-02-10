@@ -5,10 +5,8 @@
 public enum UIEventType
 {
     None = 0, // 无事件
-
-    //CombatSceneUI相关事件
-    CombatSceneUI_CardScrollViewItemClick = 10, // 卡牌滚动视图项点击事件
-    CombatSceneUI_ActorSlotClick = 20, // 角色槽位相关事件
+    CardElementScrollViewItemClick = 10, // CombatSceneUI 卡牌滚动视图项点击事件
+    ActorOrderSlotClick = 20, // CombatSceneUI 角色执行顺序槽位相关事件
 }
 
 /// <summary>

@@ -32,7 +32,7 @@ public class ActorOrderSlot : MonoBehaviour
         Debug.Log("ActorOrderSlot button clicked" + gameObject.name);
         // 创建并发送结构化的事件数据
         var eventData = new UIEventData(
-            UIEventType.CombatSceneUI_ActorSlotClick, // 事件类型
+            UIEventType.ActorOrderSlotClick, // 事件类型
             _actorNameText.text,
             -1,
             gameObject.name

@@ -178,7 +178,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: Button
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -245,7 +245,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &28949087
@@ -770,6 +770,7 @@ MonoBehaviour:
   - {fileID: 482755182}
   - {fileID: 1226557793}
   - {fileID: 1670469990}
+  _scrollView: {fileID: 1637056502}
   _onCardClickedEvent: {fileID: 11400000, guid: 30866296d72ae4c6291ad1de36817857,
     type: 2}
   _onActorSlotClickedEvent: {fileID: 11400000, guid: 8cba56b5240464160995416ab4dc47c2,
@@ -3496,7 +3497,7 @@ GameObject:
   - component: {fileID: 1637056502}
   - component: {fileID: 1637056501}
   m_Layer: 5
-  m_Name: Cards
+  m_Name: CardElements
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4059,7 +4060,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1857457672
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4133,7 +4134,7 @@ MonoBehaviour:
   _title: {fileID: 28949086}
   _background: {fileID: 1857457674}
   _overlayButton: {fileID: 1413121916}
-  _onCardClickedEvent: {fileID: 11400000, guid: 30866296d72ae4c6291ad1de36817857,
+  _onCardElementClickedEvent: {fileID: 11400000, guid: 30866296d72ae4c6291ad1de36817857,
     type: 2}
 --- !u!1 &1867475151
 GameObject:

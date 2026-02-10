@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using Mosframe;
 
 public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
 {
@@ -9,6 +10,7 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
     [SerializeField] private TMP_Text _mainText; // 主文本显示对象
     [SerializeField] private TMP_Text _combatInfoText; // 战斗信息显示对象
     [SerializeField] private ActorOrderSlot[] _actorSlots; // 角色槽位数组
+    [SerializeField] private DynamicScrollView _scrollView;     // 动态滚动视图
 
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onCardClickedEvent; // 卡牌点击事件
@@ -16,10 +18,11 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
 
     // Mock 数据 - 用于测试
     private EntitySerialization[] _mockActorData;
+    private CardElementData[] _mockCardElementData;
 
-    void Awake()
+    private void CreateMockActorData()
     {
-        // 初始化 mock 数据
+        // 创建一些 mock 角色数据用于测试
         _mockActorData = new EntitySerialization[5];
 
         // 1. 角色.猎人.石坚
@@ -58,14 +61,64 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         };
     }
 
+    private void CreateMockCardElementData()
+    {
+        // 创建 mock 卡牌要素数据，包含3种类型
+        // 顺序：状态效果 -> 技能 -> 目标角色
+        _mockCardElementData = new CardElementData[6];
+
+        // 1-2. 两个状态效果（Status Effect）
+        _mockCardElementData[0] = new CardElementData(new StatusEffect
+        {
+            name = "增益.攻击强化",
+            category = "增益",
+            manifestation = "我感到力量充盈全身，攻击力大幅提升",
+            effect = "+5点攻击力"
+        });
+
+        _mockCardElementData[1] = new CardElementData(new StatusEffect
+        {
+            name = "减益.灼烧",
+            category = "减益",
+            manifestation = "身体被火焰灼烧，持续受到伤害",
+            effect = "-3点生命值/回合"
+        });
+
+        // 3. 一个技能（Skill）
+        _mockCardElementData[2] = new CardElementData(new Skill
+        {
+            name = "技能.火球术",
+            description = "释放一颗炽热的火球攻击敌人，造成火焰伤害"
+        });
+
+        // 4-6. 三个目标角色（Target Actor）- 复用 _mockActorData
+        _mockCardElementData[3] = new CardElementData(_mockActorData[0]); // 角色.猎人.石坚
+        _mockCardElementData[4] = new CardElementData(_mockActorData[1]); // 角色.术士.云音
+        _mockCardElementData[5] = new CardElementData(_mockActorData[2]); // 角色.常物.野猪
+    }
+
+    void Awake()
+    {
+        // 创建 mock 数据
+        CreateMockActorData();
+        CreateMockCardElementData();
+
+        //
+        Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
+        _scrollView.totalItemCount = 0; // 设置滚动视图的总项数，测试动态加载
+        _scrollView.gameObject.SetActive(false); // 确保滚动视图对象被激活，能正确显示
+    }
+
     void Start()
     {
         Debug.Assert(_combatInfoText != null, "_combatInfoText is null");
         Debug.Assert(_mainText != null, "Main Text component is not assigned in the inspector.");
         Debug.Assert(_actorSlots != null && _actorSlots.Length > 0, "Actor slots are not assigned in the inspector.");
+        Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
         Debug.Assert(_onCardClickedEvent != null, "_onCardClickedEvent is null");
         Debug.Assert(_onActorSlotClickedEvent != null, "_onActorSlotClickedEvent is null");
         Debug.Assert(_mockActorData != null && _mockActorData.Length > 0, "Mock actor data is not initialized");
+        Debug.Assert(_mockCardElementData != null && _mockCardElementData.Length > 0, "Mock card element data is not initialized");
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
 
 
@@ -76,12 +129,24 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         // 注册事件监听器
         _onCardClickedEvent.RegisterListener(this);
         _onActorSlotClickedEvent.RegisterListener(this);
+       
+
+        // 将 mock 卡牌要素数据添加到 CardElementCollection
+        CardElementCollection.Clear(); // 清空之前的数据
+        foreach (var element in _mockCardElementData)
+        {
+            CardElementCollection.AddElement(element);
+        }
+        Debug.Log($"[TestDungeonCombatScenePrototype] 已添加 {CardElementCollection.Count} 个卡牌要素到 CardElementCollection");
+
+        //
+        _scrollView.totalItemCount = CardElementCollection.Count; // 设置滚动视图的总项数，测试动态加载
+        _scrollView.gameObject.SetActive(true); // 确保滚动视图对象被激活，能正确显示
+
 
         // 设置 mock 数据到 ActorOrderSlot
         for (int i = 0; i < _actorSlots.Length && i < _mockActorData.Length; i++)
         {
-            // Debug.Assert(_actorSlots[i].GetComponent<Image>().sprite == null, $"Actor slot at index {i} already has a sprite assigned in the inspector, which may interfere with testing");
-            // _actorSlots[i].GetComponent<Image>().sprite = null; // 初始时没有头像显示，后续根据数据设置
             _actorSlots[i].SetActorData(_mockActorData[i]);
         }
     }

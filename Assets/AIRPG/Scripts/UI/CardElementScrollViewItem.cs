@@ -5,17 +5,17 @@ using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// 角色滚动视图项组件
-/// 用于在动态滚动视图中显示单个角色的信息和交互
+/// 卡牌要素滚动视图项组件
+/// 用于在动态滚动视图中显示单个卡牌要素的信息和交互
 /// </summary>
-public class CardScrollViewItem : UIBehaviour, IDynamicScrollViewItem
+public class CardElementScrollViewItem : UIBehaviour, IDynamicScrollViewItem
 {
     [Header("UI Components")]
 
     [SerializeField] private TMP_Text _title; // card名称文本
     [SerializeField] private Image _background; // 背景图片
     [SerializeField] private Button _overlayButton;             // 覆盖层按钮,用于接收点击
-    [SerializeField] private UIEventGameEvent _onCardClickedEvent; // 卡牌点击事件
+    [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
 
     [Header("Debug Colors")]
     private readonly Color[] colors = new Color[] {
@@ -59,17 +59,17 @@ public class CardScrollViewItem : UIBehaviour, IDynamicScrollViewItem
 
         // 创建并发送结构化的事件数据
         var eventData = new UIEventData(
-            UIEventType.CombatSceneUI_CardScrollViewItemClick, // 事件类型
+            UIEventType.CardElementScrollViewItemClick, // 事件类型
             _title.text,
             _currentIndex
         );
 
-        _onCardClickedEvent.Raise(eventData);
+        _onCardElementClickedEvent.Raise(eventData);
     }
 
     /// <summary>
     /// 实现IDynamicScrollViewItem接口的更新方法
-    /// 根据索引更新显示的角色信息
+    /// 根据索引更新显示的卡牌要素信息
     /// </summary>
     /// <param name="index">在滚动视图中的索引位置</param>
     public void onUpdateItem(int index)
@@ -81,8 +81,42 @@ public class CardScrollViewItem : UIBehaviour, IDynamicScrollViewItem
         // 保存当前索引
         _currentIndex = index;
 
-        // 更新UI显示内容（示例：根据索引设置名称和颜色）
-        _title.text = string.Format("Actor{0:d3}", index + 1);
-        _background.color = this.colors[Mathf.Abs(index) % this.colors.Length];
+        // 从 CardElementCollection 获取对应的卡牌要素数据
+        var elementData = CardElementCollection.GetElement(index);
+
+        if (elementData == null)
+        {
+            _title.text = $"[错误] 索引 {index} 无数据";
+            _background.color = Color.red;
+            return;
+        }
+
+        // 根据要素类型显示对应的名字
+        string elementName = string.Empty;
+        switch (elementData.elementType)
+        {
+            case CardElementType.TargetActor:
+                elementName = elementData.targetActor?.name ?? "[空角色]";
+                _background.color = colors[0]; // cyan for actors
+                break;
+
+            case CardElementType.Skill:
+                elementName = elementData.skill?.name ?? "[空技能]";
+                _background.color = colors[1]; // green for skills
+                break;
+
+            case CardElementType.StatusEffect:
+                elementName = elementData.statusEffect?.name ?? "[空状态]";
+                _background.color = Color.yellow; // yellow for effects
+                break;
+
+            case CardElementType.None:
+            default:
+                elementName = "[未知类型]";
+                _background.color = Color.gray;
+                break;
+        }
+
+        _title.text = GameUtils.GetDisplayName(elementName);
     }
 }
