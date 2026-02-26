@@ -380,15 +380,6 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
     }
 
     /// <summary>
-    /// 点击 Info 按钮
-    /// </summary>
-    public void OnClickInfo()
-    {
-        Debug.Log("Info button clicked");
-        // TODO: 显示信息面板
-    }
-
-    /// <summary>
     /// 点击 Run 按钮
     /// </summary>
     public void OnClickRun()
