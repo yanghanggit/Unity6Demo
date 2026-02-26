@@ -775,6 +775,8 @@ MonoBehaviour:
     type: 2}
   _onActorSlotClickedEvent: {fileID: 11400000, guid: 8cba56b5240464160995416ab4dc47c2,
     type: 2}
+  _onCardBuilderDataChangedEvent: {fileID: 11400000, guid: fe940fe58eeb845558bdd6823ac748a0,
+    type: 2}
 --- !u!1 &482755178
 GameObject:
   m_ObjectHideFlags: 0
@@ -4135,6 +4137,8 @@ MonoBehaviour:
   _background: {fileID: 1857457674}
   _overlayButton: {fileID: 1413121916}
   _onCardElementClickedEvent: {fileID: 11400000, guid: 30866296d72ae4c6291ad1de36817857,
+    type: 2}
+  _onCardBuilderDataChangedEvent: {fileID: 11400000, guid: fe940fe58eeb845558bdd6823ac748a0,
     type: 2}
 --- !u!1 &1867475151
 GameObject:

@@ -166,4 +166,135 @@ public static class CardBuilder
     {
         return _elements.FindAll(e => e.elementType == type);
     }
+
+    /// <summary>
+    /// 切换指定索引的要素在构建数据中的状态（存在则删除，不存在则添加）
+    /// </summary>
+    /// <param name="elementIndex">要素索引</param>
+    /// <returns>是否成功修改</returns>
+    public static bool TryToggleElementInBuild(int elementIndex)
+    {
+        // 检查卡牌构建数据是否存在
+        if (Build == null)
+        {
+            Debug.LogWarning("[CardBuilder] 卡牌构建数据不存在，请先选择构建者（点击角色槽位）");
+            return false;
+        }
+
+        // 获取对应的要素数据
+        var elementData = GetElement(elementIndex);
+        if (elementData == null)
+        {
+            Debug.LogWarning($"[CardBuilder] 未找到索引为 {elementIndex} 的卡牌要素数据");
+            return false;
+        }
+
+        // 根据要素类型修改 Build 数据
+        switch (elementData.elementType)
+        {
+            case CardElementType.TargetActor:
+                if (elementData.targetActor != null)
+                {
+                    var existingActorIndex = Build.targetActors.FindIndex(
+                        actor => actor.name == elementData.targetActor.name);
+
+                    if (existingActorIndex >= 0)
+                    {
+                        Build.targetActors.RemoveAt(existingActorIndex);
+                        Debug.Log($"[CardBuilder] 删除目标角色: {elementData.targetActor.name}");
+                    }
+                    else
+                    {
+                        Build.targetActors.Add(elementData.targetActor);
+                        Debug.Log($"[CardBuilder] 添加目标角色: {elementData.targetActor.name}");
+                    }
+                }
+                break;
+
+            case CardElementType.Skill:
+                if (Build.skill != null &&
+                    !string.IsNullOrEmpty(Build.skill.name) &&
+                    Build.skill.name == elementData.skill?.name)
+                {
+                    Build.skill = new Skill();
+                    Debug.Log($"[CardBuilder] 删除技能: {elementData.skill?.name}");
+                }
+                else
+                {
+                    Build.skill = elementData.skill;
+                    Debug.Log($"[CardBuilder] 设置技能: {elementData.skill?.name ?? "[空技能]"}");
+                }
+                break;
+
+            case CardElementType.StatusEffect:
+                if (elementData.statusEffect != null)
+                {
+                    var existingEffectIndex = Build.statusEffects.FindIndex(
+                        effect => effect.name == elementData.statusEffect.name);
+
+                    if (existingEffectIndex >= 0)
+                    {
+                        Build.statusEffects.RemoveAt(existingEffectIndex);
+                        Debug.Log($"[CardBuilder] 删除状态效果: {elementData.statusEffect.name}");
+                    }
+                    else
+                    {
+                        Build.statusEffects.Add(elementData.statusEffect);
+                        Debug.Log($"[CardBuilder] 添加状态效果: {elementData.statusEffect.name}");
+                    }
+                }
+                break;
+
+            case CardElementType.None:
+            default:
+                Debug.LogWarning($"[CardBuilder] 未知的卡牌要素类型: {elementData.elementType}");
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 检查指定要素是否已在 Build 中被选中
+    /// </summary>
+    /// <param name="elementData">要检查的要素数据</param>
+    /// <returns>是否已选中</returns>
+    public static bool IsElementSelectedInBuild(CardElementData elementData)
+    {
+        if (Build == null || elementData == null)
+        {
+            return false;
+        }
+
+        switch (elementData.elementType)
+        {
+            case CardElementType.TargetActor:
+                if (elementData.targetActor != null)
+                {
+                    return Build.targetActors.Exists(
+                        actor => actor.name == elementData.targetActor.name);
+                }
+                break;
+
+            case CardElementType.Skill:
+                if (elementData.skill != null &&
+                    !string.IsNullOrEmpty(elementData.skill.name))
+                {
+                    return Build.skill != null &&
+                           !string.IsNullOrEmpty(Build.skill.name) &&
+                           Build.skill.name == elementData.skill.name;
+                }
+                break;
+
+            case CardElementType.StatusEffect:
+                if (elementData.statusEffect != null)
+                {
+                    return Build.statusEffects.Exists(
+                        effect => effect.name == elementData.statusEffect.name);
+                }
+                break;
+        }
+
+        return false;
+    }
 }

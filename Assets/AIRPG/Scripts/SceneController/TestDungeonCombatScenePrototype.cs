@@ -15,6 +15,7 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onCardClickedEvent; // 卡牌点击事件
     [SerializeField] private UIEventGameEvent _onActorSlotClickedEvent; // 角色槽位点击事件
+    [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件
 
     // Mock 数据 - 用于测试
     private EntitySerialization[] _mockActorData;
@@ -333,6 +334,7 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
         Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
         Debug.Assert(_onCardClickedEvent != null, "_onCardClickedEvent is null");
         Debug.Assert(_onActorSlotClickedEvent != null, "_onActorSlotClickedEvent is null");
+        Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
         Debug.Assert(_mockActorData != null && _mockActorData.Length > 0, "Mock actor data is not initialized");
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
 
@@ -410,8 +412,18 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
             case UIEventType.CardElementScrollViewItemClick:
                 Debug.Log($"处理卡牌要素滚动视图项点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
 
+                // 切换要素在 Build 中的状态（存在则删除，不存在则添加）
+                if (!CardBuilder.TryToggleElementInBuild(eventData.index))
+                {
+                    Debug.LogWarning($"[TestDungeonCombatScenePrototype] TryToggleElementInBuild 失败，索引: {eventData.index}");
+                    break;
+                }
+
                 // 更新主文本显示
                 UpdateMainTextWithCardBuildData();
+
+                // 派发 CardBuilder 数据已改变事件
+                _onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
                 break;
 
             case UIEventType.ActorOrderSlotClick:
@@ -444,6 +456,9 @@ public class TestDungeonCombatScenePrototype : MonoBehaviour, IUIEventListener
             // 加载卡牌要素
             LoadCardElementsFromActor(selectedActor);
             UpdateMainTextWithCardBuildData();
+
+            // 派发 CardBuilder 数据已改变事件
+            _onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
         }
         else
         {
