@@ -296,6 +296,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
 
         // 更新主对象和行动顺序对象的可见性
+        //isInteractable = true;
         _mainGameObject.SetActive(isInteractable);
         _bottomGameObject.SetActive(isInteractable);
     }
