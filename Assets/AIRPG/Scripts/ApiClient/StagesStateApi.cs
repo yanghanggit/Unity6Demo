@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -32,7 +32,7 @@ public class StagesStateApi : BaseApiClient
     /// </summary>
     /// <param name="url">请求 URL</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url)
+    public async UniTask Call(string url)
     {
         // 记录请求信息
         Debug.Log("Starting StagesStateApi call...");
@@ -46,33 +46,24 @@ public class StagesStateApi : BaseApiClient
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
-            yield break;
+            return;
         }
 
         // 发送请求
-        var task = GetRequestAsync(url);
-        yield return new WaitUntil(() => task.IsCompleted);
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError($"Request exception: {task.Exception?.GetBaseException().Message}");
-            yield break;
-        }
-
-        _requestResult = task.Result;
+        _requestResult = await GetRequestAsync(url);
 
         // 处理请求结果
         if (!_requestResult.isSuccess)
         {
             Debug.LogError($"Request failed: {_requestResult.error}");
-            yield break;
+            return;
         }
 
         // 解析响应数据
         if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
-            yield break;
+            return;
         }
 
         try
@@ -82,7 +73,7 @@ public class StagesStateApi : BaseApiClient
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
-                yield break;
+                return;
             }
 
             Debug.Log("Stages state loaded successfully");

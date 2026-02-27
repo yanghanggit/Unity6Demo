@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Text;
-using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.Threading.Tasks;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// BaseApiClient - API 请求基类
@@ -14,15 +14,16 @@ using System.Threading.Tasks;
 /// 
 /// 主要特性：
 /// - 支持 GET/POST 请求
-/// - 提供协程和 async/await 两种调用方式
+/// - 提供 async/await（UniTask）调用方式
 /// - 自动资源管理（using 语句）
 /// - 完善的错误处理和超时控制
+/// - 支持 CancellationToken 取消
 /// - WebGL 平台兼容性处理
 /// - 统一的请求头设置
 /// 
 /// 使用方式：
 /// 1. 继承此类创建具体的 API 操作类
-/// 2. 在子类中调用 GetRequestCoroutine/PostRequestCoroutine 或 GetRequestAsync/PostRequestAsync
+/// 2. 在子类中调用 GetRequestAsync/PostRequestAsync（返回 UniTask&lt;RequestResult&gt;）
 /// 3. 处理返回的 RequestResult 结构
 /// 
 /// 作者:Unity6Demo Team
@@ -30,26 +31,18 @@ using System.Threading.Tasks;
 /// </summary>
 public abstract class BaseApiClient : MonoBehaviour
 {
-    #region 抽象属性
-
     /// <summary>
     /// 请求结果属性 - 子类必须实现
     /// 用于获取最近一次请求的结果
     /// </summary>
     public abstract RequestResult ReqResult { get; }
 
-    #endregion
-
-    #region 配置字段
 
     [Header("请求配置")]
-    [SerializeField] 
+    [SerializeField]
     [Tooltip("HTTP 请求超时时间（秒），默认 30 秒")]
     private float requestTimeout = 30.0f;
 
-    #endregion
-
-    #region 数据结构
 
     /// <summary>
     /// HTTP 请求结果封装类
@@ -86,72 +79,14 @@ public abstract class BaseApiClient : MonoBehaviour
         }
     }
 
-    #endregion
-
-    #region 协程版本 API（兼容现有代码）
-
     /// <summary>
-    /// 发送 GET 请求（协程版本）
-    /// 适用于传统的 Unity 协程调用方式，兼容 Unity 所有版本
-    /// </summary>
-    /// <param name="url">请求的完整 URL</param>
-    /// <param name="onComplete">请求完成后的回调函数，接收 RequestResult 参数</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator GetRequestCoroutine(string url, System.Action<RequestResult> onComplete = null)
-    {
-        using (var request = UnityWebRequest.Get(url))
-        {
-            // 设置超时
-            request.timeout = (int)requestTimeout;
-
-            // 设置请求头
-            SetCommonHeaders(request);
-
-            Debug.Log($"GET Request: {url}");
-
-            // 发送请求
-            yield return request.SendWebRequest();
-
-            // 处理结果
-            var result = ProcessResponse(request);
-            onComplete?.Invoke(result);
-        }
-    }
-
-    /// <summary>
-    /// 发送 POST 请求（协程版本）
-    /// 适用于传统的 Unity 协程调用方式，兼容 Unity 所有版本
-    /// </summary>
-    /// <param name="url">请求的完整 URL</param>
-    /// <param name="jsonData">要发送的 JSON 数据字符串</param>
-    /// <param name="onComplete">请求完成后的回调函数，接收 RequestResult 参数</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator PostRequestCoroutine(string url, string jsonData, System.Action<RequestResult> onComplete = null)
-    {
-        using (var request = CreatePostRequest(url, jsonData))
-        {
-            Debug.Log($"POST Request: {url}\nData: {jsonData}");
-
-            // 发送请求
-            yield return request.SendWebRequest();
-
-            // 处理结果
-            var result = ProcessResponse(request);
-            onComplete?.Invoke(result);
-        }
-    }
-
-    #endregion
-
-    #region Async/Await 版本 API（Unity 6 推荐）
-
-    /// <summary>
-    /// 发送 GET 请求（Async 版本）
-    /// 推荐在 Unity 6+ 中使用，支持现代异步编程模式
-    /// </summary>
-    /// <param name="url">请求的完整 URL</param>
-    /// <returns>包含请求结果的 Task</returns>
-    public async Task<RequestResult> GetRequestAsync(string url)
+/// 发送 GET 请求（UniTask 版本）
+/// 使用 UniTask 直接 await UnityWebRequest，零分配，主线程友好
+/// </summary>
+/// <param name="url">请求的完整 URL</param>
+/// <param name="ct">取消令牌，场景销毁时可传入 this.GetCancellationTokenOnDestroy()</param>
+/// <returns>包含请求结果的 UniTask</returns>
+    public async UniTask<RequestResult> GetRequestAsync(string url, CancellationToken ct = default)
     {
         using (var request = UnityWebRequest.Get(url))
         {
@@ -160,12 +95,14 @@ public abstract class BaseApiClient : MonoBehaviour
 
             Debug.Log($"GET Request Async: {url}");
 
-            var operation = request.SendWebRequest();
-
-            // 等待请求完成
-            while (!operation.isDone)
+            try
             {
-                await Task.Yield(); // 让出控制权给Unity主线程
+                await request.SendWebRequest().ToUniTask(cancellationToken: ct);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.LogWarning($"GET request cancelled: {url}");
+                return new RequestResult(false, "", 0, "Request cancelled");
             }
 
             return ProcessResponse(request);
@@ -173,33 +110,32 @@ public abstract class BaseApiClient : MonoBehaviour
     }
 
     /// <summary>
-    /// 发送 POST 请求（Async 版本）
-    /// 推荐在 Unity 6+ 中使用，支持现代异步编程模式
-    /// </summary>
-    /// <param name="url">请求的完整 URL</param>
-    /// <param name="jsonData">要发送的 JSON 数据字符串</param>
-    /// <returns>包含请求结果的 Task</returns>
-    public async Task<RequestResult> PostRequestAsync(string url, string jsonData)
+/// 发送 POST 请求（UniTask 版本）
+/// 使用 UniTask 直接 await UnityWebRequest，零分配，主线程友好
+/// </summary>
+/// <param name="url">请求的完整 URL</param>
+/// <param name="jsonData">要发送的 JSON 数据字符串</param>
+/// <param name="ct">取消令牌，场景销毁时可传入 this.GetCancellationTokenOnDestroy()</param>
+/// <returns>包含请求结果的 UniTask</returns>
+    public async UniTask<RequestResult> PostRequestAsync(string url, string jsonData, CancellationToken ct = default)
     {
         using (var request = CreatePostRequest(url, jsonData))
         {
             Debug.Log($"POST Request Async: {url}\nData: {jsonData}");
 
-            var operation = request.SendWebRequest();
-
-            // 等待请求完成
-            while (!operation.isDone)
+            try
             {
-                await Task.Yield();
+                await request.SendWebRequest().ToUniTask(cancellationToken: ct);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.LogWarning($"POST request cancelled: {url}");
+                return new RequestResult(false, "", 0, "Request cancelled");
             }
 
             return ProcessResponse(request);
         }
     }
-
-    #endregion
-
-    #region 私有辅助方法
 
     /// <summary>
     /// 创建 POST 请求对象
@@ -283,10 +219,6 @@ public abstract class BaseApiClient : MonoBehaviour
         return new RequestResult(true, responseText, request.responseCode);
     }
 
-    #endregion
-
-    #region 静态工具方法
-
     /// <summary>
     /// 构建带查询参数的 URL
     /// 将参数列表拼接到基础 URL 后面，自动进行 URL 编码
@@ -336,5 +268,7 @@ public abstract class BaseApiClient : MonoBehaviour
 #endif
     }
 
-    #endregion
+    
+
+
 }

@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
@@ -44,7 +44,7 @@ public class TasksStatusApi : BaseApiClient
     /// <param name="url">请求 URL</param>
     /// <param name="taskIds">任务ID列表</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url, List<string> taskIds)
+    public async UniTask Call(string url, List<string> taskIds)
     {
         // 记录请求信息
         Debug.Log("Starting TasksStatusApi call...");
@@ -54,7 +54,7 @@ public class TasksStatusApi : BaseApiClient
         if (taskIds == null || taskIds.Count == 0)
         {
             Debug.LogWarning("No task IDs provided for request");
-            yield break;
+            return;
         }
 
         // 构建请求 URL
@@ -70,33 +70,24 @@ public class TasksStatusApi : BaseApiClient
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
-            yield break;
+            return;
         }
 
         // 发送请求
-        var task = GetRequestAsync(requestUrl);
-        yield return new WaitUntil(() => task.IsCompleted);
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError($"Request exception: {task.Exception?.GetBaseException().Message}");
-            yield break;
-        }
-
-        _requestResult = task.Result;
+        _requestResult = await GetRequestAsync(requestUrl);
 
         // 处理请求结果
         if (!_requestResult.isSuccess)
         {
             Debug.LogError($"Request failed: {_requestResult.error}");
-            yield break;
+            return;
         }
 
         // 解析响应数据
         if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
-            yield break;
+            return;
         }
 
         try
@@ -105,7 +96,7 @@ public class TasksStatusApi : BaseApiClient
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
-                yield break;
+                return;
             }
         }
         catch (System.Exception ex)
@@ -150,24 +141,21 @@ public class TasksStatusApi : BaseApiClient
     /// </summary>
     /// <param name="url">任务状态查询URL</param>
     /// <param name="taskId">要查询的任务ID</param>
-    /// <param name="onComplete">完成回调(是否成功, 消息, 任务记录)</param>
     /// <param name="pollInterval">轮询间隔时间（秒），如果为null则使用成员变量_pollInterval的值</param>
     /// <param name="maxAttempts">最大轮询次数，如果为null则使用成员变量_maxAttempts的值</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator PollTaskStatus(
+    /// <returns>任务记录，失败或超时时返回 null</returns>
+    public async UniTask<TaskRecord> PollTaskStatus(
         string url,
         string taskId,
-        System.Action<bool, string, TaskRecord> onComplete,
         float? pollInterval = null,
         int? maxAttempts = null)
     {
         if (string.IsNullOrEmpty(taskId))
         {
-            onComplete?.Invoke(false, "Task ID is null or empty", null);
-            yield break;
+            Debug.LogError("[TasksStatusApi] PollTaskStatus: taskId is null or empty");
+            return null;
         }
 
-        // 使用传入的参数值，如果未传入则使用成员变量的值
         float actualPollInterval = pollInterval ?? _pollInterval;
         int actualMaxAttempts = maxAttempts ?? _maxAttempts;
 
@@ -178,11 +166,11 @@ public class TasksStatusApi : BaseApiClient
             attempts++;
 
             // 等待一段时间再查询
-            yield return new WaitForSeconds(actualPollInterval);
+            await UniTask.Delay((int)(actualPollInterval * 1000));
 
             // 查询任务状态
             List<string> taskIds = new() { taskId };
-            yield return Call(url, taskIds);
+            await Call(url, taskIds);
 
             if (_requestResult == null || !_requestResult.isSuccess)
             {
@@ -190,7 +178,6 @@ public class TasksStatusApi : BaseApiClient
                 continue;
             }
 
-            // 通过 taskId 获取对应的任务记录
             var taskRecord = GetTaskRecord(taskId);
             if (taskRecord == null)
             {
@@ -203,8 +190,7 @@ public class TasksStatusApi : BaseApiClient
             if (taskRecord.status == TaskStatus.COMPLETED)
             {
                 Debug.Log($"Task {taskId} completed successfully");
-                onComplete?.Invoke(true, "Task completed successfully", taskRecord);
-                yield break;
+                return taskRecord;
             }
             else if (taskRecord.status == TaskStatus.FAILED)
             {
@@ -212,20 +198,13 @@ public class TasksStatusApi : BaseApiClient
                     ? "任务执行失败"
                     : $"任务执行失败: {taskRecord.error}";
                 Debug.LogError(errorMsg);
-                onComplete?.Invoke(false, errorMsg, taskRecord);
-                yield break;
+                return null;
             }
-            else if (taskRecord.status == TaskStatus.RUNNING)
-            {
-                // 继续轮询
-                Debug.Log($"Task {taskId} is still running, will poll again...");
-            }
+            // RUNNING: continue polling
         }
 
-        // 超时
-        string timeoutMsg = $"Task {taskId} polling timeout after {actualMaxAttempts} attempts";
-        Debug.LogError(timeoutMsg);
-        onComplete?.Invoke(false, "打牌处理超时，请重试或联系管理员", null);
+        Debug.LogError($"Task {taskId} polling timeout after {actualMaxAttempts} attempts");
+        return null;
     }
 
 }

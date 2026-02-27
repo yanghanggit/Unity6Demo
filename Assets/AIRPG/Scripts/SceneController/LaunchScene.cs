@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
 
 public class LaunchScene : MonoBehaviour
@@ -43,7 +43,7 @@ public class LaunchScene : MonoBehaviour
         Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
 
         _loginButton.gameObject.SetActive(false);
-        StartCoroutine(InitializeGameApiEndpoints());
+        InitializeGameApiEndpoints().Forget();
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ public class LaunchScene : MonoBehaviour
     /// </summary>
     public void OnLoginButtonClick()
     {
-        StartCoroutine(LoadLoginScene());
+        LoadLoginScene().Forget();
     }
 
     /// <summary>
@@ -60,20 +60,20 @@ public class LaunchScene : MonoBehaviour
     /// 从指定的基础URL获取根API配置，成功后激活登录按钮
     /// </summary>
     /// <returns>协程迭代器</returns>
-    private IEnumerator InitializeGameApiEndpoints()
+    private async UniTaskVoid InitializeGameApiEndpoints()
     {
-        yield return _rootApi.Call(_gameApiBaseUrl);
+        await _rootApi.Call(_gameApiBaseUrl);
 
         if (_rootApi.ReqResult == null)
         {
             Debug.LogError($"Failed to initialize API endpoints from {_gameApiBaseUrl}: request result is null");
-            yield break;
+            return;
         }
 
         if (!_rootApi.ReqResult.isSuccess)
         {
             Debug.LogError($"Failed to initialize API endpoints from {_gameApiBaseUrl}: {_rootApi.ReqResult.responseText}");
-            yield break;
+            return;
         }
 
         Debug.Assert(_rootApi.RespData != null, "RootApi response data is null");
@@ -89,9 +89,9 @@ public class LaunchScene : MonoBehaviour
     /// 使用协程实现场景切换，确保流畅的用户体验
     /// </summary>
     /// <returns>协程迭代器</returns>
-    private IEnumerator LoadLoginScene()
+    private async UniTaskVoid LoadLoginScene()
     {
-        yield return new WaitForSeconds(0.0f);
+        await UniTask.Yield();
         SceneManager.LoadScene(_nextSceneName);
     }
 }

@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 /// <summary>
@@ -32,7 +32,7 @@ public class RootApi : BaseApiClient
     /// </summary>
     /// <param name="rootUrl">根 URL 地址</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string rootUrl)
+    public async UniTask Call(string rootUrl)
     {
         // 记录请求信息
         Debug.Log("Starting RootApi call...");
@@ -46,33 +46,24 @@ public class RootApi : BaseApiClient
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
-            yield break;
+            return;
         }
 
         // 发送请求
-        var task = GetRequestAsync(rootUrl);
-        yield return new WaitUntil(() => task.IsCompleted);
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError($"Request exception: {task.Exception?.GetBaseException().Message}");
-            yield break;
-        }
-
-        _requestResult = task.Result;
+        _requestResult = await GetRequestAsync(rootUrl);
 
         // 处理请求结果
         if (!_requestResult.isSuccess)
         {
             Debug.LogError($"Request failed: {_requestResult.error}");
-            yield break;
+            return;
         }
 
         // 解析响应数据
         if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
-            yield break;
+            return;
         }
 
         try
@@ -81,7 +72,7 @@ public class RootApi : BaseApiClient
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
-                yield break;
+                return;
             }
         }
         catch (System.Exception ex)

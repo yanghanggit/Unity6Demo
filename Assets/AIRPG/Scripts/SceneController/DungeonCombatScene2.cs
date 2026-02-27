@@ -4,7 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using Mosframe;
 using Newtonsoft.Json;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 
 public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 {
@@ -87,11 +87,11 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         // 刷新场景初始化
         if (GameContext.Instance.IsLoggedIn)
         {
-            StartCoroutine(ExecuteCombatInit());
+            ExecuteCombatInit().Forget();
         }
         else
         {
-            StartCoroutine(ExecuteCombatInitMock());
+            ExecuteCombatInitMock().Forget();
         }
     }
 
@@ -604,71 +604,44 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// 初始化战斗并刷新地下城状态
     /// 调用服务器 combat_init 接口开始战斗，成功后刷新并显示当前地下城状态
     /// </summary>
-    private IEnumerator ExecuteCombatInit()
+    private async UniTaskVoid ExecuteCombatInit()
     {
-        // 刷新地下城数据
-        bool apiSuccess = false;
-        string apiMessage = string.Empty;
+        bool apiSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
 
-        // 只刷新地下城数据（不需要角色详情数据）
-        yield return GameStateSync.Instance.RefreshDungeonFromServer((success, msg) =>
-        {
-            apiSuccess = success;
-            apiMessage = msg;
-        });
-
-        // api调用失败，显示错误信息并退出流程
         if (!apiSuccess)
         {
-            Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon data: {apiMessage}");
-            yield break;
+            Debug.LogError("[DungeonCombatScene] Failed to refresh dungeon data");
+            return;
         }
 
-        // 当前战斗状态不是 INITIALIZATION，说明接口返回的数据不符合预期，显示警告信息并退出流程
         var currentCombatState = GameUtils.GetCurrentCombatState(GameContext.Instance.Dungeon);
         if (currentCombatState != CombatState.INITIALIZATION)
         {
             Debug.LogWarning($"Current combat state is {currentCombatState}, expected INITIALIZATION. Proceeding with caution.");
-            yield break;
+            return;
         }
 
-        // 调用 combat_init 接口开始战斗
-        yield return DungeonGamePlayManager.Instance.CombatInit(
-            (success, message, sessionMessages) =>
-            {
-                apiSuccess = success;
-                apiMessage = message;
-            });
+        var messages = await DungeonGamePlayManager.Instance.CombatInit();
+        if (messages == null)
+        {
+            Debug.LogError("Combat initialization failed");
+            return;
+        }
 
-        // 接口调用失败，显示错误信息并退出流程
+        apiSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
         if (!apiSuccess)
         {
-            Debug.LogError($"Combat initialization failed: {apiMessage}");
-            yield break;
+            Debug.LogError("Failed to refresh dungeon data after combat init");
+            return;
         }
 
-        // combat_init 成功后再次刷新地下城数据，确保场景状态与服务器数据同步
-        yield return GameStateSync.Instance.RefreshDungeonFromServer((success, msg) =>
-        {
-            apiSuccess = success;
-            apiMessage = msg;
-        });
-
-        if (!apiSuccess)
-        {
-            Debug.LogError($"Failed to refresh dungeon data after combat init: {apiMessage}");
-            yield break;
-        }
-
-        // 再次查阅当前战斗状态，如果不是 ONGOING，说明接口返回的数据不符合预期，显示警告信息并退出流程
         currentCombatState = GameUtils.GetCurrentCombatState(GameContext.Instance.Dungeon);
         if (currentCombatState != CombatState.ONGOING)
         {
             Debug.LogWarning($"Current combat state is {currentCombatState} after combat_init, expected ONGOING. Proceeding with caution.");
-            yield break;
+            return;
         }
 
-        // 刷新UI显示，确保场景状态与当前地下城数据同步
         UpdateCombatUIVisibility();
     }
 
@@ -677,9 +650,9 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// 仅用于测试UI状态切换逻辑，不涉及实际的服务器交互
     /// </summary>
     /// <returns></returns>
-    private IEnumerator ExecuteCombatInitMock()
+    private async UniTaskVoid ExecuteCombatInitMock()
     {
-        yield return new WaitForSeconds(1f); // 模拟网络延迟
+        await UniTask.Delay(1000);
         UpdateCombatUIVisibility();
     }
 }

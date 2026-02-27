@@ -1,14 +1,14 @@
 using UnityEngine;
 using UnityEngine.Networking;
-using System.Collections;
 using System;
+using Cysharp.Threading.Tasks;
 
 /**
  * TextureLoader.cs - 简单的纹理加载器
  * 
  * 用法:
  * 1. 将此组件挂载到 GameObject 上
- * 2. 调用 StartCoroutine(LoadTexture(url)) 加载纹理
+ * 2. 调用 await LoadTexture(url) 加载纹理
  * 3. 通过 Result 属性获取加载结果
  * 4. 通过 LoadedTexture 快捷访问加载的纹理
  */
@@ -40,11 +40,10 @@ public class TextureLoader : MonoBehaviour
     }
 
     /// <summary>
-    /// 加载纹理（协程方法）
+    /// 加载纹理（UniTask 异步方法）
     /// </summary>
     /// <param name="url">纹理的 URL 地址</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator LoadTexture(string url)
+    public async UniTask LoadTexture(string url)
     {
         // 重置加载结果（不销毁纹理，因为纹理可能已被 Sprite 使用，生命周期由 SpriteManager 管理）
         _result = null;
@@ -54,8 +53,16 @@ public class TextureLoader : MonoBehaviour
             SetCommonHeaders(request);
             Debug.Log($"[TextureLoader] Starting to load texture from: {url}");
 
-            // 发送请求并等待响应
-            yield return request.SendWebRequest();
+            try
+            {
+                await request.SendWebRequest().ToUniTask();
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.LogWarning($"[TextureLoader] Texture load cancelled: {url}");
+                _result = new TextureLoadResult(false, null, "Request cancelled");
+                return;
+            }
 
             // 处理响应结果
             _result = ProcessTextureResponse(request);

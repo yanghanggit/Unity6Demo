@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -32,7 +32,7 @@ public class DungeonCombatScene : MonoBehaviour
             _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
 
             // 刷新场景初始化
-            StartCoroutine(ExecuteCombatInit());
+            ExecuteCombatInit().Forget();
         }
         else
         {
@@ -49,7 +49,7 @@ public class DungeonCombatScene : MonoBehaviour
             Debug.LogWarning("Not logged in, cannot view dungeon");
             return;
         }
-        StartCoroutine(RefreshDungeonStateDisplay());
+        RefreshDungeonStateDisplay().Forget();
     }
 
     public void OnClickViewActor()
@@ -61,7 +61,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         //Debug.Log("OnClickViewActor");
-        StartCoroutine(ExecuteViewActorStats());
+        ExecuteViewActorStats().Forget();
     }
 
     public void OnClickViewCards()
@@ -73,7 +73,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         //Debug.Log("OnClickViewCards");
-        StartCoroutine(ExecuteViewActorCards());
+        ExecuteViewActorCards().Forget();
     }
 
     public void OnClickDrawCards()
@@ -86,7 +86,7 @@ public class DungeonCombatScene : MonoBehaviour
 
         //Debug.Log("OnClickDrawCards");
         List<AllyDrawCardAction> specifiedActions = GenerateAllyDrawCardActions();
-        StartCoroutine(ExecuteDrawCardsAndShowHands(specifiedActions, true));
+        ExecuteDrawCardsAndShowHands(specifiedActions, true).Forget();
     }
 
     public void OnClickPlayCards()
@@ -98,7 +98,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         //Debug.Log("OnClickPlayCards");
-        StartCoroutine(ExecutePlayCardsAndShowResult());
+        ExecutePlayCardsAndShowResult().Forget();
     }
 
     public void OnClickAdvanceNextDungeon()
@@ -116,13 +116,11 @@ public class DungeonCombatScene : MonoBehaviour
 
         if (currentCombat != null && currentCombat.state == CombatState.COMPLETE)
         {
-            // 战斗已完成，执行战斗后处理
-            StartCoroutine(ExecutePostCombat());
+            ExecutePostCombat().Forget();
         }
         else
         {
-            // 其他状态，推进到下一关
-            StartCoroutine(ExecuteAdvanceNextDungeon());
+            ExecuteAdvanceNextDungeon().Forget();
         }
     }
 
@@ -135,7 +133,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         //Debug.Log("OnClickRetreatFromDungeon");
-        StartCoroutine(ExecuteRetreatFromDungeon());
+        ExecuteRetreatFromDungeon().Forget();
     }
 
     public void OnClickBackHome()
@@ -147,7 +145,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         //Debug.Log("OnClickBackHome");
-        StartCoroutine(ExecuteBackHome());
+        ExecuteBackHome().Forget();
     }
 
     /// <summary>
@@ -179,22 +177,12 @@ public class DungeonCombatScene : MonoBehaviour
     /// 初始化战斗并刷新地下城状态
     /// 调用服务器 combat_init 接口开始战斗，成功后刷新并显示当前地下城状态
     /// </summary>
-    private IEnumerator ExecuteCombatInit()
+    private async UniTaskVoid ExecuteCombatInit()
     {
-        bool success = false;
-        yield return DungeonGamePlayManager.Instance.CombatInit(
-            (result, message, sessionMessages) =>
-            {
-                success = result;
-                if (!result)
-                {
-                    _mainText.text = message;
-                }
-            });
-
-        if (success)
+        var messages = await DungeonGamePlayManager.Instance.CombatInit();
+        if (messages != null)
         {
-            yield return RefreshDungeonStateDisplay();
+            await RefreshDungeonStateDisplay();
         }
     }
 
@@ -203,60 +191,26 @@ public class DungeonCombatScene : MonoBehaviour
     /// 调用服务器 draw_cards 接口，获取任务ID后轮询查询任务状态
     /// 当任务完成时，刷新数据并显示角色手牌信息
     /// </summary>
-    private IEnumerator ExecuteDrawCardsAndShowHands(List<AllyDrawCardAction> specifiedActions, bool enable_enemy_draw)
+    private async UniTaskVoid ExecuteDrawCardsAndShowHands(List<AllyDrawCardAction> specifiedActions, bool enable_enemy_draw)
     {
-        // 正式的抽卡操作
-        bool success = false;
-        string taskId = null;
-
-        // 开始发起抽卡请求
-        yield return DungeonGamePlayManager.Instance.DrawCards(
-            specifiedActions,
-            enable_enemy_draw,
-            (result, message, id) =>
-            {
-                success = result;
-                taskId = id;
-                if (result)
-                {
-                    Debug.Log($"DrawCards initiated successfully, task ID: {taskId}");
-                    _mainText.text = "请求已提交，正在处理中...";
-                }
-                else
-                {
-                    _mainText.text = message;
-                }
-            });
-
-        if (!success || string.IsNullOrEmpty(taskId))
+        string taskId = await DungeonGamePlayManager.Instance.DrawCards(specifiedActions, enable_enemy_draw);
+        if (string.IsNullOrEmpty(taskId))
         {
-            yield break;
+            return;
         }
 
-        // 因为是后台任务，轮询查询任务状态
-        bool pollSuccess = false;
-        yield return PollTaskStatus(taskId, (isSuccess, msg, taskRecord) =>
-        {
-            pollSuccess = isSuccess;
-            if (!isSuccess)
-            {
-                _mainText.text = msg;
-            }
-        });
+        Debug.Log($"DrawCards initiated successfully, task ID: {taskId}");
+        _mainText.text = "请求已提交，正在处理中...";
 
-        // 轮询成功后显示抽卡结果
-        if (!pollSuccess)
+        var taskRecord = await PollTaskStatus(taskId);
+        if (taskRecord == null)
         {
-            // 轮询失败
             _mainText.text = "任务轮询彻底失败";
-            yield break;
+            return;
         }
 
-        // 抽卡任务完成，刷新数据并显示手牌
         _mainText.text = "处理完成，正在加载结果...";
-
-        // 刷新地下城和角色数据
-        StartCoroutine(ExecuteViewActorCards());
+        ExecuteViewActorCards().Forget();
     }
 
     /// <summary>
@@ -295,75 +249,35 @@ public class DungeonCombatScene : MonoBehaviour
     /// 调用服务器 play_cards 接口，获取任务ID后轮询查询任务状态
     /// 当任务完成时，刷新数据并显示战斗仲裁结果
     /// </summary>
-    private IEnumerator ExecutePlayCardsAndShowResult()
+    private async UniTaskVoid ExecutePlayCardsAndShowResult()
     {
-        bool success = false;
-        string taskId = null;
-
-        yield return DungeonGamePlayManager.Instance.PlayCards(
-            (result, message, id) =>
-            {
-                success = result;
-                taskId = id;
-                if (result)
-                {
-                    Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
-                    _mainText.text = "打牌请求已提交，正在处理中...";
-                }
-                else
-                {
-                    _mainText.text = message;
-                }
-            });
-
-        if (!success || string.IsNullOrEmpty(taskId))
+        string taskId = await DungeonGamePlayManager.Instance.PlayCards();
+        if (string.IsNullOrEmpty(taskId))
         {
-            yield break;
+            return;
         }
 
-        // 轮询查询任务状态
-        bool pollSuccess = false;
-        yield return PollTaskStatus(taskId, (isSuccess, msg, taskRecord) =>
-        {
-            pollSuccess = isSuccess;
-            if (!isSuccess)
-            {
-                _mainText.text = msg;
-            }
-        });
+        Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
+        _mainText.text = "打牌请求已提交，正在处理中...";
 
-        // 轮询成功后显示打牌结果
-        if (!pollSuccess)
+        var taskRecord = await PollTaskStatus(taskId);
+        if (taskRecord == null)
         {
-            yield break;
+            return;
         }
 
         _mainText.text = "打牌处理完成，正在加载结果...";
 
-        // 刷新地下城数据
-        bool refreshSuccess = false;
-        string refreshMessage = "";
-
-        // 只刷新地下城数据（不需要角色详情数据）
-        yield return GameStateSync.Instance.RefreshDungeonFromServer((success, msg) =>
-        {
-            refreshSuccess = success;
-            refreshMessage = msg;
-        });
-
-        // 检查刷新是否成功
+        bool refreshSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
         if (!refreshSuccess)
         {
-            Debug.LogError($"Failed to refresh dungeon data: {refreshMessage}");
+            Debug.LogError("Failed to refresh dungeon data");
             _mainText.text = "刷新地下城数据失败";
-            yield break;
+            return;
         }
 
-        // 显示最新回合信息
         DisplayLastRoundInfo();
-
-        // 评估当前战斗状态
-        StartCoroutine(DungeonGamePlayManager.Instance.CombatStatusEvaluation());
+        await DungeonGamePlayManager.Instance.CombatStatusEvaluation();
     }
 
     /// <summary>
@@ -372,26 +286,11 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     /// <param name="taskId">要查询的任务ID</param>
     /// <param name="onComplete">轮询完成后的回调函数，参数为(成功标志, 消息, 任务记录)</param>
-    private IEnumerator PollTaskStatus(string taskId, System.Action<bool, string, TaskRecord> onComplete)
+    private async UniTask<TaskRecord> PollTaskStatus(string taskId)
     {
-        bool isSuccess = false;
-        string message = "";
-        TaskRecord taskRecord = null;
-
-        // 调用 TasksStatusApi 的轮询方法，将轮询逻辑委托给API层处理
-        yield return _tasksStatusApi.PollTaskStatus(
+        return await _tasksStatusApi.PollTaskStatus(
             GameContext.Instance.TasksStatusUrl,
-            taskId,
-            (success, msg, record) =>
-            {
-                isSuccess = success;
-                message = msg;
-                taskRecord = record;
-            }
-        );
-
-        // 通过回调函数返回轮询结果
-        onComplete?.Invoke(isSuccess, message, taskRecord);
+            taskId);
     }
 
     /// <summary>
@@ -426,24 +325,15 @@ public class DungeonCombatScene : MonoBehaviour
     /// 刷新并显示地下城状态
     /// 从服务器获取最新的地下城和角色数据，然后更新UI显示当前场景的角色分布和战斗信息
     /// </summary>
-    private IEnumerator RefreshDungeonStateDisplay()
+    private async UniTask RefreshDungeonStateDisplay()
     {
-        bool refreshSuccess = false;
-        string refreshMessage = "";
+        bool refreshSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
-        // 从服务器刷新地下城和角色数据
-        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer((success, msg) =>
-        {
-            refreshSuccess = success;
-            refreshMessage = msg;
-        });
-
-        // 检查刷新是否成功
         if (!refreshSuccess)
         {
-            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshMessage}");
+            Debug.LogError("Failed to refresh dungeon and actors data");
             _mainText.text = "刷新地下城状态失败";
-            yield break;
+            return;
         }
 
         // 获取当前角色所在场景及该场景中的所有角色
@@ -483,23 +373,15 @@ public class DungeonCombatScene : MonoBehaviour
     /// 查看并显示所有角色的战斗属性
     /// 从服务器刷新数据后，获取所有角色的战斗属性组件并格式化显示
     /// </summary>
-    private IEnumerator ExecuteViewActorStats()
+    private async UniTaskVoid ExecuteViewActorStats()
     {
-        bool refreshSuccess = false;
-        string refreshMessage = "";
+        bool refreshSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
-        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer((success, msg) =>
-        {
-            refreshSuccess = success;
-            refreshMessage = msg;
-        });
-
-        // 检查刷新是否成功
         if (!refreshSuccess)
         {
-            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshMessage}");
+            Debug.LogError("Failed to refresh dungeon and actors data");
             _mainText.text = "刷新角色数据失败";
-            yield break;
+            return;
         }
 
         var text = "";
@@ -523,23 +405,15 @@ public class DungeonCombatScene : MonoBehaviour
     /// 从服务器刷新数据后,直接显示所有角色当前持有的手牌
     /// 用于在游戏过程中随时查看角色的手牌状态
     /// </summary>
-    private IEnumerator ExecuteViewActorCards()
+    private async UniTaskVoid ExecuteViewActorCards()
     {
-        bool refreshSuccess = false;
-        string refreshMessage = "";
+        bool refreshSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
 
-        yield return GameStateSync.Instance.RefreshDungeonAndActorsFromServer((success, msg) =>
-        {
-            refreshSuccess = success;
-            refreshMessage = msg;
-        });
-
-        // 检查刷新是否成功
         if (!refreshSuccess)
         {
-            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshMessage}");
+            Debug.LogError("Failed to refresh dungeon and actors data");
             _mainText.text = "刷新数据失败";
-            yield break;
+            return;
         }
 
         DisplayAllActorsHands();
@@ -549,29 +423,14 @@ public class DungeonCombatScene : MonoBehaviour
     /// 战斗后处理
     /// 调用服务器 post_combat 接口进行战斗后处理，成功后刷新地下城状态显示
     /// </summary>
-    private IEnumerator ExecutePostCombat()
+    private async UniTaskVoid ExecutePostCombat()
     {
         _mainText.text = "正在执行战斗后处理...";
 
-        bool success = false;
-        List<SessionMessage> responseSessionMessages = new();
-        yield return DungeonGamePlayManager.Instance.PostCombat(
-            (result, message, sessionMessages) =>
-            {
-                success = result;
-                if (!result)
-                {
-                    _mainText.text = message;
-                }
-                else
-                {
-                    responseSessionMessages = sessionMessages;
-                }
-            });
-
-        if (!success)
+        var responseSessionMessages = await DungeonGamePlayManager.Instance.PostCombat();
+        if (responseSessionMessages == null)
         {
-            yield break;
+            return;
         }
 
         // 然后逐个处理返回的 SessionMessage，特别是 CombatArchiveEvent
@@ -602,43 +461,30 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 最后需要获取最新个的数据，因为服务器推进了地下城状态
-        yield return GameStateSync.Instance.RefreshDungeonFromServer((success, msg) =>
+        bool refreshOk = await GameStateSync.Instance.RefreshDungeonFromServer();
+        if (!refreshOk)
         {
-            if (!success)
-            {
-                Debug.LogError($"Failed to refresh dungeon data after post combat: {msg}");
-            }
-            else
-            {
-                Debug.Log("Successfully refreshed dungeon data after post combat");
-            }
-        });
+            Debug.LogError("Failed to refresh dungeon data after post combat");
+        }
+        else
+        {
+            Debug.Log("Successfully refreshed dungeon data after post combat");
+        }
     }
 
     /// <summary>
     /// 前进到下一个地下城关卡
     /// 调用服务器 advance_next_dungeon 接口，成功后刷新并显示新的地下城状态
     /// </summary>
-    private IEnumerator ExecuteAdvanceNextDungeon()
+    private async UniTaskVoid ExecuteAdvanceNextDungeon()
     {
-        bool success = false;
-        yield return DungeonGamePlayManager.Instance.AdvanceNextDungeon(
-            (result, message, sessionMessages) =>
-            {
-                success = result;
-                if (!result)
-                {
-                    _mainText.text = message;
-                }
-            });
-
-        if (!success)
+        var messages = await DungeonGamePlayManager.Instance.AdvanceNextDungeon();
+        if (messages == null)
         {
-            yield break;
+            return;
         }
 
-        // 3. 切换到地下城场景
-        yield return new WaitForSeconds(0);
+        await UniTask.Yield();
         SceneManager.LoadScene(_nextScene);
     }
 
@@ -646,24 +492,14 @@ public class DungeonCombatScene : MonoBehaviour
     /// 从地下城撤退
     /// 调用服务器撤退接口，成功后切换回主场景
     /// </summary>
-    private IEnumerator ExecuteRetreatFromDungeon()
+    private async UniTaskVoid ExecuteRetreatFromDungeon()
     {
         _mainText.text = "正在从地下城撤退...";
 
-        bool success = false;
-        yield return DungeonGamePlayManager.Instance.RetreatFromDungeon(
-            (result, message, sessionMessages) =>
-            {
-                success = result;
-                if (!result)
-                {
-                    _mainText.text = message;
-                }
-            });
-
-        if (success)
+        var messages = await DungeonGamePlayManager.Instance.RetreatFromDungeon();
+        if (messages != null)
         {
-            yield return new WaitForSeconds(0);
+            await UniTask.Yield();
             SceneManager.LoadScene(_preScene);
         }
     }
@@ -672,22 +508,12 @@ public class DungeonCombatScene : MonoBehaviour
     /// 返回主场景
     /// 调用服务器传送回家接口，成功后切换到主场景
     /// </summary>
-    private IEnumerator ExecuteBackHome()
+    private async UniTaskVoid ExecuteBackHome()
     {
-        bool success = false;
-        yield return DungeonGamePlayManager.Instance.TransHome(
-            (result, message) =>
-            {
-                success = result;
-                if (!result)
-                {
-                    _mainText.text = message;
-                }
-            });
-
+        bool success = await DungeonGamePlayManager.Instance.TransHome();
         if (success)
         {
-            yield return new WaitForSeconds(0);
+            await UniTask.Yield();
             SceneManager.LoadScene(_preScene);
         }
     }

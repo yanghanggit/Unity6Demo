@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
@@ -37,7 +37,7 @@ public class HomeAdvanceApi : BaseApiClient
     /// <param name="gameName">游戏名称标识</param>
     /// <param name="actors">参与推进的角色名称列表</param>
     /// <returns>协程枚举器，用于异步执行请求</returns>
-    public IEnumerator Call(string url, string userName, string gameName, List<string> actors)
+    public async UniTask Call(string url, string userName, string gameName, List<string> actors)
     {
         // 记录请求信息
         Debug.Log("Starting HomeAdvanceApi call...");
@@ -54,7 +54,7 @@ public class HomeAdvanceApi : BaseApiClient
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
-            yield break;
+            return;
         }
 
         // 创建请求数据
@@ -67,29 +67,20 @@ public class HomeAdvanceApi : BaseApiClient
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         // 发送请求
-        var task = PostRequestAsync(url, jsonData);
-        yield return new WaitUntil(() => task.IsCompleted);
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError($"Request exception: {task.Exception?.GetBaseException().Message}");
-            yield break;
-        }
-
-        _requestResult = task.Result;
+        _requestResult = await PostRequestAsync(url, jsonData);
 
         // 处理请求结果
         if (!_requestResult.isSuccess)
         {
             Debug.LogError($"Request failed: {_requestResult.error}");
-            yield break;
+            return;
         }
 
         // 解析响应数据
         if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
-            yield break;
+            return;
         }
 
         try
@@ -99,7 +90,7 @@ public class HomeAdvanceApi : BaseApiClient
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
-                yield break;
+                return;
             }
 
             Debug.Log("Home gameplay successful");

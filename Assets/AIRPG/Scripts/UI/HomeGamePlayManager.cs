@@ -1,7 +1,6 @@
-using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
-using System;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// Home游戏玩法管理器
@@ -62,58 +61,45 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <param name="actors">角色名称列表，传入空列表则推进所有角色</param>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator AdvanceGame(List<string> actors, Action<bool> onComplete = null)
+    /// <summary>
+    /// 推进游戏状态
+    /// </summary>
+    public async UniTask<bool> AdvanceGame(List<string> actors)
     {
         // 使用 HomeAdvance API 推进角色
-        yield return _homeAdvanceApi.Call(
+        await _homeAdvanceApi.Call(
             GameContext.Instance.HomeAdvanceUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             actors);
 
-        // 检查API调用是否成功
         if (_homeAdvanceApi.ReqResult == null)
         {
             Debug.LogError($"[HomeGamePlayManager] home_advance request failed for actors: [{string.Join(", ", actors)}]");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
-        // 进一步检查响应结果的成功标志
         if (!_homeAdvanceApi.ReqResult.isSuccess)
         {
             Debug.LogError($"[HomeGamePlayManager] home_advance request failed: {_homeAdvanceApi.ReqResult.responseText}");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
         Debug.Assert(_homeAdvanceApi.RespData != null, "[HomeGamePlayManager] home_advance response data is null");
 
         // 从服务器获取并同步最新的会话消息
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
-                {
-                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after advancing");
-                    // 收集AgentEvents 事件到 GameContext
-                    GameContext.Instance.CollectEventsByActor(sessionMessages);
-                }
-            }
-        );
-
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
+        var sessionMessages = await SessionManager.Instance.FetchSessionMessages();
+        if (sessionMessages == null)
         {
             Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after advancing");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
+        Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after advancing");
+        GameContext.Instance.CollectEventsByActor(sessionMessages);
+
         Debug.Log($"[HomeGamePlayManager] AdvanceGame completed successfully for actors: [{string.Join(", ", actors)}]");
-        onComplete?.Invoke(true);
+        return true;
     }
 
     /// <summary>
@@ -125,17 +111,18 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <param name="messageContent">消息内容</param>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator SpeakToActor(string targetActorName, string messageContent, Action<bool> onComplete = null)
+    /// <summary>
+    /// 发送消息给指定角色
+    /// </summary>
+    public async UniTask<bool> SpeakToActor(string targetActorName, string messageContent)
     {
         if (string.IsNullOrEmpty(targetActorName) || string.IsNullOrEmpty(messageContent))
         {
             Debug.LogError("[HomeGamePlayManager] Target actor name or message content is empty");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
-        // 调用 /speak 端点
-        yield return _homePlayerActionApi.Call(
+        await _homePlayerActionApi.Call(
             GameContext.Instance.HomePlayerActionUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
@@ -146,49 +133,32 @@ public class HomeGamePlayManager : MonoBehaviour
                 ["content"] = messageContent
             });
 
-        // 检查API调用是否成功
         if (_homePlayerActionApi.ReqResult == null)
         {
             Debug.LogError("[HomeGamePlayManager] /speak request failed");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
-        // 进一步检查响应结果的成功标志
         if (!_homePlayerActionApi.ReqResult.isSuccess)
         {
             Debug.LogError($"[HomeGamePlayManager] /speak request failed: {_homePlayerActionApi.ReqResult.responseText}");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
         Debug.Assert(_homePlayerActionApi.RespData != null, "[HomeGamePlayManager] /speak response data is null");
 
-        // 从服务器获取并同步最新的会话消息
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
-                {
-                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after speaking");
-                    // 收集AgentEvents 事件到 GameContext
-                    GameContext.Instance.CollectEventsByActor(sessionMessages);
-                }
-            }
-        );
-
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
+        var sessionMessages = await SessionManager.Instance.FetchSessionMessages();
+        if (sessionMessages == null)
         {
             Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after speaking");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
+        Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after speaking");
+        GameContext.Instance.CollectEventsByActor(sessionMessages);
+
         Debug.Log($"[HomeGamePlayManager] SpeakToActor completed successfully: {targetActorName}");
-        onComplete?.Invoke(true);
+        return true;
     }
 
     /// <summary>
@@ -199,17 +169,18 @@ public class HomeGamePlayManager : MonoBehaviour
     /// <param name="stageName">目标场景名称</param>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator SwitchStage(string stageName, Action<bool> onComplete = null)
+    /// <summary>
+    /// 切换场景
+    /// </summary>
+    public async UniTask<bool> SwitchStage(string stageName)
     {
         if (string.IsNullOrEmpty(stageName))
         {
             Debug.LogError("[HomeGamePlayManager] Stage name is empty");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
-        // 调用 /switch_stage 端点
-        yield return _homePlayerActionApi.Call(
+        await _homePlayerActionApi.Call(
             GameContext.Instance.HomePlayerActionUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
@@ -219,49 +190,32 @@ public class HomeGamePlayManager : MonoBehaviour
                 ["stage_name"] = stageName
             });
 
-        // 检查API调用是否成功
         if (_homePlayerActionApi.ReqResult == null)
         {
             Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
-        // 进一步检查响应结果的成功标志
         if (!_homePlayerActionApi.ReqResult.isSuccess)
         {
             Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed: {_homePlayerActionApi.ReqResult.responseText}");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
         Debug.Assert(_homePlayerActionApi.RespData != null, $"[HomeGamePlayManager] /switch_stage to {stageName} response data is null");
 
-        // 从服务器获取并同步最新的会话消息
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
-                {
-                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after stage switch");
-                    // 收集AgentEvents 事件到 GameContext
-                    GameContext.Instance.CollectEventsByActor(sessionMessages);
-                }
-            }
-        );
-
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
+        var sessionMessages = await SessionManager.Instance.FetchSessionMessages();
+        if (sessionMessages == null)
         {
             Debug.LogError($"[HomeGamePlayManager] Failed to fetch session messages after switching to {stageName}");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
+        Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after stage switch");
+        GameContext.Instance.CollectEventsByActor(sessionMessages);
+
         Debug.Log($"[HomeGamePlayManager] SwitchStage completed successfully: {stageName}");
-        onComplete?.Invoke(true);
+        return true;
     }
 
     /// <summary>
@@ -271,56 +225,41 @@ public class HomeGamePlayManager : MonoBehaviour
     /// </summary>
     /// <param name="onComplete">完成回调，参数为是否成功</param>
     /// <returns>协程迭代器</returns>
-    public IEnumerator TransDungeon(Action<bool> onComplete = null)
+    /// <summary>
+    /// 传送到地下城
+    /// </summary>
+    public async UniTask<bool> TransDungeon()
     {
-        // 调用传送地下城端点
-        yield return _transDungeonApi.Call(
+        await _transDungeonApi.Call(
             GameContext.Instance.HomeTransDungeonUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName);
 
-        // 检查API调用是否成功
         if (_transDungeonApi.ReqResult == null)
         {
             Debug.LogError("[HomeGamePlayManager] TransDungeon request failed");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
-        // 进一步检查响应结果的成功标志
         if (!_transDungeonApi.ReqResult.isSuccess)
         {
             Debug.LogError($"[HomeGamePlayManager] TransDungeon request failed: {_transDungeonApi.ReqResult.responseText}");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
         Debug.Assert(_transDungeonApi.RespData != null, "[HomeGamePlayManager] TransDungeon response data is null");
 
-        // 从服务器获取并同步最新的会话消息
-        bool fetchSuccess = false;
-        yield return SessionManager.Instance.FetchSessionMessages(
-            (success, sessionMessages) =>
-            {
-                fetchSuccess = success;
-                if (success)
-                {
-                    Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after trans dungeon");
-                    // 收集AgentEvents 事件到 GameContext
-                    GameContext.Instance.CollectEventsByActor(sessionMessages);
-                }
-            }
-        );
-
-        // 检查消息获取是否成功
-        if (!fetchSuccess)
+        var sessionMessages = await SessionManager.Instance.FetchSessionMessages();
+        if (sessionMessages == null)
         {
             Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after trans dungeon");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
+        Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after trans dungeon");
+        GameContext.Instance.CollectEventsByActor(sessionMessages);
+
         Debug.Log("[HomeGamePlayManager] TransDungeon completed successfully");
-        onComplete?.Invoke(true);
+        return true;
     }
 }

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 
 public class TestImageServiceScene : MonoBehaviour
 {
@@ -32,7 +32,7 @@ public class TestImageServiceScene : MonoBehaviour
         Debug.Assert(_imageDisplay != null, "_imageDisplay is null");
 
         // 初始化API端点
-        StartCoroutine(InitializeApiEndpoints());
+        InitializeApiEndpoints().Forget();
     }
 
     /// <summary>
@@ -40,28 +40,27 @@ public class TestImageServiceScene : MonoBehaviour
     /// </summary>
     public void OnClickGenerateAndDownload()
     {
-        StartCoroutine(TestGenerateAndDisplayImage());
+        TestGenerateAndDisplayImage().Forget();
     }
 
     /// <summary>
     /// 异步初始化API端点配置
     /// 从指定的基础URL获取根API配置，成功后激活登录按钮
     /// </summary>
-    /// <returns>协程迭代器</returns>
-    private IEnumerator InitializeApiEndpoints()
+    private async UniTaskVoid InitializeApiEndpoints()
     {
-        yield return _rootApi.Call(_baseUrl);
+        await _rootApi.Call(_baseUrl);
 
         if (_rootApi.ReqResult == null)
         {
             Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: request result is null");
-            yield break;
+            return;
         }
 
         if (!_rootApi.ReqResult.isSuccess)
         {
             Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: {_rootApi.ReqResult.responseText}");
-            yield break;
+            return;
         }
 
         Debug.Assert(_rootApi.RespData != null, "ImageRootApi response data is null");
@@ -72,68 +71,54 @@ public class TestImageServiceScene : MonoBehaviour
 
     /// <summary>
     /// 协调函数：生成图片并显示
-    /// 调用 GenerateImage 生成图片，然后在回调中调用 LoadAndDisplayImage 显示图片
     /// </summary>
-    private IEnumerator TestGenerateAndDisplayImage()
+    private async UniTaskVoid TestGenerateAndDisplayImage()
     {
-        yield return GenerateImage(
+        var generateResult = await GenerateImage(
             _prompt,
             _modelName,
             _imageWidth,
             _imageHeight,
-            _numInferenceSteps,
-            (generateResult) =>
-            {
-                // 图片生成完成后的回调
-                if (generateResult != null && generateResult.images.Count > 0)
-                {
-                    // 加载并显示第一张图片
-                    StartCoroutine(LoadAndDisplayImage(generateResult.images[0]));
-                }
-                else
-                {
-                    Debug.LogWarning("[TestImageServerScene] No images generated in callback");
-                }
-            }
+            _numInferenceSteps
         );
+
+        if (generateResult != null && generateResult.images.Count > 0)
+        {
+            await LoadAndDisplayImage(generateResult.images[0]);
+        }
+        else
+        {
+            Debug.LogWarning("[TestImageServerScene] No images generated");
+        }
     }
 
     /// <summary>
     /// 第一步：调用图片生成API并返回生成结果
     /// </summary>
-    /// <param name="prompt">提示词</param>
-    /// <param name="modelName">模型名称</param>
-    /// <param name="width">图片宽度</param>
-    /// <param name="height">图片高度</param>
-    /// <param name="numInferenceSteps">推理步数</param>
-    /// <param name="onComplete">生成完成后的回调函数，接收生成结果</param>
-    private IEnumerator GenerateImage(
+    private async UniTask<ImageGenerationResponse> GenerateImage(
         string prompt,
         string modelName,
         int width,
         int height,
-        int numInferenceSteps,
-        System.Action<ImageGenerationResponse> onComplete)
+        int numInferenceSteps)
     {
         var configs = new List<ImageGenerationConfig>
         {
             new() { prompt = prompt, model = modelName, width = width, height = height, num_inference_steps = numInferenceSteps}
         };
 
-        yield return _generateImageApi.Call(ImageService.GenerateImageApiUrl, configs);
+        await _generateImageApi.Call(ImageService.GenerateImageApiUrl, configs);
 
         if (_generateImageApi.ReqResult == null)
         {
             Debug.LogError("GenerateImageApi request result is null");
-            onComplete?.Invoke(null);
-            yield break;
+            return null;
         }
 
         if (!_generateImageApi.ReqResult.isSuccess)
         {
             Debug.LogError($"GenerateImageApi call failed: {_generateImageApi.ReqResult.responseText}");
-            onComplete?.Invoke(null);
-            yield break;
+            return null;
         }
 
         Debug.Assert(_generateImageApi.RespData != null, "GenerateImageApi response data is null");
@@ -144,26 +129,25 @@ public class TestImageServiceScene : MonoBehaviour
             Debug.Log($"Image: {img.filename}, URL: {img.url}, Prompt: {img.prompt}, Model: {img.model}");
         }
 
-        // 调用回调函数，传递生成结果
-        onComplete?.Invoke(_generateImageApi.RespData);
+        return _generateImageApi.RespData;
     }
 
     /// <summary>
     /// 第二步：根据生成结果加载并显示图片
     /// </summary>
     /// <param name="imageInfo">图片信息对象</param>
-    private IEnumerator LoadAndDisplayImage(GeneratedImage imageInfo)
+    private async UniTask LoadAndDisplayImage(GeneratedImage imageInfo)
     {
         if (imageInfo == null)
         {
             Debug.LogError("[TestImageServerScene] ImageInfo is null");
-            yield break;
+            return;
         }
 
         Debug.Log($"[TestImageServerScene] Loading image from: {imageInfo.url}");
 
         // 加载图片纹理
-        yield return _textureLoader.LoadTexture(
+        await _textureLoader.LoadTexture(
             ImageApiEndpointsManager.BaseUrl.TrimEnd('/') + imageInfo.url
         );
 

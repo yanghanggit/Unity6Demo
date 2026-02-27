@@ -1,7 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 主场景控制器(MainScene)
@@ -83,7 +83,7 @@ public class MainScene : MonoBehaviour
         _playerInfoDetails.SetActive(false);
 
         // 启动时立即刷新游戏状态
-        StartCoroutine(RefreshGameState());
+        RefreshGameState().Forget();
     }
 
     /// <summary>
@@ -119,8 +119,7 @@ public class MainScene : MonoBehaviour
     /// </summary>
     public void OnClickBack()
     {
-        //Debug.Log("Back button clicked");
-        StartCoroutine(ReturnToLoginScene());
+        ReturnToLoginScene().Forget();
     }
 
     /// <summary>
@@ -156,7 +155,7 @@ public class MainScene : MonoBehaviour
         var sceneName = _homeSceneNames[index];
         var tempConfig = ScriptableObject.CreateInstance<HomeSceneConfig>();
         tempConfig.StageName = sceneName;
-        StartCoroutine(TransitionToScene(tempConfig));
+        TransitionToScene(tempConfig).Forget();
     }
 
     /// <summary>
@@ -165,8 +164,7 @@ public class MainScene : MonoBehaviour
     /// </summary>
     public void OnClickDungeon()
     {
-        //Debug.Log("OnClickDungeon");
-        StartCoroutine(LoadDungeonOverviewScene());
+        LoadDungeonOverviewScene().Forget();
     }
 
     /// <summary>
@@ -176,7 +174,7 @@ public class MainScene : MonoBehaviour
     public void OnClickRun()
     {
         Debug.Log("Run button clicked in MainScene.");
-        StartCoroutine(AdvanceGameState());
+        AdvanceGameState().Forget();
     }
 
     /// <summary>
@@ -203,9 +201,9 @@ public class MainScene : MonoBehaviour
     /// 打开地牢浏览场景的协程
     /// 直接加载 ViewDungeonScene 场景
     /// </summary>
-    IEnumerator LoadDungeonOverviewScene()
+    async UniTaskVoid LoadDungeonOverviewScene()
     {
-        yield return new WaitForSeconds(0);
+        await UniTask.Yield();
         SceneManager.LoadScene(_dungeonOverviewScene);
     }
 
@@ -214,23 +212,17 @@ public class MainScene : MonoBehaviour
     /// 1. 使用 SessionManager 执行登出
     /// 2. 加载登录场景
     /// </summary>
-    IEnumerator ReturnToLoginScene()
+    async UniTaskVoid ReturnToLoginScene()
     {
-        // 使用 SessionManager 执行登出
-        bool logoutSuccess = false;
-        yield return SessionManager.Instance.Logout(
-            (success) => logoutSuccess = success
-        );
+        bool logoutSuccess = await SessionManager.Instance.Logout();
 
-        // 检查登出是否成功
         if (!logoutSuccess)
         {
             Debug.LogError("[MainScene] Logout failed");
-            yield break;
+            return;
         }
 
-        // 加载并返回到登录场景
-        yield return new WaitForSeconds(0);
+        await UniTask.Yield();
         SceneManager.LoadScene(_preScene);
     }
 
@@ -240,12 +232,9 @@ public class MainScene : MonoBehaviour
     /// 2. 获取并序列化玩家角色的实体数据(用于调试)
     /// 3. 刷新角色位置显示
     /// </summary>
-    private IEnumerator RefreshGameState()
+    private async UniTaskVoid RefreshGameState()
     {
-        // 从服务器同步最新的全局状态(包括映射和所有角色数据)
-        yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-
-        // 刷新角色位置显示
+        await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         RefreshActorLocations();
     }
 
@@ -254,31 +243,19 @@ public class MainScene : MonoBehaviour
     /// 调用 HomeGamePlayManager 推进所有角色的行动，并同步最新的游戏状态
     /// </summary>
     /// <returns>协程迭代器</returns>
-    private IEnumerator AdvanceGameState()
+    private async UniTaskVoid AdvanceGameState()
     {
-        // 使用 HomeGamePlayManager 推进游戏（空列表表示推进所有角色）
-        bool advanceSuccess = false;
-        yield return HomeGamePlayManager.Instance.AdvanceGame(
-            new List<string>(),
-            (success) =>
-            {
-                advanceSuccess = success;
-            }
-        );
+        bool advanceSuccess = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
 
-        // 检查推进是否成功
         if (!advanceSuccess)
         {
             Debug.LogError("[MainScene] AdvanceGame failed");
-            yield break;
+            return;
         }
 
         Debug.Log("[MainScene] Game state advanced successfully");
 
-        // 刷新游戏状态以确保数据同步
-        yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-
-        // 刷新角色位置显示
+        await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         RefreshActorLocations();
     }
 
@@ -291,47 +268,30 @@ public class MainScene : MonoBehaviour
     /// 4. 设置待处理的场景配置并加载目标 Unity 场景
     /// </summary>
     /// <param name="sceneConfig">目标场景的配置数据(包含 StageName 和 SceneDisplayName)</param>
-    private IEnumerator TransitionToScene(HomeSceneConfig sceneConfig)
+    private async UniTaskVoid TransitionToScene(HomeSceneConfig sceneConfig)
     {
-        // 获取玩家当前所在的 Stage 名称
         var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
 
-        // 检查玩家是否已在目标 Stage 中
         if (currentStageName != sceneConfig.StageName)
         {
-            // 玩家不在目标 Stage,使用 HomeGamePlayManager 切换 Stage
-            bool switchSuccess = false;
-            yield return HomeGamePlayManager.Instance.SwitchStage(
-                sceneConfig.StageName,
-                (success) =>
-                {
-                    switchSuccess = success;
-                }
-            );
+            bool switchSuccess = await HomeGamePlayManager.Instance.SwitchStage(sceneConfig.StageName);
 
-            // 检查切换是否成功
             if (!switchSuccess)
             {
                 Debug.LogError($"[MainScene] SwitchStage to {sceneConfig.StageName} failed");
-                yield break;
+                return;
             }
 
-            // 刷新全局状态以确保数据同步
-            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         }
         else
         {
-            // 玩家已在目标 Stage 中,无需切换服务器状态
             Debug.Log($"Already in target stage: {sceneConfig.StageName}, no need to switch.");
         }
 
-        // 短暂等待以确保所有异步操作完成
-        yield return new WaitForSeconds(0.0f);
+        await UniTask.Yield();
 
-        // 将场景配置设置到 HomeScene 的静态属性,供下一个场景读取
         HomeScene.PendingHomeSceneConfig = sceneConfig;
-
-        // 加载目标 Unity 场景
         SceneManager.LoadScene(_nextScene);
     }
 

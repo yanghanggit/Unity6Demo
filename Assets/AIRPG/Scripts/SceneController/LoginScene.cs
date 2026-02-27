@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using TMPro;
 
 public class LoginScene : MonoBehaviour
@@ -58,31 +58,30 @@ public class LoginScene : MonoBehaviour
     /// </summary>
     public void OnStartGameClicked()
     {
-        StartCoroutine(StartGameFlow(_playerIdentifier, _gameName));
+        StartGameFlow(_playerIdentifier, _gameName).Forget();
     }
 
     /// <summary>
     /// 执行登录并开始游戏的完整流程：登录 -> 开始游戎 -> 同步状态 -> 加载场景
     /// </summary>
-    private IEnumerator StartGameFlow(string userName, string gameName)
+    private async UniTaskVoid StartGameFlow(string userName, string gameName)
     {
         // 1. 使用 SessionManager 执行登录和开始游戏
-        bool sessionSuccess = false;
-        yield return SessionManager.Instance.LoginAndStart(
-            userName,
-            gameName,
-            (success) => sessionSuccess = success
-        );
+        bool sessionSuccess = await SessionManager.Instance.LoginAndStart(userName, gameName);
 
-        // 检查会话是否成功
         if (!sessionSuccess)
         {
             Debug.LogError("[LoginScene] LoginAndStart failed");
-            yield break;
+            return;
         }
 
         // 2. 刷新全局游戏状态
-        yield return GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+        bool syncSuccess = await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+        if (!syncSuccess)
+        {
+            Debug.LogError("[LoginScene] RefreshMappingAndEntitiesFromServer failed");
+            return;
+        }
 
         // 3. 切换场景
         SceneManager.LoadScene(_nextSceneName);

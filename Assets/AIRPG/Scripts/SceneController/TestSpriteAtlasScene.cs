@@ -1,5 +1,5 @@
-using System.Collections;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 public class TestSpriteAtlasScene : MonoBehaviour
 {
@@ -12,13 +12,13 @@ public class TestSpriteAtlasScene : MonoBehaviour
     {
         Debug.Assert(_characterSprites.Length >= 2, "请在Inspector中赋值至少两个角色Sprite");
         Debug.Assert(_character != null, "请在Inspector中赋值角色GameObject");
-        StartCoroutine(ChangeSpriteWithDelay(1f, 1)); // 1秒后更换为第二个角色   
+        ChangeSpriteWithDelay(1f, 1).Forget(); // 1秒后更换为第二个角色   
     }
 
     // 创建一个函数 延迟一下 更换角色的sprite
-    private IEnumerator ChangeSpriteWithDelay(float delay, int spriteIndex)
+    private async UniTaskVoid ChangeSpriteWithDelay(float delay, int spriteIndex)
     {
-        yield return new WaitForSeconds(delay);
+        await UniTask.Delay((int)(delay * 1000));
         SpriteRenderer spriteRenderer = _character.GetComponent<SpriteRenderer>();
         spriteRenderer.sprite = _characterSprites[spriteIndex];
     }

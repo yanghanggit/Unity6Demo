@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -38,7 +38,7 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
     /// <param name="specifiedActions">指定的盟友抽卡行动列表</param>
     /// <param name="enable_enemy_draw">是否启用敌人抽牌</param>
     /// <returns>协程枚举器</returns>
-    public IEnumerator Call(string url, string userName, string gameName, List<AllyDrawCardAction> specifiedActions, bool enable_enemy_draw)
+    public async UniTask Call(string url, string userName, string gameName, List<AllyDrawCardAction> specifiedActions, bool enable_enemy_draw)
     {
         Debug.Log("Starting DungeonCombatDrawCardsApi call...");
         Debug.Log($"URL: {url}");
@@ -54,7 +54,7 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
-            yield break;
+            return;
         }
 
         // 创建请求数据对象并序列化为 JSON
@@ -68,29 +68,20 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
         var jsonData = JsonConvert.SerializeObject(requestData);
 
         // 发送 POST 请求并等待完成
-        var task = PostRequestAsync(url, jsonData);
-        yield return new WaitUntil(() => task.IsCompleted);
-
-        if (task.IsFaulted)
-        {
-            Debug.LogError($"Request exception: {task.Exception?.GetBaseException().Message}");
-            yield break;
-        }
-
-        _requestResult = task.Result;
+        _requestResult = await PostRequestAsync(url, jsonData);
 
         // 检查请求是否成功
         if (!_requestResult.isSuccess)
         {
             Debug.LogError($"Request failed: {_requestResult.error}");
-            yield break;
+            return;
         }
 
         // 验证并解析响应数据
         if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
-            yield break;
+            return;
         }
 
         try
@@ -99,7 +90,7 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
-                yield break;
+                return;
             }
         }
         catch (System.Exception ex)

@@ -1,8 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//using Newtonsoft.Json;
 using System;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 游戏会话管理器
@@ -63,33 +62,29 @@ public class SessionManager : MonoBehaviour
 
     /// <summary>
     /// 登录游戏
+    /// <summary>
+    /// 登录
     /// 调用 /login 端点进行用户认证
     /// 自动保存用户名和游戏名到 GameContext
     /// </summary>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
-    /// <param name="onComplete">完成回调，参数为是否成功</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator Login(string userName, string gameName, Action<bool> onComplete = null)
+    /// <returns>是否成功</returns>
+    public async UniTask<bool> Login(string userName, string gameName)
     {
-        // 调用 LoginApi
-        yield return _loginApi.Call(GameContext.Instance.LoginUrl, userName, gameName);
+        await _loginApi.Call(GameContext.Instance.LoginUrl, userName, gameName);
 
-        // 检查结果
         if (_loginApi.ReqResult == null || !_loginApi.ReqResult.isSuccess)
         {
             Debug.LogError("[SessionManager] Login request failed");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
-        // 保存基本信息到 GameContext
         GameContext.Instance.UserName = userName;
         GameContext.Instance.GameName = gameName;
-        GameContext.Instance.PlayerActor = string.Empty; // 尚未分配角色
+        GameContext.Instance.PlayerActor = string.Empty;
 
-        //Debug.Log($"[SessionManager] Login completed successfully: {userName}");
-        onComplete?.Invoke(true);
+        return true;
     }
 
     /// <summary>
@@ -99,40 +94,35 @@ public class SessionManager : MonoBehaviour
     /// </summary>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
-    /// <param name="actorName">角色名</param>
-    /// <param name="onComplete">完成回调，参数为是否成功</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator StartGame(string userName, string gameName, Action<bool> onComplete = null)
+    /// <returns>是否成功</returns>
+    public async UniTask<bool> StartGame(string userName, string gameName)
     {
         // 调用 StartApi
-        yield return _startApi.Call(GameContext.Instance.StartUrl, userName, gameName);
+        await _startApi.Call(GameContext.Instance.StartUrl, userName, gameName);
 
         // 检查结果
         if (_startApi.ReqResult == null || !_startApi.ReqResult.isSuccess)
         {
             Debug.LogError("[SessionManager] Start game request failed");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
         // 保存角色信息到 GameContext
         GameContext.Instance.PlayerActor = _startApi.RespData.blueprint.player_actor;
         GameContext.Instance.PlayerOnlyStage = _startApi.RespData.blueprint.player_only_stage;
 
-        //Debug.Log($"[SessionManager] StartGame completed successfully: {GameContext.Instance.ActorName}");
-        onComplete?.Invoke(true);
+        return true;
     }
 
     /// <summary>
     /// 登出游戏
     /// 调用 /logout 端点并清理游戏上下文
     /// </summary>
-    /// <param name="onComplete">完成回调，参数为是否成功</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator Logout(Action<bool> onComplete = null)
+    /// <returns>是否成功</returns>
+    public async UniTask<bool> Logout()
     {
         // 调用 LogoutApi
-        yield return _logoutApi.Call(
+        await _logoutApi.Call(
             GameContext.Instance.LogoutUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName
@@ -142,15 +132,13 @@ public class SessionManager : MonoBehaviour
         if (_logoutApi.ReqResult == null)
         {
             Debug.LogError("[SessionManager] Logout request failed: request result is null");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
         if (!_logoutApi.ReqResult.isSuccess)
         {
             Debug.LogError($"[SessionManager] Logout request failed: {_logoutApi.ReqResult.responseText}");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
         Debug.Assert(_logoutApi.RespData != null, "[SessionManager] Logout response data is null");
@@ -158,66 +146,53 @@ public class SessionManager : MonoBehaviour
         // 清理游戏上下文
         GameContext.ClearInstance();
 
-        //Debug.Log("[SessionManager] Logout completed successfully");
-        onComplete?.Invoke(true);
+        return true;
     }
 
     /// <summary>
     /// 完整的登录并开始游戏流程（组合方法）
     /// 依次执行：登录 → 开始游戏
-    /// 注意：不包含游戏状态刷新，调用方需要自行处理
     /// </summary>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
-    /// <param name="actorName">角色名</param>
-    /// <param name="onComplete">完成回调，参数为是否成功</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator LoginAndStart(string userName, string gameName, Action<bool> onComplete = null)
+    /// <returns>是否成功</returns>
+    public async UniTask<bool> LoginAndStart(string userName, string gameName)
     {
         // 1. 登录
-        bool loginSuccess = false;
-        yield return Login(userName, gameName, (success) => loginSuccess = success);
-
+        bool loginSuccess = await Login(userName, gameName);
         if (!loginSuccess)
         {
             Debug.LogError("[SessionManager] LoginAndStart failed at Login step");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
         // 2. 开始游戏
-        bool startSuccess = false;
-        yield return StartGame(userName, gameName, (success) => startSuccess = success);
-
+        bool startSuccess = await StartGame(userName, gameName);
         if (!startSuccess)
         {
             Debug.LogError("[SessionManager] LoginAndStart failed at StartGame step");
-            onComplete?.Invoke(false);
-            yield break;
+            return false;
         }
 
-        //Debug.Log("[SessionManager] LoginAndStart completed successfully");
-        onComplete?.Invoke(true);
+        return true;
     }
 
     /// <summary>
     /// 从服务器获取会话消息
     /// 获取最新的会话消息列表并更新序列ID
     /// </summary>
-    /// <param name="onMessagesReceived">回调函数，参数1：是否成功获取 参数2：会话消息列表，</param>
-    /// <returns>协程迭代器</returns>
-    public IEnumerator FetchSessionMessages(Action<bool, List<SessionMessage>> onMessagesReceived)
+    /// <returns>会话消息列表，失败时返回 null</returns>
+    public async UniTask<List<SessionMessage>> FetchSessionMessages()
     {
         if (string.IsNullOrEmpty(GameContext.Instance.UserName) ||
             string.IsNullOrEmpty(GameContext.Instance.GameName))
         {
             Debug.LogError("[SessionManager] UserName or GameName is not set in GameContext");
-            onMessagesReceived?.Invoke(false, null);
-            yield break;
+            return null;
         }
 
         // 获取会话消息
-        yield return _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
+        await _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             GameContext.Instance.LastSequenceId);
@@ -225,15 +200,13 @@ public class SessionManager : MonoBehaviour
         if (_sessionMessagesApi.ReqResult == null)
         {
             Debug.LogError("[SessionManager] Failed to fetch session messages from server: request result is null");
-            onMessagesReceived?.Invoke(false, null);
-            yield break;
+            return null;
         }
 
         if (!_sessionMessagesApi.ReqResult.isSuccess)
         {
             Debug.LogError($"[SessionManager] Failed to fetch session messages from server: {_sessionMessagesApi.ReqResult.responseText}");
-            onMessagesReceived?.Invoke(false, null);
-            yield break;
+            return null;
         }
 
         Debug.Assert(_sessionMessagesApi.RespData != null, "[SessionManager] SessionMessagesApi response data is null");
@@ -244,12 +217,6 @@ public class SessionManager : MonoBehaviour
             GameContext.Instance.LastSequenceId = _sessionMessagesApi.RespLastSequenceId;
         }
 
-        // 复制会话消息列表
-        var sessionMessages = new List<SessionMessage>(_sessionMessagesApi.RespData.session_messages);
-
-        //Debug.Log($"[SessionManager] Successfully fetched {sessionMessages.Count} session messages from server");
-
-        // 通过回调返回消息列表和成功标识
-        onMessagesReceived?.Invoke(true, sessionMessages);
+        return new List<SessionMessage>(_sessionMessagesApi.RespData.session_messages);
     }
 }

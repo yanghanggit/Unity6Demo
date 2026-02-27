@@ -1,7 +1,7 @@
 using UnityEngine;
 using Mosframe;
 using TMPro;
-using System.Collections;
+using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
@@ -166,7 +166,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     public void OnRunButtonClicked()
     {
         Debug.Log("Run button clicked in HomeScene.");
-        StartCoroutine(AdvanceHomeState());
+        AdvanceHomeState().Forget();
     }
 
     /// <summary>
@@ -176,7 +176,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     public void OnBackButtonClicked()
     {
         Debug.Log("Back button clicked in HomeScene.");
-        StartCoroutine(ReturnToMainScene());
+        ReturnToMainScene().Forget();
     }
 
     // IStringGameEventListener接口实现
@@ -325,42 +325,28 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// <param name="targetStageName">目标 Stage 名称</param>
     /// <param name="onComplete">完成回调,参数为是否成功进入目标 Stage</param>
     /// <returns>协程迭代器</returns>
-    private IEnumerator SwitchToStageIfNeeded(string targetStageName, System.Action<bool> onComplete)
+    private async UniTask<bool> SwitchToStageIfNeeded(string targetStageName)
     {
-        // 获取玩家当前所在的 Stage 名称
         var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
 
-        // 检查玩家是否已在目标 Stage 中
         if (currentStageName != targetStageName)
         {
-            // 玩家不在目标 Stage，使用 HomeGamePlayManager 切换
-            bool switchSuccess = false;
-            yield return HomeGamePlayManager.Instance.SwitchStage(
-                targetStageName,
-                (success) =>
-                {
-                    switchSuccess = success;
-                }
-            );
+            bool switchSuccess = await HomeGamePlayManager.Instance.SwitchStage(targetStageName);
 
-            // 检查切换是否成功
             if (!switchSuccess)
             {
                 Debug.LogError($"[HomeScene] SwitchStage to {targetStageName} failed");
-                onComplete?.Invoke(false);
-                yield break;
+                return false;
             }
 
-            // 刷新全局状态以确保数据同步
-            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
             Debug.Log($"[HomeScene] Successfully switched to stage: {targetStageName}");
-            onComplete?.Invoke(true);
+            return true;
         }
         else
         {
-            // 玩家已在目标 Stage 中，无需切换服务器状态
             Debug.Log($"[HomeScene] Already in target stage {targetStageName}, no need to switch.");
-            onComplete?.Invoke(true);
+            return true;
         }
     }
 
@@ -369,35 +355,23 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// 检查游戏是否已正确设置,切换到监视之屋Stage,然后加载MainScene场景
     /// </summary>
     /// <returns>协程迭代器</returns>
-    private IEnumerator ReturnToMainScene()
+    private async UniTaskVoid ReturnToMainScene()
     {
-        // 检查游戏是否已正确初始化
         if (GameContext.Instance.IsLoggedIn)
         {
-            // 切换到监视之屋（如果需要）
-            bool switchSuccess = false;
-            yield return SwitchToStageIfNeeded(
-                GameContext.Instance.PlayerOnlyStage,
-                (success) =>
-                {
-                    switchSuccess = success;
-                }
-            );
+            bool switchSuccess = await SwitchToStageIfNeeded(GameContext.Instance.PlayerOnlyStage);
 
-            // 检查是否成功进入监视之屋
             if (!switchSuccess)
             {
                 Debug.LogError($"[HomeScene] Failed to ensure in {GameContext.Instance.PlayerOnlyStage}");
-                yield break;
+                return;
             }
 
-            // 加载 MainScene 场景
-            yield return new WaitForSeconds(0);
+            await UniTask.Yield();
             SceneManager.LoadScene(_preScene);
         }
         else
         {
-            // 游戏未初始化,保持在当前场景
             Debug.LogWarning($"Game is not set up. Staying in {_homeSceneConfig.StageName}.");
         }
     }
@@ -407,45 +381,25 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// 调用 HomeGamePlayManager 推进场景中所有角色(包括NPC)的行动,并同步最新的游戏状态
     /// </summary>
     /// <returns>协程迭代器</returns>
-    private IEnumerator AdvanceHomeState()
+    private async UniTaskVoid AdvanceHomeState()
     {
-        // 使用 HomeGamePlayManager 推进游戏（空列表表示推进所有角色）
-        bool advanceSuccess = false;
-        yield return HomeGamePlayManager.Instance.AdvanceGame(
-            new List<string>(),
-            (success) =>
-            {
-                advanceSuccess = success;
-            }
-        );
+        bool advanceSuccess = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
 
-        // 检查推进是否成功
         if (!advanceSuccess)
         {
             Debug.LogError("[HomeScene] AdvanceGame failed");
-            yield break;
+            return;
         }
 
-        // 检查是否有角色执行了场景切换事件，如果有就需要更新UI
         var actorsWithTransStageEvents = GameUtils.GetActorsWithEventType<TransStageEvent>(GameContext.Instance.LastAgentEventsHistory);
         if (actorsWithTransStageEvents.Count > 0)
         {
             Debug.Log($"[HomeScene] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
 
-            // 刷新游戏状态以确保数据同步
-            yield return GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-
-            // 刷新角色列表
+            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
             RefreshActorList();
-
-            // 如果当前选中的角色执行了场景转换,则清空选择
-            // if (actorsWithTransStageEvents.Contains(_selectedActorName))
-            // {
-            //     _selectedActorName = string.Empty;
-            // }
         }
 
-        // 更新角色显示(可能已变化)
         UpdateActorDisplay(_selectedActorName);
     }
 
@@ -495,7 +449,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Log("Send Message button clicked");
         if (GameContext.Instance.IsLoggedIn && !string.IsNullOrEmpty(_selectedActorName) && !string.IsNullOrEmpty(_inputField.text))
         {
-            StartCoroutine(ExecuteSpeakAction(_selectedActorName, _inputField.text));
+            ExecuteSpeakAction(_selectedActorName, _inputField.text).Forget();
         }
         else
         {
@@ -510,32 +464,21 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// <param name="targetActorName">目标角色名称</param>
     /// <param name="messageContent">消息内容</param>
     /// <returns>协程迭代器</returns>
-    private IEnumerator ExecuteSpeakAction(string targetActorName, string messageContent)
+    private async UniTaskVoid ExecuteSpeakAction(string targetActorName, string messageContent)
     {
-        // 使用 HomeGamePlayManager 发送消息
-        bool speakSuccess = false;
-        yield return HomeGamePlayManager.Instance.SpeakToActor(
-            targetActorName,
-            messageContent,
-            (success) =>
-            {
-                speakSuccess = success;
-            }
-        );
+        bool speakSuccess = await HomeGamePlayManager.Instance.SpeakToActor(targetActorName, messageContent);
 
-        // 检查是否成功
         if (!speakSuccess)
         {
             Debug.LogError("[HomeScene] SpeakToActor failed");
-            yield break;
+            return;
         }
 
         Debug.Log("[HomeScene] Speak action completed successfully");
 
-        // 清空输入字段,返回主状态
         _inputField.text = string.Empty;
-        _mainState.SetActive(true);                  // 显示主状态UI
-        _inputState.SetActive(false);                // 隐藏输入状态UI
+        _mainState.SetActive(true);
+        _inputState.SetActive(false);
     }
 
     /// <summary>
@@ -547,7 +490,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Log("Ally button clicked in HomeScene.");
         if (GameContext.Instance.IsLoggedIn && !string.IsNullOrEmpty(_selectedActorName))
         {
-            StartCoroutine(AdvanceActorState(_selectedActorName));
+            AdvanceActorState(_selectedActorName).Forget();
         }
         else
         {
@@ -561,28 +504,17 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// </summary>
     /// <param name="actorName">目标角色名称</param>
     /// <returns>协程迭代器</returns>
-    private IEnumerator AdvanceActorState(string actorName)
+    private async UniTaskVoid AdvanceActorState(string actorName)
     {
-        // 使用 HomeGamePlayManager 推进指定角色
-        bool advanceSuccess = false;
-        yield return HomeGamePlayManager.Instance.AdvanceGame(
-            new List<string> { actorName },
-            (success) =>
-            {
-                advanceSuccess = success;
-            }
-        );
+        bool advanceSuccess = await HomeGamePlayManager.Instance.AdvanceGame(new List<string> { actorName });
 
-        // 检查是否成功
         if (!advanceSuccess)
         {
             Debug.LogError($"[HomeScene] AdvanceActorState failed for {actorName}");
-            yield break;
+            return;
         }
 
         Debug.Log($"[HomeScene] Actor state advanced successfully for {actorName}");
-
-        // 更新角色显示(可能已变化)
         UpdateActorDisplay(_selectedActorName);
     }
 }
