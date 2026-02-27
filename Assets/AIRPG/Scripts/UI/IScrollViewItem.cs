@@ -7,5 +7,5 @@ public interface IScrollViewItem
     /// <summary>
     /// 根据索引刷新 Cell 显示内容
     /// </summary>
-    void onUpdateItem(int index);
+    void OnUpdateItem(int index);
 }

@@ -60,7 +60,7 @@ public class LoopScrollDataSourceAdapter : MonoBehaviour, LoopScrollPrefabSource
         var item = trans.GetComponent<IScrollViewItem>();
         if (item != null)
         {
-            item.onUpdateItem(idx);
+            item.OnUpdateItem(idx);
         }
         else
         {

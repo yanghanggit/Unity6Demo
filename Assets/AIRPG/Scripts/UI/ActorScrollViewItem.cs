@@ -8,7 +8,7 @@ using TMPro;
 /// 角色滚动视图项组件
 /// 用于在动态滚动视图中显示单个角色的信息和交互
 /// </summary>
-public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IScrollViewItem
+public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
 {
     // UI组件引用
     [Header("UI Components")]
@@ -58,7 +58,7 @@ public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IScrollV
     /// 根据索引更新显示的角色信息
     /// </summary>
     /// <param name="index">在滚动视图中的索引位置</param>
-    public void onUpdateItem(int index)
+    public void OnUpdateItem(int index)
     {
         // 验证所有必需的UI组件引用
         Debug.Assert(_icon != null, "_icon != null");

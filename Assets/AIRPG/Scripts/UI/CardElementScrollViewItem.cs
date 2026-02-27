@@ -8,7 +8,7 @@ using TMPro;
 /// 卡牌要素滚动视图项组件
 /// 用于在动态滚动视图中显示单个卡牌要素的信息和交互
 /// </summary>
-public class CardElementScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IScrollViewItem, IUIEventListener
+public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventListener
 {
     [Header("UI Components")]
 
@@ -83,7 +83,7 @@ public class CardElementScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IS
     /// 根据索引更新显示的卡牌要素信息
     /// </summary>
     /// <param name="index">在滚动视图中的索引位置</param>
-    public void onUpdateItem(int index)
+    public void OnUpdateItem(int index)
     {
         // 验证所有必需的UI组件引用
         Debug.Assert(_title != null, "_title != null");
@@ -155,7 +155,7 @@ public class CardElementScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IS
         if (eventData.eventType == UIEventType.CardBuilderDataChanged)
         {
             // 刷新当前项显示状态
-            onUpdateItem(_currentIndex);
+            OnUpdateItem(_currentIndex);
         }
     }
 }

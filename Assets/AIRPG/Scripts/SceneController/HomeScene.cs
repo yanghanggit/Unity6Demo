@@ -1,5 +1,5 @@
 using UnityEngine;
-using Mosframe;
+using UnityEngine.UI;
 using TMPro;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
@@ -25,7 +25,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     [SerializeField] private GameObject _mainState;             // 主状态UI容器
     [SerializeField] private GameObject _inputState;            // 输入状态UI容器
     [SerializeField] private TMP_InputField _inputField;       // 输入字段 (TMP)
-    [SerializeField] private DynamicScrollView _scrollView;     // 动态滚动视图
+    [SerializeField] private LoopHorizontalScrollRect _scrollView; // 动态滚动视图
 
     // 配置和API
     [Header("Scene Config")]
@@ -219,18 +219,21 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
             if (actorsInStage.Count > 0)
             {
                 Debug.Log($"Actors in current stage: {string.Join(", ", actorsInStage)}");
-                _scrollView.totalItemCount = actorsInStage.Count;
+                _scrollView.totalCount = actorsInStage.Count;
+                _scrollView.RefillCells();
             }
             else
             {
-                _scrollView.totalItemCount = 0;
+                _scrollView.totalCount = 0;
+                _scrollView.RefillCells();
                 Debug.Log("No other actors found in current stage");
             }
         }
         else
         {
             Debug.Log("[HomeScene] GameContext Root is null");
-            _scrollView.totalItemCount = 0;
+            _scrollView.totalCount = 0;
+            _scrollView.RefillCells();
         }
     }
 
