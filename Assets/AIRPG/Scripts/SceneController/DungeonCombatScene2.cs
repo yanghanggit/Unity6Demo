@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using Mosframe;
 using Newtonsoft.Json;
 using Cysharp.Threading.Tasks;
 
@@ -16,7 +15,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     [SerializeField] private Image _backgroundImage; // 场景背景图片
     [SerializeField] private TMP_Text _combatInfoText; // 战斗信息显示对象
     [SerializeField] private TMP_Text _mainText; // 主文本显示对象
-    [SerializeField] private DynamicScrollView _scrollView;     // 动态滚动视图
+    [SerializeField] private LoopHorizontalScrollRect _scrollView; // 动态滚动视图
     [SerializeField] private ActorOrderSlot[] _actorSlots; // 角色槽位数组
     [SerializeField] private GameObject _mainGameObject; // 场景主对象，用于测试 Find 和事件系统的目标对象
     [SerializeField] private GameObject _bottomGameObject; // 行动顺序对象，用于测试 Find 和事件系统的目标对象
@@ -296,7 +295,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
 
         // 更新主对象和行动顺序对象的可见性
-        //isInteractable = true;
+        isInteractable = true;
         _mainGameObject.SetActive(isInteractable);
         _bottomGameObject.SetActive(isInteractable);
     }
@@ -595,9 +594,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         Debug.Log($"[LoadCardElementsFromActor] 添加了 {targetCount} 个目标角色");
 
         // 更新滚动视图
-        _scrollView.totalItemCount = CardBuilder.Count;
-        _scrollView.scrollByItemIndex(0); // 滚动到顶部
-        _scrollView.refresh();
+        _scrollView.totalCount = CardBuilder.Count;
+        _scrollView.RefillCells(); // 重建列表并回到顶部
         Debug.Log($"[LoadCardElementsFromActor] 总共加载 {CardBuilder.Count} 个卡牌要素");
     }
 

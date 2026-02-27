@@ -8,7 +8,7 @@ using TMPro;
 /// 卡牌要素滚动视图项组件
 /// 用于在动态滚动视图中显示单个卡牌要素的信息和交互
 /// </summary>
-public class CardElementScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IUIEventListener
+public class CardElementScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IScrollViewItem, IUIEventListener
 {
     [Header("UI Components")]
 
@@ -126,7 +126,7 @@ public class CardElementScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IU
             case CardElementType.None:
             default:
                 elementName = "[未知类型]";
-                baseColor = Color.gray;
+                //baseColor = Color.gray;
                 break;
         }
 

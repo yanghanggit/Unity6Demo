@@ -8,7 +8,7 @@ using TMPro;
 /// 角色滚动视图项组件
 /// 用于在动态滚动视图中显示单个角色的信息和交互
 /// </summary>
-public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem
+public class ActorScrollViewItem : UIBehaviour, IDynamicScrollViewItem, IScrollViewItem
 {
     // UI组件引用
     [Header("UI Components")]
