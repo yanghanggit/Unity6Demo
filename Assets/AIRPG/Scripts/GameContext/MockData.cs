@@ -9,16 +9,16 @@ public static class MockData
     /// <summary>
     /// 创建并返回一组测试用角色数据
     /// </summary>
-    public static EntitySerialization[] CreateActorData()
+    public static List<EntitySerialization> CreateActorData()
     {
-        var actors = new EntitySerialization[5];
+        var actors = new List<EntitySerialization>();
 
         // 1. 角色.猎人.石坚
-        actors[0] = new EntitySerialization
+        actors.Add(new EntitySerialization
         {
             name = "角色.猎人.石坚",
             components = new List<ComponentSerialization>()
-        };
+        });
 
         var skillBook0 = new SkillBookComponent
         {
@@ -62,11 +62,11 @@ public static class MockData
         });
 
         // 2. 角色.术士.云音
-        actors[1] = new EntitySerialization
+        actors.Add(new EntitySerialization
         {
             name = "角色.术士.云音",
             components = new List<ComponentSerialization>()
-        };
+        });
 
         var skillBook1 = new SkillBookComponent
         {
@@ -110,11 +110,11 @@ public static class MockData
         });
 
         // 3. 角色.常物.野猪
-        actors[2] = new EntitySerialization
+        actors.Add(new EntitySerialization
         {
             name = "角色.常物.野猪",
             components = new List<ComponentSerialization>()
-        };
+        });
 
         var skillBook2 = new SkillBookComponent
         {
@@ -158,11 +158,11 @@ public static class MockData
         });
 
         // 4. 角色.精怪.山魈
-        actors[3] = new EntitySerialization
+        actors.Add(new EntitySerialization
         {
             name = "角色.精怪.山魈",
             components = new List<ComponentSerialization>()
-        };
+        });
 
         var skillBook3 = new SkillBookComponent
         {
@@ -206,11 +206,11 @@ public static class MockData
         });
 
         // 5. 角色.大妖.山中虎
-        actors[4] = new EntitySerialization
+        actors.Add(new EntitySerialization
         {
             name = "角色.大妖.山中虎",
             components = new List<ComponentSerialization>()
-        };
+        });
 
         var skillBook4 = new SkillBookComponent
         {

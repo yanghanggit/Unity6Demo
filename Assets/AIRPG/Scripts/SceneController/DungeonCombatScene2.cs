@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
 public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
@@ -26,8 +27,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi;
 
-    // Mock 数据 - 用于测试
-    private EntitySerialization[] _mockActorData;
+    private List<EntitySerialization> _mockActorData;// Mock 数据 - 用于测试
 
     void Awake()
     {
@@ -46,7 +46,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         Debug.Assert(_onCardElementClickedEvent != null, "_onCardClickedEvent is null");
         Debug.Assert(_onActorSlotClickedEvent != null, "_onActorSlotClickedEvent is null");
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
-        Debug.Assert(_mockActorData != null && _mockActorData.Length > 0, "Mock actor data is not initialized");
+        Debug.Assert(_mockActorData != null && _mockActorData.Count > 0, "Mock actor data is not initialized");
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
         Debug.Assert(_tasksStatusApi != null, "TasksStatusApi component is not assigned in the inspector.");
         Debug.Assert(_mainGameObject != null, "_mainGameObject is null");
@@ -61,24 +61,17 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         CardBuilder.Clear();
         _mainText.text = GameUtils.FormatCardBuildData(CardBuilder.Build);
 
-        // 设置 mock 数据到 ActorOrderSlot
-        for (int i = 0; i < _actorSlots.Length && i < _mockActorData.Length; i++)
-        {
-            _actorSlots[i].SetActorData(_mockActorData[i]);
-        }
+        // 根据当前战斗状态更新主对象的可交互状态
+        UpdateCombatUIVisibility();
 
-        // 设置状态
-        //_currentCombatState = CombatState.INITIALIZATION;
-
-        // 正式的代码
         // 初始化设置info的文本，展示当前地下城和关卡信息
         UpdateCombatInfoText();
 
         // 更新背景
         UpdateBackgroundImage();
 
-        // 根据当前战斗状态更新主对象的可交互状态
-        UpdateCombatUIVisibility();
+        // 根据当前地下城状态更新角色槽位显示
+        UpdateActorSlots();
 
         // 刷新场景初始化
         if (GameContext.Instance.IsLoggedIn)
@@ -180,7 +173,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         Debug.Log($"处理角色槽位点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
 
         // 从 mock 数据中查找对应的角色
-        var selectedActor = System.Array.Find(_mockActorData, actor => actor.name == eventData.targetId);
+        var selectedActor = _mockActorData.Find(actor => actor.name == eventData.targetId);
         if (selectedActor != null)
         {
             // 清空并设置新的 Build 数据
@@ -208,6 +201,43 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         _mainText.text = GameUtils.FormatCardBuildData(CardBuilder.Build);
     }
 
+    /// <summary>
+    /// 更新角色槽位显示，根据当前 mock 数据刷新每个槽位的角色信息
+    /// </summary>
+    private void UpdateActorSlots()
+    {
+        if (GameContext.Instance.IsLoggedIn)
+        {
+            // 这里是正式内容。
+            // 获取最新的地下城回合信息
+            Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+            if (round == null)
+            {
+                Debug.LogWarning("DungeonCombatScene: No round data found for current dungeon");
+                return;
+            }
+
+            if (round.action_order == null || round.action_order.Count == 0)
+            {
+                Debug.LogWarning("DungeonCombatScene: No action order data found in current round");
+                SetActorSlots(new List<EntitySerialization>()); // 传入空列表，隐藏所有槽位
+                return;
+            }
+
+            Debug.Log($"DungeonCombatScene: Updating actor slots with {round.action_order.Count} actors in action order");
+
+            // 根据当前回合的行动顺序获取对应的角色实体数据列表
+            List<EntitySerialization> actorsInActionOrder = GameContext.Instance.GetActorEntitiesSerialization(round.action_order);
+
+            // 根据当前回合的行动顺序更新角色槽位显示
+            SetActorSlots(actorsInActionOrder);
+        }
+        else
+        {
+            // mock 数据的显示逻辑
+            SetActorSlots(_mockActorData);
+        }
+    }
 
     /// <summary>
     /// 更新战斗信息文本，显示当前地下城和关卡信息
@@ -278,6 +308,27 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     }
 
     /// <summary>
+    /// 根据传入的角色列表设置角色槽位的显示内容
+    /// 列表长度不足时，多余的槽位会被隐藏
+    /// </summary>
+    private void SetActorSlots(List<EntitySerialization> actors)
+    {
+        for (int i = 0; i < _actorSlots.Length; i++)
+        {
+            if (i < actors.Count)
+            {
+                _actorSlots[i].gameObject.SetActive(true);
+                _actorSlots[i].SetData(actors[i]);
+                _actorSlots[i].RefreshUI();
+            }
+            else
+            {
+                _actorSlots[i].gameObject.SetActive(false);
+            }
+        }
+    }
+
+    /// <summary>
     /// 根据当前战斗状态更新主对象的可交互状态
     /// </summary>
     private void UpdateCombatUIVisibility()
@@ -304,12 +355,10 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
 
         // 更新主对象和行动顺序对象的可见性
-        isInteractable = true;
+        //isInteractable = true;
         _mainGameObject.SetActive(isInteractable);
         _bottomGameObject.SetActive(isInteractable);
     }
-
-
 
     /// <summary>
     /// 从选中角色加载卡牌要素数据
@@ -392,7 +441,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             return;
         }
 
-        apiSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
+        apiSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
         if (!apiSuccess)
         {
             Debug.LogError("Failed to refresh dungeon data after combat init");
@@ -406,11 +455,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             return;
         }
 
+        // 根据当前战斗状态更新主对象的可交互状态
+        UpdateCombatUIVisibility();
+
         // 更新标题info
         UpdateCombatInfoText();
 
-        // 根据当前战斗状态更新主对象的可交互状态
-        UpdateCombatUIVisibility();
+        // 更新角色槽位显示
+        UpdateActorSlots();
     }
 
     /// <summary>
@@ -421,8 +473,10 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     private async UniTaskVoid ExecuteCombatInitMock()
     {
         await UniTask.Delay(1000);
-        UpdateCombatInfoText();
+
         UpdateCombatUIVisibility();
+        UpdateCombatInfoText();
+        UpdateActorSlots();
     }
 }
 

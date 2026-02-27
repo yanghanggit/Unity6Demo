@@ -41,18 +41,18 @@ public class ActorOrderSlot : MonoBehaviour
         _onActorSlotClickedEvent.Raise(eventData);
     }
 
-    public void SetActorData(EntitySerialization actorEntitySerialization)
+    public void SetData(EntitySerialization actorEntitySerialization)
     {
         // 根据传入的角色实体序列化数据设置UI显示
         _actorEntitySerialization = actorEntitySerialization;
 
         // 从实体数据中提取显示名称并设置到UI
-        RefreshUI();
+        //RefreshUI();
     }
 
-    private void RefreshUI()
+    public void RefreshUI()
     {
-        Debug.Assert(_actorEntitySerialization != null, "Actor entity serialization data is null");
+        //Debug.Assert(_actorEntitySerialization != null, "Actor entity serialization data is null");
         // 根据 _actorEntitySerialization 中的数据刷新UI显示
         // 例如，如果有头像组件，可以从组件数据中获取头像资源并设置到 _actorImage 上
         // 根据实体数据设置UI显示，例如角色名字和头像

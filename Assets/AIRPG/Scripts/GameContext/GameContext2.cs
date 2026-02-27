@@ -209,6 +209,28 @@ public partial class GameContext
     }
 
     /// <summary>
+    /// 根据角色名称列表获取对应的实体序列化数据列表
+    /// </summary> <param name="actorNames">角色名称列表</param>
+    /// <returns>返回对应的EntitySerialization对象列表，如果未找到则返回空列表</returns>
+    public List<EntitySerialization> GetActorEntitiesSerialization(List<string> actorNames)
+    {
+        var result = new List<EntitySerialization>();
+        foreach (var actorName in actorNames)
+        {
+            var entitySerialization = GetActorEntitySerialization(actorName);
+            if (entitySerialization != null)
+            {
+                result.Add(entitySerialization);
+            }
+            else
+            {
+                Debug.LogWarning($"GetActorEntitiesSerialization: No EntitySerialization found for actor '{actorName}'");
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
     /// 根据场景名称获取对应的实体序列化数据
     /// </summary>
     /// <param name="stageName">场景名称</param>
