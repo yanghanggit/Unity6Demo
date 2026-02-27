@@ -181,7 +181,7 @@ public static partial class GameUtils
     /// </summary>
     /// <param name="dungeon">地下城对象</param>
     /// <returns>如果存在则返回最后一场战斗，否则返回 null</returns>
-    public static Combat GetCurrentCombat(Dungeon dungeon)
+    public static Combat GetLastCombat(Dungeon dungeon)
     {
         if (dungeon?.combat_sequence?.combats == null || dungeon.combat_sequence.combats.Count == 0)
             return null;
@@ -194,9 +194,9 @@ public static partial class GameUtils
     /// </summary>
     /// <param name="dungeon">地下城对象</param>
     /// <returns>返回当前战斗的状态，如果没有战斗则返回 CombatState.NONE</returns>
-    public static CombatState GetCurrentCombatState(Dungeon dungeon)
+    public static CombatState GetLastCombatState(Dungeon dungeon)
     {
-        var currentCombat = GetCurrentCombat(dungeon);
+        var currentCombat = GetLastCombat(dungeon);
         if (currentCombat == null)
         {
             return CombatState.NONE;

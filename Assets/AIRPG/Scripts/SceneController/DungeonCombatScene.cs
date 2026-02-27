@@ -112,7 +112,7 @@ public class DungeonCombatScene : MonoBehaviour
         //Debug.Log("OnClickAdvanceNextDungeon");
 
         // 检查当前战斗状态，决定执行哪个操作
-        Combat currentCombat = GameUtils.GetCurrentCombat(GameContext.Instance.Dungeon);
+        Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
 
         if (currentCombat != null && currentCombat.state == CombatState.COMPLETE)
         {
