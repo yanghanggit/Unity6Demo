@@ -190,6 +190,21 @@ public static partial class GameUtils
     }
 
     /// <summary>
+    /// 获取地下城当前战斗的状态
+    /// </summary>
+    /// <param name="dungeon">地下城对象</param>
+    /// <returns>返回当前战斗的状态，如果没有战斗则返回 CombatState.NONE</returns>
+    public static CombatState GetCurrentCombatState(Dungeon dungeon)
+    {
+        var currentCombat = GetCurrentCombat(dungeon);
+        if (currentCombat == null)
+        {
+            return CombatState.NONE;
+        }
+        return currentCombat.state;
+    }
+
+    /// <summary>
     /// 获取地下城最后一场战斗的结果
     /// 从战斗序列中获取最后一个战斗对象的结果状态
     /// </summary>

@@ -31,7 +31,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
     // Mock 数据 - 用于测试
     private EntitySerialization[] _mockActorData;
-    private CombatState _currentCombatState = CombatState.NONE; // 当前战斗状态
+    //private CombatState _currentCombatState = CombatState.NONE; // 当前战斗状态
 
     void Awake()
     {
@@ -72,7 +72,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
 
         // 设置状态
-        _currentCombatState = CombatState.INITIALIZATION;
+        //_currentCombatState = CombatState.INITIALIZATION;
 
         // 正式的代码
         // 初始化设置info的文本，展示当前地下城和关卡信息
@@ -85,7 +85,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         UpdateCombatUIVisibility();
 
         // 刷新场景初始化
-        StartCoroutine(ExecuteCombatInit());
+        if (GameContext.Instance.IsLoggedIn)
+        {
+            StartCoroutine(ExecuteCombatInit());
+        }
+        else
+        {
+            StartCoroutine(ExecuteCombatInitMock());
+        }
     }
 
     void OnDestroy()
@@ -267,8 +274,28 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>
     private void UpdateCombatUIVisibility()
     {
-        // 根据当前战斗状态更新主对象的可交互状态
-        bool isInteractable = _currentCombatState == CombatState.ONGOING;
+        // 首先获取当前战斗状态，如果当前战斗对象不存在则默认设置为不可交互
+        var combatState = GameUtils.GetCurrentCombatState(GameContext.Instance.Dungeon);
+
+        // 当前战斗状态不是 ONGOING，主对象不可交互；当前战斗状态是 ONGOING，主对象可交互
+        bool isInteractable = false;
+        switch (combatState)
+        {
+            case CombatState.INITIALIZATION:
+                isInteractable = false;
+                break;
+            case CombatState.ONGOING:
+                isInteractable = true;
+                break;
+            case CombatState.COMPLETE:
+                isInteractable = false;
+                break;
+            default:
+                Debug.LogWarning($"Unknown combat state: {combatState}");
+                break;
+        }
+
+        // 更新主对象和行动顺序对象的可见性
         _mainGameObject.SetActive(isInteractable);
         _bottomGameObject.SetActive(isInteractable);
     }
@@ -579,13 +606,81 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>
     private IEnumerator ExecuteCombatInit()
     {
-        // 等待1秒模拟网络请求延迟
-        yield return new WaitForSeconds(2f);
+        // 刷新地下城数据
+        bool apiSuccess = false;
+        string apiMessage = string.Empty;
 
-        // 临时设置ongoing状态，正式代码中应根据接口返回结果设置
-        _currentCombatState = CombatState.ONGOING;
+        // 只刷新地下城数据（不需要角色详情数据）
+        yield return GameStateSync.Instance.RefreshDungeonFromServer((success, msg) =>
+        {
+            apiSuccess = success;
+            apiMessage = msg;
+        });
+
+        // api调用失败，显示错误信息并退出流程
+        if (!apiSuccess)
+        {
+            Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon data: {apiMessage}");
+            yield break;
+        }
+
+        // 当前战斗状态不是 INITIALIZATION，说明接口返回的数据不符合预期，显示警告信息并退出流程
+        var currentCombatState = GameUtils.GetCurrentCombatState(GameContext.Instance.Dungeon);
+        if (currentCombatState != CombatState.INITIALIZATION)
+        {
+            Debug.LogWarning($"Current combat state is {currentCombatState}, expected INITIALIZATION. Proceeding with caution.");
+            yield break;
+        }
+
+        // 调用 combat_init 接口开始战斗
+        yield return DungeonGamePlayManager.Instance.CombatInit(
+            (success, message, sessionMessages) =>
+            {
+                apiSuccess = success;
+                apiMessage = message;
+            });
+
+        // 接口调用失败，显示错误信息并退出流程
+        if (!apiSuccess)
+        {
+            Debug.LogError($"Combat initialization failed: {apiMessage}");
+            yield break;
+        }
+
+        // combat_init 成功后再次刷新地下城数据，确保场景状态与服务器数据同步
+        yield return GameStateSync.Instance.RefreshDungeonFromServer((success, msg) =>
+        {
+            apiSuccess = success;
+            apiMessage = msg;
+        });
+
+        if (!apiSuccess)
+        {
+            Debug.LogError($"Failed to refresh dungeon data after combat init: {apiMessage}");
+            yield break;
+        }
+
+        // 再次查阅当前战斗状态，如果不是 ONGOING，说明接口返回的数据不符合预期，显示警告信息并退出流程
+        currentCombatState = GameUtils.GetCurrentCombatState(GameContext.Instance.Dungeon);
+        if (currentCombatState != CombatState.ONGOING)
+        {
+            Debug.LogWarning($"Current combat state is {currentCombatState} after combat_init, expected ONGOING. Proceeding with caution.");
+            yield break;
+        }
+
+        // 刷新UI显示，确保场景状态与当前地下城数据同步
         UpdateCombatUIVisibility();
     }
 
+    /// <summary>
+    /// 模拟战斗初始化流程，直接设置UI状态为可交互
+    /// 仅用于测试UI状态切换逻辑，不涉及实际的服务器交互
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator ExecuteCombatInitMock()
+    {
+        yield return new WaitForSeconds(1f); // 模拟网络延迟
+        UpdateCombatUIVisibility();
+    }
 }
 
