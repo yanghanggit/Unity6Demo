@@ -147,7 +147,32 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 break;
 
             case UIEventType.ActorOrderSlotClick:
-                HandleActorOrderSlotClick(eventData);
+
+                if (GameContext.Instance.IsLoggedIn)
+                {
+                    Debug.Log($"处理角色槽位点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
+
+                    Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+                    if (round != null && round.action_order != null)
+                    {
+                        Debug.Log($"Current round action order: {string.Join(", ", round.action_order)}");
+
+                        // 根据当前回合的行动顺序获取对应的角色实体数据列表
+                        List<EntitySerialization> actorsInActionOrder = GameContext.Instance.GetActorEntitiesSerialization(round.action_order);
+
+                        // 根据当前回合的行动顺序更新角色槽位显示
+                        HandleActorOrderSlotClick(eventData, actorsInActionOrder);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("DungeonCombatScene: No round or action order data found for current dungeon");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"处理角色槽位点击事件（使用 Mock 数据），目标: {eventData.targetId}, 索引: {eventData.index}");
+                    HandleActorOrderSlotClick(eventData, _mockActorData);
+                }
                 break;
 
             case UIEventType.CardBuilderDataChanged:
@@ -168,12 +193,13 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// 处理角色槽位点击事件
     /// 重置 Build 数据并动态加载选中角色的卡牌要素数据
     /// </summary>
-    private void HandleActorOrderSlotClick(UIEventData eventData)
+    /// <param name="allActors">当前可用的角色列表，用于查找目标及作为卡牌目标候选</param>
+    private void HandleActorOrderSlotClick(UIEventData eventData, List<EntitySerialization> allActors)
     {
         Debug.Log($"处理角色槽位点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
 
-        // 从 mock 数据中查找对应的角色
-        var selectedActor = _mockActorData.Find(actor => actor.name == eventData.targetId);
+        // 从角色列表中查找对应的角色
+        var selectedActor = allActors.Find(actor => actor.name == eventData.targetId);
         if (selectedActor != null)
         {
             // 清空并设置新的 Build 数据
@@ -181,7 +207,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             CardBuilder.Build = new CardBuildData { owner = selectedActor };
 
             // 加载卡牌要素
-            LoadCardElementsFromActor(selectedActor);
+            LoadCardElementsFromActor(selectedActor, allActors);
 
             // 派发 CardBuilder 数据已改变事件
             _onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
@@ -365,7 +391,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// 只负责维护 CardElements 部分，不处理 Build 数据
     /// </summary>
     /// <param name="selectedActor">选中的角色</param>
-    private void LoadCardElementsFromActor(EntitySerialization selectedActor)
+    /// <param name="allActors">当前可用的角色列表，其余角色将作为卡牌目标候选</param>
+    private void LoadCardElementsFromActor(EntitySerialization selectedActor, List<EntitySerialization> allActors)
     {
         if (selectedActor == null)
         {
@@ -397,7 +424,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
         // 3. 添加其他角色作为目标（排除自己）
         int targetCount = 0;
-        foreach (var actor in _mockActorData)
+        foreach (var actor in allActors)
         {
             if (actor.name != selectedActor.name)
             {
@@ -474,6 +501,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     {
         await UniTask.Delay(1000);
 
+        // 尝试性质刷新地下城状态，模拟服务器交互的结果
         UpdateCombatUIVisibility();
         UpdateCombatInfoText();
         UpdateActorSlots();

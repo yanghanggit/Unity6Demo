@@ -31,6 +31,18 @@ public class ActorOrderSlot : MonoBehaviour
     {
         Debug.Log("ActorOrderSlot button clicked" + gameObject.name);
         Debug.Assert(_actorEntitySerialization != null, "Actor entity serialization data is null");
+
+        if (GameContext.Instance.IsLoggedIn)
+        {
+            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(_actorEntitySerialization);
+            if (enemyComponent != null)
+            {
+                // 如果登陆了，并且是敌人，就不允许点击。
+                Debug.Log("Clicked on an enemy actor, ignoring click.");
+                return;
+            }
+        }
+
         // 创建并发送结构化的事件数据
         var eventData = new UIEventData(
             UIEventType.ActorOrderSlotClick, // 事件类型
@@ -38,21 +50,24 @@ public class ActorOrderSlot : MonoBehaviour
             -1,
             ""
         );
+
+        // 触发事件，通知系统哪个角色槽位被点击了
         _onActorSlotClickedEvent.Raise(eventData);
     }
 
+    /// <summary>
+    /// 根据传入的角色实体序列化数据设置UI显示
+    /// </summary>
+    /// <param name="actorEntitySerialization"></param>
     public void SetData(EntitySerialization actorEntitySerialization)
     {
         // 根据传入的角色实体序列化数据设置UI显示
         _actorEntitySerialization = actorEntitySerialization;
-
-        // 从实体数据中提取显示名称并设置到UI
-        //RefreshUI();
     }
 
     public void RefreshUI()
     {
-        //Debug.Assert(_actorEntitySerialization != null, "Actor entity serialization data is null");
+        Debug.Assert(_actorEntitySerialization != null, "Actor entity serialization data is null");
         // 根据 _actorEntitySerialization 中的数据刷新UI显示
         // 例如，如果有头像组件，可以从组件数据中获取头像资源并设置到 _actorImage 上
         // 根据实体数据设置UI显示，例如角色名字和头像
