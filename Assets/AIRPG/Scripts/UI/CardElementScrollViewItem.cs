@@ -61,21 +61,33 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
     void OnClick()
     {
         Debug.Log($"Clicked on {_title.text} at index {_currentIndex}");
+        Debug.Assert(CardBuilder.Build.owner != null, "CardBuilder.Build.owner is null");
 
         // 创建并发送结构化的事件数据，通知需要刷新UI
         var elementData = CardBuilder.GetElement(_currentIndex);
+
+        // 如果用户已登录，并且点击的要素对应的角色是敌人，就不允许点击。
+        if (GameContext.Instance.IsLoggedIn)
+        {
+            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(CardBuilder.Build.owner);
+            if (enemyComponent != null)
+            {
+                // 如果登陆了，并且是敌人，就不允许点击。
+                Debug.Log("Clicked on an enemy actor, ignoring click.");
+                return;
+            }
+        }
+
+        // 创建并发送结构化的事件数据，通知系统哪个卡牌要素被点击了
         var eventData = new UIEventData(
             UIEventType.CardElementScrollViewItemClick,
             elementData.Name,
             _currentIndex
         );
 
+        // 触发事件，通知系统哪个卡牌要素被点击了
         _onCardElementClickedEvent.Raise(eventData);
-
-        // onUpdateItem(_currentIndex); // UI 更新由 TestDungeonCombatScenePrototype 事件处理器控制
     }
-
-
 
     /// <summary>
     /// 实现IDynamicScrollViewItem接口的更新方法

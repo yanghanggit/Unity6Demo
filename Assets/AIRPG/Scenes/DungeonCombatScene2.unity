@@ -4005,7 +4005,7 @@ GameObject:
   - component: {fileID: 1646370099}
   - component: {fileID: 1646370098}
   m_Layer: 5
-  m_Name: Run
+  m_Name: Play
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4077,7 +4077,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 399892901}
         m_TargetAssemblyTypeName: DungeonCombatScene2, Assembly-CSharp
-        m_MethodName: OnClickRun
+        m_MethodName: OnClickPlay
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

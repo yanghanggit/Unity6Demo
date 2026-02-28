@@ -123,14 +123,14 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用地下城战斗抽牌端点执行抽卡操作
     /// </summary>
     /// <returns>任务 ID 字符串，失败时返回 null</returns>
-    public async UniTask<string> DrawCards(List<AllyDrawCardAction> specifiedActions, bool enable_enemy_draw)
+    public async UniTask<string> DrawCards(List<AllyDrawCardAction> specifiedActions, bool enableEnemyDraw)
     {
         await _dungeonCombatDrawCardsApi.Call(
             GameContext.Instance.DungeonCombatDrawCardsUrl,
             GameContext.Instance.UserName,
             GameContext.Instance.GameName,
             specifiedActions,
-            enable_enemy_draw);
+            enableEnemyDraw);
 
         if (_dungeonCombatDrawCardsApi.ReqResult == null)
         {

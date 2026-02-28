@@ -32,16 +32,16 @@ public class ActorOrderSlot : MonoBehaviour
         Debug.Log("ActorOrderSlot button clicked" + gameObject.name);
         Debug.Assert(_actorEntitySerialization != null, "Actor entity serialization data is null");
 
-        if (GameContext.Instance.IsLoggedIn)
-        {
-            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(_actorEntitySerialization);
-            if (enemyComponent != null)
-            {
-                // 如果登陆了，并且是敌人，就不允许点击。
-                Debug.Log("Clicked on an enemy actor, ignoring click.");
-                return;
-            }
-        }
+        // if (GameContext.Instance.IsLoggedIn)
+        // {
+        //     var enemyComponent = GameUtils.GetComponent<EnemyComponent>(_actorEntitySerialization);
+        //     if (enemyComponent != null)
+        //     {
+        //         // 如果登陆了，并且是敌人，就不允许点击。
+        //         Debug.Log("Clicked on an enemy actor, ignoring click.");
+        //         return;
+        //     }
+        // }
 
         // 创建并发送结构化的事件数据
         var eventData = new UIEventData(
