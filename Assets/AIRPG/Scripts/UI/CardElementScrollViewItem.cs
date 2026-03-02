@@ -80,19 +80,6 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
 
         // 创建并发送结构化的事件数据，通知需要刷新UI
         var elementData = CardBuilder.GetElement(_currentIndex);
-
-        // 如果用户已登录，并且点击的要素对应的角色是敌人，就不允许点击。
-        if (GameContext.Instance.IsLoggedIn)
-        {
-            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(CardBuilder.Build.owner);
-            if (enemyComponent != null)
-            {
-                // 如果登陆了，并且是敌人，就不允许点击。
-                Debug.Log("Clicked on an enemy actor, ignoring click.");
-                return;
-            }
-        }
-
         // 创建并发送结构化的事件数据，通知系统哪个卡牌要素被点击了
         var eventData = new UIEventData(
             UIEventType.CardElementScrollViewItemClick,
@@ -163,8 +150,25 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
         string displayName = GameUtils.GetDisplayName(elementName);
         if (isSelected)
         {
-            displayName += "\n<已选择>";
             baseColor = Color.red;// 已选中的项目背景色改为红色，便于测试阶段查看效果
+        }
+
+        // 如果用户已登录，并且点击的要素对应的角色是敌人，就不允许点击。
+        if (GameContext.Instance.IsLoggedIn)
+        {
+            var enemyComponent = GameUtils.GetComponent<EnemyComponent>(CardBuilder.Build.owner);
+            if (enemyComponent != null)
+            {
+                // 如果登陆了，并且是敌人，就不允许点击。
+                baseColor = Color.gray;
+            }
+
+            var deathComponent = GameUtils.GetComponent<DeathComponent>(CardBuilder.Build.owner);
+            if (deathComponent != null)
+            {
+                // 如果登陆了，并且是死了，就不允许点击。
+                baseColor = Color.gray;
+            }
         }
 
         _title.text = displayName;

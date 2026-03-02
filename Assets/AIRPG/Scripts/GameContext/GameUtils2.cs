@@ -361,17 +361,22 @@ public static partial class GameUtils
             return string.Empty;
 
         var sb = new System.Text.StringBuilder();
-        //sb.AppendLine($"Round: {round.tag}");
 
         if (round.action_order != null && round.action_order.Count > 0)
         {
             sb.AppendLine($"Action Order: {string.Join(" -> ", round.action_order)}");
         }
 
+        //加一些空行分隔
+        sb.AppendLine();
+
         if (!string.IsNullOrEmpty(round.combat_log))
         {
             sb.AppendLine($"Combat Log:\n{round.combat_log}");
         }
+
+        //加一些空行分隔
+        sb.AppendLine();
 
         if (!string.IsNullOrEmpty(round.narrative))
         {
