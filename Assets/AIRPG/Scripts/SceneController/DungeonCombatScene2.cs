@@ -115,11 +115,11 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     }
 
     /// <summary>
-    /// 点击 Play 按钮
+    /// 点击 On Going 按钮
     /// </summary>
-    public void OnClickPlay()
+    public void OnClickOnGoing()
     {
-        Debug.Log("Play button clicked");
+        Debug.Log("On Going button clicked");
 
         var combatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
         switch (combatState)
@@ -129,62 +129,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 break;
 
             case CombatState.ONGOING:
-
-                // 如果未登录，就不要处理这段提交代码。
-                if (!GameContext.Instance.IsLoggedIn)
-                {
-                    Debug.Log("Simulating successful escape for non-logged-in user");
-                    break;
-                }
-
-                if (CardBuilder.Build.owner == null)
-                {
-                    Debug.LogWarning("No actor selected, cannot execute escape action");
-                    break;
-                }
-
-                var enemyComponent = GameUtils.GetComponent<EnemyComponent>(CardBuilder.Build.owner);
-                if (enemyComponent != null)
-                {
-                    // 敌人直接执行抽卡行动，传入空的行动列表和启用敌人抽卡的标志
-                    ExecuteDrawCards(new List<AllyDrawCardAction>(), true).Forget();
-                }
-                else
-                {
-
-                    // 目标角色、技能和状态效果都是必选的，缺一不可，否则无法执行抽卡行动
-                    if (CardBuilder.Build.targetActors == null || CardBuilder.Build.targetActors.Count == 0)
-                    {
-                        Debug.LogWarning("No target actors selected, cannot execute escape action");
-                        break;
-                    }
-
-                    if (CardBuilder.Build.skill == null || CardBuilder.Build.skill.name == "")
-                    {
-                        Debug.LogWarning("No skill selected, cannot execute escape action");
-                        break;
-                    }
-
-                    if (CardBuilder.Build.statusEffects == null || CardBuilder.Build.statusEffects.Count == 0)
-                    {
-                        Debug.LogWarning("No status effects selected, cannot execute escape action");
-                        break;
-                    }
-
-                    // 创建抽卡行动
-                    var allyDrawAction = new AllyDrawCardAction
-                    {
-                        entity_name = CardBuilder.Build.owner.name,
-                        skill_name = CardBuilder.Build.skill.name,
-                        target_names = CardBuilder.Build.targetActors != null ? CardBuilder.Build.targetActors.ConvertAll(actor => actor.name) : new List<string>(),
-                        status_effect_names = CardBuilder.Build.statusEffects != null ? CardBuilder.Build.statusEffects.ConvertAll(effect => effect.name) : new List<string>()
-                    };
-
-                    // 调用抽卡接口，传入构建的行动数据
-                    ExecuteDrawCards(new List<AllyDrawCardAction> { allyDrawAction }, false).Forget();
-
-                }
-
+                ExecuteOnGoingActionAsync().Forget();
                 break;
 
             case CombatState.COMPLETE:
@@ -195,6 +140,152 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 Debug.LogWarning($"Unknown combat state: {combatState}");
                 break;
         }
+    }
+
+    /// <summary>
+    /// ONGOING 状态下的异步行动入口
+    /// 先刷新并检查所有存活演员是否都已有手牌：
+    ///   - 未全部抽牌（false）→ 执行抽卡（HandleDrawCardAction）
+    ///   - 全部已有手牌（true）→ 执行出牌（HandlePlayCardAction）
+    /// </summary>
+    private async UniTaskVoid ExecuteOnGoingActionAsync()
+    {
+        bool allDrawn = await RefreshAndCheckAllActorsDrawn();
+        if (!allDrawn)
+        {
+            // 尚有演员未抽牌，执行抽卡行动
+            Debug.Log("[DungeonCombatScene] 执行抽卡行动");
+            HandleDrawCardAction();
+        }
+        else
+        {
+            // 所有存活演员均已有手牌，执行出牌行动
+            Debug.Log("[DungeonCombatScene] 执行出牌行动");
+            HandlePlayCardAction();
+        }
+    }
+
+    /// <summary>
+    /// 处理抽卡行动：根据当前 CardBuilder.Build 的数据决定执行敌人抽卡或盟友抽卡
+    /// </summary>
+    private void HandleDrawCardAction()
+    {
+        // 如果未登录，就不要处理这段提交代码。
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.Log("Simulating successful escape for non-logged-in user");
+            return;
+        }
+
+        if (CardBuilder.Build.owner == null)
+        {
+            Debug.LogWarning("No actor selected, cannot execute escape action");
+            return;
+        }
+
+        var enemyComponent = GameUtils.GetComponent<EnemyComponent>(CardBuilder.Build.owner);
+        if (enemyComponent != null)
+        {
+            // 敌人直接执行抽卡行动，传入空的行动列表和启用敌人抽卡的标志
+            ExecuteDrawCards(new List<AllyDrawCardAction>(), true).Forget();
+            return;
+        }
+
+        // 目标角色、技能和状态效果都是必选的，缺一不可，否则无法执行抽卡行动
+        if (CardBuilder.Build.targetActors == null || CardBuilder.Build.targetActors.Count == 0)
+        {
+            Debug.LogWarning("No target actors selected, cannot execute escape action");
+            return;
+        }
+
+        if (CardBuilder.Build.skill == null || CardBuilder.Build.skill.name == "")
+        {
+            Debug.LogWarning("No skill selected, cannot execute escape action");
+            return;
+        }
+
+        if (CardBuilder.Build.statusEffects == null || CardBuilder.Build.statusEffects.Count == 0)
+        {
+            Debug.LogWarning("No status effects selected, cannot execute escape action");
+            return;
+        }
+
+        // 创建抽卡行动
+        var allyDrawAction = new AllyDrawCardAction
+        {
+            entity_name = CardBuilder.Build.owner.name,
+            skill_name = CardBuilder.Build.skill.name,
+            target_names = CardBuilder.Build.targetActors != null ? CardBuilder.Build.targetActors.ConvertAll(actor => actor.name) : new List<string>(),
+            status_effect_names = CardBuilder.Build.statusEffects != null ? CardBuilder.Build.statusEffects.ConvertAll(effect => effect.name) : new List<string>()
+        };
+
+        // 调用抽卡接口，传入构建的行动数据
+        ExecuteDrawCards(new List<AllyDrawCardAction> { allyDrawAction }, false).Forget();
+    }
+
+    /// <summary>
+    /// 处理出牌行动：所有存活演员均已有手牌后执行
+    /// TODO: 实现出牌逻辑
+    /// </summary>
+    private void HandlePlayCardAction()
+    {
+        Debug.Log("[DungeonCombatScene] HandlePlayCardAction: 所有演员已有手牌，出牌逻辑待实现");
+        // 我已经添加了 ExecutePlayCards 函数，请你在此调用点进行使用。
+        ExecutePlayCards().Forget();
+    }
+
+    /// <summary>
+    /// 刷新当前场景中所有演员数据，并检查是否所有存活演员都已完成抽卡
+    /// 存活演员定义：没有 DeathComponent 组件的演员
+    /// 抽卡完成定义：存活演员的 HandComponent.cards 不为空
+    /// </summary>
+    /// <returns>是否所有存活演员都已完成抽卡</returns>
+    private async UniTask<bool> RefreshAndCheckAllActorsDrawn()
+    {
+        // 刷新玩家所在场景中所有演员的最新数据
+        bool refreshSuccess = await GameStateSync.Instance.RefreshActorsInActorStageFromServer(GameContext.Instance.PlayerActor);
+        if (!refreshSuccess)
+        {
+            Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: failed to refresh actors in stage");
+        }
+
+        // 数据已是最新，获取当前回合的角色列表
+        var actors = GetCurrentRoundActors();
+        if (actors == null || actors.Count == 0)
+        {
+            Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: no actors found in current round");
+            return false;
+        }
+
+        // 检查所有存活演员（没有 DeathComponent）是否都已有手牌数据
+        bool allDrawn = true;
+        foreach (var actor in actors)
+        {
+            var deathComponent = GameUtils.GetComponent<DeathComponent>(actor);
+            if (deathComponent != null)
+            {
+                // 已死亡，跳过检查
+                continue;
+            }
+
+            var handComponent = GameUtils.GetComponent<HandComponent>(actor);
+            if (handComponent == null || handComponent.cards == null || handComponent.cards.Count == 0)
+            {
+                allDrawn = false;
+                break;
+            }
+        }
+
+        if (allDrawn)
+        {
+            Debug.Log("[DungeonCombatScene] 所有存活演员均已完成抽卡");
+        }
+        else
+        {
+            Debug.Log("[DungeonCombatScene] 尚有存活演员未完成抽卡");
+        }
+
+        return allDrawn;
     }
 
     /// <summary>
@@ -568,39 +659,34 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>
     private async UniTaskVoid ExecuteCombatInit()
     {
+        // 先刷新一次
         bool apiSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
-
         if (!apiSuccess)
         {
             Debug.LogError("[DungeonCombatScene] Failed to refresh dungeon data");
             return;
         }
 
+        // 如果状态是 INITIALIZATION，执行战斗初始化（不论成功与否，后续都会继续尝试刷新）
         var currentCombatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
-        if (currentCombatState != CombatState.INITIALIZATION)
+        if (currentCombatState == CombatState.INITIALIZATION)
         {
-            Debug.LogWarning($"Current combat state is {currentCombatState}, expected INITIALIZATION. Proceeding with caution.");
-            return;
+            var messages = await DungeonGamePlayManager.Instance.CombatInit();
+            if (messages == null)
+            {
+                Debug.LogError("Combat initialization failed");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[DungeonCombatScene] Current combat state is {currentCombatState}, skipping CombatInit");
         }
 
-        var messages = await DungeonGamePlayManager.Instance.CombatInit();
-        if (messages == null)
-        {
-            Debug.LogError("Combat initialization failed");
-            return;
-        }
-
+        // 不论 CombatInit 成功与否，都尝试刷新并更新 UI
         apiSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
         if (!apiSuccess)
         {
-            Debug.LogError("Failed to refresh dungeon data after combat init");
-            return;
-        }
-
-        currentCombatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
-        if (currentCombatState != CombatState.ONGOING)
-        {
-            Debug.LogWarning($"Current combat state is {currentCombatState} after combat_init, expected ONGOING. Proceeding with caution.");
+            Debug.LogError("[DungeonCombatScene] Failed to refresh dungeon and actors data");
             return;
         }
 
@@ -663,30 +749,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             Debug.LogError("Failed to refresh dungeon and actors data");
             return;
         }
-
-        // 根据当前战斗状态更新主对象的可交互状态
-        if (CardBuilder.Build.owner != null)
-        {
-            var refreshedOwner = GameContext.Instance.GetActorEntitySerialization(CardBuilder.Build.owner.name);
-            Debug.Assert(refreshedOwner != null, $"Failed to get refreshed actor data for owner: {CardBuilder.Build.owner.name}");
-
-            //这个时候，owner的数据已经被刷新了，GameContext会变化，所以需要根据名字再对其一次。
-            CardBuilder.Clear();
-            CardBuilder.Build = new CardBuildData { owner = refreshedOwner };
-
-            var handComponent = GameUtils.GetComponent<HandComponent>(CardBuilder.Build.owner);
-            if (handComponent != null)
-            {
-                // 有卡牌，就不能加载 Build 数据了，先显示手牌数据。
-                UpdateMainTextWithHandData(CardBuilder.Build.owner);
-
-                var allActors = GetCurrentRoundActors();
-                LoadCardElementsFromActor(CardBuilder.Build.owner, allActors);
-            }
-        }
-
-        // 任务完成后，获取当前选中角色的数据并显示手牌信息
-        //_onHandComponentChangedEvent.Raise(new UIEventData(UIEventType.HandComponentChanged));
     }
 
     /// <summary>
@@ -701,6 +763,63 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             GameContext.Instance.TasksStatusUrl,
             taskId);
     }
+
+    /// <summary>
+    /// 执行出牌操作并轮询任务状态，完成后刷新数据并评估战斗状态
+    /// 调用服务器 play_cards 接口，获取任务ID后轮询查询任务状态
+    /// 当任务完成时，刷新数据并调用 CombatStatusEvaluation 接口评估当前战斗状态
+    /// </summary>
+    private async UniTaskVoid ExecutePlayCards()
+    {
+        string taskId = await DungeonGamePlayManager.Instance.PlayCards();
+        if (string.IsNullOrEmpty(taskId))
+        {
+            return;
+        }
+
+        Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
+
+        var taskRecord = await PollTaskStatus(taskId);
+        if (taskRecord == null)
+        {
+            return;
+        }
+
+        bool apiSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
+        if (!apiSuccess)
+        {
+            Debug.LogError("Failed to refresh dungeon data");
+            return;
+        }
+
+
+        // 获取最新的地下城回合信息
+        Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+        if (round == null)
+        {
+            Debug.LogWarning("No rounds found in dungeon after playing cards");
+            _mainText.text = "出牌完成，但未找到回合信息";
+            return;
+        }
+
+        // 显示最新的地下城战斗仲裁信息
+        var formattedRoundInfo = GameUtils.FormatRoundInfo(round);
+        if (!string.IsNullOrEmpty(formattedRoundInfo))
+        {
+            _mainText.text = formattedRoundInfo;
+        }
+        else
+        {
+            Debug.LogWarning("No combat arbitration info available in dungeon state");
+            _mainText.text = "出牌完成，但未找到战斗仲裁信息";
+        }
+
+        Debug.Log("PlayCards action completed and combat status evaluated");
+
+        // 异步跑着，评估战斗状态，完成后会刷新地下城状态并更新UI显示
+        DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
+    }
+
 
 }
 
