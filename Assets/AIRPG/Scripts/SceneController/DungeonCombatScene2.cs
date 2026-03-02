@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using UnityEngine.SceneManagement;
 
 public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 {
@@ -21,6 +22,9 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     [SerializeField] private Button _onGoingButton; // On Going 按钮，用于测试事件系统的目标对象
     [SerializeField] private GameObject _arbitrationPanel; // 仲裁面板对象
     [SerializeField] private TMP_Text _arbitrationText; // 仲裁面板文本对象
+    [SerializeField] private GameObject _postCombatPanel; // 战斗后面板对象
+    [SerializeField] private TMP_Text _postCombatText; // 战斗后面板文本对象
+
 
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
@@ -33,7 +37,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     private List<EntitySerialization> _mockActorData;// Mock 数据 - 用于测试
 
     private bool _pendingDungeonSync = false; // 标志是否有一次待执行的地下城同步请求
-    private bool _isSyncInProgress = false; // 标志当前是否正在执行数据同步，防止重入
 
     void Awake()
     {
@@ -60,7 +63,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         Debug.Assert(_onGoingButton != null, "_onGoingButton is null");
         Debug.Assert(_arbitrationPanel != null, "_arbitrationPanel is null");
         Debug.Assert(_arbitrationText != null, "__arbitrationText is null");
-
+        Debug.Assert(_postCombatPanel != null, "_postCombatPanel is null");
+        Debug.Assert(_postCombatText != null, "_postCombatText is null");
         // 注册事件监听器
         _onCardElementClickedEvent.RegisterListener(this);
         _onActionOrderClickedEvent.RegisterListener(this);
@@ -82,6 +86,9 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         // 故意关闭仲裁面板，确保初始状态是关闭的
         HideArbitrationPanel();
 
+        // 故意关闭战斗后面板，确保初始状态是关闭的
+        HidePostCombatPanel();
+
         // 刷新场景初始化
         if (GameContext.Instance.IsLoggedIn)
         {
@@ -97,8 +104,9 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     {
         if (GameContext.Instance.IsLoggedIn)
         {
-            if (_pendingDungeonSync && !_isSyncInProgress)
+            if (_pendingDungeonSync)
             {
+                _pendingDungeonSync = false; // 重置标志，避免重复同步
                 SyncDungeonAndActorData().Forget();
             }
         }
@@ -136,12 +144,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>
     public void OnClickOnGoing()
     {
-        if (_pendingDungeonSync || _isSyncInProgress)
-        {
-            Debug.LogWarning("Refresh in progress, cannot execute On Going action");
-            return;
-        }
-
         Debug.Log("On Going button clicked");
 
         var combatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
@@ -156,7 +158,11 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 break;
 
             case CombatState.COMPLETE:
-                Debug.LogWarning("Combat is already complete, cannot execute escape action");
+                ExecutePostCombat().Forget();
+                break;
+
+            case CombatState.POST_COMBAT:
+                ExecuteAdvanceNext().Forget();
                 break;
 
             default:
@@ -172,6 +178,15 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     {
         Debug.Log("Close Arbitration button clicked");
         HideArbitrationPanel();
+    }
+
+    /// <summary>
+    /// 点击 Advance Next 按钮
+    /// </summary>
+    public void OnClickAdvanceNext()
+    {
+        Debug.Log("Advance Next button clicked");
+        HidePostCombatPanel();
     }
 
     /// <summary>
@@ -594,7 +609,10 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 isInteractable = true;
                 break;
             case CombatState.COMPLETE:
-                isInteractable = false;
+                isInteractable = true;
+                break;
+            case CombatState.POST_COMBAT:
+                isInteractable = true;
                 break;
             default:
                 Debug.LogWarning($"Unknown combat state: {combatState}");
@@ -648,11 +666,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         int targetCount = 0;
         foreach (var actor in allActors)
         {
-            //if (actor.name != selectedActor.name)
-            //{
             CardBuilder.AddElement(new CardElementData(actor));
             targetCount++;
-            //}
         }
         Debug.Log($"[LoadCardElementsFromActor] 添加了 {targetCount} 个目标角色");
 
@@ -701,20 +716,11 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
     private async UniTaskVoid SyncDungeonAndActorData()
     {
-        if (_isSyncInProgress)
-        {
-            Debug.LogWarning("Already syncing data, skipping this cycle");
-            return;
-        }
-
-        _isSyncInProgress = true;
-
         // 不论 CombatInit 成功与否，都尝试刷新并更新 UI
         var apiSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
         if (!apiSuccess)
         {
             Debug.LogError("[DungeonCombatScene] Failed to refresh dungeon and actors data");
-            _isSyncInProgress = false;
             return;
         }
 
@@ -736,20 +742,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             Debug.LogWarning("可能是空数据");
         }
 
-        // 刷新！
+        // 更新主文本显示，展示当前卡牌构建数据的状态
         UpdateMainTextByCardBuild(CardBuilder.Build);
 
         // 更新角色槽位显示
         UpdateActionOrder();
 
-        //
+        // 根据当前战斗状态更新 On Going 按钮的状态
         UpdateOnGoingButtonState();
-
-        // 关闭同步标志，允许下一次刷新调用
-        _isSyncInProgress = false;
-
-        // 关闭待同步标志，避免重复刷新导致的性能问题
-        _pendingDungeonSync = false;
     }
 
     /// <summary>
@@ -801,7 +801,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             return;
         }
 
-        _pendingDungeonSync = true; // 标记有一次待执行的同步请求，确保在抽卡完成后能够及时获取最新的地下城状态并更新 UI
+        // 标记有一次待执行的同步请求，确保在抽卡完成后能够及时获取最新的地下城状态并更新 UI
+        _pendingDungeonSync = true;
     }
 
     /// <summary>
@@ -876,22 +877,55 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>  
     private void UpdateOnGoingButtonState()
     {
-        var actors = GetCurrentRoundActors();
-        var hasHandActors = new List<EntitySerialization>();
-        for (int i = 0; i < actors.Count; i++)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            var handComponent = GameUtils.GetComponent<HandComponent>(actors[i]);
-            if (handComponent != null && handComponent.cards != null && handComponent.cards.Count > 0)
-            {
-                hasHandActors.Add(actors[i]);
-            }
+            _onGoingButton.gameObject.GetComponentInChildren<TMP_Text>().text = "On Going (模拟数据)";
+            return;
         }
 
-        //
-        Debug.Log($"UpdateOnGoingButtonState: {hasHandActors.Count}/{actors.Count} actors have hand cards");
-        _onGoingButton.gameObject.GetComponentInChildren<TMP_Text>().text = $"On Going ({hasHandActors.Count}/{actors.Count})";
-    }
+        var combatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
+        switch (combatState)
+        {
+            case CombatState.INITIALIZATION:
+                //Debug.LogWarning("Combat is in initialization state, cannot execute escape action");
+                break;
 
+            case CombatState.ONGOING:
+                Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
+                if (currentCombat != null)
+                {
+                    var actors = GetCurrentRoundActors();
+                    var hasHandActors = new List<EntitySerialization>();
+                    for (int i = 0; i < actors.Count; i++)
+                    {
+                        var handComponent = GameUtils.GetComponent<HandComponent>(actors[i]);
+                        if (handComponent != null && handComponent.cards != null && handComponent.cards.Count > 0)
+                        {
+                            hasHandActors.Add(actors[i]);
+                        }
+                    }
+
+                    //
+                    Debug.Log($"UpdateOnGoingButtonState: {hasHandActors.Count}/{actors.Count} actors have hand cards");
+                    _onGoingButton.gameObject.GetComponentInChildren<TMP_Text>().text = $"{hasHandActors.Count}/{actors.Count}";
+                }
+                break;
+
+            case CombatState.COMPLETE:
+                //Debug.LogWarning("Combat is already complete, cannot execute escape action");
+                //Debug.Log("战斗已完成，禁用 On Going 按钮");
+                _onGoingButton.gameObject.GetComponentInChildren<TMP_Text>().text = "=> Post Combat";
+                break;
+
+            case CombatState.POST_COMBAT:
+                _onGoingButton.gameObject.GetComponentInChildren<TMP_Text>().text = "=> Advance Next";
+                break;
+
+            default:
+                Debug.LogWarning($"Unknown combat state: {combatState}");
+                break;
+        }
+    }
 
     /// <summary>
     /// 显示仲裁面板并设置消息内容
@@ -910,6 +944,100 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     {
         _arbitrationPanel.SetActive(false);
         _arbitrationText.text = string.Empty;
+    }
+
+    /// <summary>
+    /// 显示战斗后面板并设置消息内容
+    /// </summary> 
+    /// <param name="message">战斗后面板显示的消息</param>
+    private void ShowPostCombatPanel(string message)
+    {
+        _postCombatPanel.SetActive(true);
+        _postCombatText.text = message;
+    }
+
+    /// <summary>
+    /// 隐藏战斗后面板并清空消息内容
+    /// </summary>
+    private void HidePostCombatPanel()
+    {
+        _postCombatPanel.SetActive(false);
+        _postCombatText.text = string.Empty;
+    }
+
+    /// <summary>
+    /// 战斗后处理
+    /// 调用服务器 post_combat 接口进行战斗后处理，成功后刷新地下城状态显示
+    /// </summary>
+    private async UniTaskVoid ExecutePostCombat()
+    {
+        ShowPostCombatPanel("正在执行战斗后处理...");
+
+        var sessionMessages = await DungeonGamePlayManager.Instance.PostCombat();
+        if (sessionMessages == null)
+        {
+            Debug.LogWarning("Failed to get session messages from post combat");
+            ShowPostCombatPanel("战斗后处理失败，无法获取事件信息");
+            return;
+        }
+
+        // 然后逐个处理返回的 SessionMessage，特别是 CombatArchiveEvent
+        var showText = "战斗后事件：\n\n";
+
+        for (int i = 0; i < sessionMessages.Count; i++)
+        {
+            SessionMessage sessionMessage = sessionMessages[i];
+            if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
+            {
+                continue;
+            }
+
+            var agentEvent = GameUtils.ParseAgentEvent(sessionMessage);
+            if (agentEvent == null)
+            {
+                Debug.LogWarning("Failed to parse agent event from session message");
+                continue;
+            }
+
+            if (agentEvent.head == (int)EventHead.COMBAT_ARCHIVE_EVENT)
+            {
+                Debug.Log("Processing CombatArchiveEvent from post combat");
+                if (agentEvent is CombatArchiveEvent combatArchiveEvent)
+                {
+                    showText += $"Actor: {combatArchiveEvent.actor}\nSummary: {combatArchiveEvent.summary}\n\n";
+                }
+            }
+        }
+
+        // 显示战斗后事件信息
+        ShowPostCombatPanel(showText);
+
+        // 标记有一次待执行的同步请求，确保在战斗后处理完成后能够及时获取最新的地下城状态并更新 UI
+        _pendingDungeonSync = true;
+    }
+
+    /// <summary>
+    /// 进入下一关处理
+    /// </summary>
+    /// <returns></returns>
+    private async UniTaskVoid ExecuteAdvanceNext()
+    {
+        var messages = await DungeonGamePlayManager.Instance.AdvanceNextDungeon();
+        if (messages == null)
+        {
+            Debug.LogWarning("Failed to advance to next dungeon, no messages returned");
+            return;
+        }
+
+        var apiSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        if (!apiSuccess)
+        {
+            Debug.LogError("[DungeonCombatScene] Failed to refresh dungeon and actors data");
+            return;
+        }
+
+        await UniTask.Yield();
+        SceneManager.LoadScene(_nextScene);
     }
 }
 
