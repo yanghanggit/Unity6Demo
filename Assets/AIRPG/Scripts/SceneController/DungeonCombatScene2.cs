@@ -291,10 +291,11 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     private async UniTask<bool> RefreshAndCheckAllActorsDrawn()
     {
         // 刷新玩家所在场景中所有演员的最新数据
-        bool refreshSuccess = await GameStateSync.Instance.RefreshActorsInActorStageFromServer(GameContext.Instance.PlayerActor);
-        if (!refreshSuccess)
+        var actorEntities = await GameStateSync.Instance.RefreshActorsInStageFromServer(GameContext.Instance.PlayerActor);
+        if (actorEntities == null)
         {
             Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: failed to refresh actors in stage");
+            return false;
         }
 
         // 数据已是最新，获取当前回合的角色列表
@@ -684,8 +685,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     private async UniTaskVoid ExecuteCombatInit()
     {
         // 先刷新一次
-        bool apiSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
-        if (!apiSuccess)
+        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
+        if (dungeon == null)
         {
             Debug.LogError("[DungeonCombatScene] Failed to refresh dungeon data");
             return;
@@ -844,8 +845,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
         ShowArbitrationPanel("服务器已完成出牌操作的处理，正在刷新数据...");
 
-        bool apiSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
-        if (!apiSuccess)
+        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
+        if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data");
             return;

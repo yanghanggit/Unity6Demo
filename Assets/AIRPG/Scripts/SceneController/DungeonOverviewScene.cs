@@ -58,7 +58,7 @@ public class DungeonOverviewScene : MonoBehaviour
             return;
         }
 
-        await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+        await GameStateSync.Instance.RefreshStageActorMappingAndEntitiesFromServer();
 
         await UniTask.Yield();
         SceneManager.LoadScene(_nextScene);

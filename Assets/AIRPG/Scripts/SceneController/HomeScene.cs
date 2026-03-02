@@ -342,7 +342,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
                 return false;
             }
 
-            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+            await GameStateSync.Instance.RefreshStageActorMappingAndActorDetailsFromServer();
             Debug.Log($"[HomeScene] Successfully switched to stage: {targetStageName}");
             return true;
         }
@@ -399,7 +399,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         {
             Debug.Log($"[HomeScene] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
 
-            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+            await GameStateSync.Instance.RefreshStageActorMappingAndActorDetailsFromServer();
             RefreshActorList();
         }
 

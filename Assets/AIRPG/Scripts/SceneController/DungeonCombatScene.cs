@@ -268,8 +268,8 @@ public class DungeonCombatScene : MonoBehaviour
 
         _mainText.text = "打牌处理完成，正在加载结果...";
 
-        bool refreshSuccess = await GameStateSync.Instance.RefreshDungeonFromServer();
-        if (!refreshSuccess)
+        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
+        if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data");
             _mainText.text = "刷新地下城数据失败";
@@ -461,8 +461,8 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 最后需要获取最新个的数据，因为服务器推进了地下城状态
-        bool refreshOk = await GameStateSync.Instance.RefreshDungeonFromServer();
-        if (!refreshOk)
+        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
+        if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data after post combat");
         }
