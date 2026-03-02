@@ -15,14 +15,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     [SerializeField] private TMP_Text _combatInfoText; // 战斗信息显示对象
     [SerializeField] private TMP_Text _mainText; // 主文本显示对象
     [SerializeField] private LoopHorizontalScrollRect _scrollView; // 动态滚动视图
-    [SerializeField] private ActorOrderSlot[] _actorSlots; // 角色槽位数组
+    [SerializeField] private ActionOrderObject[] _actionOrderObjects; // 角色槽位数组
     [SerializeField] private GameObject _mainGameObject; // 场景主对象，用于测试 Find 和事件系统的目标对象
     [SerializeField] private GameObject _bottomGameObject; // 行动顺序对象，用于测试 Find 和事件系统的目标对象
 
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
-    [SerializeField] private UIEventGameEvent _onActorSlotClickedEvent; // 角色槽位点击事件
-    [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件
+    [SerializeField] private UIEventGameEvent _onActionOrderClickedEvent; // 角色槽位点击事件
+    [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件    
 
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi;
@@ -40,12 +40,13 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         // 断言检查，确保所有必要的组件和数据都已正确设置
         Debug.Assert(_combatInfoText != null, "_combatInfoText is null");
         Debug.Assert(_mainText != null, "Main Text component is not assigned in the inspector.");
-        Debug.Assert(_actorSlots != null && _actorSlots.Length > 0, "Actor slots are not assigned in the inspector.");
+        Debug.Assert(_actionOrderObjects != null && _actionOrderObjects.Length > 0, "Action order objects are not assigned in the inspector.");
         Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
         Debug.Assert(_backgroundImage != null, "Background Image component is not assigned in the inspector.");
         Debug.Assert(_onCardElementClickedEvent != null, "_onCardClickedEvent is null");
-        Debug.Assert(_onActorSlotClickedEvent != null, "_onActorSlotClickedEvent is null");
+        Debug.Assert(_onActionOrderClickedEvent != null, "_onActionOrderClickedEvent is null");
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
+        //Debug.Assert(_onHandComponentChangedEvent != null, "_onHandComponentChangedEvent is null");
         Debug.Assert(_mockActorData != null && _mockActorData.Count > 0, "Mock actor data is not initialized");
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
         Debug.Assert(_tasksStatusApi != null, "TasksStatusApi component is not assigned in the inspector.");
@@ -54,7 +55,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
         // 注册事件监听器
         _onCardElementClickedEvent.RegisterListener(this);
-        _onActorSlotClickedEvent.RegisterListener(this);
+        _onActionOrderClickedEvent.RegisterListener(this);
         _onCardBuilderDataChangedEvent.RegisterListener(this);
 
         // 第一次更新，显示空数据的文本。
@@ -73,7 +74,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         UpdateMainTextWithCardBuildData(CardBuilder.Build);
 
         // 根据当前地下城状态更新角色槽位显示
-        UpdateActorSlots();
+        UpdateActionOrder();
 
         // 刷新场景初始化
         if (GameContext.Instance.IsLoggedIn)
@@ -94,9 +95,9 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             _onCardElementClickedEvent.UnregisterListener(this);
         }
 
-        if (_onActorSlotClickedEvent != null)
+        if (_onActionOrderClickedEvent != null)
         {
-            _onActorSlotClickedEvent.UnregisterListener(this);
+            _onActionOrderClickedEvent.UnregisterListener(this);
         }
 
         if (_onCardBuilderDataChangedEvent != null)
@@ -139,13 +140,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 if (CardBuilder.Build.owner == null)
                 {
                     Debug.LogWarning("No actor selected, cannot execute escape action");
-                    break;
-                }
-
-                var handComponent = GameUtils.GetComponent<HandComponent>(CardBuilder.Build.owner);
-                if (handComponent != null)
-                {
-                    Debug.LogWarning("Selected actor has hand cards, cannot execute escape action");
                     break;
                 }
 
@@ -228,31 +222,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 // 派发 CardBuilder 数据已改变事件
                 _onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
 
-                //UpdateMainTextWithCardBuildData(CardBuilder.Build);
+                //
                 break;
 
-            case UIEventType.ActorOrderSlotClick:
+            case UIEventType.ActionOrderClick:
 
                 Debug.Log($"处理角色槽位点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
 
-                List<EntitySerialization> allActors = null;
-                if (GameContext.Instance.IsLoggedIn)
-                {
-                    Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
-                    if (round != null && round.action_order != null)
-                    {
-                        Debug.Log($"Current round action order: {string.Join(", ", round.action_order)}");
-                        allActors = GameContext.Instance.GetActorEntitiesSerialization(round.action_order);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("DungeonCombatScene: No round or action order data found for current dungeon");
-                    }
-                }
-                else
-                {
-                    allActors = _mockActorData;
-                }
+                var allActors = GetCurrentRoundActors();
 
                 if (allActors == null)
                 {
@@ -278,7 +255,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 {
                     // 有卡牌，就不能加载 Build 数据了，先显示手牌数据。
                     UpdateMainTextWithHandData(selectedActor);
-                    LoadCardElementsFromActor(selectedActor, new List<EntitySerialization>());
+                    LoadCardElementsFromActor(selectedActor, allActors);
                     break;
                 }
 
@@ -288,7 +265,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 {
                     // 先显示敌人的战斗属性和状态效果信息，后续可以扩展显示更多内容。
                     UpdateMainTextWithEnemyData(selectedActor);
-                    LoadCardElementsFromActor(selectedActor, new List<EntitySerialization>()); // 敌人不加载目标角色数据
+                    LoadCardElementsFromActor(selectedActor, allActors); // 敌人不加载目标角色数据
                     break;
                 }
 
@@ -297,9 +274,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
                 LoadCardElementsFromActor(selectedActor, allActors);
 
                 // 派发 CardBuilder 数据已改变事件
-                //UpdateMainTextWithCardBuildData(CardBuilder.Build);
-
-                //
                 _onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
 
                 break;
@@ -350,7 +324,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// <summary>
     /// 更新角色槽位显示，根据当前 mock 数据刷新每个槽位的角色信息
     /// </summary>
-    private void UpdateActorSlots()
+    private void UpdateActionOrder()
     {
         if (GameContext.Instance.IsLoggedIn)
         {
@@ -366,22 +340,22 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             if (round.action_order == null || round.action_order.Count == 0)
             {
                 Debug.LogWarning("DungeonCombatScene: No action order data found in current round");
-                SetActorSlots(new List<EntitySerialization>()); // 传入空列表，隐藏所有槽位
+                SetActionOrder(new List<EntitySerialization>()); // 传入空列表，隐藏所有槽位
                 return;
             }
 
-            Debug.Log($"DungeonCombatScene: Updating actor slots with {round.action_order.Count} actors in action order");
+            Debug.Log($"DungeonCombatScene: Updating actor with {round.action_order.Count} actors in action order");
 
             // 根据当前回合的行动顺序获取对应的角色实体数据列表
             List<EntitySerialization> actorsInActionOrder = GameContext.Instance.GetActorEntitiesSerialization(round.action_order);
 
             // 根据当前回合的行动顺序更新角色槽位显示
-            SetActorSlots(actorsInActionOrder);
+            SetActionOrder(actorsInActionOrder);
         }
         else
         {
             // mock 数据的显示逻辑
-            SetActorSlots(_mockActorData);
+            SetActionOrder(_mockActorData);
         }
     }
 
@@ -457,21 +431,50 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// 根据传入的角色列表设置角色槽位的显示内容
     /// 列表长度不足时，多余的槽位会被隐藏
     /// </summary>
-    private void SetActorSlots(List<EntitySerialization> actors)
+    private void SetActionOrder(List<EntitySerialization> actors)
     {
-        for (int i = 0; i < _actorSlots.Length; i++)
+        for (int i = 0; i < _actionOrderObjects.Length; i++)
         {
             if (i < actors.Count)
             {
-                _actorSlots[i].gameObject.SetActive(true);
-                _actorSlots[i].SetData(actors[i]);
-                _actorSlots[i].RefreshUI();
+                _actionOrderObjects[i].gameObject.SetActive(true);
+                _actionOrderObjects[i].SetData(actors[i]);
+                _actionOrderObjects[i].RefreshUI();
             }
             else
             {
-                _actorSlots[i].gameObject.SetActive(false);
+                _actionOrderObjects[i].gameObject.SetActive(false);
             }
         }
+    }
+
+    /// <summary>
+    /// 获取当前回合的所有演员列表
+    /// 如果已登录，从地下城的最后一个回合获取行动顺序对应的演员数据
+    /// 如果未登录，返回 mock 数据
+    /// </summary>
+    /// <returns>当前回合的演员列表，如果获取失败则返回 null</returns>
+    private List<EntitySerialization> GetCurrentRoundActors()
+    {
+        List<EntitySerialization> allActors = null;
+        if (GameContext.Instance.IsLoggedIn)
+        {
+            Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+            if (round != null && round.action_order != null)
+            {
+                Debug.Log($"Current round action order: {string.Join(", ", round.action_order)}");
+                allActors = GameContext.Instance.GetActorEntitiesSerialization(round.action_order);
+            }
+            else
+            {
+                Debug.LogWarning("DungeonCombatScene: No round or action order data found for current dungeon");
+            }
+        }
+        else
+        {
+            allActors = _mockActorData;
+        }
+        return allActors;
     }
 
     /// <summary>
@@ -501,7 +504,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
 
         // 更新主对象和行动顺序对象的可见性
-        //isInteractable = true;
         _mainGameObject.SetActive(isInteractable);
         _bottomGameObject.SetActive(isInteractable);
     }
@@ -609,7 +611,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         UpdateCombatInfoText();
 
         // 更新角色槽位显示
-        UpdateActorSlots();
+        UpdateActionOrder();
     }
 
     /// <summary>
@@ -623,8 +625,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
         // 尝试性质刷新地下城状态，模拟服务器交互的结果
         UpdateCombatUIVisibility();
+        _mainGameObject.SetActive(true);
+        _bottomGameObject.SetActive(true);
+
+        //
         UpdateCombatInfoText();
-        UpdateActorSlots();
+
+        //
+        UpdateActionOrder();
     }
 
     /// <summary>
@@ -655,6 +663,30 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             Debug.LogError("Failed to refresh dungeon and actors data");
             return;
         }
+
+        // 根据当前战斗状态更新主对象的可交互状态
+        if (CardBuilder.Build.owner != null)
+        {
+            var refreshedOwner = GameContext.Instance.GetActorEntitySerialization(CardBuilder.Build.owner.name);
+            Debug.Assert(refreshedOwner != null, $"Failed to get refreshed actor data for owner: {CardBuilder.Build.owner.name}");
+
+            //这个时候，owner的数据已经被刷新了，GameContext会变化，所以需要根据名字再对其一次。
+            CardBuilder.Clear();
+            CardBuilder.Build = new CardBuildData { owner = refreshedOwner };
+
+            var handComponent = GameUtils.GetComponent<HandComponent>(CardBuilder.Build.owner);
+            if (handComponent != null)
+            {
+                // 有卡牌，就不能加载 Build 数据了，先显示手牌数据。
+                UpdateMainTextWithHandData(CardBuilder.Build.owner);
+
+                var allActors = GetCurrentRoundActors();
+                LoadCardElementsFromActor(CardBuilder.Build.owner, allActors);
+            }
+        }
+
+        // 任务完成后，获取当前选中角色的数据并显示手牌信息
+        //_onHandComponentChangedEvent.Raise(new UIEventData(UIEventType.HandComponentChanged));
     }
 
     /// <summary>

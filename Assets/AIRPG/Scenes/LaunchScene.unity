@@ -516,7 +516,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f08fca2d85854c409f7591e5632b09f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gameApiBaseUrl: http://192.168.192.103:8000/
+  _gameApiBaseUrl: http://192.168.192.119:8000/
   _nextSceneName: LoginScene
   _rootApi: {fileID: 399892903}
   _loginButton: {fileID: 1202936521}

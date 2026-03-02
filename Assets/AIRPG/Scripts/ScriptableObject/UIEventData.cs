@@ -6,7 +6,7 @@ public enum UIEventType
 {
     None = 0, // 无事件
     CardElementScrollViewItemClick = 10, // CombatSceneUI 卡牌滚动视图项点击事件
-    ActorOrderSlotClick = 20, // CombatSceneUI 角色执行顺序槽位相关事件
+    ActionOrderClick = 20, // CombatSceneUI 角色执行顺序槽位相关事件
     CardBuilderDataChanged = 30, // CardBuilder.Build 数据被修改时触发
 }
 

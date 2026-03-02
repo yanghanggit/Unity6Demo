@@ -13,10 +13,10 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
 
     [SerializeField] private TMP_Text _title; // card名称文本
     [SerializeField] private Image _background; // 背景图片
-    [SerializeField] private Button _overlayButton;             // 覆盖层按钮,用于接收点击
+    [SerializeField] private Button _button; // 覆盖层按钮,用于接收点击
 
     [Header("Events")]
-    [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
+    [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件, 这个事件自己不可以再听了，是发送端，不能再监听了，否则会死循环。
     [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件
 
     // 保存当前索引，用于事件传递
@@ -31,12 +31,14 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
         base.OnEnable();
 
         // 先移除listener，确保不会重复添加
-        _overlayButton.onClick.RemoveListener(OnClick);
-        _overlayButton.onClick.AddListener(OnClick);
+        _button.onClick.RemoveListener(OnClick);
+        _button.onClick.AddListener(OnClick);
 
         // 注册 CardBuilder 数据变化监听
         if (_onCardBuilderDataChangedEvent != null)
+        {
             _onCardBuilderDataChangedEvent.RegisterListener(this);
+        }
     }
 
     /// <summary>
@@ -46,11 +48,24 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
     protected override void OnDisable()
     {
         base.OnDisable();
-        _overlayButton.onClick.RemoveListener(OnClick);
+
+        // 注销按钮点击事件监听
+        _button.onClick.RemoveListener(OnClick);
 
         // 取消注册
         if (_onCardBuilderDataChangedEvent != null)
+        {
             _onCardBuilderDataChangedEvent.UnregisterListener(this);
+        }
+    }
+
+    protected override void OnDestroy()
+    {
+        // 确保在销毁时清理事件监听，防止内存泄漏
+        if (_onCardBuilderDataChangedEvent != null)
+        {
+            _onCardBuilderDataChangedEvent.UnregisterListener(this);
+        }
     }
 
     /// <summary>
@@ -86,6 +101,7 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
         );
 
         // 触发事件，通知系统哪个卡牌要素被点击了
+        Debug.Assert(_onCardElementClickedEvent != null, "_onCardElementClickedEvent is null");
         _onCardElementClickedEvent.Raise(eventData);
     }
 
@@ -105,7 +121,6 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
 
         // 从 CardElementCollection 获取对应的卡牌要素数据
         var elementData = CardBuilder.GetElement(index);
-
         if (elementData == null)
         {
             _title.text = $"[错误] 索引 {index} 无数据";
@@ -137,7 +152,7 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
             case CardElementType.None:
             default:
                 elementName = "[未知类型]";
-                //baseColor = Color.gray;
+                baseColor = Color.gray;
                 break;
         }
 
@@ -148,9 +163,8 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
         string displayName = GameUtils.GetDisplayName(elementName);
         if (isSelected)
         {
-            displayName += " <已选择>";
-            // 已选中的项目背景色改为红色，便于测试阶段查看效果
-            baseColor = Color.red;
+            displayName += "\n<已选择>";
+            baseColor = Color.red;// 已选中的项目背景色改为红色，便于测试阶段查看效果
         }
 
         _title.text = displayName;

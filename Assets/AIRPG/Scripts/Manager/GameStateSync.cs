@@ -68,7 +68,7 @@ public class GameStateSync : MonoBehaviour
 
         // 获取场景与演员映射关系
         await _stagesStateApi.Call(GameContext.Instance.StagesStateUrl);
-        
+
         if (_stagesStateApi.ReqResult == null)
         {
             Debug.LogError("[GameStateSync] Failed to fetch stages state from server: request result is null");
@@ -103,7 +103,7 @@ public class GameStateSync : MonoBehaviour
 
         // 获取场景详情数据
         await _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, stages);
-        
+
         if (_entityDetailsApi.ReqResult == null)
         {
             Debug.LogError("[GameStateSync] Failed to fetch stage details from server: request result is null");
@@ -138,7 +138,7 @@ public class GameStateSync : MonoBehaviour
 
         // 获取演员详情数据
         await _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, actors);
-        
+
         if (_entityDetailsApi.ReqResult == null)
         {
             Debug.LogError("[GameStateSync] Failed to fetch actor details from server: request result is null");
@@ -248,7 +248,7 @@ public class GameStateSync : MonoBehaviour
         }
 
         await _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
-        
+
         if (_dungeonStateApi.ReqResult == null)
         {
             Debug.LogError("[GameStateSync] Failed to fetch dungeon state from server: request result is null");
@@ -265,6 +265,38 @@ public class GameStateSync : MonoBehaviour
 
         GameContext.Instance.StageActorMapping = _dungeonStateApi.RespData.mapping;
         GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
+        return true;
+    }
+
+    /// <summary>
+    /// 从服务器刷新指定演员所在场景中所有演员的详情数据
+    /// </summary>
+    /// <param name="actorName">演员名称，将获取该演员所在场景的所有演员详情</param>
+    /// <returns>是否成功</returns>
+    public async UniTask<bool> RefreshActorsInActorStageFromServer(string actorName)
+    {
+        // 获取指定演员所在场景的所有演员列表
+        var stageName = GameContext.Instance.GetActorStage(actorName);
+        if (string.IsNullOrEmpty(stageName))
+        {
+            Debug.LogError($"[GameStateSync] Actor '{actorName}' stage not found in mapping");
+            return false;
+        }
+
+        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        if (actorsInStage.Count == 0)
+        {
+            Debug.LogWarning($"[GameStateSync] No actors found in stage '{stageName}'");
+            return false;
+        }
+
+        // 刷新当前场景中所有演员的详情数据
+        if (!await RefreshActorDetailsFromServer(actorsInStage))
+        {
+            Debug.LogError($"[GameStateSync] Failed to refresh actors in stage '{stageName}'");
+            return false;
+        }
+
         return true;
     }
 
@@ -286,25 +318,10 @@ public class GameStateSync : MonoBehaviour
             return false;
         }
 
-        // 步骤2: 获取当前演员所在场景的所有演员列表
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
-        if (string.IsNullOrEmpty(stageName))
+        // 步骤2: 刷新玩家所在场景中所有演员的详情数据
+        if (!await RefreshActorsInActorStageFromServer(GameContext.Instance.PlayerActor))
         {
-            Debug.LogError("[GameStateSync] Current actor's stage not found in mapping");
-            return false;
-        }
-
-        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
-        if (actorsInStage.Count == 0)
-        {
-            Debug.LogWarning("[GameStateSync] No actors found in the current actor's stage");
-            return false;
-        }
-
-        // 步骤3: 刷新当前场景中所有演员的详情数据
-        if (!await RefreshActorDetailsFromServer(actorsInStage))
-        {
-            Debug.LogError("RefreshDungeonAndActorsFromServer failed at step 3");
+            Debug.LogError("RefreshDungeonAndActorsFromServer failed at step 2");
             return false;
         }
 
