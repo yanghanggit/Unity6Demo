@@ -36,7 +36,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
 
 
 
-            UpdateState(_currentActor);
+            SetupForActor(_currentActor);
         }
     }
 
@@ -47,7 +47,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         Debug.Assert(_buildButton != null, "Build Button component is not assigned in the inspector.");
         Debug.Assert(_onCardElementClickedEvent != null, "_onCardElementClickedEvent is null");
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
-
 
         // 注册事件监听器
         _onCardElementClickedEvent.RegisterListener(this);
@@ -76,7 +75,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     /// <summary>
     /// 根据当前角色数据更新构筑按钮的状态
     /// </summary>
-    private void UpdateState(EntitySerialization actorEntity)
+    private void SetupForActor(EntitySerialization actorEntity)
     {
         Debug.Assert(actorEntity != null, "Current actor data is null");
 
@@ -105,10 +104,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     {
         // 更新主文本显示当前角色名称
         _buildButton.GetComponentInChildren<TMP_Text>().text = GameUtils.GetDisplayName(actorEntity.name);
-
-        // var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(actorEntity);
-        // Debug.Assert(combatStatsComponent != null, $"CombatStatsComponent is missing for actor: {actorEntity.name}");
-        // _buildButton.GetComponentInChildren<TMP_Text>().text += $"\n{combatStatsComponent.stats.hp}/{combatStatsComponent.stats.max_hp}";
 
         // 更新滚动视图显示当前角色的卡牌元素
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(actorEntity.name);
@@ -156,7 +151,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         _currentActor = _actorEntities[preIndex];
 
         // 更新主文本显示当前角色名称
-        UpdateState(_currentActor);
+        SetupForActor(_currentActor);
     }
 
     /// <summary>
@@ -185,7 +180,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         _currentActor = _actorEntities[nextIndex];
 
         // 更新主文本显示当前角色名称
-        UpdateState(_currentActor);
+        SetupForActor(_currentActor);
     }
 
     /// <summary>

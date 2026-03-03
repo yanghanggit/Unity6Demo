@@ -151,8 +151,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 923514721}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.41273254}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -229,9 +229,9 @@ RectTransform:
   m_Father: {fileID: 1746666107}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -17, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &46536183
 MonoBehaviour:
@@ -320,7 +320,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 1089.033}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &86104818
 MonoBehaviour:
@@ -356,17 +356,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u5206\u6790\u6B64\u4EE3\u7801\u5E93\uFF0C\u751F\u6210\u6216\u66F4\u65B0
-    .github/copilot-instructions.md \u6587\u4EF6\uFF0C\u4EE5\u6307\u5BFC AI \u7F16\u7801\u4EE3\u7406\u3002\n\n\u91CD\u70B9\u5728\u4E8E\u53D1\u73B0\u80FD\u591F\u5E2E\u52A9
-    AI \u4EE3\u7406\u7ACB\u5373\u5728\u6B64\u4EE3\u7801\u5E93\u4E2D\u9AD8\u6548\u5DE5\u4F5C\u7684\u5173\u952E\u77E5\u8BC6\u3002\u8003\u8651\u4EE5\u4E0B\u65B9\u9762\uFF1A\n\n\u9700\u8981\u9605\u8BFB\u591A\u4E2A\u6587\u4EF6\u624D\u80FD\u7406\u89E3\u7684\u201C\u5168\u5C40\u201D\u67B6\u6784\u2014\u2014\u4E3B\u8981\u7EC4\u4EF6\u3001\u670D\u52A1\u8FB9\u754C\u3001\u6570\u636E\u6D41\u4EE5\u53CA\u7ED3\u6784\u51B3\u7B56\u80CC\u540E\u7684\u201C\u539F\u56E0\u201D\u3002\n\n\u5173\u952E\u7684\u5F00\u53D1\u4EBA\u5458\u5DE5\u4F5C\u6D41\u7A0B\uFF08\u6784\u5EFA\u3001\u6D4B\u8BD5\u3001\u8C03\u8BD5\uFF09\uFF0C\u5C24\u5176\u662F\u4E00\u4E9B\u4EC5\u51ED\u6587\u4EF6\u68C0\u67E5\u65E0\u6CD5\u76F4\u63A5\u7406\u89E3\u7684\u547D\u4EE4\u3002\n\n\u4E0E\u901A\u7528\u5B9E\u8DF5\u4E0D\u540C\u7684\u9879\u76EE\u7279\u5B9A\u7EA6\u5B9A\u548C\u6A21\u5F0F\u3002\n\n\u96C6\u6210\u70B9\u3001\u5916\u90E8\u4F9D\u8D56\u9879\u548C\u8DE8\u7EC4\u4EF6\u901A\u4FE1\u6A21\u5F0F\u3002\n\n\u4ECE
-    **/{.github/copilot-instructions.md,AGENT.md,AGENTS.md,CLAUDE.md,.cursorrules,.windsurfrules,.clinerules,.cursor/rules/**,.windsurf/rules/**,.clinerules/**,README.md}
-    \u83B7\u53D6\u73B0\u6709\u7684 AI \u7EA6\u5B9A\uFF08\u8FDB\u884C\u4E00\u6B21
-    glob \u641C\u7D22\uFF09\u3002\n\n\u6307\u5357\uFF08\u66F4\u591A\u4FE1\u606F\u8BF7\u8BBF\u95EE
-    https://aka.ms/vscode-instructions-docs\uFF09\uFF1A\n\n\u5982\u679C .github/copilot-instructions.md
-    \u6587\u4EF6\u5DF2\u5B58\u5728\uFF0C\u8BF7\u8FDB\u884C\u667A\u80FD\u5408\u5E76\u2014\u2014\u5728\u66F4\u65B0\u8FC7\u65F6\u90E8\u5206\u7684\u540C\u65F6\u4FDD\u7559\u6709\u4EF7\u503C\u7684\u5185\u5BB9\u3002\n\n\u4F7F\u7528
-    Markdown \u7ED3\u6784\u7F16\u5199\u7B80\u6D01\u3001\u53EF\u64CD\u4F5C\u7684\u8BF4\u660E\uFF08\u7EA6
-    20-50 \u884C\uFF09\u3002\n\n\u63CF\u8FF0\u6A21\u5F0F\u65F6\uFF0C\u8BF7\u5305\u542B\u4EE3\u7801\u5E93\u4E2D\u7684\u5177\u4F53\u793A\u4F8B\u3002\n\n\u907F\u514D\u4F7F\u7528\u901A\u7528\u5EFA\u8BAE\uFF08\u4F8B\u5982\u201C\u7F16\u5199\u6D4B\u8BD5\u201D\u3001\u201C\u5904\u7406\u9519\u8BEF\u201D\uFF09\u2014\u2014\u4E13\u6CE8\u4E8E\u672C\u9879\u76EE\u7684\u5177\u4F53\u65B9\u6CD5\u3002\n\n\u4EC5\u8BB0\u5F55\u53EF\u53D1\u73B0\u7684\u6A21\u5F0F\uFF0C\u800C\u975E\u7406\u60F3\u5316\u7684\u5B9E\u8DF5\u3002\n\n\u5F15\u7528\u80FD\u591F\u4F53\u73B0\u91CD\u8981\u6A21\u5F0F\u7684\u5173\u952E\u6587\u4EF6/\u76EE\u5F55\u3002\n\n\u66F4\u65B0
-    .github/copilot-instructions.md \u6587\u4EF6\u4F9B\u7528\u6237\u4F7F\u7528\uFF0C\u7136\u540E\u5C31\u4EFB\u4F55\u4E0D\u6E05\u6670\u6216\u4E0D\u5B8C\u6574\u7684\u90E8\u5206\u5F81\u6C42\u53CD\u9988\u610F\u89C1\uFF0C\u4EE5\u4FBF\u8FED\u4EE3\u6539\u8FDB\u3002"
+  m_text: "\u6218\u6597\u540E\u5904\u7406\u9636\u6BB5\uFF01\uFF01\uFF01"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,
@@ -1113,8 +1103,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 609386189}
   m_HandleRect: {fileID: 609386188}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.5726735
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1594,13 +1584,15 @@ GameObject:
   - component: {fileID: 337745492}
   - component: {fileID: 337745494}
   - component: {fileID: 337745493}
+  - component: {fileID: 337745496}
+  - component: {fileID: 337745495}
   m_Layer: 5
-  m_Name: PostCombat
+  m_Name: PostCombatState
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &337745492
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1642,8 +1634,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 7736607024765954721, guid: 7a5e391422cf94750a4ef4f7f323c9c8,
+    type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -1660,6 +1653,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 337745491}
   m_CullTransparentMesh: 1
+--- !u!114 &337745495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337745491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6266a492c41584be3a551942deedc4d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatBackground
+  _backgroundImage: {fileID: 337745493}
+--- !u!114 &337745496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337745491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8461a827c717f40fe9cea503c7a9ce04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatPostCombatState
+  _mainText: {fileID: 86104819}
 --- !u!1 &399892899
 GameObject:
   m_ObjectHideFlags: 0
@@ -1707,15 +1726,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonCombatScene2
   _preScene: MainScene
   _nextScene: DungeonCombatScene2
-  _mainGameObject: {fileID: 1420096968}
-  _bottomGameObject: {fileID: 680271565}
-  _arbitrationPanel: {fileID: 1055363931}
-  _arbitrationText: {fileID: 1259827920}
-  _postCombatPanel: {fileID: 337745491}
-  _postCombatText: {fileID: 86104819}
   _topBar: {fileID: 132391926}
   _background: {fileID: 1261761014}
   _onGoingState: {fileID: 680271569}
+  _combatPostCombatState: {fileID: 337745496}
   _tasksStatusApi: {fileID: 399892902}
 --- !u!114 &399892902
 MonoBehaviour:
@@ -1981,8 +1995,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1058006132}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0.4273265}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2669,9 +2683,9 @@ RectTransform:
   m_Father: {fileID: 1927159537}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -17, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &842160315
 MonoBehaviour:
@@ -3216,7 +3230,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1055363932
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4028,7 +4042,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 1051.8406}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1259827919
 MonoBehaviour:
@@ -5853,7 +5867,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u5173\u95ED"
+  m_text: "\u4E0B\u4E00\u5173"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1ea61d4455ddc4f709d0c03f46350c8c, type: 2}
   m_sharedMaterial: {fileID: -7329718935311544710, guid: 1ea61d4455ddc4f709d0c03f46350c8c,
@@ -6328,9 +6342,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: DungeonCombatScene2, Assembly-CSharp
-        m_MethodName: OnClickAdvanceNext
+      - m_Target: {fileID: 337745496}
+        m_TargetAssemblyTypeName: CombatPostCombatState, Assembly-CSharp
+        m_MethodName: OnClickAdvanceButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

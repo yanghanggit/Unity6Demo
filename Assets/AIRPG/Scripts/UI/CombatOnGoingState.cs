@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class CombatOnGoingState : MonoBehaviour
+public class CombatOnGoingState : MonoBehaviour, ICombatState
 {
     [Header("UI Components")]
     [SerializeField] private TMP_Text _infoText; // 信息文本显示对象
@@ -10,7 +10,11 @@ public class CombatOnGoingState : MonoBehaviour
     [SerializeField] private CardBuildPanel _cardBuildPanel; // 卡牌构筑面板控制器
     [SerializeField] private ArbitrationPanel _arbitrationPanel; // 仲裁面板对象
 
+    // 用于存储 mock 数据的字段
     private List<EntitySerialization> _mockActorData;
+
+    // 实现 ICombatState 接口的 CombatScene 属性，用于接收当前战斗场景的引用
+    public ICombatScene CombatScene { get; set; }
 
     void Awake()
     {
@@ -43,9 +47,17 @@ public class CombatOnGoingState : MonoBehaviour
     {
         Debug.Log("Close Arbitration Panel Button Clicked");
         _arbitrationPanel.gameObject.SetActive(false);
+
+        RefreshView(); // 重新显示当前状态的 UI
+
+        // 测试一下
+        // CombatScene.SwitchCombatState(CombatState.POST_COMBAT);
     }
 
-    public void OnShow()
+    /// <summary>
+    /// 根据新的战斗状态切换 UI 显示和交互逻辑
+    /// </summary>
+    public void RefreshView()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {

@@ -1,63 +1,66 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+// using UnityEngine.UI;
+// using TMPro;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 
-public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
+public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
 {
     [Header("Scene Settings")]
     [SerializeField] private string _preScene = "MainScene";
     [SerializeField] private string _nextScene = "DungeonCombatScene2";
 
     [Header("UI Components")]
-    [SerializeField] private GameObject _mainGameObject; // 场景主对象，用于测试 Find 和事件系统的目标对象
-    [SerializeField] private GameObject _bottomGameObject; // 行动顺序对象，用于测试 Find 和事件系统的目标对象
-    [SerializeField] private GameObject _arbitrationPanel; // 仲裁面板对象
-    [SerializeField] private TMP_Text _arbitrationText; // 仲裁面板文本对象
-    [SerializeField] private GameObject _postCombatPanel; // 战斗后面板对象
-    [SerializeField] private TMP_Text _postCombatText; // 战斗后面板文本对象
+    // [SerializeField] private GameObject _mainGameObject; // 场景主对象，用于测试 Find 和事件系统的目标对象
+    // [SerializeField] private GameObject _bottomGameObject; // 行动顺序对象，用于测试 Find 和事件系统的目标对象
+    // //[SerializeField] private GameObject _arbitrationPanel; // 仲裁面板对象
+    // [SerializeField] private TMP_Text _arbitrationText; // 仲裁面板文本对象
+    // [SerializeField] private GameObject _postCombatPanel; // 战斗后面板对象
+    // [SerializeField] private TMP_Text _postCombatText; // 战斗后面板文本对象
 
     [Header("Top Bar")]
     [SerializeField] private CombatTopBar _topBar; // 顶部UI控制器
 
-    [Header("Background")]
-    [SerializeField] private CombatBackground _background; // 背景控制器
+    // [Header("Background")]
+    // [SerializeField] private CombatBackground _background; // 背景控制器
 
     [Header("OnGoing State")]
     [SerializeField] private CombatOnGoingState _onGoingState; // ONGOING 状态的设置数据
 
+    [Header("PostCombat State")]
+    [SerializeField] private CombatPostCombatState _combatPostCombatState; // 战斗后状态的设置数据
+
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi;
 
-    private List<EntitySerialization> _mockActorData;// Mock 数据 - 用于测试
+    //private List<EntitySerialization> _mockActorData;// Mock 数据 - 用于测试
 
     //private bool _pendingDungeonSync = false; // 标志是否有一次待执行的地下城同步请求
 
-    void Awake()
-    {
-        // 创建 mock 数据
-        _mockActorData = MockData.CreateActorData();
-    }
+    // void Awake()
+    // {
+    //     // 创建 mock 数据
+    //     _mockActorData = MockData.CreateActorData();
+    // }
 
     void Start()
     {
         // 断言检查，确保所有必要的组件和数据都已正确设置
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
-        Debug.Assert(_mockActorData != null && _mockActorData.Count > 0, "Mock actor data is not initialized");
+        //Debug.Assert(_mockActorData != null && _mockActorData.Count > 0, "Mock actor data is not initialized");
         Debug.Assert(_tasksStatusApi != null, "TasksStatusApi component is not assigned in the inspector.");
-        Debug.Assert(_mainGameObject != null, "_mainGameObject is null");
-        Debug.Assert(_bottomGameObject != null, "_bottomGameObject is null");
+        //Debug.Assert(_mainGameObject != null, "_mainGameObject is null");
+        //Debug.Assert(_bottomGameObject != null, "_bottomGameObject is null");
         //Debug.Assert(_onGoingButton != null, "_onGoingButton is null");
-        Debug.Assert(_arbitrationPanel != null, "_arbitrationPanel is null");
-        Debug.Assert(_arbitrationText != null, "__arbitrationText is null");
-        Debug.Assert(_postCombatPanel != null, "_postCombatPanel is null");
-        Debug.Assert(_postCombatText != null, "_postCombatText is null");
+        //Debug.Assert(_arbitrationPanel != null, "_arbitrationPanel is null");
+        // Debug.Assert(_arbitrationText != null, "__arbitrationText is null");
+        // Debug.Assert(_postCombatPanel != null, "_postCombatPanel is null");
+        // Debug.Assert(_postCombatText != null, "_postCombatText is null");
         Debug.Assert(_topBar != null, "_topBar is null");
-        Debug.Assert(_background != null, "_background is null");
+        //Debug.Assert(_background != null, "_background is null");
         Debug.Assert(_onGoingState != null, "_onGoingState is null");
-
+        Debug.Assert(_combatPostCombatState != null, "_combatPostCombatState is null");
 
         // 注册事件监听器
         // _onCardElementClickedEvent.RegisterListener(this);
@@ -67,8 +70,11 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
         // 先隐藏掉 _onGoingState
         _onGoingState.gameObject.SetActive(false);
+        _onGoingState.CombatScene = this; // 将当前场景作为属性传递给状态对象
 
-
+        // 初始状态先隐藏仲裁面板和战斗后面板
+        _combatPostCombatState.gameObject.SetActive(false);
+        _combatPostCombatState.CombatScene = this; // 将当前场景作为属性传递给状态对象
 
 
 
@@ -102,17 +108,17 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         // }
     }
 
-    void Update()
-    {
-        // if (GameContext.Instance.IsLoggedIn)
-        // {
-        //     if (_pendingDungeonSync)
-        //     {
-        //         _pendingDungeonSync = false; // 重置标志，避免重复同步
-        //         SyncDungeonAndActorData().Forget();
-        //     }
-        // }
-    }
+    // void Update()
+    // {
+    //     // if (GameContext.Instance.IsLoggedIn)
+    //     // {
+    //     //     if (_pendingDungeonSync)
+    //     //     {
+    //     //         _pendingDungeonSync = false; // 重置标志，避免重复同步
+    //     //         SyncDungeonAndActorData().Forget();
+    //     //     }
+    //     // }
+    // }
 
     // void OnDestroy()
     // {
@@ -136,52 +142,52 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// <summary>
     /// 点击 On Going 按钮
     /// </summary>
-    public void OnClickOnGoing()
-    {
-        Debug.Log("On Going button clicked");
+    // public void OnClickOnGoing()
+    // {
+    //     Debug.Log("On Going button clicked");
 
-        var combatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
-        switch (combatState)
-        {
-            case CombatState.INITIALIZATION:
-                Debug.LogWarning("Combat is in initialization state, cannot execute escape action");
-                break;
+    //     var combatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
+    //     switch (combatState)
+    //     {
+    //         case CombatState.INITIALIZATION:
+    //             Debug.LogWarning("Combat is in initialization state, cannot execute escape action");
+    //             break;
 
-            case CombatState.ONGOING:
-                ExecuteOnGoingActionAsync().Forget();
-                break;
+    //         case CombatState.ONGOING:
+    //             ExecuteOnGoingActionAsync().Forget();
+    //             break;
 
-            case CombatState.COMPLETE:
-                ExecutePostCombat().Forget();
-                break;
+    //         case CombatState.COMPLETE:
+    //             ExecutePostCombat().Forget();
+    //             break;
 
-            case CombatState.POST_COMBAT:
-                ExecuteAdvanceNext().Forget();
-                break;
+    //         case CombatState.POST_COMBAT:
+    //             ExecuteAdvanceNext().Forget();
+    //             break;
 
-            default:
-                Debug.LogWarning($"Unknown combat state: {combatState}");
-                break;
-        }
-    }
+    //         default:
+    //             Debug.LogWarning($"Unknown combat state: {combatState}");
+    //             break;
+    //     }
+    // }
 
     /// <summary>
     /// 点击 Close Arbitration 按钮
     /// </summary>
-    public void OnClickCloseArbitration()
-    {
-        Debug.Log("Close Arbitration button clicked");
-        HideArbitrationPanel();
-    }
+    // public void OnClickCloseArbitration()
+    // {
+    //     Debug.Log("Close Arbitration button clicked");
+    //     HideArbitrationPanel();
+    // }
 
-    /// <summary>
-    /// 点击 Advance Next 按钮
-    /// </summary>
-    public void OnClickAdvanceNext()
-    {
-        Debug.Log("Advance Next button clicked");
-        HidePostCombatPanel();
-    }
+    // /// <summary>
+    // /// 点击 Advance Next 按钮
+    // /// </summary>
+    // public void OnClickAdvanceNext()
+    // {
+    //     Debug.Log("Advance Next button clicked");
+    //     HidePostCombatPanel();
+    // }
 
     /// <summary>
     /// ONGOING 状态下的异步行动入口
@@ -189,22 +195,22 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     ///   - 未全部抽牌（false）→ 执行抽卡（HandleDrawCardAction）
     ///   - 全部已有手牌（true）→ 执行出牌（HandlePlayCardAction）
     /// </summary>
-    private async UniTaskVoid ExecuteOnGoingActionAsync()
-    {
-        bool allDrawn = await RefreshAndCheckAllActorsDrawn();
-        if (!allDrawn)
-        {
-            // 尚有演员未抽牌，执行抽卡行动
-            Debug.Log("[DungeonCombatScene] 执行抽卡行动");
-            HandleDrawCardAction();
-        }
-        else
-        {
-            // 所有存活演员均已有手牌，执行出牌行动
-            Debug.Log("[DungeonCombatScene] 执行出牌行动");
-            HandlePlayCardAction();
-        }
-    }
+    // private async UniTaskVoid ExecuteOnGoingActionAsync()
+    // {
+    //     bool allDrawn = await RefreshAndCheckAllActorsDrawn();
+    //     if (!allDrawn)
+    //     {
+    //         // 尚有演员未抽牌，执行抽卡行动
+    //         Debug.Log("[DungeonCombatScene] 执行抽卡行动");
+    //         HandleDrawCardAction();
+    //     }
+    //     else
+    //     {
+    //         // 所有存活演员均已有手牌，执行出牌行动
+    //         Debug.Log("[DungeonCombatScene] 执行出牌行动");
+    //         HandlePlayCardAction();
+    //     }
+    // }
 
     /// <summary>
     /// 处理抽卡行动：根据当前 CardBuilder.Build 的数据决定执行敌人抽卡或盟友抽卡
@@ -512,7 +518,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
         else
         {
-            allActors = _mockActorData;
+            //allActors = _mockActorData;
         }
         return allActors;
     }
@@ -520,36 +526,36 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// <summary>
     /// 根据当前战斗状态更新主对象的可交互状态
     /// </summary>
-    private void UpdateCombatUIVisibility()
-    {
-        // 首先获取当前战斗状态，如果当前战斗对象不存在则默认设置为不可交互
-        var combatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
+    // private void UpdateCombatUIVisibility()
+    // {
+    //     // 首先获取当前战斗状态，如果当前战斗对象不存在则默认设置为不可交互
+    //     var combatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
 
-        // 当前战斗状态不是 ONGOING，主对象不可交互；当前战斗状态是 ONGOING，主对象可交互
-        bool isInteractable = false;
-        switch (combatState)
-        {
-            case CombatState.INITIALIZATION:
-                isInteractable = false;
-                break;
-            case CombatState.ONGOING:
-                isInteractable = true;
-                break;
-            case CombatState.COMPLETE:
-                isInteractable = true;
-                break;
-            case CombatState.POST_COMBAT:
-                isInteractable = true;
-                break;
-            default:
-                Debug.LogWarning($"Unknown combat state: {combatState}");
-                break;
-        }
+    //     // 当前战斗状态不是 ONGOING，主对象不可交互；当前战斗状态是 ONGOING，主对象可交互
+    //     bool isInteractable = false;
+    //     switch (combatState)
+    //     {
+    //         case CombatState.INITIALIZATION:
+    //             isInteractable = false;
+    //             break;
+    //         case CombatState.ONGOING:
+    //             isInteractable = true;
+    //             break;
+    //         case CombatState.COMPLETE:
+    //             isInteractable = true;
+    //             break;
+    //         case CombatState.POST_COMBAT:
+    //             isInteractable = true;
+    //             break;
+    //         default:
+    //             Debug.LogWarning($"Unknown combat state: {combatState}");
+    //             break;
+    //     }
 
-        // 更新主对象和行动顺序对象的可见性
-        _mainGameObject.SetActive(isInteractable);
-        _bottomGameObject.SetActive(isInteractable);
-    }
+    //     // 更新主对象和行动顺序对象的可见性
+    //     _mainGameObject.SetActive(isInteractable);
+    //     _bottomGameObject.SetActive(isInteractable);
+    // }
 
     /// <summary>
     /// 从选中角色加载卡牌要素数据
@@ -647,14 +653,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
             case CombatState.ONGOING:
                 Debug.Log("[DungeonCombatScene] Combat is ongoing, initializing combat UI");
-                _onGoingState.gameObject.SetActive(true);
-                _onGoingState.OnShow();
+                SwitchCombatState(lastCombatState);
                 break;
 
             case CombatState.COMPLETE:
                 break;
 
             case CombatState.POST_COMBAT:
+                SwitchCombatState(lastCombatState);
                 break;
 
             default:
@@ -747,7 +753,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>
     private async UniTaskVoid ExecutePlayCards()
     {
-        ShowArbitrationPanel("正在执行出牌操作，请稍候...");
+        //ShowArbitrationPanel("正在执行出牌操作，请稍候...");
 
         string taskId = await DungeonGamePlayManager.Instance.PlayCards();
         if (string.IsNullOrEmpty(taskId))
@@ -757,14 +763,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
         Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
 
-        ShowArbitrationPanel("出牌操作已提交，任务id: " + taskId + "，正在等待服务器处理...");
+        //ShowArbitrationPanel("出牌操作已提交，任务id: " + taskId + "，正在等待服务器处理...");
         var taskRecord = await PollTaskStatus(taskId);
         if (taskRecord == null)
         {
             return;
         }
 
-        ShowArbitrationPanel("服务器已完成出牌操作的处理，正在刷新数据...");
+        //ShowArbitrationPanel("服务器已完成出牌操作的处理，正在刷新数据...");
 
         var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
         if (dungeon == null)
@@ -780,8 +786,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         Debug.Assert(round != null, "Round data is null after playing cards");
 
         // 显示最新的地下城战斗仲裁信息
-        var formattedRoundInfo = GameUtils.FormatRoundInfo(round);
-        ShowArbitrationPanel(formattedRoundInfo);
+        //var formattedRoundInfo = GameUtils.FormatRoundInfo(round);
+        //ShowArbitrationPanel(formattedRoundInfo);
 
         // 出牌完成后清空 Build 数据，等待玩家下一次选择
         // CardBuilder.Clear();
@@ -853,39 +859,39 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// 显示仲裁面板并设置消息内容
     /// </summary>
     /// <param name="message">仲裁面板显示的消息</param>
-    private void ShowArbitrationPanel(string message)
-    {
-        _arbitrationPanel.SetActive(true);
-        _arbitrationText.text = message;
-    }
+    // private void ShowArbitrationPanel(string message)
+    // {
+    //     _arbitrationPanel.SetActive(true);
+    //     _arbitrationText.text = message;
+    // }
 
-    /// <summary>
-    /// 隐藏仲裁面板并清空消息内容
-    /// </summary>
-    private void HideArbitrationPanel()
-    {
-        _arbitrationPanel.SetActive(false);
-        _arbitrationText.text = string.Empty;
-    }
+    // /// <summary>
+    // /// 隐藏仲裁面板并清空消息内容
+    // /// </summary>
+    // private void HideArbitrationPanel()
+    // {
+    //     _arbitrationPanel.SetActive(false);
+    //     _arbitrationText.text = string.Empty;
+    // }
 
     /// <summary>
     /// 显示战斗后面板并设置消息内容
     /// </summary> 
     /// <param name="message">战斗后面板显示的消息</param>
-    private void ShowPostCombatPanel(string message)
-    {
-        _postCombatPanel.SetActive(true);
-        _postCombatText.text = message;
-    }
+    // private void ShowPostCombatPanel(string message)
+    // {
+    //     _postCombatPanel.SetActive(true);
+    //     _postCombatText.text = message;
+    // }
 
-    /// <summary>
-    /// 隐藏战斗后面板并清空消息内容
-    /// </summary>
-    private void HidePostCombatPanel()
-    {
-        _postCombatPanel.SetActive(false);
-        _postCombatText.text = string.Empty;
-    }
+    // /// <summary>
+    // /// 隐藏战斗后面板并清空消息内容
+    // /// </summary>
+    // private void HidePostCombatPanel()
+    // {
+    //     _postCombatPanel.SetActive(false);
+    //     _postCombatText.text = string.Empty;
+    // }
 
     /// <summary>
     /// 战斗后处理
@@ -893,13 +899,13 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>
     private async UniTaskVoid ExecutePostCombat()
     {
-        ShowPostCombatPanel("正在执行战斗后处理...");
+        //ShowPostCombatPanel("正在执行战斗后处理...");
 
         var sessionMessages = await DungeonGamePlayManager.Instance.PostCombat();
         if (sessionMessages == null)
         {
             Debug.LogWarning("Failed to get session messages from post combat");
-            ShowPostCombatPanel("战斗后处理失败，无法获取事件信息");
+            //ShowPostCombatPanel("战斗后处理失败，无法获取事件信息");
             return;
         }
 
@@ -932,7 +938,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
 
         // 显示战斗后事件信息
-        ShowPostCombatPanel(showText);
+        //ShowPostCombatPanel(showText);
 
         // 标记有一次待执行的同步请求，确保在战斗后处理完成后能够及时获取最新的地下城状态并更新 UI
         //_pendingDungeonSync = true;
@@ -960,6 +966,27 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
         await UniTask.Yield();
         SceneManager.LoadScene(_nextScene);
+    }
+
+    /// <summary>
+    /// 根据新的战斗状态切换 UI 显示和交互逻辑
+    /// </summary>
+    /// <param name="newState">新的战斗状态</param>
+    public void SwitchCombatState(CombatState newState)
+    {
+        if (newState == CombatState.ONGOING)
+        {
+            _onGoingState.gameObject.SetActive(true);
+            _onGoingState.RefreshView();
+
+            //
+            _combatPostCombatState.gameObject.SetActive(false);
+        }
+        else if (newState == CombatState.POST_COMBAT)
+        {
+            _onGoingState.gameObject.SetActive(false);
+            _combatPostCombatState.gameObject.SetActive(true);
+        }
     }
 }
 
