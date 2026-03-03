@@ -12,14 +12,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     [SerializeField] private string _nextScene = "DungeonCombatScene2";
 
     [Header("UI Components")]
-    //[SerializeField] private Image _backgroundImage; // 场景背景图片
-    //[SerializeField] private TMP_Text _infoText; // 战斗信息显示对象
-    [SerializeField] private TMP_Text _mainText; // 主文本显示对象
-    [SerializeField] private LoopHorizontalScrollRect _scrollView; // 动态滚动视图
-    //[SerializeField] private ActionOrderObject[] _actionOrderObjects; // 角色槽位数组
     [SerializeField] private GameObject _mainGameObject; // 场景主对象，用于测试 Find 和事件系统的目标对象
     [SerializeField] private GameObject _bottomGameObject; // 行动顺序对象，用于测试 Find 和事件系统的目标对象
-    //[SerializeField] private Button _onGoingButton; // On Going 按钮，用于测试事件系统的目标对象
     [SerializeField] private GameObject _arbitrationPanel; // 仲裁面板对象
     [SerializeField] private TMP_Text _arbitrationText; // 仲裁面板文本对象
     [SerializeField] private GameObject _postCombatPanel; // 战斗后面板对象
@@ -34,39 +28,23 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     [Header("OnGoing State")]
     [SerializeField] private CombatOnGoingState _onGoingState; // ONGOING 状态的设置数据
 
-    [Header("Events")]
-    [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
-    [SerializeField] private UIEventGameEvent _onActionOrderClickedEvent; // 角色槽位点击事件
-    [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件    
-
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi;
 
     private List<EntitySerialization> _mockActorData;// Mock 数据 - 用于测试
 
-    private bool _pendingDungeonSync = false; // 标志是否有一次待执行的地下城同步请求
+    //private bool _pendingDungeonSync = false; // 标志是否有一次待执行的地下城同步请求
 
     void Awake()
     {
         // 创建 mock 数据
         _mockActorData = MockData.CreateActorData();
-
-        // 第一次更新，显示空数据的文本。
-        CardBuilder.Clear();
     }
 
     void Start()
     {
         // 断言检查，确保所有必要的组件和数据都已正确设置
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
-        //Debug.Assert(_infoText != null, "_infoText is null");
-        Debug.Assert(_mainText != null, "Main Text component is not assigned in the inspector.");
-        //Debug.Assert(_actionOrderObjects != null && _actionOrderObjects.Length > 0, "Action order objects are not assigned in the inspector.");
-        Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
-        //Debug.Assert(_backgroundImage != null, "Background Image component is not assigned in the inspector.");
-        Debug.Assert(_onCardElementClickedEvent != null, "_onCardClickedEvent is null");
-        Debug.Assert(_onActionOrderClickedEvent != null, "_onActionOrderClickedEvent is null");
-        Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
         Debug.Assert(_mockActorData != null && _mockActorData.Count > 0, "Mock actor data is not initialized");
         Debug.Assert(_tasksStatusApi != null, "TasksStatusApi component is not assigned in the inspector.");
         Debug.Assert(_mainGameObject != null, "_mainGameObject is null");
@@ -82,9 +60,9 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
 
         // 注册事件监听器
-        _onCardElementClickedEvent.RegisterListener(this);
-        _onActionOrderClickedEvent.RegisterListener(this);
-        _onCardBuilderDataChangedEvent.RegisterListener(this);
+        // _onCardElementClickedEvent.RegisterListener(this);
+        // //_onActionOrderClickedEvent.RegisterListener(this);
+        // _onCardBuilderDataChangedEvent.RegisterListener(this);
 
 
         // 先隐藏掉 _onGoingState
@@ -136,24 +114,24 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         // }
     }
 
-    void OnDestroy()
-    {
-        // 确保在对象销毁时取消注册事件监听器，避免内存泄漏或错误调用
-        if (_onCardElementClickedEvent != null)
-        {
-            _onCardElementClickedEvent.UnregisterListener(this);
-        }
+    // void OnDestroy()
+    // {
+    //     // 确保在对象销毁时取消注册事件监听器，避免内存泄漏或错误调用
+    //     if (_onCardElementClickedEvent != null)
+    //     {
+    //         _onCardElementClickedEvent.UnregisterListener(this);
+    //     }
 
-        if (_onActionOrderClickedEvent != null)
-        {
-            _onActionOrderClickedEvent.UnregisterListener(this);
-        }
+    //     // if (_onActionOrderClickedEvent != null)
+    //     // {
+    //     //     _onActionOrderClickedEvent.UnregisterListener(this);
+    //     // }
 
-        if (_onCardBuilderDataChangedEvent != null)
-        {
-            _onCardBuilderDataChangedEvent.UnregisterListener(this);
-        }
-    }
+    //     if (_onCardBuilderDataChangedEvent != null)
+    //     {
+    //         _onCardBuilderDataChangedEvent.UnregisterListener(this);
+    //     }
+    // }
 
     /// <summary>
     /// 点击 On Going 按钮
@@ -359,97 +337,97 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>
     public void OnEventRaised(UIEventData eventData)
     {
-        Debug.Log($"[TestDungeonCombatScenePrototype] {eventData}");
-        Debug.Log($"OnEventRaised: {eventData.eventType}, TargetId: {eventData.targetId}, Index: {eventData.index}, ExtraData: {eventData.extraData}");
+        // Debug.Log($"[TestDungeonCombatScenePrototype] {eventData}");
+        // Debug.Log($"OnEventRaised: {eventData.eventType}, TargetId: {eventData.targetId}, Index: {eventData.index}, ExtraData: {eventData.extraData}");
 
-        switch (eventData.eventType)
-        {
-            case UIEventType.CardElementScrollViewItemClick:
-                Debug.Log($"处理卡牌要素滚动视图项点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
+        // switch (eventData.eventType)
+        // {
+        //     case UIEventType.CardElementScrollViewItemClick:
+        //         Debug.Log($"处理卡牌要素滚动视图项点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
 
-                // 切换要素在 Build 中的状态（存在则删除，不存在则添加）
-                if (!CardBuilder.TryToggleElementInBuild(eventData.index))
-                {
-                    Debug.LogWarning($"[TestDungeonCombatScenePrototype] TryToggleElementInBuild 失败，索引: {eventData.index}");
-                    break;
-                }
+        //         // 切换要素在 Build 中的状态（存在则删除，不存在则添加）
+        //         if (!CardBuilder.TryToggleElementInBuild(eventData.index))
+        //         {
+        //             Debug.LogWarning($"[TestDungeonCombatScenePrototype] TryToggleElementInBuild 失败，索引: {eventData.index}");
+        //             break;
+        //         }
 
-                // 派发 CardBuilder 数据已改变事件
-                _onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
+        //         // 派发 CardBuilder 数据已改变事件
+        //         //_onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
 
-                //
-                break;
+        //         //
+        //         break;
 
-            case UIEventType.ActionOrderClick:
+        //     case UIEventType.ActionOrderClick:
 
-                Debug.Log($"处理角色槽位点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
+        //         Debug.Log($"处理角色槽位点击事件，目标: {eventData.targetId}, 索引: {eventData.index}");
 
-                var allActors = GetCurrentRoundActors();
+        //         var allActors = GetCurrentRoundActors();
 
-                if (allActors == null)
-                {
-                    Debug.LogWarning("DungeonCombatScene: No actor data available");
-                    break;
-                }
+        //         if (allActors == null)
+        //         {
+        //             Debug.LogWarning("DungeonCombatScene: No actor data available");
+        //             break;
+        //         }
 
-                // 从角色列表中查找对应的角色
-                var selectedActor = allActors.Find(actor => actor.name == eventData.targetId);
-                if (selectedActor == null)
-                {
-                    Debug.LogWarning($"未找到名为 {eventData.targetId} 的角色数据");
-                    break;
-                }
+        //         // 从角色列表中查找对应的角色
+        //         var selectedActor = allActors.Find(actor => actor.name == eventData.targetId);
+        //         if (selectedActor == null)
+        //         {
+        //             Debug.LogWarning($"未找到名为 {eventData.targetId} 的角色数据");
+        //             break;
+        //         }
 
-                // 清空并设置新的 Build 数据
-                CardBuilder.Clear();
-                CardBuilder.Build = new CardBuildData { owner = selectedActor };
+        //         // 清空并设置新的 Build 数据
+        //         CardBuilder.Clear();
+        //         CardBuilder.Build = new CardBuildData { owner = selectedActor };
 
-                // 根据选中角色加载卡牌要素数据，敌人不加载目标角色数据
-                LoadCardElementsFromActor(selectedActor, allActors);
+        //         // 根据选中角色加载卡牌要素数据，敌人不加载目标角色数据
+        //         //LoadCardElementsFromActor(selectedActor, allActors);
 
-                // 派发 CardBuilder 数据已改变事件
-                _onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
+        //         // 派发 CardBuilder 数据已改变事件
+        //         //_onCardBuilderDataChangedEvent.Raise(new UIEventData(UIEventType.CardBuilderDataChanged));
 
-                break;
+        //         break;
 
-            case UIEventType.CardBuilderDataChanged:
-                Debug.Log("CardBuilder data changed event received");
-                // 这里可以添加额外的逻辑来响应 CardBuilder 数据变化，例如更新 UI 或触发其他游戏机制
-                // 更新主文本显示
-                UpdateMainTextByCardBuild(CardBuilder.Build);
-                break;
+        //     case UIEventType.CardBuilderDataChanged:
+        //         Debug.Log("CardBuilder data changed event received");
+        //         // 这里可以添加额外的逻辑来响应 CardBuilder 数据变化，例如更新 UI 或触发其他游戏机制
+        //         // 更新主文本显示
+        //         //UpdateMainTextByCardBuild(CardBuilder.Build);
+        //         break;
 
-            default:
-                Debug.LogWarning($"未处理的事件类型: {eventData.eventType}");
-                break;
-        }
+        //     default:
+        //         Debug.LogWarning($"未处理的事件类型: {eventData.eventType}");
+        //         break;
+        // }
     }
 
     /// <summary>
     /// 更新主文本显示，展示当前卡牌构建数据的状态
     /// </summary>
-    private void UpdateMainTextByCardBuild(CardBuildData cardBuild)
-    {
-        Debug.Assert(cardBuild != null, "CardBuildData is null");
-        if (cardBuild.owner != null)
-        {
-            _mainText.text = string.Empty;
+    // private void UpdateMainTextByCardBuild(CardBuildData cardBuild)
+    // {
+    //     Debug.Assert(cardBuild != null, "CardBuildData is null");
+    //     if (cardBuild.owner != null)
+    //     {
+    //         _mainText.text = string.Empty;
 
-            var handComponent = GameUtils.GetComponent<HandComponent>(cardBuild.owner);
-            if (handComponent != null)
-            {
-                _mainText.text += "=== 手牌数据 ===\n\n";
-                _mainText.text += GameUtils.FormatHandComponent(handComponent);
-                _mainText.text += "\n\n";
-            }
+    //         var handComponent = GameUtils.GetComponent<HandComponent>(cardBuild.owner);
+    //         if (handComponent != null)
+    //         {
+    //             _mainText.text += "=== 手牌数据 ===\n\n";
+    //             _mainText.text += GameUtils.FormatHandComponent(handComponent);
+    //             _mainText.text += "\n\n";
+    //         }
 
-            _mainText.text += GameUtils.FormatCardBuildData(cardBuild);
-        }
-        else
-        {
-            _mainText.text = "未选中角色";
-        }
-    }
+    //         _mainText.text += GameUtils.FormatCardBuildData(cardBuild);
+    //     }
+    //     else
+    //     {
+    //         _mainText.text = "未选中角色";
+    //     }
+    // }
 
     /// <summary>
     /// 更新角色槽位显示，根据当前 mock 数据刷新每个槽位的角色信息
@@ -579,52 +557,52 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     /// </summary>
     /// <param name="selectedActor">选中的角色</param>
     /// <param name="allActors">当前可用的角色列表，其余角色将作为卡牌目标候选</param>
-    private void LoadCardElementsFromActor(EntitySerialization selectedActor, List<EntitySerialization> allActors)
-    {
-        if (selectedActor == null)
-        {
-            Debug.LogWarning("[LoadCardElementsFromActor] selectedActor is null");
-            _scrollView.totalCount = CardBuilder.Count;
-            _scrollView.RefillCells(); // 重建列表并回到顶部
-            return;
-        }
+    // private void LoadCardElementsFromActor(EntitySerialization selectedActor, List<EntitySerialization> allActors)
+    // {
+    //     if (selectedActor == null)
+    //     {
+    //         Debug.LogWarning("[LoadCardElementsFromActor] selectedActor is null");
+    //         _scrollView.totalCount = CardBuilder.Count;
+    //         _scrollView.RefillCells(); // 重建列表并回到顶部
+    //         return;
+    //     }
 
-        // 1. 添加角色的技能
-        var skillBook = GameUtils.GetComponent<SkillBookComponent>(selectedActor);
-        if (skillBook?.skills != null)
-        {
-            foreach (var skill in skillBook.skills)
-            {
-                CardBuilder.AddElement(new CardElementData(skill));
-            }
-            Debug.Log($"[LoadCardElementsFromActor] 添加了 {skillBook.skills.Count} 个技能");
-        }
+    //     // 1. 添加角色的技能
+    //     var skillBook = GameUtils.GetComponent<SkillBookComponent>(selectedActor);
+    //     if (skillBook?.skills != null)
+    //     {
+    //         foreach (var skill in skillBook.skills)
+    //         {
+    //             CardBuilder.AddElement(new CardElementData(skill));
+    //         }
+    //         Debug.Log($"[LoadCardElementsFromActor] 添加了 {skillBook.skills.Count} 个技能");
+    //     }
 
-        // 2. 添加角色的状态效果
-        var combatStats = GameUtils.GetComponent<CombatStatsComponent>(selectedActor);
-        if (combatStats?.status_effects != null)
-        {
-            foreach (var effect in combatStats.status_effects)
-            {
-                CardBuilder.AddElement(new CardElementData(effect));
-            }
-            Debug.Log($"[LoadCardElementsFromActor] 添加了 {combatStats.status_effects.Count} 个状态效果");
-        }
+    //     // 2. 添加角色的状态效果
+    //     var combatStats = GameUtils.GetComponent<CombatStatsComponent>(selectedActor);
+    //     if (combatStats?.status_effects != null)
+    //     {
+    //         foreach (var effect in combatStats.status_effects)
+    //         {
+    //             CardBuilder.AddElement(new CardElementData(effect));
+    //         }
+    //         Debug.Log($"[LoadCardElementsFromActor] 添加了 {combatStats.status_effects.Count} 个状态效果");
+    //     }
 
-        // 3. 添加其他角色作为目标（排除自己）
-        int targetCount = 0;
-        foreach (var actor in allActors)
-        {
-            CardBuilder.AddElement(new CardElementData(actor));
-            targetCount++;
-        }
-        Debug.Log($"[LoadCardElementsFromActor] 添加了 {targetCount} 个目标角色");
+    //     // 3. 添加其他角色作为目标（排除自己）
+    //     int targetCount = 0;
+    //     foreach (var actor in allActors)
+    //     {
+    //         CardBuilder.AddElement(new CardElementData(actor));
+    //         targetCount++;
+    //     }
+    //     Debug.Log($"[LoadCardElementsFromActor] 添加了 {targetCount} 个目标角色");
 
-        // 更新滚动视图
-        _scrollView.totalCount = CardBuilder.Count;
-        _scrollView.RefillCells(); // 重建列表并回到顶部
-        Debug.Log($"[LoadCardElementsFromActor] 总共加载 {CardBuilder.Count} 个卡牌要素");
-    }
+    //     // 更新滚动视图
+    //     _scrollView.totalCount = CardBuilder.Count;
+    //     _scrollView.RefillCells(); // 重建列表并回到顶部
+    //     Debug.Log($"[LoadCardElementsFromActor] 总共加载 {CardBuilder.Count} 个卡牌要素");
+    // }
 
     /// <summary>
     /// 场景异步初始化入口，在 Start 时调用。
@@ -685,43 +663,43 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
     }
 
-    private async UniTaskVoid SyncDungeonAndActorData()
-    {
-        // 不论 CombatInit 成功与否，都尝试刷新并更新 UI
-        var syncErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-        if (syncErr != GameSyncError.None)
-        {
-            Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
-            return;
-        }
+    // private async UniTaskVoid SyncDungeonAndActorData()
+    // {
+    //     // 不论 CombatInit 成功与否，都尝试刷新并更新 UI
+    //     var syncErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+    //     if (syncErr != GameSyncError.None)
+    //     {
+    //         Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
+    //         return;
+    //     }
 
-        // 根据当前战斗状态更新主对象的可交互状态
-        UpdateCombatUIVisibility();
+    //     // 根据当前战斗状态更新主对象的可交互状态
+    //     UpdateCombatUIVisibility();
 
-        // 更新标题info
-        //UpdateCombatInfoText();
+    //     // 更新标题info
+    //     //UpdateCombatInfoText();
 
-        // 根据当前 CardBuilder.Build 的状态更新主文本显示，因为上面从服务器刷新了数据，Build 中的角色数据可能已经过时了，所以需要更新一下 Build 中的角色数据为最新的数据
-        if (CardBuilder.Build != null && CardBuilder.Build.owner != null)
-        {
-            var refreshedActor = GameContext.Instance.GetActorEntity(CardBuilder.Build.owner.name);
-            Debug.Assert(refreshedActor != null, "Refreshed actor data is null");
-            CardBuilder.Build.owner = refreshedActor; // 更新 Build 中的角色数据为最新的数据
-        }
-        else
-        {
-            Debug.LogWarning("可能是空数据");
-        }
+    //     // 根据当前 CardBuilder.Build 的状态更新主文本显示，因为上面从服务器刷新了数据，Build 中的角色数据可能已经过时了，所以需要更新一下 Build 中的角色数据为最新的数据
+    //     if (CardBuilder.Build != null && CardBuilder.Build.owner != null)
+    //     {
+    //         var refreshedActor = GameContext.Instance.GetActorEntity(CardBuilder.Build.owner.name);
+    //         Debug.Assert(refreshedActor != null, "Refreshed actor data is null");
+    //         CardBuilder.Build.owner = refreshedActor; // 更新 Build 中的角色数据为最新的数据
+    //     }
+    //     else
+    //     {
+    //         Debug.LogWarning("可能是空数据");
+    //     }
 
-        // 更新主文本显示，展示当前卡牌构建数据的状态
-        UpdateMainTextByCardBuild(CardBuilder.Build);
+    //     // 更新主文本显示，展示当前卡牌构建数据的状态
+    //     //UpdateMainTextByCardBuild(CardBuilder.Build);
 
-        // 更新角色槽位显示
-        //UpdateActionOrder();
+    //     // 更新角色槽位显示
+    //     //UpdateActionOrder();
 
-        // 根据当前战斗状态更新 On Going 按钮的状态
-        //UpdateOnGoingButtonState();
-    }
+    //     // 根据当前战斗状态更新 On Going 按钮的状态
+    //     //UpdateOnGoingButtonState();
+    // }
 
     /// <summary>
     /// 执行抽卡操作并轮询任务状态，完成后显示手牌
@@ -746,7 +724,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         }
 
         // 标记有一次待执行的同步请求，确保在抽卡完成后能够及时获取最新的地下城状态并更新 UI
-        _pendingDungeonSync = true;
+        //_pendingDungeonSync = true;
     }
 
     /// <summary>
@@ -806,11 +784,11 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         ShowArbitrationPanel(formattedRoundInfo);
 
         // 出牌完成后清空 Build 数据，等待玩家下一次选择
-        CardBuilder.Clear();
-        LoadCardElementsFromActor(null, new List<EntitySerialization>());
+        // CardBuilder.Clear();
+        // LoadCardElementsFromActor(null, new List<EntitySerialization>());
 
         // 标记有一次待执行的同步请求，确保在抽卡完成后能够及时获取最新的地下城状态并更新 UI
-        _pendingDungeonSync = true;
+        //_pendingDungeonSync = true;
 
         // 异步跑着，评估战斗状态，完成后会刷新地下城状态并更新UI显示
         DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
@@ -957,7 +935,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         ShowPostCombatPanel(showText);
 
         // 标记有一次待执行的同步请求，确保在战斗后处理完成后能够及时获取最新的地下城状态并更新 UI
-        _pendingDungeonSync = true;
+        //_pendingDungeonSync = true;
     }
 
     /// <summary>
