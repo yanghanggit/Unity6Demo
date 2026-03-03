@@ -57,7 +57,7 @@ public class GameStateSync : MonoBehaviour
     /// 获取场景与演员的映射关系并更新到GameContext
     /// </summary>
     /// <returns>成功时返回 GameContext.Instance.StageActorMapping（Dictionary&lt;string, List&lt;string&gt;&gt;，作为 cache 引用），失败时返回 null</returns>
-    public async UniTask<Dictionary<string, List<string>>> RefreshStageActorMappingFromServer()
+    public async UniTask<Dictionary<string, List<string>>> RefreshMappingFromServer()
     {
         if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActorName))
         {
@@ -88,46 +88,11 @@ public class GameStateSync : MonoBehaviour
     }
 
     /// <summary>
-    /// 从服务器刷新指定场景列表的详情数据
-    /// </summary>
-    /// <param name="stages">需要获取详情的场景名称列表</param>
-    /// <returns>成功时返回 GameContext.Instance.StageEntities（List&lt;EntitySerialization&gt;，作为 cache 引用），失败时返回 null</returns>
-    public async UniTask<List<EntitySerialization>> RefreshStageDetailsFromServer(List<string> stages)
-    {
-        if (stages == null || stages.Count == 0)
-        {
-            Debug.LogWarning("[GameStateSync] Stage list is empty, skip fetching stage details");
-            return null;
-        }
-
-        // 获取场景详情数据
-        await _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, stages);
-
-        if (_entityDetailsApi.ReqResult == null)
-        {
-            Debug.LogError("[GameStateSync] Failed to fetch stage details from server: request result is null");
-            return null;
-        }
-
-        if (!_entityDetailsApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"[GameStateSync] Failed to fetch stage details from server: {_entityDetailsApi.ReqResult.responseText}");
-            return null;
-        }
-
-        Debug.Assert(_entityDetailsApi.RespData != null, "[GameStateSync] EntityDetailsApi response data is null");
-
-        // 更新全局场景详情数据（作为 cache）
-        GameContext.Instance.StageEntities = _entityDetailsApi.RespData.entities_serialization;
-        return GameContext.Instance.StageEntities;
-    }
-
-    /// <summary>
     /// 从服务器刷新指定实体列表的详情数据，并按类型分别存入 ActorEntities 和 StageEntities
     /// </summary>
     /// <param name="entityNames">需要获取详情的实体名称列表（可包含演员或场景）</param>
     /// <returns>成功时返回所有实体的浅拷贝列表（List&lt;EntitySerialization&gt;），失败时返回 null</returns>
-    public async UniTask<List<EntitySerialization>> RefreshEntityDetailsFromServer(List<string> entityNames)
+    public async UniTask<List<EntitySerialization>> RefreshEntitiesFromServer(List<string> entityNames)
     {
         if (entityNames == null || entityNames.Count == 0)
         {
@@ -135,7 +100,7 @@ public class GameStateSync : MonoBehaviour
             return null;
         }
 
-        // 获取演员详情数据
+        // 获取实体详情数据（可包含演员和场景两类实体）
         await _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, entityNames);
 
         if (_entityDetailsApi.ReqResult == null)
@@ -194,21 +159,21 @@ public class GameStateSync : MonoBehaviour
     /// 适用于需要获取完整游戏状态的场景，如初始化、场景切换等
     /// </summary>
     /// <returns>成功返回 <see cref="GameSyncError.None"/>，失败返回对应错误码</returns>
-    public async UniTask<GameSyncError> RefreshStageActorMappingAndEntitiesFromServer()
+    public async UniTask<GameSyncError> RefreshMappingAndEntitiesFromServer()
     {
         // 步骤1: 刷新场景映射关系
-        var stageActorMapping = await RefreshStageActorMappingFromServer();
+        var stageActorMapping = await RefreshMappingFromServer();
         if (stageActorMapping == null)
         {
-            Debug.LogError("RefreshMappingAndEntitiesFromServer failed at step 1");
+            Debug.LogError("RefreshAllEntitiesFromServer failed at step 1");
             return GameSyncError.FetchMappingFailed;
         }
 
         // 步骤2: 获取场景详情数据
-        var allEntities = await RefreshStageDetailsFromServer(GameContext.Instance.EntityNames);
+        var allEntities = await RefreshEntitiesFromServer(GameContext.Instance.EntityNames);
         if (allEntities == null)
         {
-            Debug.LogError("RefreshMappingAndEntitiesFromServer failed at step 2");
+            Debug.LogError("RefreshAllEntitiesFromServer failed at step 2");
             return GameSyncError.FetchStageDetailsFailed;
         }
 
@@ -220,21 +185,21 @@ public class GameStateSync : MonoBehaviour
     /// 执行部分游戏状态同步，依次获取：
     /// 1. 场景与演员的映射关系(StageActorMapping)
     /// 2. 所有演员的详细信息(ActorEntitiesSerialization)
-    /// 相比 RefreshStageActorMappingAndEntitiesFromServer，此方法不获取场景详情，适用于只需要演员数据的场景
+    /// 相比 RefreshMappingAndEntitiesFromServer，此方法不获取场景详情，适用于只需要演员数据的场景
     /// </summary>
     /// <returns>成功返回 <see cref="GameSyncError.None"/>，失败返回对应错误码</returns>
-    public async UniTask<GameSyncError> RefreshStageActorMappingAndActorDetailsFromServer()
+    public async UniTask<GameSyncError> RefreshMappingAndActorsFromServer()
     {
         // 步骤1: 刷新场景映射关系
-        var stageActorMapping = await RefreshStageActorMappingFromServer();
+        var stageActorMapping = await RefreshMappingFromServer();
         if (stageActorMapping == null)
         {
-            Debug.LogError("RefreshMappingAndActorsFromServer failed at step 1");
+            Debug.LogError("RefreshStageActorMappingFromServer failed at step 1");
             return GameSyncError.FetchMappingFailed;
         }
 
         // 步骤2: 刷新所有演员的详情数据
-        var actorEntities = await RefreshEntityDetailsFromServer(GameContext.Instance.ActorNames);
+        var actorEntities = await RefreshEntitiesFromServer(GameContext.Instance.ActorNames);
         if (actorEntities == null)
         {
             Debug.LogError("RefreshMappingAndActorsFromServer failed at step 2");
@@ -274,64 +239,56 @@ public class GameStateSync : MonoBehaviour
 
         Debug.Assert(_dungeonStateApi.RespData != null, "[GameStateSync] DungeonStateApi response data is null");
 
-        //GameContext.Instance.StageActorMapping = _dungeonStateApi.RespData.mapping;
+        // 写入全局地下城缓存
         GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
         return GameContext.Instance.Dungeon;
     }
 
     /// <summary>
-    /// 从服务器刷新指定演员所在场景中所有实体的详情数据
+    /// 从服务器刷新地下城数据及玩家所在场景的演员详情。
+    /// 步骤1：并行获取地下城状态和场景-演员映射关系（两者互相独立）。
+    /// 步骤2：依据映射关系，串行获取玩家所在场景中所有演员的详细信息。
     /// </summary>
-    /// <param name="actorName">演员名称，将获取该演员所在场景的所有实体详情</param>
-    /// <returns>成功时返回所有实体的浅拷贝列表（List&lt;EntitySerialization&gt;），失败时返回 null</returns>
-    public async UniTask<List<EntitySerialization>> RefreshActorsInStageFromServer(string actorName)
+    /// <returns>成功返回 <see cref="GameSyncError.None"/>，失败返回对应错误码</returns>
+    public async UniTask<GameSyncError> RefreshCombatStateFromServer()
     {
-        // 获取指定演员所在场景的所有演员列表
-        var stageName = GameContext.Instance.GetActorStage(actorName);
+        // 步骤1: 并行刷新地下城数据和场景-演员映射关系（两者互相独立，无依赖）
+        var (dungeon, mapping) = await UniTask.WhenAll(
+            RefreshDungeonFromServer(),
+            RefreshMappingFromServer()
+        );
+
+        if (dungeon == null)
+        {
+            Debug.LogError("[GameStateSync] RefreshCombatStateFromServer failed: dungeon data is null");
+            return GameSyncError.FetchDungeonFailed;
+        }
+
+        if (mapping == null)
+        {
+            Debug.LogError("[GameStateSync] RefreshCombatStateFromServer failed: stage-actor mapping is null");
+            return GameSyncError.FetchMappingFailed;
+        }
+
+        // 步骤2: 刷新玩家所在场景中所有演员的详情数据
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
         if (string.IsNullOrEmpty(stageName))
         {
-            Debug.LogError($"[GameStateSync] Actor '{actorName}' stage not found in mapping");
-            return null;
+            Debug.LogError($"[GameStateSync] Actor '{GameContext.Instance.PlayerActorName}' stage not found in mapping");
+            return GameSyncError.FetchActorsInStageFailed;
         }
 
         var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
         if (actorsInStage.Count == 0)
         {
             Debug.LogWarning($"[GameStateSync] No actors found in stage '{stageName}'");
-            return null;
+            return GameSyncError.FetchActorsInStageFailed;
         }
 
-        // 刷新当前场景中所有演员的详情数据
-        var actorEntities = await RefreshEntityDetailsFromServer(actorsInStage);
+        var actorEntities = await RefreshEntitiesFromServer(actorsInStage);
         if (actorEntities == null)
         {
             Debug.LogError($"[GameStateSync] Failed to refresh actors in stage '{stageName}'");
-            return null;
-        }
-
-        return actorEntities;
-    }
-
-    /// <summary>
-    /// 从服务器刷新地下城数据及玩家所在场景的演员详情
-    /// 依次获取：1. 地下城状态和映射关系  2. 玩家所在场景中所有演员的详细信息
-    /// </summary>
-    /// <returns>成功返回 <see cref="GameSyncError.None"/>，失败返回对应错误码</returns>
-    public async UniTask<GameSyncError> RefreshDungeonAndActorsFromServer()
-    {
-        // 步骤1: 刷新地下城数据
-        var dungeon = await RefreshDungeonFromServer();
-        if (dungeon == null)
-        {
-            Debug.LogError("RefreshDungeonAndActorsFromServer failed at step 1");
-            return GameSyncError.FetchDungeonFailed;
-        }
-
-        // 步骤2: 刷新玩家所在场景中所有演员的详情数据
-        var actorEntities = await RefreshActorsInStageFromServer(GameContext.Instance.PlayerActorName);
-        if (actorEntities == null)
-        {
-            Debug.LogError("RefreshDungeonAndActorsFromServer failed at step 2");
             return GameSyncError.FetchActorsInStageFailed;
         }
 

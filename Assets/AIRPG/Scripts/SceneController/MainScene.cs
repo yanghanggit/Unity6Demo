@@ -234,7 +234,7 @@ public class MainScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid RefreshGameState()
     {
-        await GameStateSync.Instance.RefreshStageActorMappingAndActorDetailsFromServer();
+        await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         RefreshActorLocations();
     }
 
@@ -255,7 +255,7 @@ public class MainScene : MonoBehaviour
 
         Debug.Log("[MainScene] Game state advanced successfully");
 
-        await GameStateSync.Instance.RefreshStageActorMappingAndActorDetailsFromServer();
+        await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         RefreshActorLocations();
     }
 
@@ -282,7 +282,7 @@ public class MainScene : MonoBehaviour
                 return;
             }
 
-            await GameStateSync.Instance.RefreshStageActorMappingAndActorDetailsFromServer();
+            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         }
         else
         {

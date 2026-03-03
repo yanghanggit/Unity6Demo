@@ -298,54 +298,54 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     /// 抽卡完成定义：存活演员的 HandComponent.cards 不为空
     /// </summary>
     /// <returns>是否所有存活演员都已完成抽卡</returns>
-    private async UniTask<bool> RefreshAndCheckAllActorsDrawn()
-    {
-        // 刷新玩家所在场景中所有演员的最新数据
-        var actorEntities = await GameStateSync.Instance.RefreshActorsInStageFromServer(GameContext.Instance.PlayerActorName);
-        if (actorEntities == null)
-        {
-            Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: failed to refresh actors in stage");
-            return false;
-        }
+    // private async UniTask<bool> RefreshAndCheckAllActorsDrawn()
+    // {
+    //     // 刷新玩家所在场景中所有演员的最新数据
+    //     var actorEntities = await GameStateSync.Instance.RefreshActorsInStageFromServer(GameContext.Instance.PlayerActorName);
+    //     if (actorEntities == null)
+    //     {
+    //         Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: failed to refresh actors in stage");
+    //         return false;
+    //     }
 
-        // 数据已是最新，获取当前回合的角色列表
-        var actors = GetCurrentRoundActors();
-        if (actors == null || actors.Count == 0)
-        {
-            Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: no actors found in current round");
-            return false;
-        }
+    //     // 数据已是最新，获取当前回合的角色列表
+    //     var actors = GetCurrentRoundActors();
+    //     if (actors == null || actors.Count == 0)
+    //     {
+    //         Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: no actors found in current round");
+    //         return false;
+    //     }
 
-        // 检查所有存活演员（没有 DeathComponent）是否都已有手牌数据
-        bool allDrawn = true;
-        foreach (var actor in actors)
-        {
-            var deathComponent = GameUtils.GetComponent<DeathComponent>(actor);
-            if (deathComponent != null)
-            {
-                // 已死亡，跳过检查
-                continue;
-            }
+    //     // 检查所有存活演员（没有 DeathComponent）是否都已有手牌数据
+    //     bool allDrawn = true;
+    //     foreach (var actor in actors)
+    //     {
+    //         var deathComponent = GameUtils.GetComponent<DeathComponent>(actor);
+    //         if (deathComponent != null)
+    //         {
+    //             // 已死亡，跳过检查
+    //             continue;
+    //         }
 
-            var handComponent = GameUtils.GetComponent<HandComponent>(actor);
-            if (handComponent == null || handComponent.cards == null || handComponent.cards.Count == 0)
-            {
-                allDrawn = false;
-                break;
-            }
-        }
+    //         var handComponent = GameUtils.GetComponent<HandComponent>(actor);
+    //         if (handComponent == null || handComponent.cards == null || handComponent.cards.Count == 0)
+    //         {
+    //             allDrawn = false;
+    //             break;
+    //         }
+    //     }
 
-        if (allDrawn)
-        {
-            Debug.Log("[DungeonCombatScene] 所有存活演员均已完成抽卡");
-        }
-        else
-        {
-            Debug.Log("[DungeonCombatScene] 尚有存活演员未完成抽卡");
-        }
+    //     if (allDrawn)
+    //     {
+    //         Debug.Log("[DungeonCombatScene] 所有存活演员均已完成抽卡");
+    //     }
+    //     else
+    //     {
+    //         Debug.Log("[DungeonCombatScene] 尚有存活演员未完成抽卡");
+    //     }
 
-        return allDrawn;
-    }
+    //     return allDrawn;
+    // }
 
     /// <summary>
     /// IUIEventListener 接口实现
@@ -967,7 +967,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
             return;
         }
 
-        var syncErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        var syncErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
         if (syncErr != GameSyncError.None)
         {
             Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");

@@ -327,7 +327,7 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTask RefreshDungeonStateDisplay()
     {
-        var refreshErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
         if (refreshErr != GameSyncError.None)
         {
             Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
@@ -374,7 +374,7 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid ExecuteViewActorStats()
     {
-        var refreshErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
         if (refreshErr != GameSyncError.None)
         {
             Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
@@ -405,7 +405,7 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid ExecuteViewActorCards()
     {
-        var refreshErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
         if (refreshErr != GameSyncError.None)
         {
             Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
