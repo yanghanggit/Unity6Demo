@@ -461,7 +461,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             Debug.Log($"DungeonCombatScene: Updating actor with {round.action_order.Count} actors in action order");
 
             // 根据当前回合的行动顺序获取对应的角色实体数据列表
-            List<EntitySerialization> actorsInActionOrder = GameContext.Instance.GetActorEntitiesSerialization(round.action_order);
+            List<EntitySerialization> actorsInActionOrder = GameContext.Instance.GetActorEntities(round.action_order);
 
             // 根据当前回合的行动顺序更新角色槽位显示
             SetActionOrder(actorsInActionOrder);
@@ -577,7 +577,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             if (round != null && round.action_order != null)
             {
                 Debug.Log($"Current round action order: {string.Join(", ", round.action_order)}");
-                allActors = GameContext.Instance.GetActorEntitiesSerialization(round.action_order);
+                allActors = GameContext.Instance.GetActorEntities(round.action_order);
             }
             else
             {
@@ -734,7 +734,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         // 根据当前 CardBuilder.Build 的状态更新主文本显示，因为上面从服务器刷新了数据，Build 中的角色数据可能已经过时了，所以需要更新一下 Build 中的角色数据为最新的数据
         if (CardBuilder.Build != null && CardBuilder.Build.owner != null)
         {
-            var refreshedActor = GameContext.Instance.GetActorEntitySerialization(CardBuilder.Build.owner.name);
+            var refreshedActor = GameContext.Instance.GetActorEntity(CardBuilder.Build.owner.name);
             Debug.Assert(refreshedActor != null, "Refreshed actor data is null");
             CardBuilder.Build.owner = refreshedActor; // 更新 Build 中的角色数据为最新的数据
         }

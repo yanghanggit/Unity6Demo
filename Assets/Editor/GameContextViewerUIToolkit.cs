@@ -293,7 +293,7 @@ public class GameContextViewerUIToolkit : EditorWindow
 
         actorEntitiesContainer.Clear();
 
-        var entities = GameContext.Instance.ActorEntitiesSerialization;
+        var entities = GameContext.Instance.ActorEntities;
         var foldout = rootVisualElement.Q<Foldout>("actor-entities-foldout");
         if (foldout != null)
         {
@@ -321,7 +321,7 @@ public class GameContextViewerUIToolkit : EditorWindow
 
         stageEntitiesContainer.Clear();
 
-        var entities = GameContext.Instance.StageEntitiesSerialization;
+        var entities = GameContext.Instance.StageEntities;
         var foldout = rootVisualElement.Q<Foldout>("stage-entities-foldout");
         if (foldout != null)
         {

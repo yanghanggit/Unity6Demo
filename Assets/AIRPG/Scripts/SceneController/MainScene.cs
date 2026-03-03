@@ -308,7 +308,7 @@ public class MainScene : MonoBehaviour
         }
 
         // 获取所有角色(排除玩家自己)
-        var allActors = GameContext.Instance.AllActors;
+        var allActors = GameContext.Instance.ActorNames;
         foreach (var actorName in allActors)
         {
             // 跳过玩家自己

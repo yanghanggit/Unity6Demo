@@ -1,6 +1,27 @@
 using System.Collections.Generic;
 
 /// <summary>
+/// 角色组件。
+/// </summary>
+[System.Serializable]
+public sealed class ActorComponent
+{
+    public string name = "";
+    public string character_sheet_name = "";
+    public string current_stage = "";
+}
+
+/// <summary>
+/// 场景组件。
+/// </summary>
+[System.Serializable]
+public sealed class StageComponent
+{
+    public string name = "";
+    public string character_sheet_name = "";
+}
+
+/// <summary>
 /// 角色外观信息组件。
 /// </summary>
 [System.Serializable]

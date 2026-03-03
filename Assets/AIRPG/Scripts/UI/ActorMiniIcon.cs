@@ -41,7 +41,7 @@ public class ActorMiniIcon : MonoBehaviour, IStringGameEventListener
     /// </summary>
     private void RefreshDisplay()
     {
-        var actorEntity = GameContext.Instance.GetActorEntitySerialization(gameObject.name);
+        var actorEntity = GameContext.Instance.GetActorEntity(gameObject.name);
         if (actorEntity == null)
         {
             Debug.LogWarning($"ActorMiniIcon: Actor entity not found for name: {gameObject.name}");

@@ -221,7 +221,7 @@ public class DungeonCombatScene : MonoBehaviour
     {
         var text = string.Empty;
 
-        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+        var actorEntitiesSerialization = GameContext.Instance.ActorEntities;
         foreach (var actorEntity in actorEntitiesSerialization)
         {
             var handComponent = GameUtils.GetComponent<HandComponent>(actorEntity);
@@ -385,7 +385,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         var text = "";
-        var actorEntitiesSerialization = GameContext.Instance.ActorEntitiesSerialization;
+        var actorEntitiesSerialization = GameContext.Instance.ActorEntities;
         for (int i = 0; i < actorEntitiesSerialization.Count; i++)
         {
             var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(actorEntitiesSerialization[i]);

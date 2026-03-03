@@ -20,7 +20,7 @@ public class PlayerInfoBar : MonoBehaviour
         _playerInfoText.text = $"{GameContext.Instance.UserName}\n{GameUtils.GetDisplayName(GameContext.Instance.PlayerActor)}";
 
         // 获取角色实体序列化数据
-        var actorEntitySerialization = GameContext.Instance.GetActorEntitySerialization(GameContext.Instance.PlayerActor);
+        var actorEntitySerialization = GameContext.Instance.GetActorEntity(GameContext.Instance.PlayerActor);
         Debug.Assert(actorEntitySerialization != null, "Actor entity serialization is null for actor: " + GameContext.Instance.PlayerActor);
 
         // 默认的显示逻辑

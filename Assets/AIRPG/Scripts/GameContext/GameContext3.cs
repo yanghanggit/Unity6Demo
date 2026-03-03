@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+//using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 
@@ -12,7 +12,7 @@ public partial class GameContext
     /// 每次调用 CollectEventsByActor 会添加一个新的字典到此列表中
     /// 通过 AgentEventsCollection 属性可以获取合并后的所有历史数据
     /// </summary>
-    private List<Dictionary<string, List<AgentEvent>>> _agentEventsHistory = new();
+    private readonly List<Dictionary<string, List<AgentEvent>>> _agentEventsHistory = new();
 
 
     /// <summary>

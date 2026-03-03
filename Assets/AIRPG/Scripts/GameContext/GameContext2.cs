@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -16,12 +17,12 @@ public partial class GameContext
     /// <summary>
     /// 所有角色实体的序列化数据列表
     /// </summary>
-    private List<EntitySerialization> _actorEntitiesSerialization = new();
+    private List<EntitySerialization> _actorEntities = new();
 
     /// <summary>
     /// 所有场景实体的序列化数据列表
     /// </summary>
-    private List<EntitySerialization> _stageEntitiesSerialization = new();
+    private List<EntitySerialization> _stageEntities = new();
 
     /// <summary>
     /// 地牢数据对象
@@ -54,7 +55,7 @@ public partial class GameContext
     /// 获取游戏中所有角色的名称列表
     /// 通过遍历场景映射关系，汇总所有场景中的角色
     /// </summary>
-    public List<string> AllActors
+    public List<string> ActorNames
     {
         get
         {
@@ -70,11 +71,20 @@ public partial class GameContext
     /// <summary>
     /// 获取游戏中所有场景的名称列表
     /// </summary>
-    public List<string> AllStages
+    public List<string> StageNames
     {
         get
         {
             return new List<string>(_stageActorMapping.Keys);
+        }
+    }
+
+    public List<string> EntityNames
+    {
+        get
+        {
+            // 目前仅包含角色和场景两类实体，后续如果有其他类型的实体需要管理，可以在这里进行扩展
+            return new List<string>(ActorNames).Concat(StageNames).ToList();
         }
     }
 
@@ -153,11 +163,11 @@ public partial class GameContext
     /// 获取或设置所有角色实体的序列化数据列表
     /// 用于存储和管理角色的持久化数据
     /// </summary>
-    public List<EntitySerialization> ActorEntitiesSerialization
+    public List<EntitySerialization> ActorEntities
     {
         get
         {
-            return _actorEntitiesSerialization;
+            return _actorEntities;
         }
         set
         {
@@ -166,7 +176,7 @@ public partial class GameContext
                 Debug.LogError("ActorEntitiesSerialization is null");
                 return;
             }
-            _actorEntitiesSerialization = value;
+            _actorEntities = value;
         }
     }
 
@@ -174,11 +184,11 @@ public partial class GameContext
     /// 获取或设置所有场景实体的序列化数据列表
     /// 用于存储和管理场景的持久化数据
     /// </summary>
-    public List<EntitySerialization> StageEntitiesSerialization
+    public List<EntitySerialization> StageEntities
     {
         get
         {
-            return _stageEntitiesSerialization;
+            return _stageEntities;
         }
         set
         {
@@ -187,7 +197,7 @@ public partial class GameContext
                 Debug.LogError("StageEntitiesSerialization is null");
                 return;
             }
-            _stageEntitiesSerialization = value;
+            _stageEntities = value;
         }
     }
 
@@ -196,9 +206,9 @@ public partial class GameContext
     /// </summary>
     /// <param name="actorName">角色名称</param>
     /// <returns>返回对应的EntitySerialization对象，如果未找到则返回null</returns>
-    public EntitySerialization GetActorEntitySerialization(string actorName)
+    public EntitySerialization GetActorEntity(string actorName)
     {
-        foreach (var entitySerialization in _actorEntitiesSerialization)
+        foreach (var entitySerialization in _actorEntities)
         {
             if (entitySerialization.name == actorName)
             {
@@ -212,19 +222,19 @@ public partial class GameContext
     /// 根据角色名称列表获取对应的实体序列化数据列表
     /// </summary> <param name="actorNames">角色名称列表</param>
     /// <returns>返回对应的EntitySerialization对象列表，如果未找到则返回空列表</returns>
-    public List<EntitySerialization> GetActorEntitiesSerialization(List<string> actorNames)
+    public List<EntitySerialization> GetActorEntities(List<string> actorNames)
     {
         var result = new List<EntitySerialization>();
         foreach (var actorName in actorNames)
         {
-            var entitySerialization = GetActorEntitySerialization(actorName);
-            if (entitySerialization != null)
+            var actorEntity = GetActorEntity(actorName);
+            if (actorEntity != null)
             {
-                result.Add(entitySerialization);
+                result.Add(actorEntity);
             }
             else
             {
-                Debug.LogWarning($"GetActorEntitiesSerialization: No EntitySerialization found for actor '{actorName}'");
+                Debug.LogWarning($"GetActorEntities: No EntitySerialization found for actor '{actorName}'");
             }
         }
         return result;
@@ -235,9 +245,9 @@ public partial class GameContext
     /// </summary>
     /// <param name="stageName">场景名称</param>
     /// <returns>返回对应的EntitySerialization对象，如果未找到则返回null</returns>
-    public EntitySerialization GetStageEntitySerialization(string stageName)
+    public EntitySerialization GetStageEntity(string stageName)
     {
-        foreach (var entitySerialization in _stageEntitiesSerialization)
+        foreach (var entitySerialization in _stageEntities)
         {
             if (entitySerialization.name == stageName)
             {
@@ -259,7 +269,7 @@ public partial class GameContext
 
         for (int i = 0; i < actorsInStage.Count; i++)
         {
-            var actorEntity = GetActorEntitySerialization(actorsInStage[i]);
+            var actorEntity = GetActorEntity(actorsInStage[i]);
             Debug.Assert(actorEntity != null, "actorEntity is null");
 
             var expeditionMemberComponent = GameUtils.GetComponent<ExpeditionMemberComponent>(actorEntity);
@@ -294,7 +304,7 @@ public partial class GameContext
 
         for (int i = 0; i < actorsInStage.Count; i++)
         {
-            var actorEntity = GetActorEntitySerialization(actorsInStage[i]);
+            var actorEntity = GetActorEntity(actorsInStage[i]);
             Debug.Assert(actorEntity != null, "actorEntity is null");
 
             var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntity);
