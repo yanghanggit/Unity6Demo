@@ -718,10 +718,10 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     private async UniTaskVoid SyncDungeonAndActorData()
     {
         // 不论 CombatInit 成功与否，都尝试刷新并更新 UI
-        var apiSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-        if (!apiSuccess)
+        var syncErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        if (syncErr != GameSyncError.None)
         {
-            Debug.LogError("[DungeonCombatScene] Failed to refresh dungeon and actors data");
+            Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
             return;
         }
 
@@ -1030,10 +1030,10 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
             return;
         }
 
-        var apiSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-        if (!apiSuccess)
+        var syncErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        if (syncErr != GameSyncError.None)
         {
-            Debug.LogError("[DungeonCombatScene] Failed to refresh dungeon and actors data");
+            Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
             return;
         }
 

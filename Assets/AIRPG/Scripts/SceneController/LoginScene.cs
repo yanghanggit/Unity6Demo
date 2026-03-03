@@ -76,10 +76,10 @@ public class LoginScene : MonoBehaviour
         }
 
         // 2. 刷新全局游戏状态
-        bool syncSuccess = await GameStateSync.Instance.RefreshStageActorMappingAndEntitiesFromServer();
-        if (!syncSuccess)
+        var syncErr = await GameStateSync.Instance.RefreshStageActorMappingAndEntitiesFromServer();
+        if (syncErr != GameSyncError.None)
         {
-            Debug.LogError("[LoginScene] RefreshMappingAndEntitiesFromServer failed");
+            Debug.LogError($"[LoginScene] RefreshMappingAndEntitiesFromServer failed: {syncErr}");
             return;
         }
 

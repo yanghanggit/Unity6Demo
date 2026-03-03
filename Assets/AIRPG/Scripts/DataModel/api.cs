@@ -227,7 +227,7 @@ public class DungeonCombatPlayCardsResponse
 [System.Serializable]
 public class DungeonStateResponse
 {
-    public Dictionary<string, List<string>> mapping = new();
+    //public Dictionary<string, List<string>> mapping = new();
     public Dungeon dungeon = new();
 }
 

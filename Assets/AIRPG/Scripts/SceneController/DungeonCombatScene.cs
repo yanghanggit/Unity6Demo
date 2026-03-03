@@ -327,11 +327,10 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTask RefreshDungeonStateDisplay()
     {
-        bool refreshSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-
-        if (!refreshSuccess)
+        var refreshErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        if (refreshErr != GameSyncError.None)
         {
-            Debug.LogError("Failed to refresh dungeon and actors data");
+            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
             _mainText.text = "刷新地下城状态失败";
             return;
         }
@@ -375,11 +374,10 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid ExecuteViewActorStats()
     {
-        bool refreshSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-
-        if (!refreshSuccess)
+        var refreshErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        if (refreshErr != GameSyncError.None)
         {
-            Debug.LogError("Failed to refresh dungeon and actors data");
+            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
             _mainText.text = "刷新角色数据失败";
             return;
         }
@@ -407,11 +405,10 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid ExecuteViewActorCards()
     {
-        bool refreshSuccess = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
-
-        if (!refreshSuccess)
+        var refreshErr = await GameStateSync.Instance.RefreshDungeonAndActorsFromServer();
+        if (refreshErr != GameSyncError.None)
         {
-            Debug.LogError("Failed to refresh dungeon and actors data");
+            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
             _mainText.text = "刷新数据失败";
             return;
         }
