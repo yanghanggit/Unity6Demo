@@ -215,7 +215,8 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         if (GameContext.Instance.IsLoggedIn)
         {
             // 走到这里就是有正规登陆的，加载当前场景的角色列表
-            var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
+            var actorsInStage = GameContext.Instance.GetActorsInCurrentStage();
+            actorsInStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
             if (actorsInStage.Count > 0)
             {
                 Debug.Log($"Actors in current stage: {string.Join(", ", actorsInStage)}");

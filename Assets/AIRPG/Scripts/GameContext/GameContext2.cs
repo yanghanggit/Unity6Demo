@@ -123,7 +123,7 @@ public partial class GameContext
     /// 获取当前角色所在场景中的其他角色列表(不包括当前角色自己)
     /// </summary>
     /// <returns>返回除当前角色外的场景中所有角色列表</returns>
-    public List<string> GetOtherActorsInCurrentStage()
+    public List<string> GetActorsInCurrentStage()
     {
         // 获取当前角色所属场景
         var stageName = GetActorStage(PlayerActorName);
@@ -131,10 +131,6 @@ public partial class GameContext
 
         // 获取该场景中的所有角色
         var actorsInStage = GetActorsInStage(stageName);
-
-        // 移除当前角色自己
-        actorsInStage.Remove(PlayerActorName);
-
         return actorsInStage;
     }
 

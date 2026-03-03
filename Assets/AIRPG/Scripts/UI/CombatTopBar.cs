@@ -19,10 +19,19 @@ public class CombatTopBar : MonoBehaviour
         Debug.Assert(_infoText != null, "_infoText is null");
         Debug.Assert(_settingPanel != null, "_settingPanel is null");
 
+        // 初始状态下只显示基本的地下城和关卡信息，战斗相关信息将在战斗状态更新时刷新
         _settingPanel.SetActive(false); // 初始时隐藏设置面板
 
         // 暂时不做过多的逻辑处理，主要负责显示当前地下城和关卡信息
-        RefreshView();
+        if (GameContext.Instance.Dungeon != null)
+        {
+            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+            _infoText.text = $"{GameContext.Instance.Dungeon.name} | {stageName}";
+        }
+        else
+        {
+            _infoText.text = string.Empty;
+        }
     }
 
     /// <summary>
@@ -44,34 +53,12 @@ public class CombatTopBar : MonoBehaviour
     }
 
     /// <summary>
-    /// 更新战斗信息文本，显示当前地下城和关卡信息
-    /// TODO: 待修改 名称！
+    /// 设置顶部信息文本，通常包含当前地下城、关卡、回合数等信息
     /// </summary>
-    public void RefreshView()
+    /// <param name="info"></param>
+    public void SetInfoText(string info)
     {
-        if (!GameContext.Instance.IsLoggedIn || GameContext.Instance.Dungeon == null)
-        {
-            Debug.LogWarning("DungeonCombatScene: Player is not logged in, cannot update combat info text");
-            _infoText.text = "未登录 | 无地下城信息";
-            return;
-        }
-
-        // 基础的名字
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
-        _infoText.text = $"{GameContext.Instance.Dungeon.name} | {stageName}";
-
-        // 后缀添加回合数等战斗相关信息
-        Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
-        if (currentCombat != null)
-        {
-            var rounds = currentCombat.rounds != null ? currentCombat.rounds.Count : 0;
-            _infoText.text += $" | 回合数: {rounds}";
-        }
-        else
-        {
-            _infoText.text += " | 无战斗数据";
-            Debug.LogWarning("DungeonCombatScene: No combat data found for current dungeon");
-        }
+        _infoText.text = info;
     }
 
 }

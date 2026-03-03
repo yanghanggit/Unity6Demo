@@ -67,11 +67,12 @@ public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
         Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent != null");
 
         // 获取当前场景中除了玩家角色外的其他角色列表
-        
+
         if (GameContext.Instance.IsLoggedIn)
         {
-            var actorsInStage = GameContext.Instance.GetOtherActorsInCurrentStage();
-        
+            var actorsInStage = GameContext.Instance.GetActorsInCurrentStage();
+            actorsInStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
+
             // 这段是正常的逻辑，也就是说有服务器返回其他角色数据
             Debug.Assert(actorsInStage.Count > 0, "actorsInStage.Count > 0");
             Debug.Assert(index < actorsInStage.Count, "index < actorsInStage.Count");

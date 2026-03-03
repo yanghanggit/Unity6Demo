@@ -14,9 +14,11 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
     [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件 
 
+    // 卡牌构筑数据管理对象，负责维护当前的构筑状态和数据
     private List<EntitySerialization> _actorEntities; // 角色数据列表
     private EntitySerialization _currentActor; // 当前选中的角色数据
 
+    // 卡牌构筑数据管理对象，负责维护当前的构筑状态和数据
     public List<EntitySerialization> ActorEntities
     {
         get => _actorEntities;
@@ -26,6 +28,8 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
             _actorEntities = value;
         }
     }
+
+    // 卡牌构筑数据管理对象，负责维护当前的构筑状态和数据
     public EntitySerialization CurrentActor
     {
         get => _currentActor;
@@ -51,12 +55,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         // 注册事件监听器
         _onCardElementClickedEvent.RegisterListener(this);
         _onCardBuilderDataChangedEvent.RegisterListener(this);
-
-        // 初始化 UI 显示
-        _mainText.text = string.Empty; // 初始化主文本为空
-        _scrollView.totalCount = 0; // 初始化滚动视图的总项数为0
-        _scrollView.RefillCells(); // 重建列表并回到顶部
-
     }
 
     void OnDestroy()

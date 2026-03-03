@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 public class CombatOnGoingState : MonoBehaviour, ICombatState
 {
@@ -63,6 +64,9 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
         {
             Debug.LogWarning("CombatOnGoingState: Player is not logged in, using mock data to display action order panel");
 
+            // 使用 mock 数据来刷新顶部信息显示
+            CombatScene.SetTopBarInfo("Mock Dungeon | Mock Stage | 回合数: 1");
+
             // 使用 mock 数据来显示行动顺序面板
             _actionOrderPanel.gameObject.SetActive(true);
             _actionOrderPanel.ActorEntities = _mockActorData;
@@ -79,5 +83,66 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
             _arbitrationPanel.gameObject.SetActive(false); // 默认隐藏仲裁面板
             return;
         }
+
+        Debug.Log("Refreshing Combat OnGoing State view with real game data");
+
+        RefreshAsync().Forget();
+    }
+
+    /// <summary>
+    /// 异步刷新战斗进行中状态的 UI 显示，包含从服务器获取最新战斗状态数据并更新各个面板显示。
+    /// </summary>
+    /// <returns></returns>
+    private async UniTaskVoid RefreshAsync()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("CombatOnGoingState: Player is not logged in, using mock data for ActionOrderPanelActorEntities");
+            return;
+        }
+
+        var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+        if (refreshErr != GameSyncError.None)
+        {
+            Debug.LogError($"CombatOnGoingState: Failed to refresh combat state from server, error: {refreshErr}");
+            return;
+        }
+
+        Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+        if (round == null || round.action_order == null)
+        {
+            Debug.LogWarning("CombatOnGoingState: No round or action order data found for current dungeon");
+            return;
+        }
+
+        var actionOrderEntities = GameContext.Instance.GetActorEntities(round.action_order);
+        if (actionOrderEntities == null || actionOrderEntities.Count == 0)
+        {
+            Debug.LogWarning("CombatOnGoingState: No action order entities found, cannot refresh view");
+            return;
+        }
+
+        Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
+        Debug.Assert(currentCombat != null, "CombatOnGoingState: Current combat is null, cannot refresh view");
+
+        // 顶部信息！
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+        var topBarInfo = $"{GameContext.Instance.Dungeon.name} | {stageName} | 回合数: {currentCombat.rounds.Count}";
+        CombatScene.SetTopBarInfo(topBarInfo);
+
+        // 显示行动顺序面板并设置数据
+        _actionOrderPanel.gameObject.SetActive(true);
+        _actionOrderPanel.ActorEntities = actionOrderEntities;
+
+        // 显示卡牌构筑面板并设置数据
+        _cardBuildPanel.gameObject.SetActive(true);
+        _cardBuildPanel.ActorEntities = actionOrderEntities;
+        _cardBuildPanel.CurrentActor = actionOrderEntities[0]; // 默认选中第一个角色
+
+        // 显示顶部信息文本
+        _infoText.text = $"1/{actionOrderEntities.Count} 角色行动中...";
+
+        // 默认隐藏仲裁面板，直到玩家点击信息按钮
+        _arbitrationPanel.gameObject.SetActive(false);
     }
 }
