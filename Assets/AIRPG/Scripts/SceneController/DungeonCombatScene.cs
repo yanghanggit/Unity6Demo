@@ -28,7 +28,7 @@ public class DungeonCombatScene : MonoBehaviour
         if (GameContext.Instance.IsLoggedIn)
         {
             // 已经连接服务器，开始初始化战斗场景
-            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
+            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
             _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
 
             // 刷新场景初始化
@@ -336,7 +336,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 获取当前角色所在场景及该场景中的所有角色
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
+        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
         Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
 
         //

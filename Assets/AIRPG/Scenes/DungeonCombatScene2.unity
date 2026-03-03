@@ -657,7 +657,7 @@ GameObject:
   - component: {fileID: 132391925}
   - component: {fileID: 132391924}
   m_Layer: 5
-  m_Name: Top
+  m_Name: TopBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1843,7 +1843,7 @@ MonoBehaviour:
   _preScene: MainScene
   _nextScene: DungeonCombatScene2
   _backgroundImage: {fileID: 1261761012}
-  _combatInfoText: {fileID: 328469374}
+  _infoText: {fileID: 328469374}
   _mainText: {fileID: 1386312613}
   _scrollView: {fileID: 159657217}
   _actionOrderObjects:

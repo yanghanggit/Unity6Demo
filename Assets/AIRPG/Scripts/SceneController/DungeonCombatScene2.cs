@@ -13,7 +13,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
 
     [Header("UI Components")]
     [SerializeField] private Image _backgroundImage; // 场景背景图片
-    [SerializeField] private TMP_Text _combatInfoText; // 战斗信息显示对象
+    [SerializeField] private TMP_Text _infoText; // 战斗信息显示对象
     [SerializeField] private TMP_Text _mainText; // 主文本显示对象
     [SerializeField] private LoopHorizontalScrollRect _scrollView; // 动态滚动视图
     [SerializeField] private ActionOrderObject[] _actionOrderObjects; // 角色槽位数组
@@ -47,7 +47,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     void Start()
     {
         // 断言检查，确保所有必要的组件和数据都已正确设置
-        Debug.Assert(_combatInfoText != null, "_combatInfoText is null");
+        Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
+        Debug.Assert(_infoText != null, "_infoText is null");
         Debug.Assert(_mainText != null, "Main Text component is not assigned in the inspector.");
         Debug.Assert(_actionOrderObjects != null && _actionOrderObjects.Length > 0, "Action order objects are not assigned in the inspector.");
         Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
@@ -56,7 +57,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         Debug.Assert(_onActionOrderClickedEvent != null, "_onActionOrderClickedEvent is null");
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
         Debug.Assert(_mockActorData != null && _mockActorData.Count > 0, "Mock actor data is not initialized");
-        Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
         Debug.Assert(_tasksStatusApi != null, "TasksStatusApi component is not assigned in the inspector.");
         Debug.Assert(_mainGameObject != null, "_mainGameObject is null");
         Debug.Assert(_bottomGameObject != null, "_bottomGameObject is null");
@@ -291,7 +291,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     private async UniTask<bool> RefreshAndCheckAllActorsDrawn()
     {
         // 刷新玩家所在场景中所有演员的最新数据
-        var actorEntities = await GameStateSync.Instance.RefreshActorsInStageFromServer(GameContext.Instance.PlayerActor);
+        var actorEntities = await GameStateSync.Instance.RefreshActorsInStageFromServer(GameContext.Instance.PlayerActorName);
         if (actorEntities == null)
         {
             Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: failed to refresh actors in stage");
@@ -480,14 +480,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     {
         if (GameContext.Instance.IsLoggedIn)
         {
-            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
-            _combatInfoText.text = $"{GameContext.Instance.Dungeon.name} | {stageName}";
+            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+            _infoText.text = $"{GameContext.Instance.Dungeon.name} | {stageName}";
 
             Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
             if (currentCombat != null)
             {
                 var rounds = currentCombat.rounds != null ? currentCombat.rounds.Count : 0;
-                _combatInfoText.text += $" | 回合数: {rounds}";
+                _infoText.text += $" | 回合数: {rounds}";
             }
             else
             {
@@ -498,7 +498,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
         else
         {
             Debug.LogWarning("DungeonCombatScene: Player is not logged in, cannot update combat info text");
-            _combatInfoText.text = "---";
+            _infoText.text = "---";
         }
     }
 
@@ -509,7 +509,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener
     {
         if (GameContext.Instance.IsLoggedIn)
         {
-            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
+            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
             Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
             // 获取当前角色所在场景
             var cachedSprite = SpriteCacheManager.Instance.GetSprite(stageName);

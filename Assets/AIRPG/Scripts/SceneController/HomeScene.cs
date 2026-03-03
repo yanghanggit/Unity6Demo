@@ -330,7 +330,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// <returns>协程迭代器</returns>
     private async UniTask<bool> SwitchToStageIfNeeded(string targetStageName)
     {
-        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
+        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
 
         if (currentStageName != targetStageName)
         {
@@ -362,11 +362,11 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     {
         if (GameContext.Instance.IsLoggedIn)
         {
-            bool switchSuccess = await SwitchToStageIfNeeded(GameContext.Instance.PlayerOnlyStage);
+            bool switchSuccess = await SwitchToStageIfNeeded(GameContext.Instance.PlayerOnlyStageName);
 
             if (!switchSuccess)
             {
-                Debug.LogError($"[HomeScene] Failed to ensure in {GameContext.Instance.PlayerOnlyStage}");
+                Debug.LogError($"[HomeScene] Failed to ensure in {GameContext.Instance.PlayerOnlyStageName}");
                 return;
             }
 

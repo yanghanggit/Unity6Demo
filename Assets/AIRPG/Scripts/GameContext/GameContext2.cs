@@ -126,14 +126,14 @@ public partial class GameContext
     public List<string> GetOtherActorsInCurrentStage()
     {
         // 获取当前角色所属场景
-        var stageName = GetActorStage(PlayerActor);
+        var stageName = GetActorStage(PlayerActorName);
         Debug.Assert(stageName != "", "[GameContext] Current actor's stage name is empty");
 
         // 获取该场景中的所有角色
         var actorsInStage = GetActorsInStage(stageName);
 
         // 移除当前角色自己
-        actorsInStage.Remove(PlayerActor);
+        actorsInStage.Remove(PlayerActorName);
 
         return actorsInStage;
     }
@@ -264,7 +264,7 @@ public partial class GameContext
     public List<EntitySerialization> GetAliveExpeditionMembersInCurrentCombatStage()
     {
         var aliveExpeditionMembers = new List<EntitySerialization>();
-        var stageName = GetActorStage(PlayerActor);
+        var stageName = GetActorStage(PlayerActorName);
         var actorsInStage = GetActorsInStage(stageName);
 
         for (int i = 0; i < actorsInStage.Count; i++)
@@ -299,7 +299,7 @@ public partial class GameContext
     public List<EntitySerialization> GetAliveEnemiesInCurrentCombatStage()
     {
         var aliveEnemies = new List<EntitySerialization>();
-        var stageName = GetActorStage(PlayerActor);
+        var stageName = GetActorStage(PlayerActorName);
         var actorsInStage = GetActorsInStage(stageName);
 
         for (int i = 0; i < actorsInStage.Count; i++)

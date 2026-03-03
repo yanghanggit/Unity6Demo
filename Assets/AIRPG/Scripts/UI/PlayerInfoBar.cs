@@ -17,16 +17,16 @@ public class PlayerInfoBar : MonoBehaviour
         Debug.Assert(_playerInfoText != null, "_playerInfoText is null");
 
         // 显示玩家文字信息
-        _playerInfoText.text = $"{GameContext.Instance.UserName}\n{GameUtils.GetDisplayName(GameContext.Instance.PlayerActor)}";
+        _playerInfoText.text = $"{GameContext.Instance.UserName}\n{GameUtils.GetDisplayName(GameContext.Instance.PlayerActorName)}";
 
         // 获取角色实体序列化数据
-        var actorEntitySerialization = GameContext.Instance.GetActorEntity(GameContext.Instance.PlayerActor);
-        Debug.Assert(actorEntitySerialization != null, "Actor entity serialization is null for actor: " + GameContext.Instance.PlayerActor);
+        var actorEntitySerialization = GameContext.Instance.GetActorEntity(GameContext.Instance.PlayerActorName);
+        Debug.Assert(actorEntitySerialization != null, "Actor entity serialization is null for actor: " + GameContext.Instance.PlayerActorName);
 
         // 默认的显示逻辑
         // 显示头像
-        var cachedSprite = SpriteCacheManager.Instance.GetSprite(GameContext.Instance.PlayerActor);
-        Debug.Assert(cachedSprite != null, "Cached sprite is null for actor: " + GameContext.Instance.PlayerActor);
+        var cachedSprite = SpriteCacheManager.Instance.GetSprite(GameContext.Instance.PlayerActorName);
+        Debug.Assert(cachedSprite != null, "Cached sprite is null for actor: " + GameContext.Instance.PlayerActorName);
         if (cachedSprite != null)
         {
             // 直接使用缓存的头像

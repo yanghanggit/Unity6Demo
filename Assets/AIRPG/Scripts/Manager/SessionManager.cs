@@ -82,7 +82,7 @@ public class SessionManager : MonoBehaviour
 
         GameContext.Instance.UserName = userName;
         GameContext.Instance.GameName = gameName;
-        GameContext.Instance.PlayerActor = string.Empty;
+        GameContext.Instance.PlayerActorName = string.Empty;
 
         return true;
     }
@@ -108,8 +108,8 @@ public class SessionManager : MonoBehaviour
         }
 
         // 保存角色信息到 GameContext
-        GameContext.Instance.PlayerActor = _startApi.RespData.blueprint.player_actor;
-        GameContext.Instance.PlayerOnlyStage = _startApi.RespData.blueprint.player_only_stage;
+        GameContext.Instance.PlayerActorName = _startApi.RespData.blueprint.player_actor;
+        GameContext.Instance.PlayerOnlyStageName = _startApi.RespData.blueprint.player_only_stage;
 
         return true;
     }

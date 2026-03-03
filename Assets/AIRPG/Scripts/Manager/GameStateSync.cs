@@ -59,7 +59,7 @@ public class GameStateSync : MonoBehaviour
     /// <returns>成功时返回 GameContext.Instance.StageActorMapping（Dictionary&lt;string, List&lt;string&gt;&gt;，作为 cache 引用），失败时返回 null</returns>
     public async UniTask<Dictionary<string, List<string>>> RefreshStageActorMappingFromServer()
     {
-        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActor))
+        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActorName))
         {
             Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
             return null;
@@ -252,7 +252,7 @@ public class GameStateSync : MonoBehaviour
     /// <returns>成功时返回 GameContext.Instance.Dungeon（作为 cache 引用），失败时返回 null</returns>
     public async UniTask<Dungeon> RefreshDungeonFromServer()
     {
-        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActor))
+        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActorName))
         {
             Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
             return null;
@@ -328,7 +328,7 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 步骤2: 刷新玩家所在场景中所有演员的详情数据
-        var actorEntities = await RefreshActorsInStageFromServer(GameContext.Instance.PlayerActor);
+        var actorEntities = await RefreshActorsInStageFromServer(GameContext.Instance.PlayerActorName);
         if (actorEntities == null)
         {
             Debug.LogError("RefreshDungeonAndActorsFromServer failed at step 2");

@@ -270,7 +270,7 @@ public class MainScene : MonoBehaviour
     /// <param name="sceneConfig">目标场景的配置数据(包含 StageName 和 SceneDisplayName)</param>
     private async UniTaskVoid TransitionToScene(HomeSceneConfig sceneConfig)
     {
-        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActor);
+        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
 
         if (currentStageName != sceneConfig.StageName)
         {
@@ -312,7 +312,7 @@ public class MainScene : MonoBehaviour
         foreach (var actorName in allActors)
         {
             // 跳过玩家自己
-            if (actorName == GameContext.Instance.PlayerActor)
+            if (actorName == GameContext.Instance.PlayerActorName)
             {
                 continue;
             }

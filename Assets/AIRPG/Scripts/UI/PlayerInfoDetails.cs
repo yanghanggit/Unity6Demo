@@ -29,11 +29,11 @@ public class PlayerInfoDetails : MonoBehaviour
     private void RefreshPlayerDetails()
     {
         // 获取玩家实体
-        var playerActorEntitySerialization = GameContext.Instance.GetActorEntity(GameContext.Instance.PlayerActor);
+        var playerActorEntitySerialization = GameContext.Instance.GetActorEntity(GameContext.Instance.PlayerActorName);
         //Debug.Assert(playerActorEntitySerialization != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActor);
         if (playerActorEntitySerialization == null)
         {
-            Debug.LogError("Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActor);
+            Debug.LogError("Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActorName);
             return;
         }
 
