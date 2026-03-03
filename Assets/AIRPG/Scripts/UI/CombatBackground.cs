@@ -42,16 +42,14 @@ public class CombatBackground : MonoBehaviour
         else
         {
             Debug.LogWarning("DungeonCombatScene: Player is not logged in, cannot update background image");
-
-            var mockStageName = "场景.山林边缘";
-            var cachedSprite = SpriteCacheManager.Instance.GetSprite(mockStageName);
+            var cachedSprite = SpriteCacheManager.Instance.GetSprite(MockData.MockStageName);
             if (cachedSprite != null)
             {
                 _backgroundImage.GetComponent<Image>().sprite = cachedSprite;
             }
             else
             {
-                Debug.LogWarning($"DungeonCombatScene: Background sprite not found for mock stage: {mockStageName}");
+                Debug.LogWarning($"DungeonCombatScene: Background sprite not found for mock stage: {MockData.MockStageName}");
                 _backgroundImage.GetComponent<Image>().sprite = null;
             }
         }

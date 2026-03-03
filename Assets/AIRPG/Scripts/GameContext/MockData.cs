@@ -6,6 +6,10 @@ using Newtonsoft.Json;
 /// </summary>
 public static class MockData
 {
+
+    //var mockStageName = "场景.山林边缘";
+    public static readonly string MockStageName = "场景.山林边缘";
+
     /// <summary>
     /// 创建并返回一组测试用角色数据
     /// </summary>

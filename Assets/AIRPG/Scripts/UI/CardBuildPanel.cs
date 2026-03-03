@@ -104,7 +104,11 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     private void UpdateBuildButtonState(EntitySerialization actorEntity)
     {
         // 更新主文本显示当前角色名称
-        _buildButton.GetComponentInChildren<TMP_Text>().text = actorEntity.name; // 将按钮文本设置为角色名称
+        _buildButton.GetComponentInChildren<TMP_Text>().text = GameUtils.GetDisplayName(actorEntity.name);
+
+        // var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(actorEntity);
+        // Debug.Assert(combatStatsComponent != null, $"CombatStatsComponent is missing for actor: {actorEntity.name}");
+        // _buildButton.GetComponentInChildren<TMP_Text>().text += $"\n{combatStatsComponent.stats.hp}/{combatStatsComponent.stats.max_hp}";
 
         // 更新滚动视图显示当前角色的卡牌元素
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(actorEntity.name);
@@ -238,24 +242,35 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     private void UpdateMainText(CardBuildData cardBuild)
     {
         Debug.Assert(cardBuild != null, "CardBuildData is null");
-        if (cardBuild.owner != null)
-        {
-            _mainText.text = string.Empty;
-
-            var handComponent = GameUtils.GetComponent<HandComponent>(cardBuild.owner);
-            if (handComponent != null)
-            {
-                _mainText.text += "=== 手牌数据 ===\n\n";
-                _mainText.text += GameUtils.FormatHandComponent(handComponent);
-                _mainText.text += "\n\n";
-            }
-
-            _mainText.text += GameUtils.FormatCardBuildData(cardBuild);
-        }
-        else
+        if (cardBuild.owner == null)
         {
             _mainText.text = "未选中角色";
+            return;
         }
+
+
+        _mainText.text = string.Empty;
+
+        // 更新主文本显示当前角色名称
+        var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(cardBuild.owner);
+        Debug.Assert(combatStatsComponent != null, $"CombatStatsComponent is missing for actor: {cardBuild.owner.name}");
+
+        _mainText.text += $"=== 属性: ===";
+        _mainText.text += $"\nHP:{combatStatsComponent.stats.hp}/{combatStatsComponent.stats.max_hp}," +
+                   $" Attack:{combatStatsComponent.stats.attack}," +
+                   $" Defense:{combatStatsComponent.stats.defense}" +
+                   "\n\n";
+
+
+        var handComponent = GameUtils.GetComponent<HandComponent>(cardBuild.owner);
+        if (handComponent != null)
+        {
+            _mainText.text += "=== 手牌数据 ===\n\n";
+            _mainText.text += GameUtils.FormatHandComponent(handComponent);
+            _mainText.text += "\n\n";
+        }
+
+        _mainText.text += GameUtils.FormatCardBuildData(cardBuild);
     }
 
     /// <summary>

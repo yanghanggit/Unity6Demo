@@ -5,9 +5,10 @@ using UnityEngine;
 public class CombatOnGoingState : MonoBehaviour
 {
     [Header("UI Components")]
+    [SerializeField] private TMP_Text _infoText; // 信息文本显示对象
     [SerializeField] private ActionOrderPanel _actionOrderPanel; // 行动顺序面板控制器
     [SerializeField] private CardBuildPanel _cardBuildPanel; // 卡牌构筑面板控制器
-    [SerializeField] private TMP_Text _infoText; // 信息文本显示对象
+    [SerializeField] private ArbitrationPanel _arbitrationPanel; // 仲裁面板对象
 
     private List<EntitySerialization> _mockActorData;
 
@@ -22,6 +23,7 @@ public class CombatOnGoingState : MonoBehaviour
         Debug.Assert(_actionOrderPanel != null, "_actionOrderPanel is null");
         Debug.Assert(_cardBuildPanel != null, "_cardBuildPanel is null");
         Debug.Assert(_infoText != null, "_infoText is null");
+        Debug.Assert(_arbitrationPanel != null, "_arbitrationPanel is null");
     }
 
     /// <summary>
@@ -30,6 +32,17 @@ public class CombatOnGoingState : MonoBehaviour
     public void OnClickInfoButton()
     {
         Debug.Log("Top Info Button Clicked");
+        _arbitrationPanel.gameObject.SetActive(true);
+        _arbitrationPanel.LastRound = GameUtils.GetLastRound(GameContext.Instance.Dungeon); // 显示最新的回合信息
+    }
+
+    /// <summary>
+    /// 点击仲裁面板关闭按钮的处理逻辑
+    /// </summary>
+    public void OnClickCloseArbitrationPanel()
+    {
+        Debug.Log("Close Arbitration Panel Button Clicked");
+        _arbitrationPanel.gameObject.SetActive(false);
     }
 
     public void OnShow()
@@ -49,10 +62,10 @@ public class CombatOnGoingState : MonoBehaviour
 
             //
             _infoText.text = "1/3 角色行动中... (使用 mock 数据)";
+
+            //
+            _arbitrationPanel.gameObject.SetActive(false); // 默认隐藏仲裁面板
             return;
         }
-
-
-
     }
 }
