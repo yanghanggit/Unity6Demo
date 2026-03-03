@@ -10,28 +10,44 @@ public class CombatTopBar : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private TMP_Text _infoText; // 战斗信息显示对象
 
+    [Header("Setting Panel")]
+    [SerializeField] private GameObject _settingPanel; // 设置面板对象
+
     void Start()
     {
         // 断言检查，确保所有必要的组件和数据都已正确设置
         Debug.Assert(_infoText != null, "_infoText is null");
+        Debug.Assert(_settingPanel != null, "_settingPanel is null");
+
+        _settingPanel.SetActive(false); // 初始时隐藏设置面板
 
         // 暂时不做过多的逻辑处理，主要负责显示当前地下城和关卡信息
-        UpdateInfo();
+        RefreshView();
     }
 
     /// <summary>
     /// 点击 Setting 按钮
     /// </summary>
-    public void OnClickSetting()
+    public void OnClickOpenSetting()
     {
         Debug.Log("[DungeonCombatTopBar] Setting button clicked");
+        _settingPanel.SetActive(true);
+    }
+
+    /// <summary>
+    /// 点击 Close Setting 按钮
+    /// </summary>
+    public void OnClickCloseSetting()
+    {
+        Debug.Log("[DungeonCombatScene] Close Setting button clicked");
+        _settingPanel.SetActive(false);
     }
 
     /// <summary>
     /// 更新战斗信息文本，显示当前地下城和关卡信息
     /// TODO: 待修改 名称！
     /// </summary>
-    public void UpdateInfo()
+    public void RefreshView()
     {
         if (!GameContext.Instance.IsLoggedIn || GameContext.Instance.Dungeon == null)
         {

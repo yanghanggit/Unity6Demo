@@ -19,6 +19,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     // [SerializeField] private GameObject _postCombatPanel; // 战斗后面板对象
     // [SerializeField] private TMP_Text _postCombatText; // 战斗后面板文本对象
 
+    
+
     [Header("Top Bar")]
     [SerializeField] private CombatTopBar _topBar; // 顶部UI控制器
 
@@ -30,6 +32,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
 
     [Header("PostCombat State")]
     [SerializeField] private CombatPostCombatState _combatPostCombatState; // 战斗后状态的设置数据
+
+  
 
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi;
@@ -61,6 +65,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         //Debug.Assert(_background != null, "_background is null");
         Debug.Assert(_onGoingState != null, "_onGoingState is null");
         Debug.Assert(_combatPostCombatState != null, "_combatPostCombatState is null");
+        //Debug.Assert(_settingPanel != null, "_settingPanel is null");
 
         // 注册事件监听器
         // _onCardElementClickedEvent.RegisterListener(this);
@@ -75,6 +80,9 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         // 初始状态先隐藏仲裁面板和战斗后面板
         _combatPostCombatState.gameObject.SetActive(false);
         _combatPostCombatState.CombatScene = this; // 将当前场景作为属性传递给状态对象
+
+        // 设置顶部UI
+        //_settingPanel.SetActive(false);
 
 
 
@@ -211,6 +219,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     //         HandlePlayCardAction();
     //     }
     // }
+
+    
 
     /// <summary>
     /// 处理抽卡行动：根据当前 CardBuilder.Build 的数据决定执行敌人抽卡或盟友抽卡
