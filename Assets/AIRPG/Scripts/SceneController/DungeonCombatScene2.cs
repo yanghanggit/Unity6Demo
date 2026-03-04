@@ -438,7 +438,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         _initializationState.SetActive(false);
         _onGoingState.gameObject.SetActive(false);
         _postCombatState.gameObject.SetActive(true);
-        //_postCombatState.OnEnter();
     }
 
     /// <summary>

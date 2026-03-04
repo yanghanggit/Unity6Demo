@@ -72,7 +72,6 @@ public class ActorPositioningPanel : MonoBehaviour
         }
     }
 
-
     /// <summary>
     /// 点击站位对象的处理逻辑，目前仅输出日志，后续可以扩展为显示角色详细信息等功能
     /// </summary>
@@ -80,7 +79,7 @@ public class ActorPositioningPanel : MonoBehaviour
     public void OnClickPositioningObject(int index)
     {
         Debug.Log($"Clicked on positioning object at index: {index}");
-        var actorEntity = _positioningObjects[index].ActorEntity;
+        var actorEntity = _positioningObjects[index].CachedActorEntity;
 
         var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntity);
         if (enemyComponent != null)
@@ -128,7 +127,7 @@ public class ActorPositioningPanel : MonoBehaviour
         };
         for (int i = 0; i < enemies.Count && i < enemyIndices.Length; i++)
         {
-            _positioningObjects[enemyIndices[i]].ActorEntity = enemies[i];
+            _positioningObjects[enemyIndices[i]].CachedActorEntity = enemies[i];
             _positioningObjects[enemyIndices[i]].gameObject.SetActive(true);
             _positioningObjects[enemyIndices[i]].RefreshView();
         }
@@ -143,7 +142,7 @@ public class ActorPositioningPanel : MonoBehaviour
         };
         for (int i = 0; i < members.Count && i < memberIndices.Length; i++)
         {
-            _positioningObjects[memberIndices[i]].ActorEntity = members[i];
+            _positioningObjects[memberIndices[i]].CachedActorEntity = members[i];
             _positioningObjects[memberIndices[i]].gameObject.SetActive(true);
             _positioningObjects[memberIndices[i]].RefreshView();
         }
@@ -164,17 +163,27 @@ public class ActorPositioningPanel : MonoBehaviour
     public void HideCardBuildPanel()
     {
         _cardBuildPanel.gameObject.SetActive(false);
+
+        if (ActorEntities != null && ActorEntities.Count > 0)
+        {
+            RefreshPositioningView();
+        }
     }
 
     public void ShowEnemyHandPanel(EntitySerialization actorEntity)
     {
         _enemyHandPanel.gameObject.SetActive(true);
-        _enemyHandPanel.CurrentActor = actorEntity;
+        //_enemyHandPanel.CurrentActor = actorEntity;
         _enemyHandPanel.SetupForActor(actorEntity);
     }
 
     public void HideEnemyHandPanel()
     {
         _enemyHandPanel.gameObject.SetActive(false);
+
+        if (ActorEntities != null && ActorEntities.Count > 0)
+        {
+            RefreshPositioningView();
+        }
     }
 }

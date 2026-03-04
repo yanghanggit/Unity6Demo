@@ -8,18 +8,6 @@ public class EnemyHandPanel : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private TMP_Text _infoText; // 战斗信息显示对象
 
-    private EntitySerialization _currentActor;
-
-    public EntitySerialization CurrentActor
-    {
-        get => _currentActor;
-        set
-        {
-            Debug.Assert(value != null, "CurrentActor cannot be null");
-            _currentActor = value;
-        }
-    }
-
     void Start()
     {
         Debug.Assert(_infoText != null, "_infoText is null");

@@ -7,7 +7,6 @@ using Cysharp.Threading.Tasks;
 public class CardBuildPanel : MonoBehaviour, IUIEventListener
 {
     [Header("UI Components")]
-    //[SerializeField] private ActorPositioningPanel _actorPositioningPanel; // 角色站位面板控制器
     [SerializeField] private ActionOrderPanel _actionOrderPanel; // 行动顺序面板控制器
     [SerializeField] private TMP_Text _mainText; // 主文本显示对象
     [SerializeField] private LoopHorizontalScrollRect _scrollView; // 动态滚动视图
@@ -24,11 +23,9 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
 
     void Start()
     {
-        //Debug.Assert(_actorPositioningPanel != null, "_actorPositioningPanel is null");
         Debug.Assert(_actionOrderPanel != null, "_actionOrderPanel is null");
         Debug.Assert(_mainText != null, "Main Text component is not assigned in the inspector.");
         Debug.Assert(_scrollView != null, "Scroll View component is not assigned in the inspector.");
-        // Debug.Assert(_buildButton != null, "Build Button component is not assigned in the inspector.");
         Debug.Assert(_onCardElementClickedEvent != null, "_onCardElementClickedEvent is null");
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
         Debug.Assert(_iconImage != null, "_iconImage is null");
@@ -128,7 +125,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         }
 
         // 调整一下显示，让玩家知道正在执行抽卡行动。
-        //UpdateMainText(CardBuilder.Build, "正在执行抽卡行动...");
         _mainText.text = "正在执行抽卡行动...";
 
         // 创建抽卡行动
@@ -299,9 +295,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         };
 
         UpdateMainText(CardBuilder.Build);
-
-        //
-        //_actorPositioningPanel.RefreshPositioningView();
     }
 
     /// <summary>

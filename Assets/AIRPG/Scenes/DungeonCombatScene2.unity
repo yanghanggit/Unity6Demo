@@ -5789,7 +5789,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e926500805fd7424cb6c809f84440ddb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardBuildPanel
-  _actorPositioningPanel: {fileID: 0}
   _actionOrderPanel: {fileID: 1040530435}
   _mainText: {fileID: 1386312613}
   _scrollView: {fileID: 159657217}

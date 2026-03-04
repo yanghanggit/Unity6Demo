@@ -48,8 +48,9 @@ public class ActionOrderPanel : MonoBehaviour
         {
             var actionOrderObject = GetOrCreate();
             actionOrderObject.name = $"ActionOrder_{i}";
-            actionOrderObject.ActorEntity = actorEntities[i];
+            //actionOrderObject.ActorEntity = actorEntities[i];
             actionOrderObject.gameObject.SetActive(true);
+            actionOrderObject.RefreshUI(actorEntities[i]);
         }
     }
 
