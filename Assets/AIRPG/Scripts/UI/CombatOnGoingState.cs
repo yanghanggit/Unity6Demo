@@ -135,7 +135,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
 
             // 站位面板显示
             _actorPositioningPanel.gameObject.SetActive(true);
-            var actorNamesInStage = GameContext.Instance.GetActorNamesInCurrentStage();
+            var actorNamesInStage = new List<string>();//GameContext.Instance.GetActorNamesInCurrentStage();
             _actorPositioningPanel.ActorEntities = GameContext.Instance.GetActorEntities(actorNamesInStage);
             _actorPositioningPanel.RefreshPositioningView();
         }

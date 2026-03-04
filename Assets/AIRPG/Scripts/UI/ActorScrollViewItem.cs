@@ -70,15 +70,15 @@ public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
 
         if (GameContext.Instance.IsLoggedIn)
         {
-            var actorNamesInStage = GameContext.Instance.GetActorNamesInCurrentStage();
-            actorNamesInStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
+            //var actorNamesInStage = GameContext.Instance.GetActorNamesInCurrentStage();
+            //actorNamesInStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
 
             // 这段是正常的逻辑，也就是说有服务器返回其他角色数据
-            Debug.Assert(actorNamesInStage.Count > 0, "actorsInStage.Count > 0");
-            Debug.Assert(index < actorNamesInStage.Count, "index < actorsInStage.Count");
+            //Debug.Assert(actorNamesInStage.Count > 0, "actorsInStage.Count > 0");
+            Debug.Assert(index < HomeScene.ActorNamesInCurrentStage.Count, "index < ActorNamesInCurrentStage.Count");
 
             // 根据索引获取对应的角色名称
-            _actorName = actorNamesInStage[index];
+            _actorName = HomeScene.ActorNamesInCurrentStage[index];
 
             // 更新UI显示:设置角色名称文本
             _title.text = GameUtils.GetDisplayName(_actorName);

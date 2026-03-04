@@ -16,6 +16,9 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// MainScene 会在切换场景前设置此属性,HomeScene 在 Awake 时读取并清空
     /// </summary>
     public static HomeSceneConfig PendingHomeSceneConfig { get; set; }
+
+    public static List<string> ActorNamesInCurrentStage = new();
+
     // UI组件引用
     [Header("UI Components")]
     [SerializeField] private GameObject _background;            // 场景背景
@@ -103,9 +106,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         // 中下部的UI状态初始化，带有滚动视图的主状态
         _mainState.SetActive(true);                  // 显示主状态UI
 
-        // 刷新角色列表
-        RefreshActorList();
-
         // 隐藏输入状态UI
         _inputState.SetActive(false);             // 隐藏输入状态UI
         _inputField.text = string.Empty;          // 清空输入字段
@@ -123,6 +123,9 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
                 Debug.LogWarning("Stage sprite not found for: " + _homeSceneConfig.StageName);
             }
         }
+
+        // 刷新角色列表
+        RefreshActorList().Forget();
     }
 
     /// <summary>
@@ -210,31 +213,55 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// 如果游戏已正规登录,则加载当前场景的角色列表并更新滚动视图
     /// 可以多次调用以更新角色列表显示
     /// </summary>
-    private void RefreshActorList()
+    private async UniTaskVoid RefreshActorList()
     {
-        if (GameContext.Instance.IsLoggedIn)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            // 走到这里就是有正规登陆的，加载当前场景的角色列表
-            var actorNamesInStage = GameContext.Instance.GetActorNamesInCurrentStage();
-            actorNamesInStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
-            if (actorNamesInStage.Count > 0)
+            Debug.Log("[HomeScene] GameContext Root is null");
+            ActorNamesInCurrentStage.Clear();
+            _scrollView.totalCount = ActorNamesInCurrentStage.Count;
+            _scrollView.RefillCells();
+            return;
+        }
+
+        var stagesState = await GameStateSync.Instance.GetStagesState();
+        if (stagesState == null)
+        {
+            Debug.LogError("[HomeScene] Failed to get stages state from server");
+            ActorNamesInCurrentStage.Clear();
+            _scrollView.totalCount = ActorNamesInCurrentStage.Count;
+            _scrollView.RefillCells();
+            return;
+        }
+
+        //var currentStageName = string.Empty;
+        //List<string> actorNamesInStage = new();
+        foreach (var kvp in stagesState)
+        {
+            if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
             {
-                Debug.Log($"Actors in current stage: {string.Join(", ", actorNamesInStage)}");
-                _scrollView.totalCount = actorNamesInStage.Count;
-                _scrollView.RefillCells();
+                ActorNamesInCurrentStage = kvp.Value;
+                break;
             }
-            else
-            {
-                _scrollView.totalCount = 0;
-                _scrollView.RefillCells();
-                Debug.Log("No other actors found in current stage");
-            }
+        }
+
+        ActorNamesInCurrentStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
+
+
+        // 走到这里就是有正规登陆的，加载当前场景的角色列表
+        //var actorNamesInStage = GameContext.Instance.GetActorNamesInCurrentStage();
+
+        if (ActorNamesInCurrentStage.Count > 0)
+        {
+            Debug.Log($"Actors in current stage: {string.Join(", ", ActorNamesInCurrentStage)}");
+            _scrollView.totalCount = ActorNamesInCurrentStage.Count;
+            _scrollView.RefillCells();
         }
         else
         {
-            Debug.Log("[HomeScene] GameContext Root is null");
             _scrollView.totalCount = 0;
             _scrollView.RefillCells();
+            Debug.Log("No other actors found in current stage");
         }
     }
 
@@ -309,15 +336,6 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     {
         Debug.Log($"精灵 {clickHandler.gameObject.name} 被点击了！");
 
-        // 确认选中的角色仍在当前场景中
-        var selectedActorStageName = GameContext.Instance.GetActorNameStage(_selectedActorName);
-        if (selectedActorStageName != _homeSceneConfig.StageName)
-        {
-            Debug.LogWarning($"Selected actor {_selectedActorName} is not in the current stage {_homeSceneConfig.StageName}.");
-            _speechBubbleText.text = $"[{_selectedActorName}] => 不在当前场景～"; // 更新提示文本
-            return;
-        }
-
         // 切换到输入状态！
         _mainState.SetActive(false);                // 隐藏主状态UI
         _inputState.SetActive(true);                // 显示输入状态UI
@@ -331,19 +349,33 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// <returns>协程迭代器</returns>
     private async UniTask<bool> SwitchToStageIfNeeded(string targetStageName)
     {
-        var currentStageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
+        var stagesState = await GameStateSync.Instance.GetStagesState();
+        if (stagesState == null)
+        {
+            Debug.LogError("Failed to refresh stage-actor mapping from server");
+            return false;
+        }
+
+        var currentStageName = string.Empty;
+        foreach (var kvp in stagesState)
+        {
+            if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
+            {
+                currentStageName = kvp.Key;
+                break;
+            }
+        }
 
         if (currentStageName != targetStageName)
         {
-            bool switchSuccess = await HomeGamePlayManager.Instance.SwitchStage(targetStageName);
-
-            if (!switchSuccess)
+            bool isStageSwitchSuccessful = await HomeGamePlayManager.Instance.SwitchStage(targetStageName);
+            if (!isStageSwitchSuccessful)
             {
                 Debug.LogError($"[HomeScene] SwitchStage to {targetStageName} failed");
                 return false;
             }
 
-            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+            //await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
             Debug.Log($"[HomeScene] Successfully switched to stage: {targetStageName}");
             return true;
         }
@@ -387,22 +419,21 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// <returns>协程迭代器</returns>
     private async UniTaskVoid AdvanceHomeState()
     {
-        bool advanceSuccess = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
-
-        if (!advanceSuccess)
+        bool isGameAdvanceSuccessful = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
+        if (!isGameAdvanceSuccessful)
         {
             Debug.LogError("[HomeScene] AdvanceGame failed");
             return;
         }
 
-        var actorsWithTransStageEvents = GameUtils.GetActorsWithEventType<TransStageEvent>(GameContext.Instance.LastAgentEventsHistory);
-        if (actorsWithTransStageEvents.Count > 0)
-        {
-            Debug.Log($"[HomeScene] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
+        // var actorsWithTransStageEvents = GameUtils.GetActorsWithEventType<TransStageEvent>(GameContext.Instance.LastAgentEventsHistory);
+        // if (actorsWithTransStageEvents.Count > 0)
+        // {
+        //     Debug.Log($"[HomeScene] Actors with TransStageEvents: {string.Join(", ", actorsWithTransStageEvents)}");
 
-            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-            RefreshActorList();
-        }
+        //     //await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+        //     RefreshActorList();
+        // }
 
         UpdateActorDisplay(_selectedActorName);
     }
@@ -510,9 +541,8 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// <returns>协程迭代器</returns>
     private async UniTaskVoid AdvanceActorState(string actorName)
     {
-        bool advanceSuccess = await HomeGamePlayManager.Instance.AdvanceGame(new List<string> { actorName });
-
-        if (!advanceSuccess)
+        bool isAdvanceSuccessful = await HomeGamePlayManager.Instance.AdvanceGame(new List<string> { actorName });
+        if (!isAdvanceSuccessful)
         {
             Debug.LogError($"[HomeScene] AdvanceActorState failed for {actorName}");
             return;

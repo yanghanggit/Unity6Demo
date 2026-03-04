@@ -85,8 +85,8 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         //Debug.Log("OnClickDrawCards");
-        List<AllyDrawCardAction> specifiedActions = GenerateAllyDrawCardActions();
-        ExecuteDrawCardsAndShowHands(specifiedActions, true).Forget();
+        //List<AllyDrawCardAction> specifiedActions = GenerateAllyDrawCardActions();
+        //ExecuteDrawCardsAndShowHands(specifiedActions, true).Forget();
     }
 
     public void OnClickPlayCards()
@@ -520,64 +520,64 @@ public class DungeonCombatScene : MonoBehaviour
     /// 每个盟友随机选择一个技能、一个敌人目标和一个状态效果
     /// </summary>
     /// <returns>盟友抽卡行动列表</returns>
-    private List<AllyDrawCardAction> GenerateAllyDrawCardActions()
-    {
-        var actions = new List<AllyDrawCardAction>();
-        var aliveAllies = GameContext.Instance.GetAliveExpeditionMembers();
-        var aliveEnemies = GameContext.Instance.GetAliveEnemies();
+    // private List<AllyDrawCardAction> GenerateAllyDrawCardActions()
+    // {
+    //     var actions = new List<AllyDrawCardAction>();
+    //     var aliveAllies = GameContext.Instance.GetAliveExpeditionMembers();
+    //     var aliveEnemies = GameContext.Instance.GetAliveEnemies();
 
-        // 如果没有敌人，无法生成攻击行动
-        if (aliveEnemies.Count == 0)
-        {
-            Debug.LogWarning("No alive enemies found, cannot generate draw card actions");
-            return actions;
-        }
+    //     // 如果没有敌人，无法生成攻击行动
+    //     if (aliveEnemies.Count == 0)
+    //     {
+    //         Debug.LogWarning("No alive enemies found, cannot generate draw card actions");
+    //         return actions;
+    //     }
 
-        foreach (var allyEntity in aliveAllies)
-        {
-            // 获取盟友的技能书组件
-            var skillBookComponent = GameUtils.GetComponent<SkillBookComponent>(allyEntity);
-            if (skillBookComponent == null || skillBookComponent.skills.Count == 0)
-            {
-                Debug.LogWarning($"Ally {allyEntity.name} has no skills, skipping");
-                continue;
-            }
+    //     foreach (var allyEntity in aliveAllies)
+    //     {
+    //         // 获取盟友的技能书组件
+    //         var skillBookComponent = GameUtils.GetComponent<SkillBookComponent>(allyEntity);
+    //         if (skillBookComponent == null || skillBookComponent.skills.Count == 0)
+    //         {
+    //             Debug.LogWarning($"Ally {allyEntity.name} has no skills, skipping");
+    //             continue;
+    //         }
 
-            // 获取盟友的战斗属性组件
-            var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(allyEntity);
-            if (combatStatsComponent == null)
-            {
-                Debug.LogWarning($"Ally {allyEntity.name} has no combat stats component, skipping");
-                continue;
-            }
+    //         // 获取盟友的战斗属性组件
+    //         var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(allyEntity);
+    //         if (combatStatsComponent == null)
+    //         {
+    //             Debug.LogWarning($"Ally {allyEntity.name} has no combat stats component, skipping");
+    //             continue;
+    //         }
 
-            // 随机选择一个技能
-            var randomSkill = skillBookComponent.skills[Random.Range(0, skillBookComponent.skills.Count)];
+    //         // 随机选择一个技能
+    //         var randomSkill = skillBookComponent.skills[Random.Range(0, skillBookComponent.skills.Count)];
 
-            // 随机选择一个敌人作为目标
-            var randomEnemy = aliveEnemies[Random.Range(0, aliveEnemies.Count)];
+    //         // 随机选择一个敌人作为目标
+    //         var randomEnemy = aliveEnemies[Random.Range(0, aliveEnemies.Count)];
 
-            // 随机选择一个状态效果（如果有）
-            var statusEffectNames = new List<string>();
-            if (combatStatsComponent.status_effects.Count > 0)
-            {
-                var randomStatusEffect = combatStatsComponent.status_effects[Random.Range(0, combatStatsComponent.status_effects.Count)];
-                statusEffectNames.Add(randomStatusEffect.name);
-            }
+    //         // 随机选择一个状态效果（如果有）
+    //         var statusEffectNames = new List<string>();
+    //         if (combatStatsComponent.status_effects.Count > 0)
+    //         {
+    //             var randomStatusEffect = combatStatsComponent.status_effects[Random.Range(0, combatStatsComponent.status_effects.Count)];
+    //             statusEffectNames.Add(randomStatusEffect.name);
+    //         }
 
-            // 创建抽卡行动
-            var action = new AllyDrawCardAction
-            {
-                entity_name = allyEntity.name,
-                skill_name = randomSkill.name,
-                target_names = new List<string> { randomEnemy.name },
-                status_effect_names = statusEffectNames
-            };
+    //         // 创建抽卡行动
+    //         var action = new AllyDrawCardAction
+    //         {
+    //             entity_name = allyEntity.name,
+    //             skill_name = randomSkill.name,
+    //             target_names = new List<string> { randomEnemy.name },
+    //             status_effect_names = statusEffectNames
+    //         };
 
-            actions.Add(action);
-            Debug.Log($"Generated draw card action: {allyEntity.name} uses {randomSkill.name} on {randomEnemy.name}");
-        }
+    //         actions.Add(action);
+    //         Debug.Log($"Generated draw card action: {allyEntity.name} uses {randomSkill.name} on {randomEnemy.name}");
+    //     }
 
-        return actions;
-    }
+    //     return actions;
+    // }
 }

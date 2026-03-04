@@ -232,15 +232,15 @@ public class MainScene : MonoBehaviour
     /// <param name="sceneConfig">目标场景的配置数据(包含 StageName 和 SceneDisplayName)</param>
     private async UniTaskVoid TransitionToScene(HomeSceneConfig sceneConfig)
     {
-        var mapping = await GameStateSync.Instance.RefreshMappingFromServer();
-        if (mapping == null)
+        var stagesState = await GameStateSync.Instance.GetStagesState();
+        if (stagesState == null)
         {
             Debug.LogError("Failed to refresh stage-actor mapping from server");
             return;
         }
 
         var currentStageName = string.Empty;
-        foreach (var kvp in mapping)
+        foreach (var kvp in stagesState)
         {
             if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
             {
@@ -284,15 +284,15 @@ public class MainScene : MonoBehaviour
         }
 
         // 从服务器刷新场景-角色映射关系
-        var mapping = await GameStateSync.Instance.RefreshMappingFromServer();
-        if (mapping == null)
+        var stagesState = await GameStateSync.Instance.GetStagesState();
+        if (stagesState == null)
         {
             Debug.LogError("Failed to refresh stage-actor mapping from server");
             return;
         }
 
-        // 遍历 mapping 中的每个场景和对应的角色列表
-        foreach (var kvp in mapping)
+        // 遍历 stagesState 中的每个场景和对应的角色列表
+        foreach (var kvp in stagesState)
         {
             var stageName = kvp.Key;
             var actorNames = kvp.Value;

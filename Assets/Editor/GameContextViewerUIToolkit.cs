@@ -176,7 +176,7 @@ public class GameContextViewerUIToolkit : EditorWindow
 
         UpdateUserInfo();
         UpdateUrls();
-        UpdateStageMapping();
+        //UpdateStageMapping();
         UpdateActorEntities();
         UpdateStageEntities();
         UpdateDungeonData();
@@ -249,43 +249,43 @@ public class GameContextViewerUIToolkit : EditorWindow
         return row;
     }
 
-    private void UpdateStageMapping()
-    {
-        if (stageMappingContainer == null) return;
+    // private void UpdateStageMapping()
+    // {
+    //     if (stageMappingContainer == null) return;
 
-        stageMappingContainer.Clear();
+    //     stageMappingContainer.Clear();
 
-        var mapping = GameContext.Instance.StageActorMapping;
-        var foldout = rootVisualElement.Q<Foldout>("stage-mapping-foldout");
-        if (foldout != null)
-        {
-            foldout.text = $"场景-角色映射 (场景数: {mapping.Count})";
-        }
+    //     var mapping = GameContext.Instance.StageActorMapping;
+    //     var foldout = rootVisualElement.Q<Foldout>("stage-mapping-foldout");
+    //     if (foldout != null)
+    //     {
+    //         foldout.text = $"场景-角色映射 (场景数: {mapping.Count})";
+    //     }
 
-        if (mapping.Count == 0)
-        {
-            var emptyLabel = new Label("暂无数据");
-            emptyLabel.AddToClassList("empty-message");
-            stageMappingContainer.Add(emptyLabel);
-            return;
-        }
+    //     if (mapping.Count == 0)
+    //     {
+    //         var emptyLabel = new Label("暂无数据");
+    //         emptyLabel.AddToClassList("empty-message");
+    //         stageMappingContainer.Add(emptyLabel);
+    //         return;
+    //     }
 
-        foreach (var kvp in mapping)
-        {
-            var stageLabel = new Label($"场景: {kvp.Key}");
-            stageLabel.AddToClassList("bold-label");
-            stageMappingContainer.Add(stageLabel);
+    //     foreach (var kvp in mapping)
+    //     {
+    //         var stageLabel = new Label($"场景: {kvp.Key}");
+    //         stageLabel.AddToClassList("bold-label");
+    //         stageMappingContainer.Add(stageLabel);
 
-            foreach (var actor in kvp.Value)
-            {
-                var actorLabel = new Label($"  → {actor}");
-                actorLabel.AddToClassList("info-label");
-                stageMappingContainer.Add(actorLabel);
-            }
+    //         foreach (var actor in kvp.Value)
+    //         {
+    //             var actorLabel = new Label($"  → {actor}");
+    //             actorLabel.AddToClassList("info-label");
+    //             stageMappingContainer.Add(actorLabel);
+    //         }
 
-            stageMappingContainer.Add(new VisualElement { style = { height = 5 } });
-        }
-    }
+    //         stageMappingContainer.Add(new VisualElement { style = { height = 5 } });
+    //     }
+    // }
 
     private void UpdateActorEntities()
     {
