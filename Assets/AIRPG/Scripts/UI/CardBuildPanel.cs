@@ -76,7 +76,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     /// <summary>
     /// 根据当前角色数据更新构筑按钮的状态
     /// </summary>
-    private void SetupForActor(EntitySerialization actorEntity)
+    public void SetupForActor(EntitySerialization actorEntity)
     {
         Debug.Assert(actorEntity != null, "Current actor data is null");
 

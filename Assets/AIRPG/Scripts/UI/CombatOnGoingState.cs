@@ -58,13 +58,14 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
             Debug.LogWarning("CombatOnGoingState: Player is not logged in, using mock data to display action order panel");
 
             // 使用 mock 数据来刷新顶部信息显示
-            _topBar.SetInfoText("Mock Dungeon | Mock Stage | 回合数: 1");
+            _topBar.SetText("Mock Dungeon | Mock Stage | 回合数: 1");
 
             // positioning 显示。
             _actorPositioningPanel.gameObject.SetActive(true);
             _actorPositioningPanel.ActorEntities = _mockActorData;
             _actorPositioningPanel.RefreshPositioningView();
             _actorPositioningPanel.HideCardBuildPanel();
+            _actorPositioningPanel.HideEnemyHandPanel();
 
 
             // 先关掉仲裁面板，避免显示错误数据
@@ -83,19 +84,6 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
     /// <returns></returns>
     private async UniTaskVoid OnEnterAsync()
     {
-        if (!GameContext.Instance.IsLoggedIn)
-        {
-            Debug.LogWarning("CombatOnGoingState: Player is not logged in, using mock data for ActionOrderPanelActorEntities");
-            return;
-        }
-
-        var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-        if (refreshErr != GameSyncError.None)
-        {
-            Debug.LogError($"CombatOnGoingState: Failed to refresh combat state from server, error: {refreshErr}");
-            return;
-        }
-
         Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
         if (round == null || round.action_order == null)
         {
@@ -116,7 +104,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
         // 顶部信息！
         var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
         var topBarInfo = $"{GameContext.Instance.Dungeon.name} | {stageName} | 回合数: {currentCombat.rounds.Count}";
-        _topBar.SetInfoText(topBarInfo);
+        _topBar.SetText(topBarInfo);
     }
 
     /// <summary>

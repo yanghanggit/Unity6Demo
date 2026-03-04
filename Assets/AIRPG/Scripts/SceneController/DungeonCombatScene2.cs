@@ -34,13 +34,15 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     {
         // 断言检查，确保所有必要的组件和数据都已正确设置
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
-        //Debug.Assert(_mockActorData != null && _mockActorData.Count > 0, "Mock actor data is not initialized");
         Debug.Assert(_tasksStatusApi != null, "TasksStatusApi component is not assigned in the inspector.");
         Debug.Assert(_topBar != null, "_topBar is null");
         Debug.Assert(_initializationState != null, "_initializationState is null");
         Debug.Assert(_onGoingState != null, "_onGoingState is null");
         Debug.Assert(_postCombatState != null, "_postCombatState is null");
         Debug.Assert(_settingPanel != null, "_settingPanel is null");
+
+        // 场景初始状态设置为隐藏所有状态对象和设置面板，确保场景初始状态是干净的
+        _topBar.gameObject.SetActive(true);
 
         // 初始状态先隐藏主对象和底部对象，确保场景初始状态是隐藏的
         _initializationState.SetActive(true);
@@ -231,21 +233,28 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         switch (lastCombatState)
         {
             case CombatState.INITIALIZATION:
-                Debug.Log("[DungeonCombatScene] Combat is in initialization state, showing initialization UI");
-                var messages = await DungeonGamePlayManager.Instance.CombatInit();
-                if (messages == null)
                 {
-                    Debug.LogError("CombatInit failed, messages is null");
-                    return;
+                    Debug.Log("[DungeonCombatScene] Combat is in initialization state, showing initialization UI");
+                    var messages = await DungeonGamePlayManager.Instance.CombatInit();
+                    if (messages == null)
+                    {
+                        Debug.LogError("CombatInit failed, messages is null");
+                        return;
+                    }
+
+                    var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+                    if (refreshErr != GameSyncError.None)
+                    {
+                        Debug.LogError($"CombatOnGoingState: Failed to refresh combat state from server, error: {refreshErr}");
+                        return;
+                    }
+                    Debug.Log("[DungeonCombatScene] Combat initialization completed, switching to ongoing state");
+                    OnEnterOnGoingState();
                 }
-                Debug.Log("[DungeonCombatScene] Combat initialization completed, switching to ongoing state");
-                //SwitchCombatState(CombatState.ONGOING);
-                OnEnterOnGoingState();
                 break;
 
             case CombatState.ONGOING:
                 Debug.Log("[DungeonCombatScene] Combat is ongoing, showing ongoing UI");
-                //SwitchCombatState(CombatState.ONGOING);
                 OnEnterOnGoingState();
                 break;
 

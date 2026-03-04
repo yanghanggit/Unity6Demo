@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class ActorPositioningPanel : MonoBehaviour
 {
-    // Maximum number of positioning objects that can be displayed in the panel
     public static readonly int MaxPositioningObjects = 6;
 
 
     [Header("UI Components")]
     [SerializeField] private ActorPositioningObject[] _positioningObjects;
     [SerializeField] private CardBuildPanel _cardBuildPanel;
+    [SerializeField] private EnemyHandPanel _enemyHandPanel;
 
     // 角色数据列表，包含所有需要在站位面板中显示的角色实体数据
     private List<EntitySerialization> _actorEntities;
@@ -82,7 +82,16 @@ public class ActorPositioningPanel : MonoBehaviour
         Debug.Log($"Clicked on positioning object at index: {index}");
         var actorEntity = _positioningObjects[index].ActorEntity;
 
-        ShowCardBuildPanelForActor(actorEntity);
+        var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntity);
+        if (enemyComponent != null)
+        {
+            ShowEnemyHandPanel(actorEntity);
+
+        }
+        else
+        {
+            ShowCardBuildPanelForActor(actorEntity);
+        }
     }
 
 
@@ -90,6 +99,7 @@ public class ActorPositioningPanel : MonoBehaviour
     {
         Debug.Assert(_positioningObjects != null && _positioningObjects.Length == MaxPositioningObjects, "Positioning objects array is not assigned in the inspector.");
         Debug.Assert(_cardBuildPanel != null, "_cardBuildPanel is null");
+        Debug.Assert(_enemyHandPanel != null, "_enemyHandPanel is null");
     }
 
     /// <summary>
@@ -147,6 +157,7 @@ public class ActorPositioningPanel : MonoBehaviour
         _cardBuildPanel.gameObject.SetActive(true);
         _cardBuildPanel.ActorEntities = ActorEntities;
         _cardBuildPanel.CurrentActor = actorEntity;
+        _cardBuildPanel.SetupForActor(actorEntity);
     }
 
     ///<summary>
@@ -155,5 +166,17 @@ public class ActorPositioningPanel : MonoBehaviour
     public void HideCardBuildPanel()
     {
         _cardBuildPanel.gameObject.SetActive(false);
+    }
+
+    public void ShowEnemyHandPanel(EntitySerialization actorEntity)
+    {
+        _enemyHandPanel.gameObject.SetActive(true);
+        _enemyHandPanel.CurrentActor = actorEntity;
+        _enemyHandPanel.SetupForActor(actorEntity);
+    }
+
+    public void HideEnemyHandPanel()
+    {
+        _enemyHandPanel.gameObject.SetActive(false);
     }
 }
