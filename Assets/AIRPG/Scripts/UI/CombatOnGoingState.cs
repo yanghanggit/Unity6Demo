@@ -6,6 +6,7 @@ using Cysharp.Threading.Tasks;
 public class CombatOnGoingState : MonoBehaviour, ICombatState
 {
     [Header("UI Components")]
+    [SerializeField] private ActorPositioningPanel _actorPositioningPanel; // 角色站位面板控制器
     [SerializeField] private TMP_Text _infoText; // 信息文本显示对象
     [SerializeField] private ActionOrderPanel _actionOrderPanel; // 行动顺序面板控制器
     [SerializeField] private CardBuildPanel _cardBuildPanel; // 卡牌构筑面板控制器
@@ -25,6 +26,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
 
     void Start()
     {
+        Debug.Assert(_actorPositioningPanel != null, "_actorPositioningPanel is null");
         Debug.Assert(_actionOrderPanel != null, "_actionOrderPanel is null");
         Debug.Assert(_cardBuildPanel != null, "_cardBuildPanel is null");
         Debug.Assert(_infoText != null, "_infoText is null");
@@ -67,20 +69,25 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
             // 使用 mock 数据来刷新顶部信息显示
             CombatScene.SetTopBarInfo("Mock Dungeon | Mock Stage | 回合数: 1");
 
+            // positioning 显示。
+            _actorPositioningPanel.gameObject.SetActive(true);
+            _actorPositioningPanel.ActorEntities = _mockActorData;
+            _actorPositioningPanel.RefreshView();
+
             // 使用 mock 数据来显示行动顺序面板
-            _actionOrderPanel.gameObject.SetActive(true);
-            _actionOrderPanel.ActorEntities = _mockActorData;
+            // _actionOrderPanel.gameObject.SetActive(true);
+            // _actionOrderPanel.ActorEntities = _mockActorData;
 
-            // 初始化卡牌构筑面板，默认选中第一个角色
-            _cardBuildPanel.gameObject.SetActive(true);
-            _cardBuildPanel.ActorEntities = _mockActorData;
-            _cardBuildPanel.CurrentActor = _mockActorData[0]; // 默认选中
+            // // 初始化卡牌构筑面板，默认选中第一个角色
+            // _cardBuildPanel.gameObject.SetActive(true);
+            // _cardBuildPanel.ActorEntities = _mockActorData;
+            // _cardBuildPanel.CurrentActor = _mockActorData[0]; // 默认选中
 
-            //
-            _infoText.text = "1/3 角色行动中... (使用 mock 数据)";
+            // //
+            // _infoText.text = "1/3 角色行动中... (使用 mock 数据)";
 
-            //
-            _arbitrationPanel.gameObject.SetActive(false); // 默认隐藏仲裁面板
+            // //
+            // _arbitrationPanel.gameObject.SetActive(false); // 默认隐藏仲裁面板
             return;
         }
 

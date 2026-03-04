@@ -65,6 +65,14 @@ public static class MockData
                 JsonConvert.SerializeObject(combatStats0))
         });
 
+        var expeditionMember0 = new ExpeditionMemberComponent { name = "ExpeditionMemberComponent", dungeon_name = "" };
+        actors[0].components.Add(new ComponentSerialization
+        {
+            name = "ExpeditionMemberComponent",
+            data = JsonConvert.DeserializeObject<Dictionary<string, object>>(
+                JsonConvert.SerializeObject(expeditionMember0))
+        });
+
         // 2. 角色.术士.云音
         actors.Add(new EntitySerialization
         {
@@ -111,6 +119,14 @@ public static class MockData
             name = "CombatStatsComponent",
             data = JsonConvert.DeserializeObject<Dictionary<string, object>>(
                 JsonConvert.SerializeObject(combatStats1))
+        });
+
+        var expeditionMember1 = new ExpeditionMemberComponent { name = "ExpeditionMemberComponent", dungeon_name = "" };
+        actors[1].components.Add(new ComponentSerialization
+        {
+            name = "ExpeditionMemberComponent",
+            data = JsonConvert.DeserializeObject<Dictionary<string, object>>(
+                JsonConvert.SerializeObject(expeditionMember1))
         });
 
         // 3. 角色.常物.野猪
@@ -161,6 +177,14 @@ public static class MockData
                 JsonConvert.SerializeObject(combatStats2))
         });
 
+        var enemy2 = new EnemyComponent { name = "EnemyComponent" };
+        actors[2].components.Add(new ComponentSerialization
+        {
+            name = "EnemyComponent",
+            data = JsonConvert.DeserializeObject<Dictionary<string, object>>(
+                JsonConvert.SerializeObject(enemy2))
+        });
+
         // 4. 角色.精怪.山魈
         actors.Add(new EntitySerialization
         {
@@ -209,6 +233,14 @@ public static class MockData
                 JsonConvert.SerializeObject(combatStats3))
         });
 
+        var enemy3 = new EnemyComponent { name = "EnemyComponent" };
+        actors[3].components.Add(new ComponentSerialization
+        {
+            name = "EnemyComponent",
+            data = JsonConvert.DeserializeObject<Dictionary<string, object>>(
+                JsonConvert.SerializeObject(enemy3))
+        });
+
         // 5. 角色.大妖.山中虎
         actors.Add(new EntitySerialization
         {
@@ -255,6 +287,14 @@ public static class MockData
             name = "CombatStatsComponent",
             data = JsonConvert.DeserializeObject<Dictionary<string, object>>(
                 JsonConvert.SerializeObject(combatStats4))
+        });
+
+        var enemy4 = new EnemyComponent { name = "EnemyComponent" };
+        actors[4].components.Add(new ComponentSerialization
+        {
+            name = "EnemyComponent",
+            data = JsonConvert.DeserializeObject<Dictionary<string, object>>(
+                JsonConvert.SerializeObject(enemy4))
         });
 
         return actors;

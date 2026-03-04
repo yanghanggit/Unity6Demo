@@ -238,6 +238,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
 
             case CombatState.ONGOING:
                 Debug.Log("[DungeonCombatScene] Combat is ongoing, showing ongoing UI");
+                SwitchCombatState(CombatState.ONGOING);
                 break;
 
             case CombatState.COMPLETE:
