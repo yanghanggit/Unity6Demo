@@ -1,5 +1,7 @@
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CombatPostCombatState : MonoBehaviour, ICombatState
 {
@@ -19,6 +21,30 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
     public void OnClickAdvanceButton()
     {
         Debug.Log("Advance Button Clicked");
+        gameObject.SetActive(false);
         // 在这里添加点击继续按钮后的逻辑，例如返回主界面或进入下一个关卡
+        ExecuteAdvanceNext().Forget();
     }
+
+
+    private async UniTaskVoid ExecuteAdvanceNext()
+    {
+        // var messages = await DungeonGamePlayManager.Instance.AdvanceNextDungeon();
+        // if (messages == null)
+        // {
+        //     Debug.LogWarning("Failed to advance to next dungeon, no messages returned");
+        //     return;
+        // }
+
+        // var syncErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+        // if (syncErr != GameSyncError.None)
+        // {
+        //     Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
+        //     return;
+        // }
+
+        await UniTask.Yield();
+        SceneManager.LoadScene("DungeonCombatScene2");
+    }
+
 }

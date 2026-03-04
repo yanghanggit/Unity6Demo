@@ -38,4 +38,10 @@ public class ArbitrationPanel : MonoBehaviour
         Debug.Assert(_backgroundImage != null, "_backgroundImage is null");
         Debug.Assert(_arbitrationText != null, "_arbitrationText is null");
     }
+
+    public void OnClickCloseButton()
+    {
+        Debug.Log("Close Arbitration Panel Button Clicked");
+        gameObject.SetActive(false);
+    }
 }

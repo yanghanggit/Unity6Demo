@@ -21,11 +21,13 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     [SerializeField] private CombatOnGoingState _onGoingState; // ONGOING 状态的设置数据
 
     [Header("PostCombat State")]
-    [SerializeField] private CombatPostCombatState _combatPostCombatState; // 战斗后状态的设置数据
+    [SerializeField] private CombatPostCombatState _postCombatState; // 战斗后状态的设置数据
+
+    [Header("Setting Panel")]
+    [SerializeField] private GameObject _settingPanel; // 设置面板对象
 
     [Header("API Components")]
-    [SerializeField] private TasksStatusApi _tasksStatusApi;
-
+    [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
 
 
     void Start()
@@ -37,7 +39,8 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         Debug.Assert(_topBar != null, "_topBar is null");
         Debug.Assert(_initializationState != null, "_initializationState is null");
         Debug.Assert(_onGoingState != null, "_onGoingState is null");
-        Debug.Assert(_combatPostCombatState != null, "_combatPostCombatState is null");
+        Debug.Assert(_postCombatState != null, "_postCombatState is null");
+        Debug.Assert(_settingPanel != null, "_settingPanel is null");
 
         // 初始状态先隐藏主对象和底部对象，确保场景初始状态是隐藏的
         _initializationState.SetActive(true);
@@ -47,8 +50,11 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         _onGoingState.CombatScene = this; // 将当前场景作为属性传递给状态对象
 
         // 初始状态先隐藏仲裁面板和战斗后面板
-        _combatPostCombatState.gameObject.SetActive(false);
-        _combatPostCombatState.CombatScene = this; // 将当前场景作为属性传递给状态对象
+        _postCombatState.gameObject.SetActive(false);
+        _postCombatState.CombatScene = this; // 将当前场景作为属性传递给状态对象
+
+        //
+        _settingPanel.SetActive(false);
 
         /// 场景异步初始化入口，根据当前战斗状态执行对应的初始化逻辑
         InitCombatSceneAsync().Forget();
@@ -233,12 +239,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
                     return;
                 }
                 Debug.Log("[DungeonCombatScene] Combat initialization completed, switching to ongoing state");
-                SwitchCombatState(CombatState.ONGOING);
+                //SwitchCombatState(CombatState.ONGOING);
+                OnEnterOnGoingState();
                 break;
 
             case CombatState.ONGOING:
                 Debug.Log("[DungeonCombatScene] Combat is ongoing, showing ongoing UI");
-                SwitchCombatState(CombatState.ONGOING);
+                //SwitchCombatState(CombatState.ONGOING);
+                OnEnterOnGoingState();
                 break;
 
             case CombatState.COMPLETE:
@@ -418,39 +426,47 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     }
 
     /// <summary>
-    /// 根据新的战斗状态切换 UI 显示和交互逻辑
+    /// 显示仲裁面板并设置文本内容
     /// </summary>
-    /// <param name="newState">新的战斗状态</param>
-    public void SwitchCombatState(CombatState newState)
+    public void OnEnterOnGoingState()
     {
-        //
-        if (newState == CombatState.ONGOING)
-        {
-            //
-            _initializationState.SetActive(false);
+        // 切换到 OnGoing 状态，显示主对象并刷新显示内容
+        _initializationState.SetActive(false);
+        _postCombatState.gameObject.SetActive(false);
 
-            // 切换到 OnGoing 状态，显示主对象并刷新显示内容
-            _onGoingState.gameObject.SetActive(true);
-            _onGoingState.OnEnter();
+        // 切换到 OnGoing 状态，显示主对象并刷新显示内容
+        _onGoingState.gameObject.SetActive(true);
+        _onGoingState.OnEnter();
+    }
 
-            //
-            _combatPostCombatState.gameObject.SetActive(false);
-        }
-        else if (newState == CombatState.POST_COMBAT)
-        {
-            _initializationState.SetActive(false);
-            _onGoingState.gameObject.SetActive(false);
-            _combatPostCombatState.gameObject.SetActive(true);
-        }
+
+    /// <summary>
+    /// 进入战斗后状态，显示战斗后面板并刷新显示内容
+    /// </summary>
+    public void OnEnterPostCombatState()
+    {
+        _initializationState.SetActive(false);
+        _onGoingState.gameObject.SetActive(false);
+        _postCombatState.gameObject.SetActive(true);
+        //_postCombatState.OnEnter();
     }
 
     /// <summary>
-    /// 设置顶部信息显示内容
+    /// 点击 Setting 按钮
     /// </summary>
-    /// <param name="info"></param>
-    public void SetTopBarInfo(string info)
+    public void OnClickOpenSetting()
     {
-        _topBar.SetInfoText(info);
+        Debug.Log("[DungeonCombatTopBar] Setting button clicked");
+        _settingPanel.SetActive(true);
+    }
+
+    /// <summary>
+    /// 点击 Close Setting 按钮
+    /// </summary>
+    public void OnClickCloseSetting()
+    {
+        Debug.Log("[DungeonCombatScene] Close Setting button clicked");
+        _settingPanel.SetActive(false);
     }
 }
 
