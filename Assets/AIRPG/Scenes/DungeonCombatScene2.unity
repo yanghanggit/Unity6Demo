@@ -2336,8 +2336,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28fe4f318e8964d11811af15dc4c8c85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonCombatScene2
-  _preScene: MainScene
-  _nextScene: DungeonCombatScene2
   _topBar: {fileID: 132391926}
   _initializationState: {fileID: 1261761010}
   _onGoingState: {fileID: 680271569}
@@ -3086,7 +3084,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &680271566
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5709,6 +5707,7 @@ GameObject:
   - component: {fileID: 1420096970}
   - component: {fileID: 1420096972}
   - component: {fileID: 1420096973}
+  - component: {fileID: 1420096974}
   m_Layer: 5
   m_Name: CardBuildPanel
   m_TagString: Untagged
@@ -5790,6 +5789,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e926500805fd7424cb6c809f84440ddb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardBuildPanel
+  _actorPositioningPanel: {fileID: 0}
   _actionOrderPanel: {fileID: 1040530435}
   _mainText: {fileID: 1386312613}
   _scrollView: {fileID: 159657217}
@@ -5799,6 +5799,7 @@ MonoBehaviour:
     type: 2}
   _onCardBuilderDataChangedEvent: {fileID: 11400000, guid: fe940fe58eeb845558bdd6823ac748a0,
     type: 2}
+  _tasksStatusApi: {fileID: 1420096974}
 --- !u!114 &1420096973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5812,6 +5813,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatBackground
   _backgroundImage: {fileID: 1420096970}
+--- !u!114 &1420096974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420096968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b4b41fbe39740799fa3830acf2686f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TasksStatusApi
+  requestTimeout: 30
+  _pollInterval: 2
+  _maxAttempts: 60
 --- !u!1 &1466193411
 GameObject:
   m_ObjectHideFlags: 0
@@ -5952,7 +5968,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1475957525
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6289,9 +6305,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1420096972}
-        m_TargetAssemblyTypeName: CardBuildPanel, Assembly-CSharp
-        m_MethodName: OnClickCloseButton
+      - m_Target: {fileID: 1475957528}
+        m_TargetAssemblyTypeName: ActorPositioningPanel, Assembly-CSharp
+        m_MethodName: HideCardBuildPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

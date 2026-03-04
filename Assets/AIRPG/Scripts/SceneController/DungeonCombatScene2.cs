@@ -5,10 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
 {
-    // [Header("Scene Settings")]
-    // [SerializeField] private string _preScene = "MainScene";
-    // [SerializeField] private string _nextScene = "DungeonCombatScene2";
-
     public static readonly string PreSceneName = "MainScene";
     public static readonly string NextSceneName = "DungeonCombatScene2";
 
@@ -296,9 +292,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
             Debug.LogError($"Failed to get task record for task ID: {taskId}");
             return;
         }
-
-        // 标记有一次待执行的同步请求，确保在抽卡完成后能够及时获取最新的地下城状态并更新 UI
-        //_pendingDungeonSync = true;
     }
 
     /// <summary>

@@ -155,9 +155,7 @@ public class ActorPositioningPanel : MonoBehaviour
     public void ShowCardBuildPanelForActor(EntitySerialization actorEntity)
     {
         _cardBuildPanel.gameObject.SetActive(true);
-        _cardBuildPanel.ActorEntities = ActorEntities;
-        _cardBuildPanel.CurrentActor = actorEntity;
-        _cardBuildPanel.SetupForActor(actorEntity);
+        _cardBuildPanel.SetupForActor(actorEntity, ActorEntities);
     }
 
     ///<summary>

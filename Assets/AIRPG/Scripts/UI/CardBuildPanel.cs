@@ -2,10 +2,12 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 
 public class CardBuildPanel : MonoBehaviour, IUIEventListener
 {
     [Header("UI Components")]
+    //[SerializeField] private ActorPositioningPanel _actorPositioningPanel; // 角色站位面板控制器
     [SerializeField] private ActionOrderPanel _actionOrderPanel; // 行动顺序面板控制器
     [SerializeField] private TMP_Text _mainText; // 主文本显示对象
     [SerializeField] private LoopHorizontalScrollRect _scrollView; // 动态滚动视图
@@ -16,36 +18,13 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
     [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件 
 
-    // 卡牌构筑数据管理对象，负责维护当前的构筑状态和数据
-    private List<EntitySerialization> _actorEntities; // 角色数据列表
-    private EntitySerialization _currentActor; // 当前选中的角色数据
 
-    // 卡牌构筑数据管理对象，负责维护当前的构筑状态和数据
-    public List<EntitySerialization> ActorEntities
-    {
-        get => _actorEntities;
-        set
-        {
-            Debug.Assert(value != null && value.Count > 0, "ActorEntities cannot be null or empty");
-            _actorEntities = value;
-            _actionOrderPanel.ActorEntities = _actorEntities;
-        }
-    }
-
-    // 卡牌构筑数据管理对象，负责维护当前的构筑状态和数据
-    public EntitySerialization CurrentActor
-    {
-        get => _currentActor;
-        set
-        {
-            Debug.Assert(value != null, "CurrentActor cannot be null");
-            _currentActor = value;
-            SetupForActor(_currentActor);
-        }
-    }
+    [Header("API Components")]
+    [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
 
     void Start()
     {
+        //Debug.Assert(_actorPositioningPanel != null, "_actorPositioningPanel is null");
         Debug.Assert(_actionOrderPanel != null, "_actionOrderPanel is null");
         Debug.Assert(_mainText != null, "Main Text component is not assigned in the inspector.");
         Debug.Assert(_scrollView != null, "Scroll View component is not assigned in the inspector.");
@@ -54,6 +33,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
         Debug.Assert(_iconImage != null, "_iconImage is null");
         Debug.Assert(_statsText != null, "_statsText is null");
+        Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
         // 注册事件监听器
         _onCardElementClickedEvent.RegisterListener(this);
@@ -76,22 +56,25 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     /// <summary>
     /// 根据当前角色数据更新构筑按钮的状态
     /// </summary>
-    public void SetupForActor(EntitySerialization actorEntity)
+    public void SetupForActor(EntitySerialization actorEntity, List<EntitySerialization> allActors)
     {
         Debug.Assert(actorEntity != null, "Current actor data is null");
+
+        // 先更新行动顺序面板数据
+        _actionOrderPanel.UpdateByActorEntities(allActors);
 
         // 初始化 CardBuilder 数据
         CardBuilder.Clear();
         CardBuilder.Build = new CardBuildData
         {
-            owner = _currentActor
+            owner = actorEntity
         };
 
         //
         UpdateMainText(CardBuilder.Build);
 
         //
-        LoadCardElements(actorEntity, _actorEntities);
+        LoadCardElements(actorEntity, allActors);
 
         // 更新角色头像显示
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(actorEntity.name);
@@ -120,16 +103,44 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     public void OnClickBuildButton()
     {
         // 这里可以添加点击构筑按钮的逻辑
-        Debug.Log("Build Button Clicked " + _currentActor.name);
-    }
+        //Debug.Log("Build Button Clicked " + CurrentActor.name);
 
-    /// <summary>
-    /// 点击关闭按钮的处理逻辑
-    /// </summary>
-    public void OnClickCloseButton()
-    {
-        Debug.Log("Close Button Clicked");
-        gameObject.SetActive(false);
+        // 目标角色、技能和状态效果都是必选的，缺一不可，否则无法执行抽卡行动
+        if (CardBuilder.Build.targetActors == null || CardBuilder.Build.targetActors.Count == 0)
+        {
+            Debug.LogWarning("No target actors selected, cannot execute escape action");
+            _mainText.text = "请至少选择一个目标角色";
+            return;
+        }
+
+        if (CardBuilder.Build.skill == null || CardBuilder.Build.skill.name == "")
+        {
+            Debug.LogWarning("No skill selected, cannot execute escape action");
+            _mainText.text = "请至少选择一个技能";
+            return;
+        }
+
+        if (CardBuilder.Build.statusEffects == null || CardBuilder.Build.statusEffects.Count == 0)
+        {
+            Debug.LogWarning("No status effects selected, cannot execute escape action");
+            _mainText.text = "请至少选择一个状态效果";
+            return;
+        }
+
+        // 调整一下显示，让玩家知道正在执行抽卡行动。
+        //UpdateMainText(CardBuilder.Build, "正在执行抽卡行动...");
+        _mainText.text = "正在执行抽卡行动...";
+
+        // 创建抽卡行动
+        var allyDrawAction = new AllyDrawCardAction
+        {
+            entity_name = CardBuilder.Build.owner.name,
+            skill_name = CardBuilder.Build.skill.name,
+            target_names = CardBuilder.Build.targetActors != null ? CardBuilder.Build.targetActors.ConvertAll(actor => actor.name) : new List<string>(),
+            status_effect_names = CardBuilder.Build.statusEffects != null ? CardBuilder.Build.statusEffects.ConvertAll(effect => effect.name) : new List<string>()
+        };
+
+        ExecuteDrawCards(allyDrawAction).Forget();
     }
 
     /// <summary>
@@ -182,7 +193,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
             _mainText.text = "未选中角色";
             return;
         }
-
 
         _mainText.text = string.Empty;
 
@@ -249,4 +259,62 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         _scrollView.RefillCells(); // 重建列表并回到顶部
         Debug.Log($"[LoadCardElementsFromActor] 总共加载 {CardBuilder.Count} 个卡牌要素");
     }
+
+    /// <summary>
+    /// 执行抽卡操作并轮询任务状态，完成后显示手牌
+    /// 调用服务器 draw_cards 接口，获取任务ID后轮询查询任务状态
+    /// 当任务完成时，刷新数据并显示角色手牌信息
+    /// </summary>
+    private async UniTaskVoid ExecuteDrawCards(AllyDrawCardAction allyDrawAction)
+    {
+        string taskId = await DungeonGamePlayManager.Instance.DrawCards(new List<AllyDrawCardAction> { allyDrawAction }, false);
+        if (string.IsNullOrEmpty(taskId))
+        {
+            Debug.LogError("DrawCards API call failed, no task ID returned");
+            return;
+        }
+
+        Debug.Log($"DrawCards initiated successfully, task ID: {taskId}");
+        var taskRecord = await PollTaskStatus(taskId);
+        if (taskRecord == null)
+        {
+            Debug.LogError($"Failed to get task record for task ID: {taskId}");
+            return;
+        }
+
+        // 刷新角色数据以获取最新的手牌信息
+        var actorEntities = await GameStateSync.Instance.RefreshEntitiesFromServer(new List<string> { allyDrawAction.entity_name });
+        if (actorEntities == null)
+        {
+            Debug.LogError($"Failed to refresh actor entities from server for actor: {allyDrawAction.entity_name}");
+            return;
+        }
+
+        // 更新当前角色数据
+        var updatedActor = GameContext.Instance.GetActorEntity(allyDrawAction.entity_name);
+        CardBuilder.Clear();
+        CardBuilder.Build = new CardBuildData
+        {
+            owner = updatedActor
+        };
+
+        UpdateMainText(CardBuilder.Build);
+
+        //
+        //_actorPositioningPanel.RefreshPositioningView();
+    }
+
+    /// <summary>
+    /// 轮询查询任务状态直到完成或失败
+    /// 委托 TasksStatusApi 执行轮询逻辑，完成后通过回调函数返回结果
+    /// </summary>
+    /// <param name="taskId">要查询的任务ID</param>
+    /// <param name="onComplete">轮询完成后的回调函数，参数为(成功标志, 消息, 任务记录)</param>
+    private async UniTask<TaskRecord> PollTaskStatus(string taskId)
+    {
+        return await _tasksStatusApi.PollTaskStatus(
+            GameContext.Instance.TasksStatusUrl,
+            taskId);
+    }
+
 }
