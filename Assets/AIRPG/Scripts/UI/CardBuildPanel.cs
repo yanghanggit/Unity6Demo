@@ -6,9 +6,11 @@ using System.Collections.Generic;
 public class CardBuildPanel : MonoBehaviour, IUIEventListener
 {
     [Header("UI Components")]
+    [SerializeField] private ActionOrderPanel _actionOrderPanel; // 行动顺序面板控制器
     [SerializeField] private TMP_Text _mainText; // 主文本显示对象
     [SerializeField] private LoopHorizontalScrollRect _scrollView; // 动态滚动视图
-    [SerializeField] private Button _buildButton; // 构筑按钮
+    [SerializeField] private Image _iconImage; // 角色头像显示对象
+    [SerializeField] private TMP_Text _statsText; // 角色属性显示对象
 
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
@@ -26,6 +28,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         {
             Debug.Assert(value != null && value.Count > 0, "ActorEntities cannot be null or empty");
             _actorEntities = value;
+            _actionOrderPanel.ActorEntities = _actorEntities;
         }
     }
 
@@ -37,20 +40,20 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         {
             Debug.Assert(value != null, "CurrentActor cannot be null");
             _currentActor = value;
-
-
-
             SetupForActor(_currentActor);
         }
     }
 
     void Start()
     {
+        Debug.Assert(_actionOrderPanel != null, "_actionOrderPanel is null");
         Debug.Assert(_mainText != null, "Main Text component is not assigned in the inspector.");
         Debug.Assert(_scrollView != null, "Scroll View component is not assigned in the inspector.");
-        Debug.Assert(_buildButton != null, "Build Button component is not assigned in the inspector.");
+        // Debug.Assert(_buildButton != null, "Build Button component is not assigned in the inspector.");
         Debug.Assert(_onCardElementClickedEvent != null, "_onCardElementClickedEvent is null");
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
+        Debug.Assert(_iconImage != null, "_iconImage is null");
+        Debug.Assert(_statsText != null, "_statsText is null");
 
         // 注册事件监听器
         _onCardElementClickedEvent.RegisterListener(this);
@@ -90,95 +93,25 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         //
         LoadCardElements(actorEntity, _actorEntities);
 
-        //
-        UpdateBuildButtonState(actorEntity);
-    }
-
-    /// <summary>
-    /// 根据当前角色数据更新构筑按钮的显示状态，包括按钮文本和背景图等
-    /// </summary>
-    /// <param name="actorEntity"></param>
-    private void UpdateBuildButtonState(EntitySerialization actorEntity)
-    {
-        // 更新主文本显示当前角色名称
-        _buildButton.GetComponentInChildren<TMP_Text>().text = GameUtils.GetDisplayName(actorEntity.name);
-
-        // 更新滚动视图显示当前角色的卡牌元素
+        // 更新角色头像显示
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(actorEntity.name);
         if (cachedSprite != null)
         {
-            _buildButton.GetComponent<Image>().sprite = cachedSprite;
+            _iconImage.GetComponent<Image>().sprite = cachedSprite;
         }
         else
         {
             Debug.LogWarning($"DungeonCombatScene: Background sprite not found for stage: {actorEntity.name}");
-            _buildButton.GetComponent<Image>().sprite = null;
+            _iconImage.GetComponent<Image>().sprite = null;
         }
-
-
-        /// 根据当前角色在列表中的位置，更新上一个和下一个按钮的状态
-        var currentIndex = _actorEntities.IndexOf(actorEntity);
-        if (currentIndex >= _actorEntities.Count - 1)
-        {
-            Debug.Log("Current actor is the last one in the list, disabling Next button");
-        }
-    }
-
-    /// <summary>
-    /// 点击上一个角色按钮的处理逻辑
-    /// </summary>
-    public void OnClickPreButton()
-    {
-        // 这里可以添加点击上一个角色的逻辑
-        Debug.Log("Pre Button Clicked");
-
-        // 查阅 _currentActor 在 _actorEntities 中的index
-        int currentIndex = _actorEntities.IndexOf(_currentActor);
-        if (currentIndex == -1)
-        {
-            Debug.LogError("Current actor not found in actor entities list");
-            return;
-        }
-
-        // 计算上一个角色的index，如果已经是0了，就保持0
-        int preIndex = currentIndex - 1;
-        if (preIndex < 0)
-        {
-            preIndex = 0;
-        }
-        _currentActor = _actorEntities[preIndex];
 
         // 更新主文本显示当前角色名称
-        SetupForActor(_currentActor);
-    }
-
-    /// <summary>
-    /// 点击下一个角色按钮的处理逻辑
-    /// </summary>
-    public void OnClickNextButton()
-    {
-        // 这里可以添加点击下一个角色的逻辑
-        Debug.Log("Next Button Clicked");
-
-        int currentIndex = _actorEntities.IndexOf(_currentActor);
-        if (currentIndex == -1)
-        {
-            Debug.LogError("Current actor not found in actor entities list");
-            return;
-        }
-
-        // 计算下一个角色的index，注意循环
-        int nextIndex = currentIndex + 1;
-        if (nextIndex >= _actorEntities.Count)
-        {
-            nextIndex = _actorEntities.Count - 1;
-        }
-
-
-        _currentActor = _actorEntities[nextIndex];
-
-        // 更新主文本显示当前角色名称
-        SetupForActor(_currentActor);
+        var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(actorEntity);
+        Debug.Assert(combatStatsComponent != null, $"CombatStatsComponent is missing for actor: {actorEntity.name}");
+        _statsText.text = GameUtils.GetDisplayName(actorEntity.name) + "\n" +
+                   $"HP:{combatStatsComponent.stats.hp}/{combatStatsComponent.stats.max_hp}\n" +
+                   $"Attack:{combatStatsComponent.stats.attack}\n" +
+                   $"Defense:{combatStatsComponent.stats.defense}";
     }
 
     /// <summary>
@@ -188,6 +121,15 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     {
         // 这里可以添加点击构筑按钮的逻辑
         Debug.Log("Build Button Clicked " + _currentActor.name);
+    }
+
+    /// <summary>
+    /// 点击关闭按钮的处理逻辑
+    /// </summary>
+    public void OnClickCloseButton()
+    {
+        Debug.Log("Close Button Clicked");
+        gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -243,17 +185,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
 
 
         _mainText.text = string.Empty;
-
-        // 更新主文本显示当前角色名称
-        var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(cardBuild.owner);
-        Debug.Assert(combatStatsComponent != null, $"CombatStatsComponent is missing for actor: {cardBuild.owner.name}");
-
-        _mainText.text += $"=== 属性: ===";
-        _mainText.text += $"\nHP:{combatStatsComponent.stats.hp}/{combatStatsComponent.stats.max_hp}," +
-                   $" Attack:{combatStatsComponent.stats.attack}," +
-                   $" Defense:{combatStatsComponent.stats.defense}" +
-                   "\n\n";
-
 
         var handComponent = GameUtils.GetComponent<HandComponent>(cardBuild.owner);
         if (handComponent != null)

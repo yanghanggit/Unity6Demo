@@ -8,8 +8,6 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
     [Header("UI Components")]
     [SerializeField] private ActorPositioningPanel _actorPositioningPanel; // 角色站位面板控制器
     [SerializeField] private TMP_Text _infoText; // 信息文本显示对象
-    [SerializeField] private ActionOrderPanel _actionOrderPanel; // 行动顺序面板控制器
-    [SerializeField] private CardBuildPanel _cardBuildPanel; // 卡牌构筑面板控制器
     [SerializeField] private ArbitrationPanel _arbitrationPanel; // 仲裁面板对象
 
     // 用于存储 mock 数据的字段
@@ -27,8 +25,8 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
     void Start()
     {
         Debug.Assert(_actorPositioningPanel != null, "_actorPositioningPanel is null");
-        Debug.Assert(_actionOrderPanel != null, "_actionOrderPanel is null");
-        Debug.Assert(_cardBuildPanel != null, "_cardBuildPanel is null");
+        //Debug.Assert(_actionOrderPanel != null, "_actionOrderPanel is null");
+        //Debug.Assert(_cardBuildPanel != null, "_cardBuildPanel is null");
         Debug.Assert(_infoText != null, "_infoText is null");
         Debug.Assert(_arbitrationPanel != null, "_arbitrationPanel is null");
     }
@@ -51,16 +49,16 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
         Debug.Log("Close Arbitration Panel Button Clicked");
         _arbitrationPanel.gameObject.SetActive(false);
 
-        RefreshView(); // 重新显示当前状态的 UI
+        // OnEnter(); // 重新显示当前状态的 UI
 
         // 测试一下
         // CombatScene.SwitchCombatState(CombatState.POST_COMBAT);
     }
 
     /// <summary>
-    /// 根据新的战斗状态切换 UI 显示和交互逻辑
+    /// 进入战斗进行中状态时的处理逻辑，包含根据当前游戏状态刷新 UI 显示内容的逻辑。
     /// </summary>
-    public void RefreshView()
+    public void OnEnter()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -72,7 +70,8 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
             // positioning 显示。
             _actorPositioningPanel.gameObject.SetActive(true);
             _actorPositioningPanel.ActorEntities = _mockActorData;
-            _actorPositioningPanel.RefreshView();
+            _actorPositioningPanel.RefreshPositioningView();
+            _actorPositioningPanel.HideCardBuildPanel();
 
             // 使用 mock 数据来显示行动顺序面板
             // _actionOrderPanel.gameObject.SetActive(true);
@@ -138,13 +137,13 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
         CombatScene.SetTopBarInfo(topBarInfo);
 
         // 显示行动顺序面板并设置数据
-        _actionOrderPanel.gameObject.SetActive(true);
-        _actionOrderPanel.ActorEntities = actionOrderEntities;
+        // _actionOrderPanel.gameObject.SetActive(true);
+        // _actionOrderPanel.ActorEntities = actionOrderEntities;
 
         // 显示卡牌构筑面板并设置数据
-        _cardBuildPanel.gameObject.SetActive(true);
-        _cardBuildPanel.ActorEntities = actionOrderEntities;
-        _cardBuildPanel.CurrentActor = actionOrderEntities[0]; // 默认选中第一个角色
+        // _cardBuildPanel.gameObject.SetActive(true);
+        // _cardBuildPanel.ActorEntities = actionOrderEntities;
+        // _cardBuildPanel.CurrentActor = actionOrderEntities[0]; // 默认选中第一个角色
 
         // 显示顶部信息文本
         _infoText.text = $"1/{actionOrderEntities.Count} 角色行动中...";

@@ -431,7 +431,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
 
             // 切换到 OnGoing 状态，显示主对象并刷新显示内容
             _onGoingState.gameObject.SetActive(true);
-            _onGoingState.RefreshView();
+            _onGoingState.OnEnter();
 
             //
             _combatPostCombatState.gameObject.SetActive(false);
