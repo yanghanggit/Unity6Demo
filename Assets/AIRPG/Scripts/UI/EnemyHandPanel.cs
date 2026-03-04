@@ -20,7 +20,6 @@ public class EnemyHandPanel : MonoBehaviour
         }
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Debug.Assert(_infoText != null, "_infoText is null");
@@ -41,6 +40,7 @@ public class EnemyHandPanel : MonoBehaviour
             if (handComponent == null)
             {
                 Debug.LogWarning($"EnemyHandPanel: HandComponent not found for actor: {actorEntity.name}");
+                _infoText.text = $"Enemy: {GameUtils.GetDisplayName(actorEntity.name)}\n(No hand data available)";
                 return;
             }
         }

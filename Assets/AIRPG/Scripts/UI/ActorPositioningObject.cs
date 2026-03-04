@@ -14,7 +14,6 @@ public class ActorPositioningObject : MonoBehaviour
 
     private EntitySerialization _actorEntity; // 角色数据
 
-
     public EntitySerialization ActorEntity
     {
         get => _actorEntity;
@@ -25,7 +24,28 @@ public class ActorPositioningObject : MonoBehaviour
         }
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public int ActionOrderIndex
+    {
+        get
+        {
+            var lastRound = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+            if (lastRound == null)
+            {
+                Debug.LogWarning("No rounds found in current dungeon. Defaulting action order to 0.");
+                return 0;
+            }
+
+            var actionOrder = lastRound.action_order;
+            if (actionOrder == null || actionOrder.Count == 0)
+            {
+                Debug.LogWarning("Action order is empty in the last round. Defaulting action order to 0.");
+                return 0;
+            }
+
+            return actionOrder.IndexOf(_actorEntity.name);
+        }
+    }
+
     void Start()
     {
         Debug.Assert(_image != null, "_image is not assigned in the inspector.");
@@ -45,9 +65,8 @@ public class ActorPositioningObject : MonoBehaviour
         //gameObject.GetComponentInChildren<TMP_Text>().text = _actorEntity.name; // 显示角色名称
         _nameText.text = GameUtils.GetDisplayName(_actorEntity.name); // 显示角色名称
 
-        // 从1～5之间随机一个数字
-        var randomHp = Random.Range(1, 6);
-        _nameText.text += $" | {randomHp}"; // 显示当前HP
+        //
+        _nameText.text += $" | {ActionOrderIndex + 1}"; // 显示角色名称和行动顺序（从1开始）
 
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(_actorEntity.name);
         if (cachedSprite != null)

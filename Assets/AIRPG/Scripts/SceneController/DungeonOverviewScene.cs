@@ -10,9 +10,8 @@ using TMPro;
 /// </summary>
 public class DungeonOverviewScene : MonoBehaviour
 {
-    [Header("Scene Settings")]
-    [SerializeField] private string _preScene = "MainScene";
-    [SerializeField] private string _nextScene = "DungeonCombatScene";
+    public static readonly string PreSceneName = "MainScene";
+    public static readonly string NextSceneName = "DungeonCombatScene2";
 
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText;
@@ -24,14 +23,8 @@ public class DungeonOverviewScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_mainText != null, "_mainText is null");
-
         _mainText.text = "Loading dungeon data...";
-
-        if (GameContext.Instance.IsLoggedIn)
-        {
-            LoadDungeonOverview().Forget();
-        }
-
+        LoadDungeonOverview().Forget();
     }
 
     /// <summary>
@@ -50,18 +43,25 @@ public class DungeonOverviewScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid EnterDungeon()
     {
-        bool success = await HomeGamePlayManager.Instance.TransDungeon();
-
-        if (!success)
+        var dungeonTransitionResult = await HomeGamePlayManager.Instance.TransDungeon();
+        if (!dungeonTransitionResult)
         {
             _mainText.text = "Trans dungeon failed";
             return;
         }
 
-        await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+        var syncErr = await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+        if (syncErr != GameSyncError.None)
+        {
+            Debug.LogError($"[LoginScene] RefreshMappingAndEntitiesFromServer failed: {syncErr}");
+            _mainText.text = "Failed to sync game state";
+            return;
+        }
 
         await UniTask.Yield();
-        SceneManager.LoadScene(_nextScene);
+
+        // 成功进入地下城后切换到地下城战斗场景
+        SceneManager.LoadScene(NextSceneName);
     }
 
     /// <summary>
@@ -70,7 +70,22 @@ public class DungeonOverviewScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid LoadDungeonOverview()
     {
-        await GameStateSync.Instance.RefreshDungeonFromServer();
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Player is not logged in, cannot load dungeon overview");
+            _mainText.text = "Player is not logged in";
+            return;
+        }
+
+
+        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
+        if (dungeon == null)
+        {
+            Debug.LogError("Failed to refresh dungeon data");
+            _mainText.text = "Failed to load dungeon data";
+            return;
+        }
+
         _mainText.text = GameUtils.FormatDungeonOverview(GameContext.Instance.Dungeon);
     }
 
@@ -94,7 +109,7 @@ public class DungeonOverviewScene : MonoBehaviour
         {
             Debug.Log("Returning to MainScene");
             await UniTask.Yield();
-            SceneManager.LoadScene(_preScene);
+            SceneManager.LoadScene(PreSceneName);
         }
         else
         {

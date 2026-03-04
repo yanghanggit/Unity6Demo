@@ -34,17 +34,63 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
     public void OnClickPlayButton()
     {
         Debug.Log("Top Info Button Clicked");
+        OnPlayAsync().Forget();
+    }
 
+    private async UniTaskVoid OnPlayAsync()
+    {
+        // 获取当前战斗状态，如果当前战斗对象不存在则默认设置为 NONE，并在日志中输出警告信息
+        CombatState lastCombatState = CombatState.NONE;
 
-        // 随机一个0～100 之间的数，模拟不同的战斗状态
-        int randomValue = Random.Range(0, 101);
-        if (randomValue < 50)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            ShowArbitrationPanel();
+            // 模拟未登录用户的战斗状态，这里直接设置为 ONGOING，后续可以根据需要调整为其他状态
+            await UniTask.Delay(100);
+
+            // 随机一个0～100 之间的数，模拟不同的战斗状态
+            int randomValue = Random.Range(0, 101);
+            if (randomValue < 50)
+            {
+                ShowArbitrationPanel();
+            }
+            else
+            {
+                CombatScene.OnEnterPostCombatState();
+            }
+            return;
         }
         else
         {
-            CombatScene.OnEnterPostCombatState();
+            // 先刷新一次
+            var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+            if (refreshErr != GameSyncError.None)
+            {
+                Debug.LogError($"[DungeonCombatScene] Failed to refresh combat state from server: {refreshErr}");
+                return;
+            }
+
+            lastCombatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
+            Debug.Log($"[DungeonCombatScene] Last combat state: {lastCombatState}");
+        }
+
+        //
+        switch (lastCombatState)
+        {
+            case CombatState.ONGOING:
+                Debug.Log("[DungeonCombatScene] Combat is ongoing, showing ongoing UI");
+                break;
+
+            case CombatState.COMPLETE:
+                Debug.Log("[DungeonCombatScene] Combat is complete, showing post-combat UI");
+                break;
+
+            case CombatState.POST_COMBAT:
+                Debug.Log("[DungeonCombatScene] Combat is in post-combat state, showing post-combat UI");
+                break;
+
+            default:
+                Debug.LogWarning($"Unknown combat state: {lastCombatState}, skipping combat initialization");
+                break;
         }
     }
 
@@ -53,6 +99,13 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
     /// </summary>
     public void OnEnter()
     {
+        // 进入战斗进行中状态时，默认先隐藏卡牌构筑面板和敌人手牌面板，确保界面干净
+        _actorPositioningPanel.HideCardBuildPanel();
+        _actorPositioningPanel.HideEnemyHandPanel();
+
+        // 先关掉仲裁面板，避免显示错误数据
+        HideArbitrationPanel();
+
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("CombatOnGoingState: Player is not logged in, using mock data to display action order panel");
@@ -64,18 +117,13 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
             _actorPositioningPanel.gameObject.SetActive(true);
             _actorPositioningPanel.ActorEntities = _mockActorData;
             _actorPositioningPanel.RefreshPositioningView();
-            _actorPositioningPanel.HideCardBuildPanel();
-            _actorPositioningPanel.HideEnemyHandPanel();
 
-
-            // 先关掉仲裁面板，避免显示错误数据
-            HideArbitrationPanel();
-            return;
         }
-
-        //Debug.Log("Refreshing Combat OnGoing State view with real game data");
-
-        OnEnterAsync().Forget();
+        else
+        {
+            // 正式的显示！
+            OnEnterAsync().Forget();
+        }
     }
 
     /// <summary>
@@ -105,6 +153,11 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
         var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
         var topBarInfo = $"{GameContext.Instance.Dungeon.name} | {stageName} | 回合数: {currentCombat.rounds.Count}";
         _topBar.SetText(topBarInfo);
+
+        // 站位面板显示
+        _actorPositioningPanel.gameObject.SetActive(true);
+        _actorPositioningPanel.ActorEntities = actionOrderEntities;
+        _actorPositioningPanel.RefreshPositioningView();
     }
 
     /// <summary>

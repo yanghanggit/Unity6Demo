@@ -5,9 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
 {
-    [Header("Scene Settings")]
-    [SerializeField] private string _preScene = "MainScene";
-    [SerializeField] private string _nextScene = "DungeonCombatScene2";
+    // [Header("Scene Settings")]
+    // [SerializeField] private string _preScene = "MainScene";
+    // [SerializeField] private string _nextScene = "DungeonCombatScene2";
+
+    public static readonly string PreSceneName = "MainScene";
+    public static readonly string NextSceneName = "DungeonCombatScene2";
 
     [Header("UI Components")]
 
@@ -318,7 +321,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     /// </summary>
     private async UniTaskVoid ExecutePlayCards()
     {
-        //ShowArbitrationPanel("正在执行出牌操作，请稍候...");
 
         string taskId = await DungeonGamePlayManager.Instance.PlayCards();
         if (string.IsNullOrEmpty(taskId))
@@ -335,8 +337,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
             return;
         }
 
-        //ShowArbitrationPanel("服务器已完成出牌操作的处理，正在刷新数据...");
-
         var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
         if (dungeon == null)
         {
@@ -350,17 +350,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
         Debug.Assert(round != null, "Round data is null after playing cards");
 
-        // 显示最新的地下城战斗仲裁信息
-        //var formattedRoundInfo = GameUtils.FormatRoundInfo(round);
-        //ShowArbitrationPanel(formattedRoundInfo);
-
-        // 出牌完成后清空 Build 数据，等待玩家下一次选择
-        // CardBuilder.Clear();
-        // LoadCardElementsFromActor(null, new List<EntitySerialization>());
-
-        // 标记有一次待执行的同步请求，确保在抽卡完成后能够及时获取最新的地下城状态并更新 UI
-        //_pendingDungeonSync = true;
-
         // 异步跑着，评估战斗状态，完成后会刷新地下城状态并更新UI显示
         DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
     }
@@ -371,7 +360,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     /// </summary>
     private async UniTaskVoid ExecutePostCombat()
     {
-        //ShowPostCombatPanel("正在执行战斗后处理...");
 
         var sessionMessages = await DungeonGamePlayManager.Instance.PostCombat();
         if (sessionMessages == null)
@@ -431,7 +419,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         }
 
         await UniTask.Yield();
-        SceneManager.LoadScene(_nextScene);
+        SceneManager.LoadScene(NextSceneName);
     }
 
     /// <summary>
