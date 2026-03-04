@@ -122,42 +122,23 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
         else
         {
             // 正式的显示！
-            OnEnterAsync().Forget();
+            Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+            Debug.Assert(round != null, "CombatOnGoingState: No round data found for current dungeon");
+
+            Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
+            Debug.Assert(currentCombat != null, "CombatOnGoingState: Current combat is null, cannot refresh view");
+
+            // 顶部信息！
+            var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
+            var topBarInfo = $"{GameContext.Instance.Dungeon.name} | {stageName} | 回合数: {currentCombat.rounds.Count}";
+            _topBar.SetText(topBarInfo);
+
+            // 站位面板显示
+            _actorPositioningPanel.gameObject.SetActive(true);
+            var actorNamesInStage = GameContext.Instance.GetActorNamesInCurrentStage();
+            _actorPositioningPanel.ActorEntities = GameContext.Instance.GetActorEntities(actorNamesInStage);
+            _actorPositioningPanel.RefreshPositioningView();
         }
-    }
-
-    /// <summary>
-    /// 异步刷新战斗进行中状态的 UI 显示，包含从服务器获取最新战斗状态数据并更新各个面板显示。
-    /// </summary>
-    /// <returns></returns>
-    private async UniTaskVoid OnEnterAsync()
-    {
-        Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
-        if (round == null || round.action_order == null)
-        {
-            Debug.LogWarning("CombatOnGoingState: No round or action order data found for current dungeon");
-            return;
-        }
-
-        var actionOrderEntities = GameContext.Instance.GetActorEntities(round.action_order);
-        if (actionOrderEntities == null || actionOrderEntities.Count == 0)
-        {
-            Debug.LogWarning("CombatOnGoingState: No action order entities found, cannot refresh view");
-            return;
-        }
-
-        Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
-        Debug.Assert(currentCombat != null, "CombatOnGoingState: Current combat is null, cannot refresh view");
-
-        // 顶部信息！
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
-        var topBarInfo = $"{GameContext.Instance.Dungeon.name} | {stageName} | 回合数: {currentCombat.rounds.Count}";
-        _topBar.SetText(topBarInfo);
-
-        // 站位面板显示
-        _actorPositioningPanel.gameObject.SetActive(true);
-        _actorPositioningPanel.ActorEntities = actionOrderEntities;
-        _actorPositioningPanel.RefreshPositioningView();
     }
 
     /// <summary>

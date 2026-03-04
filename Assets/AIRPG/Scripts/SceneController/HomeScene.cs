@@ -215,12 +215,12 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         if (GameContext.Instance.IsLoggedIn)
         {
             // 走到这里就是有正规登陆的，加载当前场景的角色列表
-            var actorsInStage = GameContext.Instance.GetActorsInCurrentStage();
-            actorsInStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
-            if (actorsInStage.Count > 0)
+            var actorNamesInStage = GameContext.Instance.GetActorNamesInCurrentStage();
+            actorNamesInStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
+            if (actorNamesInStage.Count > 0)
             {
-                Debug.Log($"Actors in current stage: {string.Join(", ", actorsInStage)}");
-                _scrollView.totalCount = actorsInStage.Count;
+                Debug.Log($"Actors in current stage: {string.Join(", ", actorNamesInStage)}");
+                _scrollView.totalCount = actorNamesInStage.Count;
                 _scrollView.RefillCells();
             }
             else
@@ -310,7 +310,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Log($"精灵 {clickHandler.gameObject.name} 被点击了！");
 
         // 确认选中的角色仍在当前场景中
-        var selectedActorStageName = GameContext.Instance.GetActorStage(_selectedActorName);
+        var selectedActorStageName = GameContext.Instance.GetActorNameStage(_selectedActorName);
         if (selectedActorStageName != _homeSceneConfig.StageName)
         {
             Debug.LogWarning($"Selected actor {_selectedActorName} is not in the current stage {_homeSceneConfig.StageName}.");
@@ -331,7 +331,7 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// <returns>协程迭代器</returns>
     private async UniTask<bool> SwitchToStageIfNeeded(string targetStageName)
     {
-        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+        var currentStageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
 
         if (currentStageName != targetStageName)
         {

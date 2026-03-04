@@ -28,7 +28,7 @@ public class DungeonCombatScene : MonoBehaviour
         if (GameContext.Instance.IsLoggedIn)
         {
             // 已经连接服务器，开始初始化战斗场景
-            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+            var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
             _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
 
             // 刷新场景初始化
@@ -336,14 +336,14 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 获取当前角色所在场景及该场景中的所有角色
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+        var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
         Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
 
         //
         SetBackgroundImage(stageName);
 
         // 需要所有的角色名称列表！
-        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        var actorsInStage = GameContext.Instance.GetActorNamesInStage(stageName);
 
         // 格式化并显示地下城状态（包括场景-角色映射和战斗序列信息）
         _mainText.text = GameUtils.FormatDungeonStateDisplay(GameContext.Instance.Dungeon, new Dictionary<string, List<string>> { { stageName, actorsInStage } });
@@ -523,8 +523,8 @@ public class DungeonCombatScene : MonoBehaviour
     private List<AllyDrawCardAction> GenerateAllyDrawCardActions()
     {
         var actions = new List<AllyDrawCardAction>();
-        var aliveAllies = GameContext.Instance.GetAliveExpeditionMembersInCurrentCombatStage();
-        var aliveEnemies = GameContext.Instance.GetAliveEnemiesInCurrentCombatStage();
+        var aliveAllies = GameContext.Instance.GetAliveExpeditionMembers();
+        var aliveEnemies = GameContext.Instance.GetAliveEnemies();
 
         // 如果没有敌人，无法生成攻击行动
         if (aliveEnemies.Count == 0)

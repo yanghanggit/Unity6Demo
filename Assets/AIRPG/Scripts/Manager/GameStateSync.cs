@@ -271,14 +271,14 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 步骤2: 刷新玩家所在场景中所有演员的详情数据
-        var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+        var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
         if (string.IsNullOrEmpty(stageName))
         {
             Debug.LogError($"[GameStateSync] Actor '{GameContext.Instance.PlayerActorName}' stage not found in mapping");
             return GameSyncError.FetchActorsInStageFailed;
         }
 
-        var actorsInStage = GameContext.Instance.GetActorsInStage(stageName);
+        var actorsInStage = GameContext.Instance.GetActorNamesInStage(stageName);
         if (actorsInStage.Count == 0)
         {
             Debug.LogWarning($"[GameStateSync] No actors found in stage '{stageName}'");

@@ -435,9 +435,13 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     /// </summary>
     public void OnEnterPostCombatState()
     {
+        // 先隐藏掉其他状态对象，确保只有战斗后状态对象是显示的
         _initializationState.SetActive(false);
         _onGoingState.gameObject.SetActive(false);
+
+        // 切换到战斗后状态，显示主对象并刷新显示内容
         _postCombatState.gameObject.SetActive(true);
+        _postCombatState.OnEnter();
     }
 
     /// <summary>

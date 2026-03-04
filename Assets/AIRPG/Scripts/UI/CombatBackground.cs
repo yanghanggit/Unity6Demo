@@ -25,7 +25,7 @@ public class CombatBackground : MonoBehaviour
     {
         if (GameContext.Instance.IsLoggedIn)
         {
-            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+            var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
             Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
             // 获取当前角色所在场景
             var cachedSprite = SpriteCacheManager.Instance.GetSprite(stageName);

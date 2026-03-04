@@ -93,7 +93,7 @@ public partial class GameContext
     /// </summary>
     /// <param name="actorName">角色名称</param>
     /// <returns>返回场景名称，如果未找到则返回空字符串</returns>
-    public string GetActorStage(string actorName)
+    public string GetActorNameStage(string actorName)
     {
         foreach (var kvp in _stageActorMapping)
         {
@@ -110,7 +110,7 @@ public partial class GameContext
     /// </summary>
     /// <param name="stageName">场景名称</param>
     /// <returns>返回该场景中的角色列表，如果场景不存在则返回空列表</returns>
-    public List<string> GetActorsInStage(string stageName)
+    public List<string> GetActorNamesInStage(string stageName)
     {
         if (_stageActorMapping.ContainsKey(stageName))
         {
@@ -123,14 +123,14 @@ public partial class GameContext
     /// 获取当前角色所在场景中的其他角色列表(不包括当前角色自己)
     /// </summary>
     /// <returns>返回除当前角色外的场景中所有角色列表</returns>
-    public List<string> GetActorsInCurrentStage()
+    public List<string> GetActorNamesInCurrentStage()
     {
         // 获取当前角色所属场景
-        var stageName = GetActorStage(PlayerActorName);
+        var stageName = GetActorNameStage(PlayerActorName);
         Debug.Assert(stageName != "", "[GameContext] Current actor's stage name is empty");
 
         // 获取该场景中的所有角色
-        var actorsInStage = GetActorsInStage(stageName);
+        var actorsInStage = GetActorNamesInStage(stageName);
         return actorsInStage;
     }
 
@@ -257,15 +257,15 @@ public partial class GameContext
     /// 获取当前舞台中所有活着的盟友实体
     /// </summary>
     /// <returns>活着的盟友实体列表</returns>
-    public List<EntitySerialization> GetAliveExpeditionMembersInCurrentCombatStage()
+    public List<EntitySerialization> GetAliveExpeditionMembers()
     {
         var aliveExpeditionMembers = new List<EntitySerialization>();
-        var stageName = GetActorStage(PlayerActorName);
-        var actorsInStage = GetActorsInStage(stageName);
+        var actorNamesInStage = GetActorNamesInCurrentStage();
+        var actorEntities = GetActorEntities(actorNamesInStage);
 
-        for (int i = 0; i < actorsInStage.Count; i++)
+        for (int i = 0; i < actorEntities.Count; i++)
         {
-            var actorEntity = GetActorEntity(actorsInStage[i]);
+            var actorEntity = actorEntities[i];
             Debug.Assert(actorEntity != null, "actorEntity is null");
 
             var expeditionMemberComponent = GameUtils.GetComponent<ExpeditionMemberComponent>(actorEntity);
@@ -292,15 +292,15 @@ public partial class GameContext
     /// 获取当前舞台中所有活着的敌人实体
     /// </summary>
     /// <returns>活着的敌人实体列表</returns>
-    public List<EntitySerialization> GetAliveEnemiesInCurrentCombatStage()
+    public List<EntitySerialization> GetAliveEnemies()
     {
         var aliveEnemies = new List<EntitySerialization>();
-        var stageName = GetActorStage(PlayerActorName);
-        var actorsInStage = GetActorsInStage(stageName);
+        var actorNamesInStage = GetActorNamesInCurrentStage();
+        var actorEntities = GetActorEntities(actorNamesInStage);
 
-        for (int i = 0; i < actorsInStage.Count; i++)
+        for (int i = 0; i < actorEntities.Count; i++)
         {
-            var actorEntity = GetActorEntity(actorsInStage[i]);
+            var actorEntity = actorEntities[i];
             Debug.Assert(actorEntity != null, "actorEntity is null");
 
             var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntity);

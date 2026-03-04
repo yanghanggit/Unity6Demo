@@ -26,6 +26,12 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
         ExecuteAdvanceNext().Forget();
     }
 
+    public void OnEnter()
+    {
+        // 显示战斗结果文本
+        Debug.Log("Entered Post Combat State");
+    }
+
 
     private async UniTaskVoid ExecuteAdvanceNext()
     {

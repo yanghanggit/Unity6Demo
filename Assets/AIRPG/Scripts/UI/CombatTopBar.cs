@@ -17,7 +17,7 @@ public class CombatTopBar : MonoBehaviour
         // 暂时不做过多的逻辑处理，主要负责显示当前地下城和关卡信息
         if (GameContext.Instance.Dungeon != null)
         {
-            var stageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+            var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
             _infoText.text = $"{GameContext.Instance.Dungeon.name} | {stageName}";
         }
         else

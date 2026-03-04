@@ -100,7 +100,12 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     public void OnClickBuildButton()
     {
         // 这里可以添加点击构筑按钮的逻辑
-        //Debug.Log("Build Button Clicked " + CurrentActor.name);
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not logged in, cannot execute build action");
+            _mainText.text = "请先登录以执行构筑行动";
+            return;
+        }
 
         // 目标角色、技能和状态效果都是必选的，缺一不可，否则无法执行抽卡行动
         if (CardBuilder.Build.targetActors == null || CardBuilder.Build.targetActors.Count == 0)

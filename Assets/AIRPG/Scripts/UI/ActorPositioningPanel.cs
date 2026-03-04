@@ -12,32 +12,14 @@ public class ActorPositioningPanel : MonoBehaviour
     [SerializeField] private CardBuildPanel _cardBuildPanel;
     [SerializeField] private EnemyHandPanel _enemyHandPanel;
 
-    // 角色数据列表，包含所有需要在站位面板中显示的角色实体数据
-    private List<EntitySerialization> _actorEntities;
-
-
     // 卡牌构筑数据管理对象，负责维护当前的构筑状态和数据
-    public List<EntitySerialization> ActorEntities
-    {
-        get => _actorEntities;
-        set
-        {
-            Debug.Assert(value != null && value.Count > 0, "ActorEntities cannot be null or empty");
-            _actorEntities = value;
-        }
-    }
-
+    public List<EntitySerialization> ActorEntities { get; set; }
     public List<EntitySerialization> EnemyEntities
     {
         get
         {
-            if (_actorEntities == null)
-            {
-                Debug.LogError("ActorEntities is not set. Cannot retrieve EnemyEntities.");
-                return new List<EntitySerialization>();
-            }
             List<EntitySerialization> enemyEntities = new();
-            foreach (var entity in _actorEntities)
+            foreach (var entity in ActorEntities)
             {
                 var enemyComponent = GameUtils.GetComponent<EnemyComponent>(entity);
                 if (enemyComponent != null)
@@ -53,14 +35,8 @@ public class ActorPositioningPanel : MonoBehaviour
     {
         get
         {
-            if (_actorEntities == null)
-            {
-                Debug.LogError("ActorEntities is not set. Cannot retrieve ExpeditionMemberEntities.");
-                return new List<EntitySerialization>();
-            }
-
             List<EntitySerialization> expeditionMemberEntities = new();
-            foreach (var entity in _actorEntities)
+            foreach (var entity in ActorEntities)
             {
                 var expeditionMemberComponent = GameUtils.GetComponent<ExpeditionMemberComponent>(entity);
                 if (expeditionMemberComponent != null)
@@ -154,7 +130,20 @@ public class ActorPositioningPanel : MonoBehaviour
     public void ShowCardBuildPanelForActor(EntitySerialization actorEntity)
     {
         _cardBuildPanel.gameObject.SetActive(true);
-        _cardBuildPanel.SetupForActor(actorEntity, ActorEntities);
+
+        if (GameContext.Instance.IsLoggedIn)
+        {
+            Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+            Debug.Assert(round != null, "CombatOnGoingState: No round data found for current dungeon");
+            var actionOrderEntities = GameContext.Instance.GetActorEntities(round.action_order);
+            Debug.Assert(actionOrderEntities != null && actionOrderEntities.Count > 0, "CombatOnGoingState: No action order entities found, cannot refresh view");
+            _cardBuildPanel.SetupForActor(actorEntity, actionOrderEntities);
+        }
+        else
+        {
+            //mock 数据，所有的角色都显示同样的构筑界面
+            _cardBuildPanel.SetupForActor(actorEntity, ActorEntities);
+        }
     }
 
     ///<summary>

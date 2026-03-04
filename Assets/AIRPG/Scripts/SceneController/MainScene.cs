@@ -270,7 +270,7 @@ public class MainScene : MonoBehaviour
     /// <param name="sceneConfig">目标场景的配置数据(包含 StageName 和 SceneDisplayName)</param>
     private async UniTaskVoid TransitionToScene(HomeSceneConfig sceneConfig)
     {
-        var currentStageName = GameContext.Instance.GetActorStage(GameContext.Instance.PlayerActorName);
+        var currentStageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
 
         if (currentStageName != sceneConfig.StageName)
         {
@@ -318,7 +318,7 @@ public class MainScene : MonoBehaviour
             }
 
             // 获取角色所在的 Stage
-            var actorStage = GameContext.Instance.GetActorStage(actorName);
+            var actorStage = GameContext.Instance.GetActorNameStage(actorName);
 
             // 根据 Stage 在对应区域显示角色图标
             for (int i = 0; i < _homeSceneNames.Length; i++)
