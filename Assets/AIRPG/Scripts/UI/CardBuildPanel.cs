@@ -284,7 +284,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         }
 
         // 刷新角色数据以获取最新的手牌信息
-        var actorEntities = await GameStateSync.Instance.RefreshEntitiesFromServer(new List<string> { allyDrawAction.entity_name });
+        var actorEntities = await GameStateSync.Instance.GetEntities(new List<string> { allyDrawAction.entity_name });
         if (actorEntities == null)
         {
             Debug.LogError($"Failed to refresh actor entities from server for actor: {allyDrawAction.entity_name}");

@@ -50,13 +50,13 @@ public class DungeonOverviewScene : MonoBehaviour
             return;
         }
 
-        var syncErr = await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
-        if (syncErr != GameSyncError.None)
-        {
-            Debug.LogError($"[LoginScene] RefreshMappingAndEntitiesFromServer failed: {syncErr}");
-            _mainText.text = "Failed to sync game state";
-            return;
-        }
+        // var syncErr = await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+        // if (syncErr != GameSyncError.None)
+        // {
+        //     Debug.LogError($"[LoginScene] RefreshMappingAndEntitiesFromServer failed: {syncErr}");
+        //     _mainText.text = "Failed to sync game state";
+        //     return;
+        // }
 
         await UniTask.Yield();
 

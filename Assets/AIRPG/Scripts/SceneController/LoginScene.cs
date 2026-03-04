@@ -5,13 +5,14 @@ using TMPro;
 
 public class LoginScene : MonoBehaviour
 {
+    public static readonly string NextSceneName = "MainScene";
+
+    public static readonly string GameName = "Game1";
+
     [Header("UI Components")]
     [SerializeField] private TMP_Text _userNameText;
     [SerializeField] private TMP_Text _gameNameText;
 
-    [Header("Scene Settings")]
-    [SerializeField] private string _nextSceneName = "MainScene";
-    [SerializeField] private string _gameName = "Game1";
 
     /// 加一个Header 叫测试测试，内加一个变量叫固定玩家ID，用于测试用途
     [Header("测试测试")]
@@ -24,8 +25,8 @@ public class LoginScene : MonoBehaviour
     {
         Debug.Assert(_userNameText != null, "_userNameText is null");
         Debug.Assert(_gameNameText != null, "_gameNameText is null");
-        Debug.Assert(!string.IsNullOrEmpty(_gameName), "_gameName is null");
-        Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
+        Debug.Assert(!string.IsNullOrEmpty(GameName), "_gameName is null");
+        //Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
 
         // 如果固定就使用固定的玩家ID，否则生成一个临时ID
         if (!string.IsNullOrEmpty(_fixedPlayerId))
@@ -39,7 +40,7 @@ public class LoginScene : MonoBehaviour
 
         //_playerIdentifier = GeneratePlayerId();
         _userNameText.text = "临时ID = " + _playerIdentifier;
-        _gameNameText.text = "测试游戏 = " + _gameName;
+        _gameNameText.text = "测试游戏 = " + GameName;
     }
 
     /// <summary>
@@ -58,7 +59,7 @@ public class LoginScene : MonoBehaviour
     /// </summary>
     public void OnStartGameClicked()
     {
-        StartGameFlow(_playerIdentifier, _gameName).Forget();
+        StartGameFlow(_playerIdentifier, GameName).Forget();
     }
 
     /// <summary>
@@ -67,23 +68,24 @@ public class LoginScene : MonoBehaviour
     private async UniTaskVoid StartGameFlow(string userName, string gameName)
     {
         // 1. 使用 SessionManager 执行登录和开始游戏
-        bool sessionSuccess = await SessionManager.Instance.LoginAndStart(userName, gameName);
-
-        if (!sessionSuccess)
+        bool apiSuccess = await SessionManager.Instance.LoginAndStart(userName, gameName);
+        if (!apiSuccess)
         {
             Debug.LogError("[LoginScene] LoginAndStart failed");
             return;
         }
 
         // 2. 刷新全局游戏状态
-        var syncErr = await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
-        if (syncErr != GameSyncError.None)
-        {
-            Debug.LogError($"[LoginScene] RefreshMappingAndEntitiesFromServer failed: {syncErr}");
-            return;
-        }
+        // var syncErr = await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
+        // if (syncErr != GameSyncError.None)
+        // {
+        //     Debug.LogError($"[LoginScene] RefreshMappingAndEntitiesFromServer failed: {syncErr}");
+        //     return;
+        // }
+
+        await UniTask.Yield();
 
         // 3. 切换场景
-        SceneManager.LoadScene(_nextSceneName);
+        SceneManager.LoadScene(NextSceneName);
     }
 }

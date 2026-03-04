@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using Cysharp.Threading.Tasks;
 
 public class PlayerInfoBar : MonoBehaviour
 {
@@ -20,8 +21,8 @@ public class PlayerInfoBar : MonoBehaviour
         _playerInfoText.text = $"{GameContext.Instance.UserName}\n{GameUtils.GetDisplayName(GameContext.Instance.PlayerActorName)}";
 
         // 获取角色实体序列化数据
-        var actorEntitySerialization = GameContext.Instance.GetActorEntity(GameContext.Instance.PlayerActorName);
-        Debug.Assert(actorEntitySerialization != null, "Actor entity serialization is null for actor: " + GameContext.Instance.PlayerActorName);
+        // var actorEntitySerialization = GameContext.Instance.GetActorEntity(GameContext.Instance.PlayerActorName);
+        // Debug.Assert(actorEntitySerialization != null, "Actor entity serialization is null for actor: " + GameContext.Instance.PlayerActorName);
 
         // 默认的显示逻辑
         // 显示头像
@@ -39,6 +40,11 @@ public class PlayerInfoBar : MonoBehaviour
         Debug.Log("Head icon clicked!");
         OnHeadIconClickedCallback?.Invoke();
     }
+
+    // private async UniTaskVoid RefreshViewAsync()
+    // {
+
+    // }
 }
 
 

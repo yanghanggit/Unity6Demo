@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8400106062775008967}
   - component: {fileID: 6756011783545974541}
   m_Layer: 5
-  m_Name: ActorAvatar
+  m_Name: ActorIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -58,11 +58,9 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05c9d3ea87fb14e4f9776c283da03f96, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActorMiniIcon
-  _actorImage: {fileID: 6756011783545974541}
-  _actorNameText: {fileID: 2541385535386928186}
-  _onActorAvatarsRefreshEvent: {fileID: 11400000, guid: 24712b7f887c54a53b03aebdcfaae1cc,
-    type: 2}
+  m_EditorClassIdentifier: Assembly-CSharp::ActorIcon
+  _image: {fileID: 6756011783545974541}
+  _nameText: {fileID: 2541385535386928186}
 --- !u!114 &6756011783545974541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105,7 +103,7 @@ GameObject:
   - component: {fileID: 5808962141838938228}
   - component: {fileID: 2541385535386928186}
   m_Layer: 5
-  m_Name: actor_name
+  m_Name: Name
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -125,10 +123,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 4452145139867759273}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 190, y: 50}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5808962141838938228
 CanvasRenderer:

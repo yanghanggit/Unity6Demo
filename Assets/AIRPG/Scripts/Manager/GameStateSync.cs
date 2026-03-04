@@ -92,7 +92,7 @@ public class GameStateSync : MonoBehaviour
     /// </summary>
     /// <param name="entityNames">需要获取详情的实体名称列表（可包含演员或场景）</param>
     /// <returns>成功时返回所有实体的浅拷贝列表（List&lt;EntitySerialization&gt;），失败时返回 null</returns>
-    public async UniTask<List<EntitySerialization>> RefreshEntitiesFromServer(List<string> entityNames)
+    public async UniTask<List<EntitySerialization>> GetEntities(List<string> entityNames)
     {
         if (entityNames == null || entityNames.Count == 0)
         {
@@ -118,34 +118,34 @@ public class GameStateSync : MonoBehaviour
         Debug.Assert(_entityDetailsApi.RespData != null, "[GameStateSync] EntityDetailsApi response data is null");
 
 
-        var actorEntities = new List<EntitySerialization>();
-        var stageEntities = new List<EntitySerialization>();
+        // var actorEntities = new List<EntitySerialization>();
+        // var stageEntities = new List<EntitySerialization>();
 
-        for (int i = 0; i < _entityDetailsApi.RespData.entities_serialization.Count; i++)
-        {
-            var entity = _entityDetailsApi.RespData.entities_serialization[i];
-            Debug.Log($"[GameStateSync] Fetched entity details from server: {entity.name} (index {i})");
+        // for (int i = 0; i < _entityDetailsApi.RespData.entities_serialization.Count; i++)
+        // {
+        //     var entity = _entityDetailsApi.RespData.entities_serialization[i];
+        //     Debug.Log($"[GameStateSync] Fetched entity details from server: {entity.name} (index {i})");
 
-            var actorComponent = GameUtils.GetComponent<ActorComponent>(entity);
-            if (actorComponent != null)
-            {
-                Debug.Log($"[GameStateSync] ActorComponent - name: {actorComponent.name}, character_sheet_name: {actorComponent.character_sheet_name}, current_stage: {actorComponent.current_stage}");
-                actorEntities.Add(entity);
-                continue;
-            }
+        //     var actorComponent = GameUtils.GetComponent<ActorComponent>(entity);
+        //     if (actorComponent != null)
+        //     {
+        //         Debug.Log($"[GameStateSync] ActorComponent - name: {actorComponent.name}, character_sheet_name: {actorComponent.character_sheet_name}, current_stage: {actorComponent.current_stage}");
+        //         actorEntities.Add(entity);
+        //         continue;
+        //     }
 
-            var stageComponent = GameUtils.GetComponent<StageComponent>(entity);
-            if (stageComponent != null)
-            {
-                Debug.Log($"[GameStateSync] StageComponent - name: {stageComponent.name}, character_sheet_name: {stageComponent.character_sheet_name}");
-                stageEntities.Add(entity);
-                continue;
-            }
-        }
+        //     var stageComponent = GameUtils.GetComponent<StageComponent>(entity);
+        //     if (stageComponent != null)
+        //     {
+        //         Debug.Log($"[GameStateSync] StageComponent - name: {stageComponent.name}, character_sheet_name: {stageComponent.character_sheet_name}");
+        //         stageEntities.Add(entity);
+        //         continue;
+        //     }
+        // }
 
         // 更新全局演员及场景实体详情数据（作为 cache）
-        GameContext.Instance.ActorEntities = actorEntities;
-        GameContext.Instance.StageEntities = stageEntities;
+        // GameContext.Instance.ActorEntities = actorEntities;
+        // GameContext.Instance.StageEntities = stageEntities;
 
         // 返回浅拷贝，避免外部修改全局缓存数据
         return new List<EntitySerialization>(_entityDetailsApi.RespData.entities_serialization);
@@ -159,26 +159,26 @@ public class GameStateSync : MonoBehaviour
     /// 适用于需要获取完整游戏状态的场景，如初始化、场景切换等
     /// </summary>
     /// <returns>成功返回 <see cref="GameSyncError.None"/>，失败返回对应错误码</returns>
-    public async UniTask<GameSyncError> RefreshMappingAndEntitiesFromServer()
-    {
-        // 步骤1: 刷新场景映射关系
-        var stageActorMapping = await RefreshMappingFromServer();
-        if (stageActorMapping == null)
-        {
-            Debug.LogError("RefreshAllEntitiesFromServer failed at step 1");
-            return GameSyncError.FetchMappingFailed;
-        }
+    // public async UniTask<GameSyncError> RefreshMappingAndEntitiesFromServer()
+    // {
+    //     // 步骤1: 刷新场景映射关系
+    //     var stageActorMapping = await RefreshMappingFromServer();
+    //     if (stageActorMapping == null)
+    //     {
+    //         Debug.LogError("RefreshAllEntitiesFromServer failed at step 1");
+    //         return GameSyncError.FetchMappingFailed;
+    //     }
 
-        // 步骤2: 获取场景详情数据
-        var allEntities = await RefreshEntitiesFromServer(GameContext.Instance.EntityNames);
-        if (allEntities == null)
-        {
-            Debug.LogError("RefreshAllEntitiesFromServer failed at step 2");
-            return GameSyncError.FetchStageDetailsFailed;
-        }
+    //     // 步骤2: 获取场景详情数据
+    //     var allEntities = await GetEntities(GameContext.Instance.EntityNames);
+    //     if (allEntities == null)
+    //     {
+    //         Debug.LogError("RefreshAllEntitiesFromServer failed at step 2");
+    //         return GameSyncError.FetchStageDetailsFailed;
+    //     }
 
-        return GameSyncError.None;
-    }
+    //     return GameSyncError.None;
+    // }
 
     /// <summary>
     /// 从服务器刷新场景-演员映射关系及演员详情数据
@@ -199,7 +199,7 @@ public class GameStateSync : MonoBehaviour
         }
 
         // 步骤2: 刷新所有演员的详情数据
-        var actorEntities = await RefreshEntitiesFromServer(GameContext.Instance.ActorNames);
+        var actorEntities = await GetEntities(GameContext.Instance.ActorNames);
         if (actorEntities == null)
         {
             Debug.LogError("RefreshMappingAndActorsFromServer failed at step 2");
@@ -285,7 +285,7 @@ public class GameStateSync : MonoBehaviour
             return GameSyncError.FetchActorsInStageFailed;
         }
 
-        var actorEntities = await RefreshEntitiesFromServer(actorsInStage);
+        var actorEntities = await GetEntities(actorsInStage);
         if (actorEntities == null)
         {
             Debug.LogError($"[GameStateSync] Failed to refresh actors in stage '{stageName}'");

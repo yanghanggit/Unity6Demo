@@ -11,33 +11,9 @@ using Cysharp.Threading.Tasks;
 public class MainScene : MonoBehaviour
 {
 
-    [Header("Scene Settings")]
-    /// <summary>
-    /// 返回按钮要跳转的上一个场景名称
-    /// </summary>
-    [SerializeField] private string _preScene = "LoginScene";
-
-    /// <summary>
-    /// 场景转换时要加载的目标场景名称
-    /// </summary>
-    [SerializeField] private string _nextScene = "HomeScene";
-
-    /// <summary>
-    /// 地牢浏览场景名称
-    /// </summary>
-    [SerializeField] private string _dungeonOverviewScene = "DungeonOverviewScene";
-
-
-    [Header("HomeSceneConfigs")]
-    /// <summary>
-    /// 营地场景配置数据(包含 StageName 和 SceneDisplayName)
-    /// </summary>
-    // [SerializeField] private HomeSceneConfig _campSceneConfig;
-
-    // /// <summary>
-    // /// 餐厅场景配置数据(包含 StageName 和 SceneDisplayName)
-    // /// </summary>
-    // [SerializeField] private HomeSceneConfig _restaurantSceneConfig;
+    public static readonly string PreSceneName = "LoginScene";
+    public static readonly string NextSceneName = "HomeScene";
+    public static readonly string DungeonOverviewSceneName = "DungeonOverviewScene";
 
     [Header("Home Scene Names and Objects")]
     [SerializeField] private string[] _homeSceneNames;
@@ -73,7 +49,7 @@ public class MainScene : MonoBehaviour
         Debug.Assert(_playerInfoBar != null, "_playerInfoBar is null");
         Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
         Debug.Assert(_actorAvatarPrefab != null, "_actorMiniIconPrefab is null");
-        Debug.Assert(_actorAvatarPrefab.GetComponent<ActorMiniIcon>() != null, "ActorMiniIcon component not found on _actorMiniIconPrefab");
+        Debug.Assert(_actorAvatarPrefab.GetComponent<ActorIcon>() != null, "ActorMiniIcon component not found on _actorMiniIconPrefab");
 
         // 设置头像点击回调
         _playerInfoBar.GetComponent<PlayerInfoBar>().OnHeadIconClickedCallback += OnHeadIconClicked;
@@ -83,7 +59,7 @@ public class MainScene : MonoBehaviour
         _playerInfoDetails.SetActive(false);
 
         // 启动时立即刷新游戏状态
-        RefreshGameState().Forget();
+        RefreshActorLocations().Forget();
     }
 
     /// <summary>
@@ -204,7 +180,7 @@ public class MainScene : MonoBehaviour
     async UniTaskVoid LoadDungeonOverviewScene()
     {
         await UniTask.Yield();
-        SceneManager.LoadScene(_dungeonOverviewScene);
+        SceneManager.LoadScene(DungeonOverviewSceneName);
     }
 
     /// <summary>
@@ -214,28 +190,15 @@ public class MainScene : MonoBehaviour
     /// </summary>
     async UniTaskVoid ReturnToLoginScene()
     {
-        bool logoutSuccess = await SessionManager.Instance.Logout();
-
-        if (!logoutSuccess)
+        bool isLogoutSuccessful = await SessionManager.Instance.Logout();
+        if (!isLogoutSuccessful)
         {
             Debug.LogError("[MainScene] Logout failed");
             return;
         }
 
         await UniTask.Yield();
-        SceneManager.LoadScene(_preScene);
-    }
-
-    /// <summary>
-    /// 刷新游戏状态的协程
-    /// 1. 从服务器刷新映射和角色数据
-    /// 2. 获取并序列化玩家角色的实体数据(用于调试)
-    /// 3. 刷新角色位置显示
-    /// </summary>
-    private async UniTaskVoid RefreshGameState()
-    {
-        await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-        RefreshActorLocations();
+        SceneManager.LoadScene(PreSceneName);
     }
 
     /// <summary>
@@ -245,9 +208,8 @@ public class MainScene : MonoBehaviour
     /// <returns>协程迭代器</returns>
     private async UniTaskVoid AdvanceGameState()
     {
-        bool advanceSuccess = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
-
-        if (!advanceSuccess)
+        bool isGameAdvanced = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
+        if (!isGameAdvanced)
         {
             Debug.LogError("[MainScene] AdvanceGame failed");
             return;
@@ -255,8 +217,8 @@ public class MainScene : MonoBehaviour
 
         Debug.Log("[MainScene] Game state advanced successfully");
 
-        await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
-        RefreshActorLocations();
+        //await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
+        RefreshActorLocations().Forget();
     }
 
     /// <summary>
@@ -270,8 +232,24 @@ public class MainScene : MonoBehaviour
     /// <param name="sceneConfig">目标场景的配置数据(包含 StageName 和 SceneDisplayName)</param>
     private async UniTaskVoid TransitionToScene(HomeSceneConfig sceneConfig)
     {
-        var currentStageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
+        var mapping = await GameStateSync.Instance.RefreshMappingFromServer();
+        if (mapping == null)
+        {
+            Debug.LogError("Failed to refresh stage-actor mapping from server");
+            return;
+        }
 
+        var currentStageName = string.Empty;
+        foreach (var kvp in mapping)
+        {
+            if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
+            {
+                currentStageName = kvp.Key;
+                break;
+            }
+        }
+
+        Debug.Log($"Current stage: {currentStageName}, Target stage: {sceneConfig.StageName}");
         if (currentStageName != sceneConfig.StageName)
         {
             bool switchSuccess = await HomeGamePlayManager.Instance.SwitchStage(sceneConfig.StageName);
@@ -281,8 +259,6 @@ public class MainScene : MonoBehaviour
                 Debug.LogError($"[MainScene] SwitchStage to {sceneConfig.StageName} failed");
                 return;
             }
-
-            await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         }
         else
         {
@@ -292,14 +268,14 @@ public class MainScene : MonoBehaviour
         await UniTask.Yield();
 
         HomeScene.PendingHomeSceneConfig = sceneConfig;
-        SceneManager.LoadScene(_nextScene);
+        SceneManager.LoadScene(NextSceneName);
     }
 
     /// <summary>
     /// 刷新场景中的角色位置显示
     /// 遍历所有角色,根据他们所在的 Stage 在对应区域显示迷你图标
     /// </summary>
-    private void RefreshActorLocations()
+    private async UniTaskVoid RefreshActorLocations()
     {
         // 清空现有图标
         for (int i = 0; i < _homeSceneObjects.Length; i++)
@@ -307,26 +283,32 @@ public class MainScene : MonoBehaviour
             ClearActorIcons(_homeSceneObjects[i]);
         }
 
-        // 获取所有角色(排除玩家自己)
-        var allActors = GameContext.Instance.ActorNames;
-        foreach (var actorName in allActors)
+        // 从服务器刷新场景-角色映射关系
+        var mapping = await GameStateSync.Instance.RefreshMappingFromServer();
+        if (mapping == null)
         {
-            // 跳过玩家自己
-            if (actorName == GameContext.Instance.PlayerActorName)
-            {
-                continue;
-            }
+            Debug.LogError("Failed to refresh stage-actor mapping from server");
+            return;
+        }
 
-            // 获取角色所在的 Stage
-            var actorStage = GameContext.Instance.GetActorNameStage(actorName);
+        // 遍历 mapping 中的每个场景和对应的角色列表
+        foreach (var kvp in mapping)
+        {
+            var stageName = kvp.Key;
+            var actorNames = kvp.Value;
+            actorNames.Remove(GameContext.Instance.PlayerActorName); // 移除玩家自己
 
-            // 根据 Stage 在对应区域显示角色图标
             for (int i = 0; i < _homeSceneNames.Length; i++)
             {
-                if (actorStage == _homeSceneNames[i])
+                if (stageName != _homeSceneNames[i])
                 {
+                    continue;
+                }
+
+                for (int j = 0; j < actorNames.Count; j++)
+                {
+                    var actorName = actorNames[j];
                     CreateActorIcon(actorName, _homeSceneObjects[i]);
-                    break;
                 }
             }
         }
@@ -339,22 +321,14 @@ public class MainScene : MonoBehaviour
     /// <param name="container">图标容器</param>
     private void CreateActorIcon(string actorName, GameObject container)
     {
-        // 验证角色名称
-        if (string.IsNullOrEmpty(actorName))
-        {
-            Debug.LogWarning("Cannot create actor icon with empty actor name");
-            return;
-        }
-
         // 实例化图标
         GameObject iconInstance = Instantiate(_actorAvatarPrefab, container.transform);
         // 设置图标大小
-        RectTransform rectTransform = iconInstance.GetComponent<RectTransform>();
-        if (rectTransform != null)
+        if (iconInstance.TryGetComponent<RectTransform>(out var rectTransform))
         {
             rectTransform.sizeDelta = new Vector2(100, 100); // 宽100像素，高100像素
         }
-        iconInstance.name = actorName;
+        iconInstance.GetComponent<ActorIcon>().ActorName = actorName;
     }
 
     /// <summary>
@@ -363,11 +337,6 @@ public class MainScene : MonoBehaviour
     /// <param name="container">图标容器</param>
     private void ClearActorIcons(GameObject container)
     {
-        if (container == null)
-        {
-            return;
-        }
-
         // 销毁容器中的所有子对象
         foreach (Transform child in container.transform)
         {

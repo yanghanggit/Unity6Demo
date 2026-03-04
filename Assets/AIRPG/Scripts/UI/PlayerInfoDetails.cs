@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 using Newtonsoft.Json;
+using Cysharp.Threading.Tasks;
+using System.Collections.Generic;
 
 
 public class PlayerInfoDetails : MonoBehaviour
@@ -19,38 +21,77 @@ public class PlayerInfoDetails : MonoBehaviour
         Debug.Assert(_playerInfoText != null, "_playerInfoText is null");
 
         // 初始化为空
-        _playerImage.sprite = null;
+        //_playerImage.sprite = null;
         _playerInfoText.text = "";
 
-        // 刷新内容
-        RefreshPlayerDetails();
-    }
-
-    private void RefreshPlayerDetails()
-    {
-        // 获取玩家实体
-        var playerActorEntitySerialization = GameContext.Instance.GetActorEntity(GameContext.Instance.PlayerActorName);
-        //Debug.Assert(playerActorEntitySerialization != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActor);
-        if (playerActorEntitySerialization == null)
-        {
-            Debug.LogError("Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActorName);
-            return;
-        }
-
-        var actorSprite = SpriteCacheManager.Instance.GetSprite(playerActorEntitySerialization.name);
-        Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + playerActorEntitySerialization.name);
+        var actorSprite = SpriteCacheManager.Instance.GetSprite(GameContext.Instance.PlayerActorName);
+        //Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + entitySerialization.name);
         _playerImage.sprite = actorSprite;
         _playerImage.gameObject.SetActive(false); // 先隐藏图片，避免空白显示
 
+        // 刷新内容
+        RefreshPlayerDetails().Forget();
+    }
+
+    private async UniTaskVoid RefreshPlayerDetails()
+    {
+        var actorEntities = await GameStateSync.Instance.GetEntities(
+            new List<string> { GameContext.Instance.PlayerActorName }
+        );
+
+        if (actorEntities == null || actorEntities.Count == 0)
+        {
+            Debug.LogError("PlayerInfoDetails: Player actor entity not found for name: " + GameContext.Instance.PlayerActorName);
+            _playerInfoText.text = "玩家信息未找到";
+            return;
+        }
+
+        //  var playerActorEntitySerialization = actorEntities[0];
+        //  Debug.Assert(playerActorEntitySerialization != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActorName);
+        //  if (playerActorEntitySerialization == null)
+        //  {
+        //      Debug.LogError("Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActorName);
+        //      _playerInfoText.text = "玩家信息未找到";
+        //      return;
+        //  }
+
+        //  // 获取角色头像
+        //  var actorSprite = SpriteCacheManager.Instance.GetSprite(playerActorEntitySerialization.name);
+        //  Debug.Assert(actorSprite != null, "Player actor sprite is null for entity: " + playerActorEntitySerialization.name);
+        //  if (actorSprite == null)
+        //  {
+        //      Debug.LogWarning($"PlayerInfoDetails: Actor sprite not found for: {playerActorEntitySerialization.name}");
+        //      _playerImage.sprite = null; // 或者设置为一个默认的占位图
+        //  }
+        //  else
+        //  {
+        //      _playerImage.sprite = actorSprite;
+        //      _playerImage.gameObject.SetActive(true); // 显示图片
+        //  }
+
+
+
+        // 获取玩家实体
+        var entitySerialization = actorEntities[0];
+        //Debug.Assert(playerActorEntitySerialization != null, "Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActor);
+        // if (entitySerialization == null)
+        // {
+        //     Debug.LogError("Player actor entity serialization is null for actor name: " + GameContext.Instance.PlayerActorName);
+        //     _playerInfoText.text = "玩家信息未找到";
+        //     return;
+        // }
+
+
+
         // 获取 CombatStatsComponent
-        var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(playerActorEntitySerialization);
-        Debug.Assert(combatStatsComponent != null, "CombatStatsComponent is null for player actor: " + playerActorEntitySerialization.name);
-        Debug.Assert(combatStatsComponent.stats != null, "CombatStatsComponent.stats is null for player actor: " + playerActorEntitySerialization.name);
+        var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(entitySerialization);
+        //Debug.Assert(combatStatsComponent != null, "CombatStatsComponent is null for player actor: " + entitySerialization.name);
+        //Debug.Assert(combatStatsComponent.stats != null, "CombatStatsComponent.stats is null for player actor: " + entitySerialization.name);
 
         //InventoryComponent
-        var inventoryComponent = GameUtils.GetComponent<InventoryComponent>(playerActorEntitySerialization);
-        Debug.Assert(inventoryComponent != null, "InventoryComponent is null for player actor: " + playerActorEntitySerialization.name);
-        Debug.Assert(inventoryComponent.items != null, "InventoryComponent.items is null for player actor: " + playerActorEntitySerialization.name);
+        var inventoryComponent = GameUtils.GetComponent<InventoryComponent>(entitySerialization);
+        //Debug.Assert(inventoryComponent != null, "InventoryComponent is null for player actor: " + entitySerialization.name);
+        //Debug.Assert(inventoryComponent.items != null, "InventoryComponent.items is null for player actor: " + entitySerialization.name);
 
         // 格式化显示 CombatStatsComponent 的属性
         var stats = combatStatsComponent.stats;
@@ -76,7 +117,7 @@ public class PlayerInfoDetails : MonoBehaviour
         }
 
         // 获取并显示 SkillBookComponent
-        var skillBookComponent = GameUtils.GetComponent<SkillBookComponent>(playerActorEntitySerialization);
+        var skillBookComponent = GameUtils.GetComponent<SkillBookComponent>(entitySerialization);
         if (skillBookComponent != null && skillBookComponent.skills != null && skillBookComponent.skills.Count > 0)
         {
             statsText += $"\n{GameUtils.FormatSkillBookComponent(skillBookComponent)}";
