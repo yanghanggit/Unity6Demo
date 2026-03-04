@@ -12,7 +12,7 @@ public partial class GameContext
     /// 场景与角色的映射关系
     /// Key: 场景名称, Value: 该场景中的角色列表
     /// </summary>
-    private Dictionary<string, List<string>> _stageActorMapping = new();
+    //private Dictionary<string, List<string>> _stageActorMapping = new();
 
     /// <summary>
     /// 所有角色实体的序列化数据列表
@@ -22,7 +22,7 @@ public partial class GameContext
     /// <summary>
     /// 所有场景实体的序列化数据列表
     /// </summary>
-    private List<EntitySerialization> _stageEntities = new();
+    //private List<EntitySerialization> _stageEntities = new();
 
     /// <summary>
     /// 地牢数据对象
@@ -93,31 +93,31 @@ public partial class GameContext
     /// </summary>
     /// <param name="actorName">角色名称</param>
     /// <returns>返回场景名称，如果未找到则返回空字符串</returns>
-    public string GetActorNameStage(string actorName)
-    {
-        foreach (var kvp in _stageActorMapping)
-        {
-            if (kvp.Value.Contains(actorName))
-            {
-                return kvp.Key;
-            }
-        }
-        return "";
-    }
+    // public string GetActorNameStage(string actorName)
+    // {
+    //     foreach (var kvp in _stageActorMapping)
+    //     {
+    //         if (kvp.Value.Contains(actorName))
+    //         {
+    //             return kvp.Key;
+    //         }
+    //     }
+    //     return "";
+    // }
 
     /// <summary>
     /// 获取指定场景中的所有角色列表
     /// </summary>
     /// <param name="stageName">场景名称</param>
     /// <returns>返回该场景中的角色列表，如果场景不存在则返回空列表</returns>
-    public List<string> GetActorNamesInStage(string stageName)
-    {
-        if (_stageActorMapping.ContainsKey(stageName))
-        {
-            return new List<string>(_stageActorMapping[stageName]);  // 返回副本
-        }
-        return new List<string>();
-    }
+    // public List<string> GetActorNamesInStage(string stageName)
+    // {
+    //     if (_stageActorMapping.ContainsKey(stageName))
+    //     {
+    //         return new List<string>(_stageActorMapping[stageName]);  // 返回副本
+    //     }
+    //     return new List<string>();
+    // }
 
     /// <summary>
     /// 获取当前角色所在场景中的其他角色列表(不包括当前角色自己)
@@ -159,43 +159,43 @@ public partial class GameContext
     /// 获取或设置所有角色实体的序列化数据列表
     /// 用于存储和管理角色的持久化数据
     /// </summary>
-    public List<EntitySerialization> ActorEntities
-    {
-        get
-        {
-            return _actorEntities;
-        }
-        set
-        {
-            if (value == null)
-            {
-                Debug.LogError("ActorEntitiesSerialization is null");
-                return;
-            }
-            _actorEntities = value;
-        }
-    }
+    // public List<EntitySerialization> ActorEntities
+    // {
+    //     get
+    //     {
+    //         return _actorEntities;
+    //     }
+    //     set
+    //     {
+    //         if (value == null)
+    //         {
+    //             Debug.LogError("ActorEntitiesSerialization is null");
+    //             return;
+    //         }
+    //         _actorEntities = value;
+    //     }
+    // }
 
     /// <summary>
     /// 获取或设置所有场景实体的序列化数据列表
     /// 用于存储和管理场景的持久化数据
     /// </summary>
-    public List<EntitySerialization> StageEntities
-    {
-        get
-        {
-            return _stageEntities;
-        }
-        set
-        {
-            if (value == null)
-            {
-                Debug.LogError("StageEntitiesSerialization is null");
-                return;
-            }
-            _stageEntities = value;
-        }
-    }
+    // public List<EntitySerialization> StageEntities
+    // {
+    //     get
+    //     {
+    //         return _stageEntities;
+    //     }
+    //     set
+    //     {
+    //         if (value == null)
+    //         {
+    //             Debug.LogError("StageEntitiesSerialization is null");
+    //             return;
+    //         }
+    //         _stageEntities = value;
+    //     }
+    // }
 
     /// <summary>
     /// 根据角色名称获取对应的实体序列化数据
@@ -241,17 +241,17 @@ public partial class GameContext
     /// </summary>
     /// <param name="stageName">场景名称</param>
     /// <returns>返回对应的EntitySerialization对象，如果未找到则返回null</returns>
-    public EntitySerialization GetStageEntity(string stageName)
-    {
-        foreach (var entitySerialization in _stageEntities)
-        {
-            if (entitySerialization.name == stageName)
-            {
-                return entitySerialization;
-            }
-        }
-        return null;
-    }
+    // public EntitySerialization GetStageEntity(string stageName)
+    // {
+    //     foreach (var entitySerialization in _stageEntities)
+    //     {
+    //         if (entitySerialization.name == stageName)
+    //         {
+    //             return entitySerialization;
+    //         }
+    //     }
+    //     return null;
+    // }
 
     /// <summary>
     /// 获取当前舞台中所有活着的盟友实体

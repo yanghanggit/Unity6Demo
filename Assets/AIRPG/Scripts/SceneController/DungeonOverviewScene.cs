@@ -43,24 +43,54 @@ public class DungeonOverviewScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid EnterDungeon()
     {
-        var dungeonTransitionResult = await HomeGamePlayManager.Instance.TransDungeon();
-        if (!dungeonTransitionResult)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            _mainText.text = "Trans dungeon failed";
+            Debug.LogWarning("Player is not logged in, cannot load dungeon overview");
+            _mainText.text = "Player is not logged in";
             return;
         }
 
-        // var syncErr = await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
-        // if (syncErr != GameSyncError.None)
-        // {
-        //     Debug.LogError($"[LoginScene] RefreshMappingAndEntitiesFromServer failed: {syncErr}");
-        //     _mainText.text = "Failed to sync game state";
-        //     return;
-        // }
+        var dungeon = await GameStateSync.Instance.GetDungeon();
+        if (dungeon == null)
+        {
+            Debug.LogError("Failed to refresh dungeon data");
+            _mainText.text = "Failed to load dungeon data";
+            return;
+        }
+
+        var dungeonTransitionResult = await HomeGamePlayManager.Instance.TransDungeon();
+        if (!dungeonTransitionResult)
+        {
+            Debug.LogError("Failed to transition into dungeon");
+            _mainText.text = "Failed to enter dungeon";
+            return;
+        }
+
+        var stagesState = await GameStateSync.Instance.GetStagesState();
+        if (stagesState == null)
+        {
+            Debug.LogError("[HomeScene] Failed to get stages state from server");
+            _mainText.text = "Failed to get stage information";
+            return;
+        }
+
+        var targetStageName = string.Empty;
+        foreach (var kvp in stagesState)
+        {
+            if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
+            {
+                targetStageName = kvp.Key;
+                break;
+            }
+        }
 
         await UniTask.Yield();
 
-        // 成功进入地下城后切换到地下城战斗场景
+        // 进入地下城后默认进入第一个关卡
+        DungeonCombatScene2.StageName = targetStageName;
+        DungeonCombatScene2.DungeonName = dungeon.name;
+
+        // 切换到地下城战斗场景
         SceneManager.LoadScene(NextSceneName);
     }
 
@@ -78,7 +108,7 @@ public class DungeonOverviewScene : MonoBehaviour
         }
 
 
-        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
+        var dungeon = await GameStateSync.Instance.GetDungeon();
         if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data");
@@ -86,7 +116,7 @@ public class DungeonOverviewScene : MonoBehaviour
             return;
         }
 
-        _mainText.text = GameUtils.FormatDungeonOverview(GameContext.Instance.Dungeon);
+        _mainText.text = GameUtils.FormatDungeonOverview(dungeon);
     }
 
     /// <summary>

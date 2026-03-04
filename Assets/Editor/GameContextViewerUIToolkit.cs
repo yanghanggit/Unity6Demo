@@ -177,8 +177,8 @@ public class GameContextViewerUIToolkit : EditorWindow
         UpdateUserInfo();
         UpdateUrls();
         //UpdateStageMapping();
-        UpdateActorEntities();
-        UpdateStageEntities();
+        //UpdateActorEntities();
+        //UpdateStageEntities();
         UpdateDungeonData();
         UpdateAgentEvents();
     }
@@ -287,61 +287,61 @@ public class GameContextViewerUIToolkit : EditorWindow
     //     }
     // }
 
-    private void UpdateActorEntities()
-    {
-        if (actorEntitiesContainer == null) return;
+    // private void UpdateActorEntities()
+    // {
+    //     if (actorEntitiesContainer == null) return;
 
-        actorEntitiesContainer.Clear();
+    //     actorEntitiesContainer.Clear();
 
-        var entities = GameContext.Instance.ActorEntities;
-        var foldout = rootVisualElement.Q<Foldout>("actor-entities-foldout");
-        if (foldout != null)
-        {
-            foldout.text = $"角色实体序列化 (数量: {entities.Count})";
-        }
+    //     var entities = GameContext.Instance.ActorEntities;
+    //     var foldout = rootVisualElement.Q<Foldout>("actor-entities-foldout");
+    //     if (foldout != null)
+    //     {
+    //         foldout.text = $"角色实体序列化 (数量: {entities.Count})";
+    //     }
 
-        if (entities.Count == 0)
-        {
-            var emptyLabel = new Label("暂无数据");
-            emptyLabel.AddToClassList("empty-message");
-            actorEntitiesContainer.Add(emptyLabel);
-            return;
-        }
+    //     if (entities.Count == 0)
+    //     {
+    //         var emptyLabel = new Label("暂无数据");
+    //         emptyLabel.AddToClassList("empty-message");
+    //         actorEntitiesContainer.Add(emptyLabel);
+    //         return;
+    //     }
 
-        foreach (var entity in entities)
-        {
-            var card = CreateEntityCard(entity);
-            actorEntitiesContainer.Add(card);
-        }
-    }
+    //     foreach (var entity in entities)
+    //     {
+    //         var card = CreateEntityCard(entity);
+    //         actorEntitiesContainer.Add(card);
+    //     }
+    // }
 
-    private void UpdateStageEntities()
-    {
-        if (stageEntitiesContainer == null) return;
+    // private void UpdateStageEntities()
+    // {
+    //     if (stageEntitiesContainer == null) return;
 
-        stageEntitiesContainer.Clear();
+    //     stageEntitiesContainer.Clear();
 
-        var entities = GameContext.Instance.StageEntities;
-        var foldout = rootVisualElement.Q<Foldout>("stage-entities-foldout");
-        if (foldout != null)
-        {
-            foldout.text = $"场景实体序列化 (数量: {entities.Count})";
-        }
+    //     var entities = GameContext.Instance.StageEntities;
+    //     var foldout = rootVisualElement.Q<Foldout>("stage-entities-foldout");
+    //     if (foldout != null)
+    //     {
+    //         foldout.text = $"场景实体序列化 (数量: {entities.Count})";
+    //     }
 
-        if (entities.Count == 0)
-        {
-            var emptyLabel = new Label("暂无数据");
-            emptyLabel.AddToClassList("empty-message");
-            stageEntitiesContainer.Add(emptyLabel);
-            return;
-        }
+    //     if (entities.Count == 0)
+    //     {
+    //         var emptyLabel = new Label("暂无数据");
+    //         emptyLabel.AddToClassList("empty-message");
+    //         stageEntitiesContainer.Add(emptyLabel);
+    //         return;
+    //     }
 
-        foreach (var entity in entities)
-        {
-            var card = CreateEntityCard(entity);
-            stageEntitiesContainer.Add(card);
-        }
-    }
+    //     foreach (var entity in entities)
+    //     {
+    //         var card = CreateEntityCard(entity);
+    //         stageEntitiesContainer.Add(card);
+    //     }
+    // }
 
     private VisualElement CreateEntityCard(EntitySerialization entity)
     {

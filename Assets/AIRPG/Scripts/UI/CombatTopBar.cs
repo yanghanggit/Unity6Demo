@@ -15,15 +15,17 @@ public class CombatTopBar : MonoBehaviour
         Debug.Assert(_infoText != null, "_infoText is null");
 
         // 暂时不做过多的逻辑处理，主要负责显示当前地下城和关卡信息
-        if (GameContext.Instance.Dungeon != null)
-        {
-            var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
-            _infoText.text = $"{GameContext.Instance.Dungeon.name} | {stageName}";
-        }
-        else
-        {
-            _infoText.text = string.Empty;
-        }
+        // if (GameContext.Instance.Dungeon != null)
+        // {
+        //     var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
+        //     _infoText.text = $"{GameContext.Instance.Dungeon.name} | {stageName}";
+        // }
+        // else
+        // {
+        //     _infoText.text = string.Empty;
+        // }
+
+        _infoText.text = $"{DungeonCombatScene2.DungeonName} | {DungeonCombatScene2.StageName}";
     }
 
     /// <summary>

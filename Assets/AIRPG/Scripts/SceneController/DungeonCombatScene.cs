@@ -25,21 +25,21 @@ public class DungeonCombatScene : MonoBehaviour
         Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
         // 检查是否已经连接服务器
-        if (GameContext.Instance.IsLoggedIn)
-        {
-            // 已经连接服务器，开始初始化战斗场景
-            var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
-            _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
+        // if (GameContext.Instance.IsLoggedIn)
+        // {
+        //     // 已经连接服务器，开始初始化战斗场景
+        //     var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
+        //     _mainText.text = $"{GameContext.Instance.Dungeon.name} | {stageName} : Initializing combat scene...";
 
-            // 刷新场景初始化
-            ExecuteCombatInit().Forget();
-        }
-        else
-        {
-            // 没有连接服务器，基本是本地测试模式
-            Debug.Log("DungeonCombatScene: Not logged in, running in local test mode");
-            _mainText.text = "本地测试模式：未连接服务器，无法进行完整战斗操作。";
-        }
+        //     // 刷新场景初始化
+        //     ExecuteCombatInit().Forget();
+        // }
+        // else
+        // {
+        //     // 没有连接服务器，基本是本地测试模式
+        //     Debug.Log("DungeonCombatScene: Not logged in, running in local test mode");
+        //     _mainText.text = "本地测试模式：未连接服务器，无法进行完整战斗操作。";
+        // }
     }
 
     public void OnClickViewDungeon()
@@ -103,25 +103,25 @@ public class DungeonCombatScene : MonoBehaviour
 
     public void OnClickAdvanceNextDungeon()
     {
-        if (!GameContext.Instance.IsLoggedIn)
-        {
-            Debug.LogWarning("Not logged in, cannot advance to next dungeon");
-            return;
-        }
+        // if (!GameContext.Instance.IsLoggedIn)
+        // {
+        //     Debug.LogWarning("Not logged in, cannot advance to next dungeon");
+        //     return;
+        // }
 
-        //Debug.Log("OnClickAdvanceNextDungeon");
+        // //Debug.Log("OnClickAdvanceNextDungeon");
 
-        // 检查当前战斗状态，决定执行哪个操作
-        Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
+        // // 检查当前战斗状态，决定执行哪个操作
+        // Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
 
-        if (currentCombat != null && currentCombat.state == CombatState.COMPLETE)
-        {
-            ExecutePostCombat().Forget();
-        }
-        else
-        {
-            ExecuteAdvanceNextDungeon().Forget();
-        }
+        // if (currentCombat != null && currentCombat.state == CombatState.COMPLETE)
+        // {
+        //     ExecutePostCombat().Forget();
+        // }
+        // else
+        // {
+        //     ExecuteAdvanceNextDungeon().Forget();
+        // }
     }
 
     public void OnClickRetreatFromDungeon()
@@ -219,29 +219,29 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private void DisplayAllActorsHands()
     {
-        var text = string.Empty;
+        // var text = string.Empty;
 
-        var actorEntitiesSerialization = GameContext.Instance.ActorEntities;
-        foreach (var actorEntity in actorEntitiesSerialization)
-        {
-            var handComponent = GameUtils.GetComponent<HandComponent>(actorEntity);
-            if (handComponent == null)
-            {
-                continue;
-            }
+        // var actorEntitiesSerialization = GameContext.Instance.ActorEntities;
+        // foreach (var actorEntity in actorEntitiesSerialization)
+        // {
+        //     var handComponent = GameUtils.GetComponent<HandComponent>(actorEntity);
+        //     if (handComponent == null)
+        //     {
+        //         continue;
+        //     }
 
-            text += GameUtils.FormatHandComponent(handComponent);
-            text += "\n";
-        }
+        //     text += GameUtils.FormatHandComponent(handComponent);
+        //     text += "\n";
+        // }
 
-        if (string.IsNullOrEmpty(text))
-        {
-            _mainText.text = "当前没有角色持有手牌信息。";
-        }
-        else
-        {
-            _mainText.text = "当前角色手牌信息：\n\n" + text;
-        }
+        // if (string.IsNullOrEmpty(text))
+        // {
+        //     _mainText.text = "当前没有角色持有手牌信息。";
+        // }
+        // else
+        // {
+        //     _mainText.text = "当前角色手牌信息：\n\n" + text;
+        // }
     }
 
     /// <summary>
@@ -268,7 +268,7 @@ public class DungeonCombatScene : MonoBehaviour
 
         _mainText.text = "打牌处理完成，正在加载结果...";
 
-        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
+        var dungeon = await GameStateSync.Instance.GetDungeon();
         if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data");
@@ -300,25 +300,25 @@ public class DungeonCombatScene : MonoBehaviour
     private void DisplayLastRoundInfo()
     {
         // 获取最新的地下城回合信息
-        Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
-        if (round == null)
-        {
-            Debug.LogWarning("No rounds found in dungeon after playing cards");
-            _mainText.text = "打牌完成，但未找到回合信息";
-            return;
-        }
+        // Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+        // if (round == null)
+        // {
+        //     Debug.LogWarning("No rounds found in dungeon after playing cards");
+        //     _mainText.text = "打牌完成，但未找到回合信息";
+        //     return;
+        // }
 
-        // 显示最新的地下城战斗仲裁信息
-        var formattedRoundInfo = GameUtils.FormatRoundInfo(round);
-        if (!string.IsNullOrEmpty(formattedRoundInfo))
-        {
-            _mainText.text = formattedRoundInfo;
-        }
-        else
-        {
-            Debug.LogWarning("No combat arbitration info available in dungeon state");
-            _mainText.text = "打牌完成，但未找到战斗仲裁信息";
-        }
+        // // 显示最新的地下城战斗仲裁信息
+        // var formattedRoundInfo = GameUtils.FormatRoundInfo(round);
+        // if (!string.IsNullOrEmpty(formattedRoundInfo))
+        // {
+        //     _mainText.text = formattedRoundInfo;
+        // }
+        // else
+        // {
+        //     Debug.LogWarning("No combat arbitration info available in dungeon state");
+        //     _mainText.text = "打牌完成，但未找到战斗仲裁信息";
+        // }
     }
 
     /// <summary>
@@ -327,26 +327,26 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTask RefreshDungeonStateDisplay()
     {
-        var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-        if (refreshErr != GameSyncError.None)
-        {
-            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
-            _mainText.text = "刷新地下城状态失败";
-            return;
-        }
+        // var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+        // if (refreshErr != GameSyncError.None)
+        // {
+        //     Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
+        //     _mainText.text = "刷新地下城状态失败";
+        //     return;
+        // }
 
         // 获取当前角色所在场景及该场景中的所有角色
-        var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
-        Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
+        // var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
+        // Debug.Assert(stageName != "", "[GameStateSync] Current actor's stage name is empty");
 
-        //
-        SetBackgroundImage(stageName);
+        // //
+        // SetBackgroundImage(stageName);
 
-        // 需要所有的角色名称列表！
-        var actorsInStage = GameContext.Instance.GetActorNamesInStage(stageName);
+        // // 需要所有的角色名称列表！
+        // var actorsInStage = GameContext.Instance.GetActorNamesInStage(stageName);
 
-        // 格式化并显示地下城状态（包括场景-角色映射和战斗序列信息）
-        _mainText.text = GameUtils.FormatDungeonStateDisplay(GameContext.Instance.Dungeon, new Dictionary<string, List<string>> { { stageName, actorsInStage } });
+        // // 格式化并显示地下城状态（包括场景-角色映射和战斗序列信息）
+        // _mainText.text = GameUtils.FormatDungeonStateDisplay(GameContext.Instance.Dungeon, new Dictionary<string, List<string>> { { stageName, actorsInStage } });
     }
 
     /// <summary>
@@ -374,28 +374,28 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid ExecuteViewActorStats()
     {
-        var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-        if (refreshErr != GameSyncError.None)
-        {
-            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
-            _mainText.text = "刷新角色数据失败";
-            return;
-        }
+        // var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+        // if (refreshErr != GameSyncError.None)
+        // {
+        //     Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
+        //     _mainText.text = "刷新角色数据失败";
+        //     return;
+        // }
 
-        var text = "";
-        var actorEntitiesSerialization = GameContext.Instance.ActorEntities;
-        for (int i = 0; i < actorEntitiesSerialization.Count; i++)
-        {
-            var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(actorEntitiesSerialization[i]);
-            if (combatStatsComponent == null)
-            {
-                Debug.Assert(false, "combatStatsComponent is null");
-                continue;
-            }
-            text += GameUtils.FormatCombatStatsComponent(combatStatsComponent);
-            text += "\n";
-        }
-        _mainText.text = text;
+        // var text = "";
+        // var actorEntitiesSerialization = GameContext.Instance.ActorEntities;
+        // for (int i = 0; i < actorEntitiesSerialization.Count; i++)
+        // {
+        //     var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(actorEntitiesSerialization[i]);
+        //     if (combatStatsComponent == null)
+        //     {
+        //         Debug.Assert(false, "combatStatsComponent is null");
+        //         continue;
+        //     }
+        //     text += GameUtils.FormatCombatStatsComponent(combatStatsComponent);
+        //     text += "\n";
+        // }
+        // _mainText.text = text;
     }
 
     /// <summary>
@@ -405,13 +405,13 @@ public class DungeonCombatScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid ExecuteViewActorCards()
     {
-        var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-        if (refreshErr != GameSyncError.None)
-        {
-            Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
-            _mainText.text = "刷新数据失败";
-            return;
-        }
+        // var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+        // if (refreshErr != GameSyncError.None)
+        // {
+        //     Debug.LogError($"Failed to refresh dungeon and actors data: {refreshErr}");
+        //     _mainText.text = "刷新数据失败";
+        //     return;
+        // }
 
         DisplayAllActorsHands();
     }
@@ -458,7 +458,7 @@ public class DungeonCombatScene : MonoBehaviour
         }
 
         // 最后需要获取最新个的数据，因为服务器推进了地下城状态
-        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
+        var dungeon = await GameStateSync.Instance.GetDungeon();
         if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data after post combat");

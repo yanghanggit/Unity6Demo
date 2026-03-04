@@ -240,6 +240,18 @@ public partial class GameContext
     }
 
     /// <summary>
+    /// 获取地牢战斗API的URL地址
+    /// 根据用户名和游戏名称动态构建完整的URL
+    /// </summary>
+    public string DungeonCombatUrl
+    {
+        get
+        {
+            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + $"{GameApiEndpointsManager.DungeonCombat}{UserName}/{GameName}/combat";
+        }
+    }
+
+    /// <summary>
     /// 获取实体详情API的URL地址
     /// 根据用户名和游戏名称动态构建完整的URL
     /// </summary>

@@ -29,6 +29,7 @@ public static class GameApiEndpointsManager
     public static readonly string DungeonCombatPlayCards = "/api/dungeon/combat/play_cards/v1/";
     public static readonly string DungeonTransHome = "/api/dungeon/trans_home/v1/";
     public static readonly string DungeonState = "/api/dungeons/v1/";
+    public static readonly string DungeonCombat = "/api/dungeons/v1/";
     public static readonly string SessionMessages = "/api/session_messages/v1/";
     public static readonly string EntityDetails = "/api/entities/v1/";
     public static readonly string StagesState = "/api/stages/v1/";

@@ -3078,6 +3078,7 @@ GameObject:
   - component: {fileID: 680271568}
   - component: {fileID: 680271567}
   - component: {fileID: 680271569}
+  - component: {fileID: 680271570}
   m_Layer: 5
   m_Name: OnGoingState
   m_TagString: Untagged
@@ -3160,6 +3161,19 @@ MonoBehaviour:
   _actorPositioningPanel: {fileID: 1475957528}
   _arbitrationPanel: {fileID: 1055363935}
   _topBar: {fileID: 132391926}
+--- !u!114 &680271570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680271565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6266a492c41584be3a551942deedc4d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatBackground
+  _backgroundImage: {fileID: 680271567}
 --- !u!1 &684910318
 GameObject:
   m_ObjectHideFlags: 0

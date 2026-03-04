@@ -30,6 +30,11 @@ public class GameStateSync : MonoBehaviour
     /// </summary>
     public DungeonStateApi _dungeonStateApi;
 
+    /// <summary>
+    /// 地下城战斗状态API接口
+    /// </summary>
+    public DungeonCombatApi _dungeonCombatApi;
+
     private void Awake()
     {
         // 单例模式处理
@@ -50,6 +55,7 @@ public class GameStateSync : MonoBehaviour
         Debug.Assert(_stagesStateApi != null, "_stagesStateApi is null");
         Debug.Assert(_entityDetailsApi != null, "_actorDetailApi is null");
         Debug.Assert(_dungeonStateApi != null, "_dungeonStateApi is null");
+        Debug.Assert(_dungeonCombatApi != null, "_dungeonCombatApi is null");
     }
 
     /// <summary>
@@ -215,7 +221,7 @@ public class GameStateSync : MonoBehaviour
     /// 获取地下城详细信息并更新到 GameContext.Instance.Dungeon
     /// </summary>
     /// <returns>成功时返回 GameContext.Instance.Dungeon（作为 cache 引用），失败时返回 null</returns>
-    public async UniTask<Dungeon> RefreshDungeonFromServer()
+    public async UniTask<Dungeon> GetDungeon()
     {
         if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActorName))
         {
@@ -240,8 +246,40 @@ public class GameStateSync : MonoBehaviour
         Debug.Assert(_dungeonStateApi.RespData != null, "[GameStateSync] DungeonStateApi response data is null");
 
         // 写入全局地下城缓存
-        GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
-        return GameContext.Instance.Dungeon;
+        //GameContext.Instance.Dungeon = _dungeonStateApi.RespData.dungeon;
+        return _dungeonStateApi.RespData.dungeon;
+    }
+
+    /// <summary>
+    /// 从服务器刷新地下城战斗状态
+    /// 获取战斗详细信息
+    /// </summary>
+    /// <returns>成功时返回 Combat 数据，失败时返回 null</returns>
+    public async UniTask<Combat> GetCombat()
+    {
+        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActorName))
+        {
+            Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
+            return null;
+        }
+
+        await _dungeonCombatApi.Call(GameContext.Instance.DungeonCombatUrl);
+
+        if (_dungeonCombatApi.ReqResult == null)
+        {
+            Debug.LogError("[GameStateSync] Failed to fetch dungeon combat state from server: request result is null");
+            return null;
+        }
+
+        if (!_dungeonCombatApi.ReqResult.isSuccess)
+        {
+            Debug.LogError($"[GameStateSync] Failed to fetch dungeon combat state from server: {_dungeonCombatApi.ReqResult.responseText}");
+            return null;
+        }
+
+        Debug.Assert(_dungeonCombatApi.RespData != null, "[GameStateSync] DungeonCombatApi response data is null");
+
+        return _dungeonCombatApi.RespData.combat;
     }
 
     /// <summary>
@@ -250,48 +288,48 @@ public class GameStateSync : MonoBehaviour
     /// 步骤2：依据映射关系，串行获取玩家所在场景中所有演员的详细信息。
     /// </summary>
     /// <returns>成功返回 <see cref="GameSyncError.None"/>，失败返回对应错误码</returns>
-    public async UniTask<GameSyncError> RefreshCombatStateFromServer()
-    {
-        // 步骤1: 并行刷新地下城数据和场景-演员映射关系（两者互相独立，无依赖）
-        var (dungeon, mapping) = await UniTask.WhenAll(
-            RefreshDungeonFromServer(),
-            GetStagesState()
-        );
+    // public async UniTask<GameSyncError> RefreshCombatStateFromServer()
+    // {
+    //     // 步骤1: 并行刷新地下城数据和场景-演员映射关系（两者互相独立，无依赖）
+    //     var (dungeon, mapping) = await UniTask.WhenAll(
+    //         GetDungeon(),
+    //         GetStagesState()
+    //     );
 
-        if (dungeon == null)
-        {
-            Debug.LogError("[GameStateSync] RefreshCombatStateFromServer failed: dungeon data is null");
-            return GameSyncError.FetchDungeonFailed;
-        }
+    //     if (dungeon == null)
+    //     {
+    //         Debug.LogError("[GameStateSync] RefreshCombatStateFromServer failed: dungeon data is null");
+    //         return GameSyncError.FetchDungeonFailed;
+    //     }
 
-        if (mapping == null)
-        {
-            Debug.LogError("[GameStateSync] RefreshCombatStateFromServer failed: stage-actor mapping is null");
-            return GameSyncError.FetchMappingFailed;
-        }
+    //     if (mapping == null)
+    //     {
+    //         Debug.LogError("[GameStateSync] RefreshCombatStateFromServer failed: stage-actor mapping is null");
+    //         return GameSyncError.FetchMappingFailed;
+    //     }
 
-        // 步骤2: 刷新玩家所在场景中所有演员的详情数据
-        var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
-        if (string.IsNullOrEmpty(stageName))
-        {
-            Debug.LogError($"[GameStateSync] Actor '{GameContext.Instance.PlayerActorName}' stage not found in mapping");
-            return GameSyncError.FetchActorsInStageFailed;
-        }
+    //     // 步骤2: 刷新玩家所在场景中所有演员的详情数据
+    //     var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
+    //     if (string.IsNullOrEmpty(stageName))
+    //     {
+    //         Debug.LogError($"[GameStateSync] Actor '{GameContext.Instance.PlayerActorName}' stage not found in mapping");
+    //         return GameSyncError.FetchActorsInStageFailed;
+    //     }
 
-        var actorsInStage = GameContext.Instance.GetActorNamesInStage(stageName);
-        if (actorsInStage.Count == 0)
-        {
-            Debug.LogWarning($"[GameStateSync] No actors found in stage '{stageName}'");
-            return GameSyncError.FetchActorsInStageFailed;
-        }
+    //     var actorsInStage = GameContext.Instance.GetActorNamesInStage(stageName);
+    //     if (actorsInStage.Count == 0)
+    //     {
+    //         Debug.LogWarning($"[GameStateSync] No actors found in stage '{stageName}'");
+    //         return GameSyncError.FetchActorsInStageFailed;
+    //     }
 
-        var actorEntities = await GetEntities(actorsInStage);
-        if (actorEntities == null)
-        {
-            Debug.LogError($"[GameStateSync] Failed to refresh actors in stage '{stageName}'");
-            return GameSyncError.FetchActorsInStageFailed;
-        }
+    //     var actorEntities = await GetEntities(actorsInStage);
+    //     if (actorEntities == null)
+    //     {
+    //         Debug.LogError($"[GameStateSync] Failed to refresh actors in stage '{stageName}'");
+    //         return GameSyncError.FetchActorsInStageFailed;
+    //     }
 
-        return GameSyncError.None;
-    }
+    //     return GameSyncError.None;
+    // }
 }

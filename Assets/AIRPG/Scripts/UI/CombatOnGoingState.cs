@@ -62,14 +62,21 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
         else
         {
             // 先刷新一次
-            var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-            if (refreshErr != GameSyncError.None)
+            // var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+            // if (refreshErr != GameSyncError.None)
+            // {
+            //     Debug.LogError($"[DungeonCombatScene] Failed to refresh combat state from server: {refreshErr}");
+            //     return;
+            // }
+
+            var combat = await GameStateSync.Instance.GetCombat();
+            if (combat == null)
             {
-                Debug.LogError($"[DungeonCombatScene] Failed to refresh combat state from server: {refreshErr}");
+                Debug.LogError("[DungeonCombatScene] Combat data is null after refresh");
                 return;
             }
 
-            lastCombatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
+            lastCombatState = combat.state;
             Debug.Log($"[DungeonCombatScene] Last combat state: {lastCombatState}");
         }
 
@@ -117,28 +124,63 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
             _actorPositioningPanel.gameObject.SetActive(true);
             _actorPositioningPanel.ActorEntities = _mockActorData;
             _actorPositioningPanel.RefreshPositioningView();
+            return;
 
         }
-        else
+
+        OnEnterAsync().Forget();
+    }
+
+    private async UniTaskVoid OnEnterAsync()
+    {
+        // 阶段1：并行获取战斗状态和场景-演员映射关系（两者互相独立）
+        var (combat, stagesState) = await UniTask.WhenAll(
+            GameStateSync.Instance.GetCombat(),
+            GameStateSync.Instance.GetStagesState()
+        );
+
+        if (combat == null)
         {
-            // 正式的显示！
-            Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
-            Debug.Assert(round != null, "CombatOnGoingState: No round data found for current dungeon");
-
-            Combat currentCombat = GameUtils.GetLastCombat(GameContext.Instance.Dungeon);
-            Debug.Assert(currentCombat != null, "CombatOnGoingState: Current combat is null, cannot refresh view");
-
-            // 顶部信息！
-            var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
-            var topBarInfo = $"{GameContext.Instance.Dungeon.name} | {stageName} | 回合数: {currentCombat.rounds.Count}";
-            _topBar.SetText(topBarInfo);
-
-            // 站位面板显示
-            _actorPositioningPanel.gameObject.SetActive(true);
-            var actorNamesInStage = new List<string>();//GameContext.Instance.GetActorNamesInCurrentStage();
-            _actorPositioningPanel.ActorEntities = GameContext.Instance.GetActorEntities(actorNamesInStage);
-            _actorPositioningPanel.RefreshPositioningView();
+            Debug.LogError("CombatOnGoingState: Dungeon data is null, cannot refresh combat view");
+            return;
         }
+
+        if (stagesState == null)
+        {
+            Debug.LogError("CombatOnGoingState: Stages state data is null, cannot determine current stage and actors");
+            return;
+        }
+
+        // 阶段2：依据映射结果获取当前场景中的演员列表
+        List<string> actorNamesInStage = new();
+        foreach (var kvp in stagesState)
+        {
+            if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
+            {
+                actorNamesInStage = kvp.Value;
+                break;
+            }
+        }
+
+        var actorEntities = await GameStateSync.Instance.GetEntities(actorNamesInStage);
+        if (actorEntities == null)
+        {
+            Debug.LogError("CombatOnGoingState: Actor entities data is null, cannot refresh combat view");
+            return;
+        }
+
+        // 等待1秒钟，模拟加载过程中的等待时间，提升用户体验
+        //await UniTask.Delay(1000 * 60);
+
+
+        // 刷新顶部信息显示，包含当前地下城、关卡和回合数等信息
+        var topBarInfo = $"{DungeonCombatScene2.DungeonName} | {DungeonCombatScene2.StageName} | 回合数: {combat.rounds.Count}";
+        _topBar.SetText(topBarInfo);
+
+        // 站位面板显示
+        _actorPositioningPanel.gameObject.SetActive(true);
+        _actorPositioningPanel.ActorEntities = actorEntities;
+        _actorPositioningPanel.RefreshPositioningView();
     }
 
     /// <summary>

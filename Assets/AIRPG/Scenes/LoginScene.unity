@@ -633,8 +633,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _userNameText: {fileID: 470425677}
   _gameNameText: {fileID: 143863052}
-  _nextSceneName: MainScene
-  _gameName: Game1
   _fixedPlayerId: 
 --- !u!1 &470425675
 GameObject:
@@ -1559,6 +1557,7 @@ GameObject:
   - component: {fileID: 2047208670}
   - component: {fileID: 2047208669}
   - component: {fileID: 2047208671}
+  - component: {fileID: 2047208672}
   m_Layer: 0
   m_Name: GameStateSync
   m_TagString: Untagged
@@ -1596,6 +1595,7 @@ MonoBehaviour:
   _stagesStateApi: {fileID: 2047208670}
   _entityDetailsApi: {fileID: 2047208669}
   _dungeonStateApi: {fileID: 2047208671}
+  _dungeonCombatApi: {fileID: 2047208672}
 --- !u!114 &2047208669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1634,6 +1634,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8a573799922e489ba7cd168349339df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonStateApi
+  requestTimeout: 30
+--- !u!114 &2047208672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2047208666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3d963d961765407581dcedb7dbbc99f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonCombatApi
   requestTimeout: 30
 --- !u!1 &2110898351
 GameObject:

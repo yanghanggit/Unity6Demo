@@ -8,6 +8,9 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
     public static readonly string PreSceneName = "MainScene";
     public static readonly string NextSceneName = "DungeonCombatScene2";
 
+    public static string StageName = string.Empty;
+    public static string DungeonName = string.Empty;
+
     [Header("UI Components")]
 
     [Header("Top Bar")]
@@ -216,15 +219,14 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         }
         else
         {
-            // 先刷新一次
-            var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-            if (refreshErr != GameSyncError.None)
+            var combatState = await GameStateSync.Instance.GetCombat();
+            if (combatState == null)
             {
-                Debug.LogError($"[DungeonCombatScene] Failed to refresh combat state from server: {refreshErr}");
+                Debug.LogWarning("[DungeonCombatScene] No combat data found for current dungeon, defaulting to NONE state");
                 return;
             }
 
-            lastCombatState = GameUtils.GetLastCombatState(GameContext.Instance.Dungeon);
+            lastCombatState = combatState.state;
             Debug.Log($"[DungeonCombatScene] Last combat state: {lastCombatState}");
         }
 
@@ -241,12 +243,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
                         return;
                     }
 
-                    var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-                    if (refreshErr != GameSyncError.None)
-                    {
-                        Debug.LogError($"CombatOnGoingState: Failed to refresh combat state from server, error: {refreshErr}");
-                        return;
-                    }
+
                     Debug.Log("[DungeonCombatScene] Combat initialization completed, switching to ongoing state");
                     OnEnterOnGoingState();
                 }
@@ -330,18 +327,18 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
             return;
         }
 
-        var dungeon = await GameStateSync.Instance.RefreshDungeonFromServer();
-        if (dungeon == null)
-        {
-            Debug.LogError("Failed to refresh dungeon data");
-            return;
-        }
+        // var dungeon = await GameStateSync.Instance.GetDungeon();
+        // if (dungeon == null)
+        // {
+        //     Debug.LogError("Failed to refresh dungeon data");
+        //     return;
+        // }
 
-        Debug.Log("PlayCards action completed and combat status evaluated");
+        // Debug.Log("PlayCards action completed and combat status evaluated");
 
-        // 获取最新的地下城回合信息
-        Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
-        Debug.Assert(round != null, "Round data is null after playing cards");
+        // // 获取最新的地下城回合信息
+        // Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+        // Debug.Assert(round != null, "Round data is null after playing cards");
 
         // 异步跑着，评估战斗状态，完成后会刷新地下城状态并更新UI显示
         DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
@@ -404,12 +401,12 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
             return;
         }
 
-        var syncErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-        if (syncErr != GameSyncError.None)
-        {
-            Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
-            return;
-        }
+        // var syncErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
+        // if (syncErr != GameSyncError.None)
+        // {
+        //     Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
+        //     return;
+        // }
 
         await UniTask.Yield();
         SceneManager.LoadScene(NextSceneName);
