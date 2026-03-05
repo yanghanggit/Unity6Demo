@@ -19,6 +19,7 @@ using Cysharp.Threading.Tasks;
 /// - 支持 CancellationToken 取消
 /// - WebGL 平台兼容性处理
 /// - 统一请求头设置
+/// - 失败自动重试（可配置次数、间隔、指数退避）
 /// 
 /// 使用方式：
 /// 1. 继承此类创建具体的 API 客户端类
@@ -37,6 +38,18 @@ public abstract class BaseApiClient : MonoBehaviour
     [SerializeField]
     [Tooltip("HTTP 请求超时时间（秒），默认 30 秒")]
     private float requestTimeout = 30.0f;
+
+    [SerializeField]
+    [Tooltip("请求失败后的最大重试次数（不含首次请求），0 表示不重试")]
+    private int maxRetryCount = 3;
+
+    [SerializeField]
+    [Tooltip("首次重试前的等待时间（秒）")]
+    private float retryDelaySeconds = 1.0f;
+
+    [SerializeField]
+    [Tooltip("是否启用指数退避：每次重试等待时间翻倍（1s → 2s → 4s …）")]
+    private bool useExponentialBackoff = true;
 
 
     /// <summary>
@@ -57,74 +70,129 @@ public abstract class BaseApiClient : MonoBehaviour
         /// <summary>错误信息（仅在失败时有值）</summary>
         public string error;
 
+        /// <summary>实际发生的重试次数（成功或最终失败时记录）</summary>
+        public int retryCount;
+
         /// <summary>
         /// </summary>
         /// <param name="success">请求是否成功</param>
         /// <param name="response">响应文本</param>
         /// <param name="code">HTTP 状态码</param>
         /// <param name="errorMsg">错误信息</param>
-        public RequestResult(bool success, string response = "", long code = 0, string errorMsg = "")
+        /// <param name="retries">实际重试次数</param>
+        public RequestResult(bool success, string response = "", long code = 0, string errorMsg = "", int retries = 0)
         {
             isSuccess = success;
             responseText = response;
             responseCode = code;
             error = errorMsg;
+            retryCount = retries;
         }
     }
 
     /// <summary>
-    /// 发送 GET 请求
+    /// 发送 GET 请求（含自动重试）
     /// </summary>
     /// <param name="url">请求的完整 URL</param>
     /// <param name="ct">取消令牌，可传入 this.GetCancellationTokenOnDestroy() 以在场景销毁时自动取消</param>
     /// <returns>请求结果</returns>
-    public async UniTask<RequestResult> GetRequestAsync(string url, CancellationToken ct = default)
+    public UniTask<RequestResult> GetRequestAsync(string url, CancellationToken ct = default)
     {
-        using (var request = UnityWebRequest.Get(url))
+        return ExecuteWithRetryAsync(() =>
         {
+            var request = UnityWebRequest.Get(url);
             request.timeout = (int)requestTimeout;
             SetCommonHeaders(request);
-
             Debug.Log($"GET Request Async: {url}");
-
-            try
-            {
-                await request.SendWebRequest().ToUniTask(cancellationToken: ct);
-            }
-            catch (OperationCanceledException)
-            {
-                Debug.LogWarning($"GET request cancelled: {url}");
-                return new RequestResult(false, "", 0, "Request cancelled");
-            }
-
-            return ProcessResponse(request);
-        }
+            return (request, $"GET {url}");
+        }, ct);
     }
 
     /// <summary>
-    /// 发送 POST 请求
+    /// 发送 POST 请求（含自动重试）
     /// </summary>
     /// <param name="url">请求的完整 URL</param>
     /// <param name="jsonData">要发送的 JSON 数据字符串</param>
     /// <param name="ct">取消令牌，可传入 this.GetCancellationTokenOnDestroy() 以在场景销毁时自动取消</param>
     /// <returns>请求结果</returns>
-    public async UniTask<RequestResult> PostRequestAsync(string url, string jsonData, CancellationToken ct = default)
+    public UniTask<RequestResult> PostRequestAsync(string url, string jsonData, CancellationToken ct = default)
     {
-        using (var request = CreatePostRequest(url, jsonData))
+        return ExecuteWithRetryAsync(() =>
         {
+            var request = CreatePostRequest(url, jsonData);
             Debug.Log($"POST Request Async: {url}\nData: {jsonData}");
+            return (request, $"POST {url}");
+        }, ct);
+    }
 
-            try
+    /// <summary>
+    /// 判断某次请求结果是否应该重试
+    /// - ConnectionError / DataProcessingError：网络层问题，可重试
+    /// - HTTP 5xx：服务端临时故障，可重试
+    /// - HTTP 429（Too Many Requests）：限流，可重试
+    /// - HTTP 4xx（非429）/ 用户取消：不重试
+    /// </summary>
+    private bool ShouldRetry(RequestResult result)
+    {
+        if (result.isSuccess) return false;
+        if (result.error == "Request cancelled") return false;
+
+        // ConnectionError / DataProcessingError 通过 responseCode == 0 且有错误信息判断
+        // ProtocolError 则看 HTTP 状态码决定
+        if (result.responseCode == 0) return true;          // 网络层错误
+        if (result.responseCode == 429) return true;        // 限流
+        if (result.responseCode >= 500) return true;        // 服务端错误
+
+        return false;
+    }
+
+    /// <summary>
+    /// 核心重试执行器：按配置自动重试请求
+    /// </summary>
+    /// <param name="requestFactory">
+    /// 每次尝试时调用，返回一个全新的 UnityWebRequest 和用于日志的标签。
+    /// 每次重试必须创建新的 request 对象，不可复用。
+    /// </param>
+    /// <param name="ct">取消令牌</param>
+    private async UniTask<RequestResult> ExecuteWithRetryAsync(
+        Func<(UnityWebRequest request, string label)> requestFactory,
+        CancellationToken ct)
+    {
+        int attempt = 0;
+        float delay = retryDelaySeconds;
+        RequestResult lastResult = null;
+
+        while (true)
+        {
+            var (request, label) = requestFactory();
+
+            using (request)
             {
-                await request.SendWebRequest().ToUniTask(cancellationToken: ct);
-            }
-            catch (OperationCanceledException)
-            {
-                Debug.LogWarning($"POST request cancelled: {url}");
-                return new RequestResult(false, "", 0, "Request cancelled");
+                try
+                {
+                    await request.SendWebRequest().ToUniTask(cancellationToken: ct);
+                }
+                catch (OperationCanceledException)
+                {
+                    Debug.LogWarning($"{label} cancelled.");
+                    return new RequestResult(false, "", 0, "Request cancelled", attempt);
+                }
+
+                lastResult = ProcessResponse(request);
+                lastResult.retryCount = attempt;
             }
 
-            return ProcessResponse(request);
+            if (lastResult.isSuccess) return lastResult;
+            if (!ShouldRetry(lastResult) || attempt >= maxRetryCount) return lastResult;
+
+            attempt++;
+            Debug.LogWarning($"{requestFactory().label} failed (attempt {attempt}/{maxRetryCount}), "
+                + $"retrying in {delay:F1}s... Error: {lastResult.error}");
+
+            await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: ct);
+
+            if (useExponentialBackoff)
+                delay *= 2f;
         }
     }
 
