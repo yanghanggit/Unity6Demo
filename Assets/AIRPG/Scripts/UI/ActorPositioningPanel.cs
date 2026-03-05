@@ -19,7 +19,7 @@ public class ActorPositioningPanel : MonoBehaviour
     /// <summary>
     /// 刷新界面显示，根据当前的角色数据列表更新每个定位对象的显示状态和内容。
     /// </summary>
-    public void RefreshPositioningView(List<EntitySerialization> actorEntities)
+    public void RefreshPositioningView(List<EntitySerialization> sortedActorEntities, List<string> actionOrder)
     {
         // 先隐藏所有定位对象
         for (int i = 0; i < MaxPositioningObjects; i++)
@@ -28,7 +28,7 @@ public class ActorPositioningPanel : MonoBehaviour
         }
 
         // 敌人占位 index 0~2，根据数量决定摆放位置
-        var enemies = GetEnemyEntities(actorEntities);
+        var enemies = GetEnemyEntities(sortedActorEntities);
         int[] enemyIndices = enemies.Count switch
         {
             1 => new[] { 1 },
@@ -37,13 +37,13 @@ public class ActorPositioningPanel : MonoBehaviour
         };
         for (int i = 0; i < enemies.Count && i < enemyIndices.Length; i++)
         {
-            _positioningObjects[enemyIndices[i]].ActorEntity = enemies[i];
+            //_positioningObjects[enemyIndices[i]].ActorEntity = enemies[i];
             _positioningObjects[enemyIndices[i]].gameObject.SetActive(true);
-            _positioningObjects[enemyIndices[i]].RefreshView();
+            _positioningObjects[enemyIndices[i]].RefreshView(enemies[i], actionOrder);
         }
 
         // 探险队成员占位 index 3~5，根据数量决定摆放位置
-        var members = ExpeditionMemberEntities(actorEntities);
+        var members = ExpeditionMemberEntities(sortedActorEntities);
         int[] memberIndices = members.Count switch
         {
             1 => new[] { 4 },
@@ -52,9 +52,9 @@ public class ActorPositioningPanel : MonoBehaviour
         };
         for (int i = 0; i < members.Count && i < memberIndices.Length; i++)
         {
-            _positioningObjects[memberIndices[i]].ActorEntity = members[i];
+            //_positioningObjects[memberIndices[i]].ActorEntity = members[i];
             _positioningObjects[memberIndices[i]].gameObject.SetActive(true);
-            _positioningObjects[memberIndices[i]].RefreshView();
+            _positioningObjects[memberIndices[i]].RefreshView(members[i], actionOrder);
         }
     }
 

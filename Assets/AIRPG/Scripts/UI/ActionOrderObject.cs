@@ -17,13 +17,12 @@ public class ActionOrderObject : MonoBehaviour
     /// <summary>
     /// 根据当前设置的角色实体数据，刷新UI显示
     /// </summary>
-    public void RefreshUI(EntitySerialization actorEntity)
+    public void RefresView(EntitySerialization actorEntity)
     {
         Debug.Assert(actorEntity != null, "Actor entity serialization data is null");
 
         // 根据角色名称获取对应的显示名称，并设置到UI组件上
-        string displayName = GameUtils.GetDisplayName(actorEntity.name);
-        _nameText.text = displayName;
+        _nameText.text = GameUtils.GetDisplayName(actorEntity.name);
 
         // 根据角色名称从缓存中获取对应的头像资源，并设置到UI组件上
         var stageSprite = SpriteCacheManager.Instance.GetSprite(actorEntity.name);

@@ -2992,9 +2992,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37401a4a748e34fbe818707f8e7da613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatOnGoingState
+  _topBar: {fileID: 132391926}
   _actorPositioningPanel: {fileID: 1475957528}
   _arbitrationPanel: {fileID: 1055363935}
-  _topBar: {fileID: 132391926}
   _cardBuildPanel: {fileID: 1420096972}
   _enemyHandPanel: {fileID: 104793519}
   _onActorPositioningClickedEvent: {fileID: 11400000, guid: eb8def111152f4426875476ff9c4eaff,
@@ -7219,7 +7219,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1965228971
 MonoBehaviour:
   m_ObjectHideFlags: 0

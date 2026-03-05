@@ -16,7 +16,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
     [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件 
-    
+
 
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
@@ -28,7 +28,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         Debug.Assert(_scrollView != null, "Scroll View component is not assigned in the inspector.");
         Debug.Assert(_onCardElementClickedEvent != null, "_onCardElementClickedEvent is null");
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
-        
+
         Debug.Assert(_iconImage != null, "_iconImage is null");
         Debug.Assert(_statsText != null, "_statsText is null");
         Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
@@ -36,7 +36,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         // 注册事件监听器
         _onCardElementClickedEvent.RegisterListener(this);
         _onCardBuilderDataChangedEvent.RegisterListener(this);
-       
+
     }
 
     void OnDestroy()
@@ -55,12 +55,12 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     /// <summary>
     /// 根据当前角色数据更新构筑按钮的状态
     /// </summary>
-    public void SetupForActor(EntitySerialization actorEntity, List<EntitySerialization> allActors)
+    public void SetupForActor(EntitySerialization actorEntity, List<EntitySerialization> activeActors)
     {
         Debug.Assert(actorEntity != null, "Current actor data is null");
 
         // 先更新行动顺序面板数据
-        _actionOrderPanel.UpdateByActorEntities(allActors);
+        _actionOrderPanel.RefresView(activeActors);
 
         // 初始化 CardBuilder 数据
         CardBuilder.Clear();
@@ -73,7 +73,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         UpdateMainText(CardBuilder.Build);
 
         //
-        LoadCardElements(actorEntity, allActors);
+        LoadCardElements(actorEntity, activeActors);
 
         // 更新角色头像显示
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(actorEntity.name);
@@ -178,11 +178,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
                 UpdateMainText(CardBuilder.Build);
                 break;
 
-            // case UIEventType.ActorPositioningClicked:
-            //     Debug.Log($"角色站位被点击，目标角色: {eventData.targetId}");
-            //     OnHandleActorPositioningClicked(eventData).Forget();
-            //     break;
-
             default:
                 Debug.LogWarning($"未处理的事件类型: {eventData.eventType}");
                 break;
@@ -220,8 +215,8 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     /// 只负责维护 CardElements 部分，不处理 Build 数据
     /// </summary>
     /// <param name="selectedActor">选中的角色</param>
-    /// <param name="allActors">当前可用的角色列表，其余角色将作为卡牌目标候选</param>
-    private void LoadCardElements(EntitySerialization selectedActor, List<EntitySerialization> allActors)
+    /// <param name="activeActors">当前可用的角色列表，其余角色将作为卡牌目标候选</param>
+    private void LoadCardElements(EntitySerialization selectedActor, List<EntitySerialization> activeActors)
     {
         if (selectedActor == null)
         {
@@ -255,7 +250,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
 
         // 3. 添加其他角色作为目标（排除自己）
         int targetCount = 0;
-        foreach (var actor in allActors)
+        foreach (var actor in activeActors)
         {
             CardBuilder.AddElement(new CardElementData(actor));
             targetCount++;
@@ -299,11 +294,10 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         }
 
         // 更新当前角色数据
-        var updatedActor = GameContext.Instance.GetActorEntity(allyDrawAction.entity_name);
         CardBuilder.Clear();
         CardBuilder.Build = new CardBuildData
         {
-            owner = updatedActor
+            owner = actorEntities.Count > 0 ? actorEntities[0] : null
         };
 
         UpdateMainText(CardBuilder.Build);
@@ -323,6 +317,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     }
 
 
-    
+
 
 }

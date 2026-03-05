@@ -240,4 +240,68 @@ public static partial class GameUtils
     {
         return GetLastCombatResult(dungeon) == CombatResult.LOSE;
     }
+
+
+
+
+    /// <summary>
+    /// 按照行动顺序对角色实体列表进行排序
+    /// 
+    /// 以 <paramref name="actionOrderNames"/> 中角色名称的顺序为基准，
+    /// 从 <paramref name="actorEntityPool"/> 中依次查找并收集对应的实体，
+    /// 返回按行动顺序排列的新列表。
+    /// 
+    /// 注意：若某个行动顺序中的角色名在实体池中找不到对应实体，则该角色会被跳过。
+    /// </summary>
+    /// <param name="actorEntityPool">待排序的角色实体集合（顺序任意）</param>
+    /// <param name="actionOrderNames">行动顺序中各角色的名称列表（决定输出顺序）</param>
+    /// <returns>按行动顺序排列的角色实体列表</returns>
+    public static List<EntitySerialization> SortActorsByActionOrder(
+        List<EntitySerialization> actorEntityPool,
+        List<string> actionOrderNames)
+    {
+        var sortedEntities = new List<EntitySerialization>();
+
+        foreach (var actorName in actionOrderNames)
+        {
+            foreach (var entity in actorEntityPool)
+            {
+                if (entity.name == actorName)
+                {
+                    sortedEntities.Add(entity);
+                    break;
+                }
+            }
+        }
+
+        return sortedEntities;
+    }
+
+
+    /// <summary>
+    /// 按创建顺序对角色实体列表进行排序
+    /// 
+    /// 读取每个实体的 <see cref="IdentityComponent.creation_order"/> 字段，
+    /// 返回按该值从小到大排列的新列表。
+    /// 
+    /// 注意：若某个实体无法获取到 <see cref="IdentityComponent"/>，
+    /// 其 creation_order 视为 <see cref="int.MaxValue"/>，排在最后。
+    /// </summary>
+    /// <param name="actorEntities">待排序的角色实体列表</param>
+    /// <returns>按 creation_order 升序排列的新列表</returns>
+    public static List<EntitySerialization> SortActorsByCreationOrder(List<EntitySerialization> actorEntities)
+    {
+        var sorted = new List<EntitySerialization>(actorEntities);
+        sorted.Sort((a, b) =>
+        {
+            var identityA = GetComponent<IdentityComponent>(a);
+            Debug.Assert(identityA != null, $"Entity {a.name} is missing IdentityComponent");
+            var identityB = GetComponent<IdentityComponent>(b);
+            Debug.Assert(identityB != null, $"Entity {b.name} is missing IdentityComponent");
+            int orderA = identityA?.creation_order ?? int.MaxValue;
+            int orderB = identityB?.creation_order ?? int.MaxValue;
+            return orderA.CompareTo(orderB);
+        });
+        return sorted;
+    }
 }
