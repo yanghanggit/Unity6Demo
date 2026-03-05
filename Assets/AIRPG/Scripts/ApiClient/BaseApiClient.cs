@@ -7,33 +7,28 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 
 /// <summary>
-/// BaseApiClient - API 请求基类
+/// API 请求基类
 /// 
-/// 为所有具体的 API 操作类（如 LoginAction、StartAction 等）提供统一的 HTTP 请求能力。
-/// 针对 Unity 6 和 WebGL 平台进行了优化。
+/// 为所有具体的 API 客户端类（如 LoginApi、DungeonStateApi 等）提供统一的 HTTP 请求能力。
 /// 
-/// 主要特性：
-/// - 支持 GET/POST 请求
-/// - 提供 async/await（UniTask）调用方式
+/// 主要功能：
+/// - 支持 GET / POST 请求
+/// - 基于 UniTask 的 async/await 调用方式
 /// - 自动资源管理（using 语句）
 /// - 完善的错误处理和超时控制
 /// - 支持 CancellationToken 取消
 /// - WebGL 平台兼容性处理
-/// - 统一的请求头设置
+/// - 统一请求头设置
 /// 
 /// 使用方式：
-/// 1. 继承此类创建具体的 API 操作类
-/// 2. 在子类中调用 GetRequestAsync/PostRequestAsync（返回 UniTask&lt;RequestResult&gt;）
-/// 3. 处理返回的 RequestResult 结构
-/// 
-/// 作者:Unity6Demo Team
-/// 日期:2025-01-23
+/// 1. 继承此类创建具体的 API 客户端类
+/// 2. 在子类中调用 GetRequestAsync / PostRequestAsync，返回 UniTask&lt;RequestResult&gt;
+/// 3. 处理返回的 RequestResult
 /// </summary>
 public abstract class BaseApiClient : MonoBehaviour
 {
     /// <summary>
-    /// 请求结果属性 - 子类必须实现
-    /// 用于获取最近一次请求的结果
+    /// 最近一次请求的结果，子类必须实现此属性
     /// </summary>
     public abstract RequestResult ReqResult { get; }
 
@@ -45,8 +40,7 @@ public abstract class BaseApiClient : MonoBehaviour
 
 
     /// <summary>
-    /// HTTP 请求结果封装类
-    /// 统一封装请求的成功状态、响应内容、状态码和错误信息
+    /// 封装单次 HTTP 请求的返回结果，包括成功标志、响应内容、状态码和错误信息
     /// </summary>
     [Serializable]
     public class RequestResult
@@ -64,7 +58,6 @@ public abstract class BaseApiClient : MonoBehaviour
         public string error;
 
         /// <summary>
-        /// 构造函数
         /// </summary>
         /// <param name="success">请求是否成功</param>
         /// <param name="response">响应文本</param>
@@ -80,12 +73,11 @@ public abstract class BaseApiClient : MonoBehaviour
     }
 
     /// <summary>
-/// 发送 GET 请求（UniTask 版本）
-/// 使用 UniTask 直接 await UnityWebRequest，零分配，主线程友好
-/// </summary>
-/// <param name="url">请求的完整 URL</param>
-/// <param name="ct">取消令牌，场景销毁时可传入 this.GetCancellationTokenOnDestroy()</param>
-/// <returns>包含请求结果的 UniTask</returns>
+    /// 发送 GET 请求
+    /// </summary>
+    /// <param name="url">请求的完整 URL</param>
+    /// <param name="ct">取消令牌，可传入 this.GetCancellationTokenOnDestroy() 以在场景销毁时自动取消</param>
+    /// <returns>请求结果</returns>
     public async UniTask<RequestResult> GetRequestAsync(string url, CancellationToken ct = default)
     {
         using (var request = UnityWebRequest.Get(url))
@@ -110,13 +102,12 @@ public abstract class BaseApiClient : MonoBehaviour
     }
 
     /// <summary>
-/// 发送 POST 请求（UniTask 版本）
-/// 使用 UniTask 直接 await UnityWebRequest，零分配，主线程友好
-/// </summary>
-/// <param name="url">请求的完整 URL</param>
-/// <param name="jsonData">要发送的 JSON 数据字符串</param>
-/// <param name="ct">取消令牌，场景销毁时可传入 this.GetCancellationTokenOnDestroy()</param>
-/// <returns>包含请求结果的 UniTask</returns>
+    /// 发送 POST 请求
+    /// </summary>
+    /// <param name="url">请求的完整 URL</param>
+    /// <param name="jsonData">要发送的 JSON 数据字符串</param>
+    /// <param name="ct">取消令牌，可传入 this.GetCancellationTokenOnDestroy() 以在场景销毁时自动取消</param>
+    /// <returns>请求结果</returns>
     public async UniTask<RequestResult> PostRequestAsync(string url, string jsonData, CancellationToken ct = default)
     {
         using (var request = CreatePostRequest(url, jsonData))
@@ -138,8 +129,7 @@ public abstract class BaseApiClient : MonoBehaviour
     }
 
     /// <summary>
-    /// 创建 POST 请求对象
-    /// 封装 UnityWebRequest 的创建逻辑，设置请求体、下载处理器和超时
+    /// 创建配置好的 POST 请求对象，设置请求体、下载处理器和超时
     /// </summary>
     /// <param name="url">请求的完整 URL</param>
     /// <param name="jsonData">要发送的 JSON 数据字符串</param>
@@ -163,9 +153,8 @@ public abstract class BaseApiClient : MonoBehaviour
     }
 
     /// <summary>
-    /// 设置通用请求头
-    /// 为所有请求添加标准的 HTTP 头部，包括 Content-Type 和 User-Agent
-    /// WebGL 平台会跳过某些可能被浏览器阻止的头部
+    /// 为请求设置通用 HTTP 头部（Content-Type、Accept、User-Agent）
+    /// WebGL 平台下跳过 User-Agent，避免浏览器拦截
     /// </summary>
     /// <param name="request">要设置头部的 UnityWebRequest 对象</param>
     private void SetCommonHeaders(UnityWebRequest request)
@@ -182,8 +171,8 @@ public abstract class BaseApiClient : MonoBehaviour
     }
 
     /// <summary>
-    /// 处理 HTTP 响应
-    /// 统一处理各种错误类型（连接错误、协议错误、数据处理错误）并记录日志
+    /// 处理 HTTP 响应，将 UnityWebRequest 结果转换为 RequestResult
+    /// 依次处理连接错误、协议错误、数据处理错误及成功四种分支
     /// </summary>
     /// <param name="request">已完成的 UnityWebRequest 对象</param>
     /// <returns>封装好的 RequestResult 对象</returns>
@@ -220,10 +209,11 @@ public abstract class BaseApiClient : MonoBehaviour
     }
 
     /// <summary>
-    /// 构建带查询参数的 URL
-    /// 将参数列表拼接到基础 URL 后面，自动进行 URL 编码
-    /// 例如：BuildUrlWithQueryParams("http://api.com/users", [{"name", "张三"}]) 
-    ///       返回 "http://api.com/users?name=%E5%BC%A0%E4%B8%89"
+    /// 将键値对参数列表拼接到基础 URL 后面，自动进行 URL 编码
+    /// <example>
+    /// BuildUrlWithQueryParams("http://api.com/users", [("name", "张三")])
+    /// 返回 "http://api.com/users?name=%E5%BC%A0%E4%B8%89"
+    /// </example>
     /// </summary>
     /// <param name="baseUrl">基础 URL（不含查询参数）</param>
     /// <param name="parameters">查询参数列表</param>
@@ -253,9 +243,8 @@ public abstract class BaseApiClient : MonoBehaviour
     }
 
     /// <summary>
-    /// 检查网络可达性（WebGL 友好）
-    /// 在 WebGL 平台中始终返回 true（因为浏览器环境本身就需要网络）
-    /// 在其他平台检查实际的网络连接状态
+    /// 检查网络可达性
+    /// WebGL 平台始终返回 true（浏览器环境本身需要网络），其他平台检查实际连接状态
     /// </summary>
     /// <returns>true 表示网络可用，false 表示无网络连接</returns>
     public static bool IsNetworkReachable()
@@ -267,8 +256,6 @@ public abstract class BaseApiClient : MonoBehaviour
         return Application.internetReachability != NetworkReachability.NotReachable;
 #endif
     }
-
-    
-
-
 }
+
+
