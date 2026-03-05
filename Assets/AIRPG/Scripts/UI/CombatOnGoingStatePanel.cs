@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
-public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
+public class CombatOnGoingStatePanel : MonoBehaviour, ICombatState, IUIEventListener
 {
     [Header("UI Components")]
     [SerializeField] private CombatTopBar _topBar; // 顶部UI控制器
@@ -51,7 +51,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
     public void OnClickCloseCardBuildPanel()
     {
         _cardBuildPanel.gameObject.SetActive(false);
-        RefreshPositioningAsync().Forget(); // 重新刷新界面显示，确保站位面板等内容是最新的
+        RefreshCombatPanels(); // 重新刷新界面显示，确保站位面板等内容是最新的
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
     public void OnClickCloseEnemyHandPanel()
     {
         _enemyHandPanel.gameObject.SetActive(false);
-        RefreshPositioningAsync().Forget(); // 重新刷新界面显示，确保站位面板等内容是最新的
+        RefreshCombatPanels(); // 重新刷新界面显示，确保站位面板等内容是最新的
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
     public void OnClickCloseArbitrationPanel()
     {
         _arbitrationPanel.gameObject.SetActive(false);
-        RefreshPositioningAsync().Forget(); // 重新刷新界面显示，确保站位面板等内容是最新的
+        RefreshCombatPanels(); // 重新刷新界面显示，确保站位面板等内容是最新的
     }
 
     /// <summary>
@@ -79,7 +79,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
     private async UniTaskVoid OnPlayAsync()
     {
         // 获取当前战斗状态，如果当前战斗对象不存在则默认设置为 NONE，并在日志中输出警告信息
-        CombatState lastCombatState = CombatState.NONE;
+        CombatState lastCombatState;
         List<EntitySerialization> actorEntitiesInStage = new();
 
         if (!GameContext.Instance.IsLoggedIn)
@@ -174,77 +174,20 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         _arbitrationPanel.gameObject.SetActive(false);
         _actorPositioningPanel.gameObject.SetActive(false);
 
-        if (!GameContext.Instance.IsLoggedIn)
-        {
-            Debug.LogWarning("CombatOnGoingState: Player is not logged in, using mock data to display action order panel");
+        // 刷新顶部信息和站位面板（含未登录 mock 回退，由各组件内部自行处理）
+        _topBar.gameObject.SetActive(true);
+        _actorPositioningPanel.gameObject.SetActive(true);
 
-            // 使用 mock 数据来刷新顶部信息显示
-            _topBar.SetText("Mock Dungeon | Mock Stage | 回合数: 1");
-
-            // positioning 显示。
-            _actorPositioningPanel.gameObject.SetActive(true);
-            _actorPositioningPanel.UpdateCombatView(MockData.CreateActorData(), new Combat()); // 传入空的 action order 和 combat 对象，确保界面显示正常但不依赖实际数据
-        }
-        else
-        {
-            RefreshPositioningAsync().Forget();
-        }
+        RefreshCombatPanels(); // 刷新界面显示，确保内容是最新的
     }
 
     /// <summary>
-    /// 异步刷新站位面板及顶部信息栏：
-    /// 并行拉取战斗数据与场景-演员映射，找到玩家所在场景的演员列表，
-    /// 按创建顺序排序后更新站位面板显示。
+    /// 刷新顶部信息栏和站位面板，数据获取由各组件内部自行负责。
     /// </summary>
-    private async UniTaskVoid RefreshPositioningAsync()
+    private void RefreshCombatPanels()
     {
-        // 阶段1：并行获取战斗状态和场景-演员映射关系（两者互相独立）
-        var (combat, stagesState) = await UniTask.WhenAll(
-            GameStateSync.Instance.GetCombat(),
-            GameStateSync.Instance.GetStagesState()
-        );
-
-        if (combat == null)
-        {
-            Debug.LogError("CombatOnGoingState: Dungeon data is null, cannot refresh combat view");
-            return;
-        }
-
-        if (stagesState == null)
-        {
-            Debug.LogError("CombatOnGoingState: Stages state data is null, cannot determine current stage and actors");
-            return;
-        }
-
-        // 阶段2：依据映射结果获取当前场景中的演员列表
-        List<string> actorNamesInStage = new();
-        foreach (var kvp in stagesState)
-        {
-            if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
-            {
-                actorNamesInStage = kvp.Value;
-                break;
-            }
-        }
-
-        var actorEntitiesInStage = await GameStateSync.Instance.GetEntities(actorNamesInStage);
-        if (actorEntitiesInStage == null)
-        {
-            Debug.LogError("CombatOnGoingState: Actor entities data is null, cannot refresh combat view");
-            return;
-        }
-
-        // 刷新顶部信息显示，包含当前地下城、关卡和回合数等信息
-        var topBarInfo = $"{DungeonCombatScene.CachedDungeonName} | {DungeonCombatScene.CachedStageName} | 回合数: {combat.rounds.Count}";
-        _topBar.SetText(topBarInfo);
-
-        // 排序一下，不然每次都是乱的。
-        var sortedByCreationOrder = GameUtils.SortActorsByCreationOrder(actorEntitiesInStage);
-        Debug.Log($"Sorted actor entities by creation order: {string.Join(", ", sortedByCreationOrder.ConvertAll(e => e.name))}");
-
-        // 站位面板显示
-        _actorPositioningPanel.gameObject.SetActive(true);
-        _actorPositioningPanel.UpdateCombatView(sortedByCreationOrder, combat);
+        _topBar.RefreshCombatStatusAsync().Forget();
+        _actorPositioningPanel.RefreshCombatViewAsync().Forget();
     }
 
     /// <summary>

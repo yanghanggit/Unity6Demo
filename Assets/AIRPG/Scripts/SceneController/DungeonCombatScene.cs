@@ -18,7 +18,7 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
     [SerializeField] private GameObject _initializationState; // INITIALIZATION 状态的设置数据
 
     [Header("OnGoing State")]
-    [SerializeField] private CombatOnGoingState _onGoingState; // ONGOING 状态的设置数据
+    [SerializeField] private CombatOnGoingStatePanel _onGoingState; // ONGOING 状态的设置数据
 
     [Header("PostCombat State")]
     [SerializeField] private CombatPostCombatState _postCombatState; // 战斗后状态的设置数据
@@ -105,15 +105,14 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
             case CombatState.INITIALIZATION:
                 {
                     Debug.Log("[DungeonCombatScene] Combat is in initialization state, showing initialization UI");
-                    var messages = await DungeonGamePlayManager.Instance.InitCombat();
-                    if (messages == null)
+                    var responseSessionMessages = await DungeonGamePlayManager.Instance.InitCombat();
+                    if (responseSessionMessages == null)
                     {
-                        Debug.LogError("CombatInit failed, messages is null");
+                        Debug.LogError("[DungeonCombatScene] Combat initialization failed, response session messages is null");
                         return;
                     }
 
-
-                    Debug.Log("[DungeonCombatScene] Combat initialization completed, switching to ongoing state");
+                    //Debug.Log("[DungeonCombatScene] Combat initialization completed, switching to ongoing state");
                     OnEnterOnGoingState();
                 }
                 break;

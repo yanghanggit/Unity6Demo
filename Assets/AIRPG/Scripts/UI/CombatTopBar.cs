@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using Cysharp.Threading.Tasks;
 
 /// <summary>
 /// 地牢战斗场景顶部UI控制器
@@ -13,28 +14,32 @@ public class CombatTopBar : MonoBehaviour
     {
         // 断言检查，确保所有必要的组件和数据都已正确设置
         Debug.Assert(_infoText != null, "_infoText is null");
-
-        // 暂时不做过多的逻辑处理，主要负责显示当前地下城和关卡信息
-        // if (GameContext.Instance.Dungeon != null)
-        // {
-        //     var stageName = GameContext.Instance.GetActorNameStage(GameContext.Instance.PlayerActorName);
-        //     _infoText.text = $"{GameContext.Instance.Dungeon.name} | {stageName}";
-        // }
-        // else
-        // {
-        //     _infoText.text = string.Empty;
-        // }
-
         _infoText.text = $"{DungeonCombatScene.CachedDungeonName} | {DungeonCombatScene.CachedStageName}";
     }
 
     /// <summary>
-    /// 设置顶部信息文本，通常包含当前地下城、关卡、回合数等信息
+    /// 刷新战斗状态显示，包含当前地下城、关卡和回合数等信息
     /// </summary>
-    /// <param name="info"></param>
-    public void SetText(string info)
+    /// <returns></returns>
+    public async UniTaskVoid RefreshCombatStatusAsync()
     {
-        _infoText.text = info;
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("CombatOnGoingState: Player is not logged in, using mock data to refresh combat info");
+            // 使用 mock 数据来刷新顶部信息显示
+            _infoText.text = "Mock Dungeon | Mock Stage | 回合数: 1";
+            return;
+        }
+
+        var combat = await GameStateSync.Instance.GetCombat();
+        if (combat == null || combat.rounds == null)
+        {
+            Debug.LogError("CombatOnGoingState: Combat data is null or rounds data is null, cannot refresh combat view");
+            return;
+        }
+
+        // 刷新顶部信息显示，包含当前地下城、关卡和回合数等信息
+        _infoText.text = $"{DungeonCombatScene.CachedDungeonName} | {DungeonCombatScene.CachedStageName} | 回合数: {combat.rounds.Count}";
     }
 
 }

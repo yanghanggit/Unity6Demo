@@ -2931,7 +2931,7 @@ GameObject:
   - component: {fileID: 680271569}
   - component: {fileID: 680271570}
   m_Layer: 5
-  m_Name: OnGoingState
+  m_Name: OnGoingStatePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

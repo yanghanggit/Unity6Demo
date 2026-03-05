@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,12 +22,63 @@ public class ActorPositioningPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// 根据战斗数据更新整个面板，包括角色站位布局和操作按钮文本。
+    /// 自主拉取战斗数据并刷新整个面板，包括角色站位布局和操作按钮文本。
+    /// 未登录时自动回退到 mock 数据。
     /// </summary>
-    /// <param name="sortedActorEntities">已排序的角色实体列表。</param>
-    /// <param name="combat">当前战斗数据，用于读取行动顺序和战斗状态。</param>
-    public void UpdateCombatView(List<EntitySerialization> sortedActorEntities, Combat combat)
+    public async UniTaskVoid RefreshCombatViewAsync()
     {
+        List<EntitySerialization> sortedActorEntities;
+        Combat combat;
+
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("ActorPositioningPanel: Player is not logged in, using mock data to refresh combat view");
+            sortedActorEntities = MockData.CreateActorData();
+            combat = new Combat();
+        }
+        else
+        {
+            // 阶段1：并行获取战斗状态和场景-演员映射关系（两者互相独立）
+            var (combatData, stagesState) = await UniTask.WhenAll(
+                GameStateSync.Instance.GetCombat(),
+                GameStateSync.Instance.GetStagesState()
+            );
+
+            if (combatData == null)
+            {
+                Debug.LogError("ActorPositioningPanel: Combat data is null, cannot refresh combat view");
+                return;
+            }
+
+            if (stagesState == null)
+            {
+                Debug.LogError("ActorPositioningPanel: Stages state data is null, cannot determine current stage and actors");
+                return;
+            }
+
+            // 阶段2：依据映射结果获取当前场景中的演员列表
+            List<string> actorNamesInStage = new();
+            foreach (var kvp in stagesState)
+            {
+                if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
+                {
+                    actorNamesInStage = kvp.Value;
+                    break;
+                }
+            }
+
+            var actorEntitiesInStage = await GameStateSync.Instance.GetEntities(actorNamesInStage);
+            if (actorEntitiesInStage == null)
+            {
+                Debug.LogError("ActorPositioningPanel: Actor entities data is null, cannot refresh combat view");
+                return;
+            }
+
+            combat = combatData;
+            sortedActorEntities = GameUtils.SortActorsByCreationOrder(actorEntitiesInStage);
+            Debug.Log($"Sorted actor entities by creation order: {string.Join(", ", sortedActorEntities.ConvertAll(e => e.name))}");
+        }
+
         // 刷新站位界面显示
         var round = combat.rounds.Count > 0 ? combat.rounds[^1] : null;
         var actionOrder = round != null ? round.action_order : new List<string>();
