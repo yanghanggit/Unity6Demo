@@ -18,52 +18,53 @@ public class EnemyHandPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// 根据当前角色数据更新构筑按钮的状态
+    /// 根据当前角色数据更新敌人手牌面板显示。
+    /// 同步快路径：未登录时使用 mock 数据直接显示。
+    /// 异步流程：先向服务器请求一次最新角色数据并尝试获取 HandComponent；
+    /// 若仍缺失，则发起 DrawCards → 轮询任务完成 → 再次刷新角色数据。
     /// </summary>
-    public void SetupForActor(EntitySerialization actorEntity)
+    /// <param name="actorEntityName">目标角色的实体名称</param>
+    public async UniTaskVoid SetupForActorAsync(string actorEntityName)
     {
-        Debug.Assert(actorEntity != null, "Current actor data is null");
+        Debug.Assert(!string.IsNullOrEmpty(actorEntityName), "Actor entity name is null or empty");
+
+        // 未登录时使用 mock 手牌数据直接展示
         if (!GameContext.Instance.IsLoggedIn)
         {
-            // mock 一个 HandComponent 数据
             var mockHandComponent = new HandComponent
             {
                 name = "HandComponent",
                 round = 1,
                 cards = new List<Card>
                 {
-                    new() { name = "卡牌.普通攻击", action = "对目标造成普通攻击伤害", targets = new List<string> { actorEntity.name } },
-                    new() { name = "卡牌.防御姿态", action = "进入防御姿态，减少受到的伤害", targets = new List<string> { actorEntity.name } },
-                    new() { name = "卡牌.蓄力", action = "蓄积力量，下一次攻击伤害大幅提升", targets = new List<string> { actorEntity.name } }
+                    new() { name = "卡牌.普通攻击", action = "对目标造成普通攻击伤害", targets = new List<string> { actorEntityName } },
+                    new() { name = "卡牌.防御姿态", action = "进入防御姿态，减少受到的伤害", targets = new List<string> { actorEntityName } },
+                    new() { name = "卡牌.蓄力", action = "蓄积力量，下一次攻击伤害大幅提升", targets = new List<string> { actorEntityName } }
                 }
             };
-
             _infoText.text = GameUtils.FormatHandComponent(mockHandComponent);
             return;
         }
 
-        // 根据角色数据获取 HandComponent 组件，并格式化显示在界面上
-        var handComponent = GameUtils.GetComponent<HandComponent>(actorEntity);
-        if (handComponent != null)
-        {
-            _infoText.text = GameUtils.FormatHandComponent(handComponent);
-        }
-        else
-        {
-            Debug.LogWarning($"HandComponent not found for actor: {actorEntity.name}");
-            _infoText.text = "(从游戏数据加载手牌信息中...)";
-            SetupForActorAsync(actorEntity).Forget();
-        }
-    }
+        _infoText.text = "(从游戏数据加载手牌信息中...)";
 
-    /// <summary>
-    /// 根据当前角色数据异步加载并更新界面显示，适用于需要从资源或网络加载数据的情况。
-    /// 目前游戏设计中敌人的手牌数据是直接包含在角色数据中的，因此这个方法暂时没有实际的异步操作，但保留这个接口以便未来扩展。
-    /// </summary>
-    /// <param name="actorEntity"></param>
-    /// <returns></returns>
-    private async UniTaskVoid SetupForActorAsync(EntitySerialization actorEntity)
-    {
+        // 先从服务器拉取一次最新角色数据，尝试获取 HandComponent
+        var actorEntities = await GameStateSync.Instance.GetEntities(new List<string> { actorEntityName });
+        if (actorEntities != null)
+        {
+            var fetchedHandComponent = GameUtils.GetComponent<HandComponent>(actorEntities[0]);
+            if (fetchedHandComponent != null)
+            {
+                _infoText.text = GameUtils.FormatHandComponent(fetchedHandComponent);
+                return;
+            }
+        }
+
+        _infoText.text = "(未获取到手牌信息，正在请求服务器抽卡...)";
+
+        // 仍未获取到 HandComponent，发起 DrawCards 请求
+        Debug.LogWarning($"HandComponent not found for actor: {actorEntityName}, fetching via DrawCards API");
+
         string taskId = await DungeonGamePlayManager.Instance.DrawCards(new List<AllyDrawCardAction>(), true);
         if (string.IsNullOrEmpty(taskId))
         {
@@ -81,23 +82,23 @@ public class EnemyHandPanel : MonoBehaviour
             return;
         }
 
-        // 刷新角色数据以获取最新的手牌信息
-        var actorEntities = await GameStateSync.Instance.GetEntities(new List<string> { actorEntity.name });
-        if (actorEntities == null)
+        // DrawCards 完成后再次刷新角色数据以获取最新手牌
+        var refreshedEntities = await GameStateSync.Instance.GetEntities(new List<string> { actorEntityName });
+        if (refreshedEntities == null)
         {
-            Debug.LogError($"Failed to refresh actor entities from server for actor: {actorEntity.name}");
+            Debug.LogError($"Failed to refresh actor entities from server for actor: {actorEntityName}");
             _infoText.text = "(加载手牌信息失败)";
             return;
         }
 
-        var handComponent = GameUtils.GetComponent<HandComponent>(actorEntities[0]);
-        if (handComponent != null)
+        var refreshedHandComponent = GameUtils.GetComponent<HandComponent>(refreshedEntities[0]);
+        if (refreshedHandComponent != null)
         {
-            _infoText.text = GameUtils.FormatHandComponent(handComponent);
+            _infoText.text = GameUtils.FormatHandComponent(refreshedHandComponent);
         }
         else
         {
-            Debug.LogWarning($"HandComponent still not found for actor: {actorEntity.name} after refresh");
+            Debug.LogWarning($"HandComponent still not found for actor: {actorEntityName} after DrawCards");
             _infoText.text = "(加载手牌信息失败)";
         }
     }

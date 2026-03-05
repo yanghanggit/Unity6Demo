@@ -43,9 +43,13 @@ public class ActorPositioningObject : MonoBehaviour
             return;
         }
 
+        //
+        var enemyComponent = GameUtils.GetComponent<EnemyComponent>(_actorEntity);
+        var extraData = enemyComponent != null ? "Enemy" : string.Empty; // 如果是敌人角色则在事件数据中添加额外标识
         var eventData = new UIEventData(
             UIEventType.ActorPositioningClicked,
-            _actorEntity.name
+            id: _actorEntity.name,
+            extra: extraData
         );
 
         // 触发事件，通知系统哪个卡牌要素被点击了

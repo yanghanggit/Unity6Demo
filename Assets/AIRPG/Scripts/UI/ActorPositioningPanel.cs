@@ -21,12 +21,25 @@ public class ActorPositioningPanel : MonoBehaviour
         Debug.Assert(_playButton != null, "_playButton is not assigned in the inspector.");
     }
 
+    /// 刷新界面显示，先隐藏所有定位对象，然后根据当前战斗状态和角色数据决定显示哪些对象，并更新操作按钮文本。
+    private void HideAllPositioningObjectsAndResetButton()
+    {
+        for (int i = 0; i < MaxPositioningObjects; i++)
+        {
+            _positioningObjects[i].gameObject.SetActive(false);
+        }
+
+        _playButton.GetComponentInChildren<TMP_Text>().text = "加载中..."; // 默认显示加载状态
+    }
+
     /// <summary>
     /// 自主拉取战斗数据并刷新整个面板，包括角色站位布局和操作按钮文本。
     /// 未登录时自动回退到 mock 数据。
     /// </summary>
     public async UniTaskVoid RefreshCombatViewAsync()
     {
+        HideAllPositioningObjectsAndResetButton();
+
         List<EntitySerialization> sortedActorEntities;
         Combat combat;
 

@@ -205,16 +205,26 @@ public class CombatOnGoingStatePanel : MonoBehaviour, ICombatState, IUIEventList
                 {
                     Debug.Log($"角色站位被点击，目标角色: {eventData.targetId}");
                     var actorName = eventData.targetId;
+                    var isEnemy = !string.IsNullOrEmpty(eventData.extraData) && eventData.extraData == "Enemy";
+                    if (isEnemy)
+                    {
+                        _enemyHandPanel.gameObject.SetActive(true);
+                        _enemyHandPanel.SetupForActorAsync(actorName).Forget();
+                        return;
+                    }
+
+
+                    //_enemyHandPanel.SetupForActorAsync(actorName).Forget();
                     if (!GameContext.Instance.IsLoggedIn)
                     {
                         var mockData = MockData.CreateActorData();
                         var selectedActor = mockData.Find(actor => actor.name == actorName);
-                        Debug.Assert(selectedActor != null, $"MockData does not contain actor with name: {actorName}");
-                        var enemyComponent = GameUtils.GetComponent<EnemyComponent>(selectedActor);
-                        if (enemyComponent != null)
+                        //Debug.Assert(selectedActor != null, $"MockData does not contain actor with name: {actorName}");
+                        //var enemyComponent = GameUtils.GetComponent<EnemyComponent>(selectedActor);
+                        if (isEnemy)
                         {
-                            _enemyHandPanel.gameObject.SetActive(true);
-                            _enemyHandPanel.SetupForActor(selectedActor);
+                            // _enemyHandPanel.gameObject.SetActive(true);
+                            // _enemyHandPanel.SetupForActorAsync(actorName).Forget();
                         }
                         else
                         {
@@ -246,6 +256,20 @@ public class CombatOnGoingStatePanel : MonoBehaviour, ICombatState, IUIEventList
     private async UniTaskVoid OnHandleActorPositioningClicked(UIEventData eventData)
     {
         Debug.Log($"角色站位被点击，目标角色: {eventData.targetId}");
+        var actorName = eventData.targetId;
+        // var isEnemy = !string.IsNullOrEmpty(eventData.extraData) && eventData.extraData == "Enemy";
+
+        // if (isEnemy)
+        // {
+        //      Debug.Log($"Clicked on enemy actor: {actorName}, showing enemy hand panel");
+        //     _enemyHandPanel.gameObject.SetActive(true);
+        //     _enemyHandPanel.SetupForActorAsync(actorName).Forget();
+        //     return;
+        // }
+
+       
+
+
         // 这里可以添加点击角色站位的处理逻辑，例如显示该角色的详细信息或者切换选中状态等
 
         // 阶段1：并行获取战斗状态和场景-演员映射关系（两者互相独立）
@@ -279,7 +303,7 @@ public class CombatOnGoingStatePanel : MonoBehaviour, ICombatState, IUIEventList
         }
 
         // 从 actorEntities 中找到被点击的角色实体数据
-        var actorName = eventData.targetId;
+       
         EntitySerialization selectedActorEntity = null;
         foreach (var entity in actorEntitiesInStage)
         {
@@ -299,9 +323,7 @@ public class CombatOnGoingStatePanel : MonoBehaviour, ICombatState, IUIEventList
         var enemyComponent = GameUtils.GetComponent<EnemyComponent>(selectedActorEntity);
         if (enemyComponent != null)
         {
-            Debug.Log($"Clicked on enemy actor: {selectedActorEntity.name}, showing enemy hand panel");
-            _enemyHandPanel.gameObject.SetActive(true);
-            _enemyHandPanel.SetupForActor(selectedActorEntity);
+            
         }
         else
         {
