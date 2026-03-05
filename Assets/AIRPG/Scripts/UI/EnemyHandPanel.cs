@@ -50,17 +50,29 @@ public class EnemyHandPanel : MonoBehaviour
 
         // 先从服务器拉取一次最新角色数据，尝试获取 HandComponent
         var actorEntities = await GameStateSync.Instance.GetEntities(new List<string> { actorEntityName });
-        if (actorEntities != null)
+        if (actorEntities == null)
         {
-            var fetchedHandComponent = GameUtils.GetComponent<HandComponent>(actorEntities[0]);
-            if (fetchedHandComponent != null)
-            {
-                _infoText.text = GameUtils.FormatHandComponent(fetchedHandComponent);
-                return;
-            }
+            Debug.LogError($"Failed to get actor entities from server for actor: {actorEntityName}");
+            _infoText.text = "(加载手牌信息失败)";
+            return;
         }
 
-        _infoText.text = "(未获取到手牌信息，正在请求服务器抽卡...)";
+        var enemyComponent = GameUtils.GetComponent<EnemyComponent>(actorEntities[0]);
+        if (enemyComponent == null)
+        {
+            Debug.LogError($"EnemyComponent not found for actor: {actorEntityName}");
+            _infoText.text = "不是敌人角色，无法显示手牌信息";
+            return;
+        }
+
+        var fetchedHandComponent = GameUtils.GetComponent<HandComponent>(actorEntities[0]);
+        if (fetchedHandComponent != null)
+        {
+            _infoText.text = GameUtils.FormatHandComponent(fetchedHandComponent);
+            return;
+        }
+
+        _infoText.text = "敌人开始自主决定行动。。。。";
 
         // 仍未获取到 HandComponent，发起 DrawCards 请求
         Debug.LogWarning($"HandComponent not found for actor: {actorEntityName}, fetching via DrawCards API");

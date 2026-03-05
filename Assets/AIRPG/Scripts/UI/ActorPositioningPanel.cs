@@ -131,7 +131,6 @@ public class ActorPositioningPanel : MonoBehaviour
                         // 还有角色没有手牌，或者所有角色都死了，不能执行行动
                         _playButton.GetComponentInChildren<TMP_Text>().text = $"构建行动{hasHandComponentEntities.Count}/{aliveCount}";
                     }
-
                 }
                 break;
 

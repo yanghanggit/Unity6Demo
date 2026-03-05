@@ -53,12 +53,81 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     }
 
     /// <summary>
-    /// 根据当前角色数据更新构筑按钮的状态
+    /// 根据角色名称更新构筑面板显示。
+    /// 同步快路径：未登录时使用 mock 数据直接显示。
+    /// 异步流程：并行拉取战斗状态与场景-演员映射，获取所在场景的角色列表，
+    /// 按行动顺序排序后设置面板数据。
     /// </summary>
-    public void SetupForActor(EntitySerialization actorEntity, List<EntitySerialization> activeActors)
+    /// <param name="actorName">目标角色的实体名称</param>
+    public async UniTaskVoid SetupForActorAsync(string actorName)
     {
-        Debug.Assert(actorEntity != null, "Current actor data is null");
+        Debug.Assert(!string.IsNullOrEmpty(actorName), "Actor name is null or empty");
 
+        // 未登录时使用 mock 数据直接展示
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            var mockData = MockData.CreateActorData();
+            var mockActor = mockData.Find(a => a.name == actorName);
+            if (mockActor == null)
+            {
+                Debug.LogWarning($"MockData does not contain actor with name: {actorName}");
+                return;
+            }
+            ApplySetup(mockActor, mockData);
+            return;
+        }
+
+        // 并行拉取战斗状态与场景-演员映射
+        var (combat, stagesState) = await UniTask.WhenAll(
+            GameStateSync.Instance.GetCombat(),
+            GameStateSync.Instance.GetStagesState()
+        );
+
+        if (combat == null || combat.rounds == null)
+        {
+            Debug.LogError("CardBuildPanel: Combat or rounds data is null");
+            return;
+        }
+
+        // 找出玩家所在场景的角色名列表
+        List<string> actorNamesInStage = new();
+        foreach (var kvp in stagesState)
+        {
+            if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
+            {
+                actorNamesInStage = kvp.Value;
+                break;
+            }
+        }
+
+        var actorEntitiesInStage = await GameStateSync.Instance.GetEntities(actorNamesInStage);
+        if (actorEntitiesInStage == null)
+        {
+            Debug.LogError($"CardBuildPanel: Failed to get actor entities from server");
+            return;
+        }
+
+        // 找到被点击角色的实体数据
+        var selectedActorEntity = actorEntitiesInStage.Find(e => e.name == actorName);
+        if (selectedActorEntity == null)
+        {
+            Debug.LogError($"CardBuildPanel: No actor entity found with name: {actorName}");
+            return;
+        }
+
+        // 按行动顺序排序场景角色列表
+        var round = combat.rounds.Count > 0 ? combat.rounds[^1] : null;
+        Debug.Assert(round != null, "Combat has no rounds data");
+        var sortedActorEntities = GameUtils.SortActorsByActionOrder(actorEntitiesInStage, round.action_order);
+
+        ApplySetup(selectedActorEntity, sortedActorEntities);
+    }
+
+    /// <summary>
+    /// 将已准备好的角色数据应用到构筑面板 UI 上
+    /// </summary>
+    private void ApplySetup(EntitySerialization actorEntity, List<EntitySerialization> activeActors)
+    {
         // 先更新行动顺序面板数据
         _actionOrderPanel.RefresView(activeActors);
 
@@ -69,10 +138,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
             owner = actorEntity
         };
 
-        //
         UpdateMainText(CardBuilder.Build);
-
-        //
         LoadCardElements(actorEntity, activeActors);
 
         // 更新角色头像显示
@@ -87,7 +153,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
             _iconImage.GetComponent<Image>().sprite = null;
         }
 
-        // 更新主文本显示当前角色名称
+        // 更新角色属性显示
         var combatStatsComponent = GameUtils.GetComponent<CombatStatsComponent>(actorEntity);
         Debug.Assert(combatStatsComponent != null, $"CombatStatsComponent is missing for actor: {actorEntity.name}");
         _statsText.text = GameUtils.GetDisplayName(actorEntity.name) + "\n" +
@@ -182,7 +248,6 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
                 Debug.LogWarning($"未处理的事件类型: {eventData.eventType}");
                 break;
         }
-
     }
 
     /// <summary>
@@ -285,26 +350,12 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
             return;
         }
 
-        // 刷新角色数据以获取最新的手牌信息
-        var actorEntities = await GameStateSync.Instance.GetEntities(new List<string> { allyDrawAction.entity_name });
-        if (actorEntities == null)
+        // DrawCards 完成后用最新服务器数据刷新面板
+        var ownerName = CardBuilder.Build?.owner?.name;
+        if (!string.IsNullOrEmpty(ownerName))
         {
-            Debug.LogError($"Failed to refresh actor entities from server for actor: {allyDrawAction.entity_name}");
-            return;
+            SetupForActorAsync(ownerName).Forget();
         }
-
-        // 更新当前角色数据
-        CardBuilder.Build = new CardBuildData
-        {
-            owner = actorEntities.Count > 0 ? actorEntities[0] : null
-        };
-
-        //
-        UpdateMainText(CardBuilder.Build);
-
-        //
-        //_scrollView.totalCount = CardBuilder.ElementsCount;
-        _scrollView.RefillCells(); // 重建列表并回到顶部
     }
 
     /// <summary>
@@ -319,8 +370,4 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
             GameContext.Instance.TasksStatusUrl,
             taskId);
     }
-
-
-
-
 }

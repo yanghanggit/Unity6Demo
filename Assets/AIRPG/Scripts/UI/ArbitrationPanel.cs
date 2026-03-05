@@ -21,13 +21,13 @@ public class ArbitrationPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// 当进入仲裁阶段时调用，根据当前游戏状态刷新仲裁面板显示内容
+    /// 进入仲裁阶段的完整处理流程：隐藏关闭按钮，显示加载文本。
+    /// 未登录时直接展示 mock 回合数据；已登录时异步执行 PlayCards，
+    /// 轮询任务完成后获取最新战斗回合数据并更新面板显示。
     /// </summary>
-    public void OnArbitrationPhaseEntered()
+    public async UniTaskVoid EnterArbitrationPhaseAsync()
     {
-        // 进入仲裁阶段时隐藏关闭按钮，直到仲裁结果显示完成后再显示关闭按钮
         _closeButton.gameObject.SetActive(false);
-
 
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -37,28 +37,18 @@ public class ArbitrationPanel : MonoBehaviour
                 combat_log = "Hero attacks Goblin for 30 damage. Goblin is defeated. Mage casts Fireball on Hero for 20 damage.",
                 narrative = "The battle begins! The Hero strikes first, taking down the Goblin. The Mage retaliates with a fiery spell, scorching the Hero."
             };
-
-            _closeButton.gameObject.SetActive(true); // 显示关闭按钮，允许玩家关闭仲裁面板
             _arbitrationText.text = GameUtils.FormatRoundInfo(mockRound);
+            _closeButton.gameObject.SetActive(true);
+            return;
         }
-        else
-        {
-            _arbitrationText.text = "正在执行仲裁操作，请稍候...";
-            ExecuteRoundAndDisplayResultAsync().Forget();
-        }
-    }
 
-    /// <summary>
-    ///  执行出牌操作，并轮询任务状态直到完成，最后刷新界面显示结果
-    /// </summary>
-    /// <returns></returns>
-    private async UniTaskVoid ExecuteRoundAndDisplayResultAsync()
-    {
+        _arbitrationText.text = "正在执行仲裁操作，请稍候...";
+
         string taskId = await DungeonGamePlayManager.Instance.PlayCards();
         if (string.IsNullOrEmpty(taskId))
         {
             _arbitrationText.text = "Failed to initiate PlayCards action.";
-            _closeButton.gameObject.SetActive(true); // 显示关闭按钮，允许玩家关闭仲裁面板
+            _closeButton.gameObject.SetActive(true);
             return;
         }
 
@@ -67,7 +57,7 @@ public class ArbitrationPanel : MonoBehaviour
         if (taskRecord == null)
         {
             _arbitrationText.text = "Failed to retrieve task status.";
-            _closeButton.gameObject.SetActive(true); // 显示关闭按钮，允许玩家关闭仲裁面板
+            _closeButton.gameObject.SetActive(true);
             return;
         }
 
@@ -75,23 +65,22 @@ public class ArbitrationPanel : MonoBehaviour
         if (combat == null)
         {
             _arbitrationText.text = "Failed to retrieve combat data.";
-            _closeButton.gameObject.SetActive(true); // 显示关闭按钮，允许玩家关闭仲裁面板
+            _closeButton.gameObject.SetActive(true);
             return;
         }
 
-        var round = combat.rounds.Count > 0 ? combat.rounds[combat.rounds.Count - 1] : null;
+        var round = combat.rounds.Count > 0 ? combat.rounds[^1] : null;
         if (round == null)
         {
             _arbitrationText.text = "No round data available.";
-            _closeButton.gameObject.SetActive(true); // 显示关闭按钮，允许玩家关闭仲裁面板
+            _closeButton.gameObject.SetActive(true);
             return;
         }
 
-        // 根据最新的回合数据刷新仲裁面板显示内容
-        _closeButton.gameObject.SetActive(true); // 显示关闭按钮，允许玩家关闭仲裁面板
         _arbitrationText.text = GameUtils.FormatRoundInfo(round);
+        _closeButton.gameObject.SetActive(true);
 
-        // 同步发射一个事件，通知其他系统当前回合的战斗状态已经更新，确保站位面板等内容也能及时刷新显示
+        // 通知其他系统战斗状态已更新，确保站位面板等内容及时刷新
         DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
     }
 

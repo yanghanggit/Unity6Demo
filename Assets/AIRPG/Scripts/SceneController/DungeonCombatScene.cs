@@ -80,9 +80,6 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
 
         if (!GameContext.Instance.IsLoggedIn)
         {
-            // 模拟未登录用户的战斗状态，这里直接设置为 ONGOING，后续可以根据需要调整为其他状态
-            //await UniTask.Delay(0);
-
             // 假设未登录用户没有战斗数据，直接设置为 NONE 状态，并在日志中输出相关信息
             lastCombatState = CombatState.ONGOING;
         }
@@ -111,8 +108,6 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
                         Debug.LogError("[DungeonCombatScene] Combat initialization failed, response session messages is null");
                         return;
                     }
-
-                    //Debug.Log("[DungeonCombatScene] Combat initialization completed, switching to ongoing state");
                     OnEnterOnGoingState();
                 }
                 break;
@@ -136,7 +131,6 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
         }
     }
 
-
     /// <summary>
     /// 显示仲裁面板并设置文本内容
     /// </summary>
@@ -150,7 +144,6 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
         _onGoingState.gameObject.SetActive(true);
         _onGoingState.OnEnter();
     }
-
 
     /// <summary>
     /// 进入战斗后状态，显示战斗后面板并刷新显示内容

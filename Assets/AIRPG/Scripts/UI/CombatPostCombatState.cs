@@ -40,15 +40,16 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
             _mainText.text = "战斗结束！正在处理战斗结果...";
 
             // 调用服务器接口进行战斗后处理，并根据返回的结果更新 UI 显示
-            OnEnterSync().Forget();
+            FetchAndDisplayPostCombatResultAsync().Forget();
         }
     }
 
-    private async UniTaskVoid OnEnterSync()
+    /// <summary>
+    /// 调用服务器 PostCombat 接口，解析返回的 SessionMessage 列表，
+    /// 提取其中的 <see cref="CombatArchiveEvent"/> 并将战斗总结文本更新到 UI 上。
+    /// </summary>
+    private async UniTaskVoid FetchAndDisplayPostCombatResultAsync()
     {
-        // 显示战斗结果文本
-        Debug.Log("Entered Post Combat State");
-
         var sessionMessages = await DungeonGamePlayManager.Instance.PostCombat();
         if (sessionMessages == null)
         {
@@ -57,16 +58,13 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
             return;
         }
 
-        // 然后逐个处理返回的 SessionMessage，特别是 CombatArchiveEvent
+        // 遍历 SessionMessage，收集 CombatArchiveEvent 中的战斗总结
         var showText = "战斗后事件：\n\n";
 
-        for (int i = 0; i < sessionMessages.Count; i++)
+        foreach (var sessionMessage in sessionMessages)
         {
-            SessionMessage sessionMessage = sessionMessages[i];
             if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
-            {
                 continue;
-            }
 
             var agentEvent = GameUtils.ParseAgentEvent(sessionMessage);
             if (agentEvent == null)
@@ -75,17 +73,14 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
                 continue;
             }
 
-            if (agentEvent.head == (int)EventHead.COMBAT_ARCHIVE_EVENT)
+            if (agentEvent.head == (int)EventHead.COMBAT_ARCHIVE_EVENT
+                && agentEvent is CombatArchiveEvent combatArchiveEvent)
             {
                 Debug.Log("Processing CombatArchiveEvent from post combat");
-                if (agentEvent is CombatArchiveEvent combatArchiveEvent)
-                {
-                    showText += $"Actor: {combatArchiveEvent.actor}\nSummary: {combatArchiveEvent.summary}\n\n";
-                }
+                showText += $"Actor: {combatArchiveEvent.actor}\nSummary: {combatArchiveEvent.summary}\n\n";
             }
         }
 
-        //
         _mainText.text = showText;
     }
 
@@ -148,6 +143,8 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
         await UniTask.Yield();
 
         DungeonCombatScene.CachedStageName = targetStageName;
+        DungeonCombatScene.CachedDungeonName = dungeon.name;
+
         SceneManager.LoadScene(NextSceneName);
     }
 }
