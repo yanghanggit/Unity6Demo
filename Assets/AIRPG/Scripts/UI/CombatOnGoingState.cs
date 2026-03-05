@@ -204,7 +204,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         }
 
         // 刷新顶部信息显示，包含当前地下城、关卡和回合数等信息
-        var topBarInfo = $"{DungeonCombatScene2.CachedDungeonName} | {DungeonCombatScene2.CachedStageName} | 回合数: {combat.rounds.Count}";
+        var topBarInfo = $"{DungeonCombatScene.CachedDungeonName} | {DungeonCombatScene.CachedStageName} | 回合数: {combat.rounds.Count}";
         _topBar.SetText(topBarInfo);
 
         //

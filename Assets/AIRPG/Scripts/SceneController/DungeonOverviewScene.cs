@@ -11,7 +11,7 @@ using TMPro;
 public class DungeonOverviewScene : MonoBehaviour
 {
     public static readonly string PreSceneName = "MainScene";
-    public static readonly string NextSceneName = "DungeonCombatScene2";
+    public static readonly string NextSceneName = "DungeonCombatScene";
 
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText;
@@ -87,8 +87,8 @@ public class DungeonOverviewScene : MonoBehaviour
         await UniTask.Yield();
 
         // 进入地下城后默认进入第一个关卡
-        DungeonCombatScene2.CachedStageName = targetStageName;
-        DungeonCombatScene2.CachedDungeonName = dungeon.name;
+        DungeonCombatScene.CachedStageName = targetStageName;
+        DungeonCombatScene.CachedDungeonName = dungeon.name;
 
         // 切换到地下城战斗场景
         SceneManager.LoadScene(NextSceneName);

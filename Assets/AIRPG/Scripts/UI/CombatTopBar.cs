@@ -25,7 +25,7 @@ public class CombatTopBar : MonoBehaviour
         //     _infoText.text = string.Empty;
         // }
 
-        _infoText.text = $"{DungeonCombatScene2.CachedDungeonName} | {DungeonCombatScene2.CachedStageName}";
+        _infoText.text = $"{DungeonCombatScene.CachedDungeonName} | {DungeonCombatScene.CachedStageName}";
     }
 
     /// <summary>

@@ -15,7 +15,7 @@ public class CombatBackground : MonoBehaviour
         Debug.Assert(_backgroundImage != null, "_backgroundImage is null");
 
         // 根据当前角色所在的地下城和关卡，动态更新场景背景图片
-        var stageName = GameContext.Instance.IsLoggedIn ? DungeonCombatScene2.CachedStageName : MockData.MockStageName;
+        var stageName = GameContext.Instance.IsLoggedIn ? DungeonCombatScene.CachedStageName : MockData.MockStageName;
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(stageName);
         if (cachedSprite != null)
         {

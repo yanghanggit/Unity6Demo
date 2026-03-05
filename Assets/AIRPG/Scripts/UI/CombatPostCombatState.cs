@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class CombatPostCombatState : MonoBehaviour, ICombatState
 {
+    public static readonly string NextSceneName = "DungeonCombatScene";
+
     [Header("UI Components")]
     [SerializeField] private TMP_Text _mainText; // 战斗后面板文本对象
 
@@ -35,22 +37,8 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
 
     private async UniTaskVoid ExecuteAdvanceNext()
     {
-        // var messages = await DungeonGamePlayManager.Instance.AdvanceNextDungeon();
-        // if (messages == null)
-        // {
-        //     Debug.LogWarning("Failed to advance to next dungeon, no messages returned");
-        //     return;
-        // }
-
-        // var syncErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-        // if (syncErr != GameSyncError.None)
-        // {
-        //     Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
-        //     return;
-        // }
-
         await UniTask.Yield();
-        SceneManager.LoadScene("DungeonCombatScene2");
+        SceneManager.LoadScene(NextSceneName);
     }
 
 }
