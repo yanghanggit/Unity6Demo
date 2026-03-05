@@ -31,12 +31,6 @@ public class SessionManager : MonoBehaviour
     /// </summary>
     [SerializeField] private LogoutApi _logoutApi;
 
-    /// <summary>
-    /// 会话消息API接口
-    /// 用于从服务器获取游戏会话消息列表，支持基于序列ID的增量拉取
-    /// </summary>
-    [SerializeField] private SessionMessagesApi _sessionMessagesApi;
-
     private void Awake()
     {
         // 单例模式处理
@@ -57,7 +51,6 @@ public class SessionManager : MonoBehaviour
         Debug.Assert(_loginApi != null, "_loginApi is null");
         Debug.Assert(_startApi != null, "_startApi is null");
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
-        Debug.Assert(_sessionMessagesApi != null, "_sessionMessagesApi is null");
     }
 
     /// <summary>
@@ -175,48 +168,5 @@ public class SessionManager : MonoBehaviour
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// 从服务器获取会话消息
-    /// 获取最新的会话消息列表并更新序列ID
-    /// </summary>
-    /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> FetchSessionMessages()
-    {
-        if (string.IsNullOrEmpty(GameContext.Instance.UserName) ||
-            string.IsNullOrEmpty(GameContext.Instance.GameName))
-        {
-            Debug.LogError("[SessionManager] UserName or GameName is not set in GameContext");
-            return null;
-        }
-
-        // 获取会话消息
-        await _sessionMessagesApi.Call(GameContext.Instance.SessionMessagesUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            GameContext.Instance.LastSequenceId);
-
-        if (_sessionMessagesApi.ReqResult == null)
-        {
-            Debug.LogError("[SessionManager] Failed to fetch session messages from server: request result is null");
-            return null;
-        }
-
-        if (!_sessionMessagesApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"[SessionManager] Failed to fetch session messages from server: {_sessionMessagesApi.ReqResult.responseText}");
-            return null;
-        }
-
-        Debug.Assert(_sessionMessagesApi.RespData != null, "[SessionManager] SessionMessagesApi response data is null");
-
-        // 更新最后一个序列ID
-        if (_sessionMessagesApi.RespLastSequenceId >= 0)
-        {
-            GameContext.Instance.LastSequenceId = _sessionMessagesApi.RespLastSequenceId;
-        }
-
-        return new List<SessionMessage>(_sessionMessagesApi.RespData.session_messages);
     }
 }

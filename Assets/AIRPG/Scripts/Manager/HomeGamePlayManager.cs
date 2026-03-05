@@ -6,7 +6,7 @@ using Cysharp.Threading.Tasks;
 /// Home游戏玩法管理器
 /// 单例模式，封装所有Home相关的游戏操作（POST请求）
 /// 负责推进游戏、场景切换、角色交互等写操作
-/// 仅依赖 SessionManager.FetchSessionMessages 获取会话消息
+/// 仅依赖 GameStateSync.GetSessionMessages 获取会话消息
 /// </summary>
 public class HomeGamePlayManager : MonoBehaviour
 {
@@ -14,21 +14,6 @@ public class HomeGamePlayManager : MonoBehaviour
     /// 单例实例
     /// </summary>
     public static HomeGamePlayManager Instance { get; private set; }
-
-    /// <summary>
-    /// Home游戏玩法API接口
-    /// </summary>
-    [SerializeField] private HomePlayerActionApi _homePlayerActionApi;
-
-    /// <summary>
-    /// 传送到地下城API接口
-    /// </summary>
-    [SerializeField] private TransDungeonApi _transDungeonApi;
-
-    /// <summary>
-    /// 家园推进API接口
-    /// </summary>
-    [SerializeField] private HomeAdvanceApi _homeAdvanceApi;
 
     private void Awake()
     {
@@ -45,11 +30,17 @@ public class HomeGamePlayManager : MonoBehaviour
         }
     }
 
-    private void Start()
+    /// <summary>
+    /// 创建一个独立的临时 API 实例，挂载于自身 Transform 下。
+    /// 每次调用均产生隔离对象，避免并发时共享 ReqResult / RespData 导致竞态。
+    /// 调用方负责在使用完毕后通过 finally 块 Destroy 该实例的 gameObject。
+    /// </summary>
+    private T CreateApi<T>() where T : BaseApiClient
     {
-        Debug.Assert(_homePlayerActionApi != null, "_homeGamePlayApi is null");
-        Debug.Assert(_transDungeonApi != null, "_transDungeonApi is null");
-        Debug.Assert(_homeAdvanceApi != null, "_homeAdvanceApi is null");
+        var go = new GameObject(typeof(T).Name);
+        go.transform.SetParent(transform);
+        go.hideFlags = HideFlags.HideInHierarchy;
+        return go.AddComponent<T>();
     }
 
     /// <summary>
@@ -66,29 +57,43 @@ public class HomeGamePlayManager : MonoBehaviour
     /// </summary>
     public async UniTask<bool> AdvanceGame(List<string> actors)
     {
-        // 使用 HomeAdvance API 推进角色
-        await _homeAdvanceApi.Call(
-            GameContext.Instance.HomeAdvanceUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            actors);
-
-        if (_homeAdvanceApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError($"[HomeGamePlayManager] home_advance request failed for actors: [{string.Join(", ", actors)}]");
+            Debug.LogWarning("[HomeGamePlayManager] Player is not logged in, skip AdvanceGame");
             return false;
         }
 
-        if (!_homeAdvanceApi.ReqResult.isSuccess)
+        var api = CreateApi<HomeAdvanceApi>();
+        try
         {
-            Debug.LogError($"[HomeGamePlayManager] home_advance request failed: {_homeAdvanceApi.ReqResult.responseText}");
-            return false;
-        }
+            // 使用 HomeAdvance API 推进角色
+            await api.Call(
+                GameContext.Instance.HomeAdvanceUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                actors);
 
-        Debug.Assert(_homeAdvanceApi.RespData != null, "[HomeGamePlayManager] home_advance response data is null");
+            if (api.ReqResult == null)
+            {
+                Debug.LogError($"[HomeGamePlayManager] home_advance request failed for actors: [{string.Join(", ", actors)}]");
+                return false;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[HomeGamePlayManager] home_advance request failed: {api.ReqResult.responseText}");
+                return false;
+            }
+
+            Debug.Assert(api.RespData != null, "[HomeGamePlayManager] home_advance response data is null");
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
 
         // 从服务器获取并同步最新的会话消息
-        var sessionMessages = await SessionManager.Instance.FetchSessionMessages();
+        var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
         if (sessionMessages == null)
         {
             Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after advancing");
@@ -116,38 +121,52 @@ public class HomeGamePlayManager : MonoBehaviour
     /// </summary>
     public async UniTask<bool> SpeakToActor(string targetActorName, string messageContent)
     {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[HomeGamePlayManager] Player is not logged in, skip SpeakToActor");
+            return false;
+        }
+
         if (string.IsNullOrEmpty(targetActorName) || string.IsNullOrEmpty(messageContent))
         {
             Debug.LogError("[HomeGamePlayManager] Target actor name or message content is empty");
             return false;
         }
 
-        await _homePlayerActionApi.Call(
-            GameContext.Instance.HomePlayerActionUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            HomePlayerActionType.SPEAK,
-            new Dictionary<string, string>
+        var api = CreateApi<HomePlayerActionApi>();
+        try
+        {
+            await api.Call(
+                GameContext.Instance.HomePlayerActionUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                HomePlayerActionType.SPEAK,
+                new Dictionary<string, string>
+                {
+                    ["target"] = targetActorName,
+                    ["content"] = messageContent
+                });
+
+            if (api.ReqResult == null)
             {
-                ["target"] = targetActorName,
-                ["content"] = messageContent
-            });
+                Debug.LogError("[HomeGamePlayManager] /speak request failed");
+                return false;
+            }
 
-        if (_homePlayerActionApi.ReqResult == null)
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[HomeGamePlayManager] /speak request failed: {api.ReqResult.responseText}");
+                return false;
+            }
+
+            Debug.Assert(api.RespData != null, "[HomeGamePlayManager] /speak response data is null");
+        }
+        finally
         {
-            Debug.LogError("[HomeGamePlayManager] /speak request failed");
-            return false;
+            Destroy(api.gameObject);
         }
 
-        if (!_homePlayerActionApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"[HomeGamePlayManager] /speak request failed: {_homePlayerActionApi.ReqResult.responseText}");
-            return false;
-        }
-
-        Debug.Assert(_homePlayerActionApi.RespData != null, "[HomeGamePlayManager] /speak response data is null");
-
-        var sessionMessages = await SessionManager.Instance.FetchSessionMessages();
+        var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
         if (sessionMessages == null)
         {
             Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after speaking");
@@ -174,37 +193,51 @@ public class HomeGamePlayManager : MonoBehaviour
     /// </summary>
     public async UniTask<bool> SwitchStage(string stageName)
     {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[HomeGamePlayManager] Player is not logged in, skip SwitchStage");
+            return false;
+        }
+
         if (string.IsNullOrEmpty(stageName))
         {
             Debug.LogError("[HomeGamePlayManager] Stage name is empty");
             return false;
         }
 
-        await _homePlayerActionApi.Call(
-            GameContext.Instance.HomePlayerActionUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            HomePlayerActionType.SWITCH_STAGE,
-            new Dictionary<string, string>
+        var api = CreateApi<HomePlayerActionApi>();
+        try
+        {
+            await api.Call(
+                GameContext.Instance.HomePlayerActionUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                HomePlayerActionType.SWITCH_STAGE,
+                new Dictionary<string, string>
+                {
+                    ["stage_name"] = stageName
+                });
+
+            if (api.ReqResult == null)
             {
-                ["stage_name"] = stageName
-            });
+                Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed");
+                return false;
+            }
 
-        if (_homePlayerActionApi.ReqResult == null)
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed: {api.ReqResult.responseText}");
+                return false;
+            }
+
+            Debug.Assert(api.RespData != null, $"[HomeGamePlayManager] /switch_stage to {stageName} response data is null");
+        }
+        finally
         {
-            Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed");
-            return false;
+            Destroy(api.gameObject);
         }
 
-        if (!_homePlayerActionApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"[HomeGamePlayManager] /switch_stage to {stageName} request failed: {_homePlayerActionApi.ReqResult.responseText}");
-            return false;
-        }
-
-        Debug.Assert(_homePlayerActionApi.RespData != null, $"[HomeGamePlayManager] /switch_stage to {stageName} response data is null");
-
-        var sessionMessages = await SessionManager.Instance.FetchSessionMessages();
+        var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
         if (sessionMessages == null)
         {
             Debug.LogError($"[HomeGamePlayManager] Failed to fetch session messages after switching to {stageName}");
@@ -230,26 +263,40 @@ public class HomeGamePlayManager : MonoBehaviour
     /// </summary>
     public async UniTask<bool> TransDungeon()
     {
-        await _transDungeonApi.Call(
-            GameContext.Instance.HomeTransDungeonUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName);
-
-        if (_transDungeonApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[HomeGamePlayManager] TransDungeon request failed");
+            Debug.LogWarning("[HomeGamePlayManager] Player is not logged in, skip TransDungeon");
             return false;
         }
 
-        if (!_transDungeonApi.ReqResult.isSuccess)
+        var api = CreateApi<TransDungeonApi>();
+        try
         {
-            Debug.LogError($"[HomeGamePlayManager] TransDungeon request failed: {_transDungeonApi.ReqResult.responseText}");
-            return false;
+            await api.Call(
+                GameContext.Instance.HomeTransDungeonUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName);
+
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[HomeGamePlayManager] TransDungeon request failed");
+                return false;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[HomeGamePlayManager] TransDungeon request failed: {api.ReqResult.responseText}");
+                return false;
+            }
+
+            Debug.Assert(api.RespData != null, "[HomeGamePlayManager] TransDungeon response data is null");
+        }
+        finally
+        {
+            Destroy(api.gameObject);
         }
 
-        Debug.Assert(_transDungeonApi.RespData != null, "[HomeGamePlayManager] TransDungeon response data is null");
-
-        var sessionMessages = await SessionManager.Instance.FetchSessionMessages();
+        var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
         if (sessionMessages == null)
         {
             Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after trans dungeon");

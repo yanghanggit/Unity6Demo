@@ -14,26 +14,6 @@ public class GameStateSync : MonoBehaviour
     /// </summary>
     public static GameStateSync Instance { get; private set; }
 
-    /// <summary>
-    /// 场景状态API接口
-    /// </summary>
-    public StagesStateApi _stagesStateApi;
-
-    /// <summary>
-    /// 演员详情API接口
-    /// </summary>
-    public EntityDetailsApi _entityDetailsApi;
-
-    /// <summary>
-    /// 地下城状态API接口
-    /// </summary>
-    public DungeonStateApi _dungeonStateApi;
-
-    /// <summary>
-    /// 地下城战斗状态API接口
-    /// </summary>
-    public DungeonCombatApi _dungeonCombatApi;
-
     private void Awake()
     {
         // 单例模式处理
@@ -49,12 +29,17 @@ public class GameStateSync : MonoBehaviour
         }
     }
 
-    private void Start()
+    /// <summary>
+    /// 创建一个独立的临时 API 实例，挂载于自身 Transform 下。
+    /// 每次调用均产生隔离对象，避免并发时共享 ReqResult / RespData 导致竞态。
+    /// 调用方负责在使用完毕后通过 finally 块 Destroy 该实例的 gameObject。
+    /// </summary>
+    private T CreateApi<T>() where T : BaseApiClient
     {
-        Debug.Assert(_stagesStateApi != null, "_stagesStateApi is null");
-        Debug.Assert(_entityDetailsApi != null, "_actorDetailApi is null");
-        Debug.Assert(_dungeonStateApi != null, "_dungeonStateApi is null");
-        Debug.Assert(_dungeonCombatApi != null, "_dungeonCombatApi is null");
+        var go = new GameObject(typeof(T).Name);
+        go.transform.SetParent(transform);
+        go.hideFlags = HideFlags.HideInHierarchy;
+        return go.AddComponent<T>();
     }
 
     /// <summary>
@@ -63,29 +48,37 @@ public class GameStateSync : MonoBehaviour
     /// <returns>成功时返回 Dictionary&lt;string, List&lt;string&gt;&gt;（场景名 → 演员名列表），失败时返回 null</returns>
     public async UniTask<Dictionary<string, List<string>>> GetStagesState()
     {
-        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActorName))
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
+            Debug.LogWarning("[GameStateSync] Player is not logged in, skip fetching stages state from server");
             return null;
         }
 
-        // 获取场景与演员映射关系
-        await _stagesStateApi.Call(GameContext.Instance.StagesStateUrl);
-
-        if (_stagesStateApi.ReqResult == null)
+        // 每次创建独立实例，避免并发时共享状态导致竞态
+        var api = CreateApi<StagesStateApi>();
+        try
         {
-            Debug.LogError("[GameStateSync] Failed to fetch stages state from server: request result is null");
-            return null;
-        }
+            await api.Call(GameContext.Instance.StagesStateUrl);
 
-        if (!_stagesStateApi.ReqResult.isSuccess)
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[GameStateSync] Failed to fetch stages state from server: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[GameStateSync] Failed to fetch stages state from server: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "[GameStateSync] StagesStateApi response data is null");
+            return api.RespData.mapping;
+        }
+        finally
         {
-            Debug.LogError($"[GameStateSync] Failed to fetch stages state from server: {_stagesStateApi.ReqResult.responseText}");
-            return null;
+            Destroy(api.gameObject);
         }
-
-        Debug.Assert(_stagesStateApi.RespData != null, "[GameStateSync] StagesStateApi response data is null");
-        return _stagesStateApi.RespData.mapping;
     }
 
     /// <summary>
@@ -95,29 +88,43 @@ public class GameStateSync : MonoBehaviour
     /// <returns>成功时返回所有实体的浅拷贝列表（List&lt;EntitySerialization&gt;），失败时返回 null</returns>
     public async UniTask<List<EntitySerialization>> GetEntities(List<string> entityNames)
     {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[GameStateSync] Player is not logged in, skip fetching entity details from server");
+            return null;
+        }
+
         if (entityNames == null || entityNames.Count == 0)
         {
             Debug.LogWarning("[GameStateSync] Entity list is empty, skip fetching entity details");
             return null;
         }
 
-        // 获取实体详情数据（可包含演员和场景两类实体）
-        await _entityDetailsApi.Call(GameContext.Instance.EntityDetailsUrl, entityNames);
-
-        if (_entityDetailsApi.ReqResult == null)
+        // 每次创建独立实例，避免并发时共享状态导致竞态
+        var api = CreateApi<EntityDetailsApi>();
+        try
         {
-            Debug.LogError("[GameStateSync] Failed to fetch entity details from server: request result is null");
-            return null;
-        }
+            await api.Call(GameContext.Instance.EntityDetailsUrl, entityNames);
 
-        if (!_entityDetailsApi.ReqResult.isSuccess)
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[GameStateSync] Failed to fetch entity details from server: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[GameStateSync] Failed to fetch entity details from server: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "[GameStateSync] EntityDetailsApi response data is null");
+            return new List<EntitySerialization>(api.RespData.entities_serialization);
+        }
+        finally
         {
-            Debug.LogError($"[GameStateSync] Failed to fetch entity details from server: {_entityDetailsApi.ReqResult.responseText}");
-            return null;
+            Destroy(api.gameObject);
         }
-
-        Debug.Assert(_entityDetailsApi.RespData != null, "[GameStateSync] EntityDetailsApi response data is null");
-        return new List<EntitySerialization>(_entityDetailsApi.RespData.entities_serialization);
     }
 
     /// <summary>
@@ -126,28 +133,37 @@ public class GameStateSync : MonoBehaviour
     /// <returns>成功时返回 <see cref="Dungeon"/>，失败时返回 null</returns>
     public async UniTask<Dungeon> GetDungeon()
     {
-        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActorName))
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
+            Debug.LogWarning("[GameStateSync] Player is not logged in, skip fetching dungeon state from server");
             return null;
         }
 
-        await _dungeonStateApi.Call(GameContext.Instance.DungeonStateUrl);
-
-        if (_dungeonStateApi.ReqResult == null)
+        // 每次创建独立实例，避免并发时共享状态导致竞态
+        var api = CreateApi<DungeonStateApi>();
+        try
         {
-            Debug.LogError("[GameStateSync] Failed to fetch dungeon state from server: request result is null");
-            return null;
-        }
+            await api.Call(GameContext.Instance.DungeonStateUrl);
 
-        if (!_dungeonStateApi.ReqResult.isSuccess)
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[GameStateSync] Failed to fetch dungeon state from server: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[GameStateSync] Failed to fetch dungeon state from server: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "[GameStateSync] DungeonStateApi response data is null");
+            return api.RespData.dungeon;
+        }
+        finally
         {
-            Debug.LogError($"[GameStateSync] Failed to fetch dungeon state from server: {_dungeonStateApi.ReqResult.responseText}");
-            return null;
+            Destroy(api.gameObject);
         }
-
-        Debug.Assert(_dungeonStateApi.RespData != null, "[GameStateSync] DungeonStateApi response data is null");
-        return _dungeonStateApi.RespData.dungeon;
     }
 
     /// <summary>
@@ -156,27 +172,87 @@ public class GameStateSync : MonoBehaviour
     /// <returns>成功时返回 <see cref="Combat"/>，失败时返回 null</returns>
     public async UniTask<Combat> GetCombat()
     {
-        if (string.IsNullOrEmpty(GameContext.Instance.UserName) || string.IsNullOrEmpty(GameContext.Instance.GameName) || string.IsNullOrEmpty(GameContext.Instance.PlayerActorName))
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[GameStateSync] UserName, GameName, or ActorName is not set in GameContext");
+            Debug.LogWarning("[GameStateSync] Player is not logged in, skip fetching combat state from server");
             return null;
         }
 
-        await _dungeonCombatApi.Call(GameContext.Instance.DungeonCombatUrl);
-
-        if (_dungeonCombatApi.ReqResult == null)
+        // 每次创建独立实例，避免并发时共享状态导致竞态
+        var api = CreateApi<DungeonCombatApi>();
+        try
         {
-            Debug.LogError("[GameStateSync] Failed to fetch dungeon combat state from server: request result is null");
+            await api.Call(GameContext.Instance.DungeonCombatUrl);
+
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[GameStateSync] Failed to fetch dungeon combat state from server: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[GameStateSync] Failed to fetch dungeon combat state from server: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "[GameStateSync] DungeonCombatApi response data is null");
+            return api.RespData.combat;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
+    }
+
+    /// <summary>
+    /// 从服务器获取会话消息，并更新序列ID
+    /// </summary>
+    /// <returns>成功时返回会话消息列表，失败时返回 null</returns>
+    public async UniTask<List<SessionMessage>> GetSessionMessages()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[GameStateSync] Player is not logged in, skip fetching session messages from server");
             return null;
         }
 
-        if (!_dungeonCombatApi.ReqResult.isSuccess)
+        // 每次创建独立实例，避免并发时共享状态导致竞态
+        var api = CreateApi<SessionMessagesApi>();
+        try
         {
-            Debug.LogError($"[GameStateSync] Failed to fetch dungeon combat state from server: {_dungeonCombatApi.ReqResult.responseText}");
-            return null;
-        }
+            await api.Call(
+                GameContext.Instance.SessionMessagesUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                GameContext.Instance.LastSequenceId
+            );
 
-        Debug.Assert(_dungeonCombatApi.RespData != null, "[GameStateSync] DungeonCombatApi response data is null");
-        return _dungeonCombatApi.RespData.combat;
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[GameStateSync] Failed to fetch session messages from server: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[GameStateSync] Failed to fetch session messages from server: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "[GameStateSync] SessionMessagesApi response data is null");
+
+            // 更新最后一个序列ID
+            if (api.RespLastSequenceId >= 0)
+            {
+                GameContext.Instance.LastSequenceId = api.RespLastSequenceId;
+            }
+
+            return new List<SessionMessage>(api.RespData.session_messages);
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
     }
 }

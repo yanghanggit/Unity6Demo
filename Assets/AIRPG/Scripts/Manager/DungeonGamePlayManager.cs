@@ -15,32 +15,6 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// </summary>
     public static DungeonGamePlayManager Instance { get; private set; }
 
-    /// <summary>
-    /// Dungeon进度API接口
-    /// </summary>
-    [SerializeField] private DungeonProgressApi _dungeonProgressApi;
-
-    /// <summary>
-    /// 传送回家API接口
-    /// </summary>
-    [SerializeField] private TransHomeApi _transHomeApi;
-
-    /// <summary>
-    /// Dungeon战斗打牌API接口
-    /// </summary>
-    [SerializeField] private DungeonCombatPlayCardsApi _dungeonCombatPlayCardsApi;
-
-    /// <summary>
-    /// Dungeon战斗抽牌API接口
-    /// </summary>
-    [SerializeField] private DungeonCombatDrawCardsApi _dungeonCombatDrawCardsApi;
-
-    /// <summary>
-    /// 公开访问接口
-    /// </summary>
-    public DungeonProgressApi ProgressApi => _dungeonProgressApi;
-
-    
     private void Awake()
     {
         // 单例模式处理
@@ -56,12 +30,17 @@ public class DungeonGamePlayManager : MonoBehaviour
         }
     }
 
-    private void Start()
+    /// <summary>
+    /// 创建一个独立的临时 API 实例，挂载于自身 Transform 下。
+    /// 每次调用均产生隔离对象，避免并发时共享 ReqResult / RespData 导致竞态。
+    /// 调用方负责在使用完毕后通过 finally 块 Destroy 该实例的 gameObject。
+    /// </summary>
+    private T CreateApi<T>() where T : BaseApiClient
     {
-        Debug.Assert(_dungeonProgressApi != null, "_dungeonProgressApi is null");
-        Debug.Assert(_transHomeApi != null, "_transHomeApi is null");
-        Debug.Assert(_dungeonCombatPlayCardsApi != null, "_dungeonCombatPlayCardsApi is null");
-        Debug.Assert(_dungeonCombatDrawCardsApi != null, "_dungeonCombatDrawCardsApi is null");
+        var go = new GameObject(typeof(T).Name);
+        go.transform.SetParent(transform);
+        go.hideFlags = HideFlags.HideInHierarchy;
+        return go.AddComponent<T>();
     }
 
     /// <summary>
@@ -71,27 +50,41 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>会话消息列表，失败时返回 null</returns>
     public async UniTask<List<SessionMessage>> InitCombat()
     {
-        await _dungeonProgressApi.Call(
-            GameContext.Instance.DungeonProgressUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            DungeonProgressType.INIT_COMBAT);
-
-        if (_dungeonProgressApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[DungeonGamePlayManager] CombatInit: request result is null");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip InitCombat");
             return null;
         }
 
-        if (!_dungeonProgressApi.ReqResult.isSuccess)
+        var api = CreateApi<DungeonProgressApi>();
+        try
         {
-            Debug.LogError($"[DungeonGamePlayManager] CombatInit failed: {_dungeonProgressApi.ReqResult.responseText}");
-            return null;
-        }
+            await api.Call(
+                GameContext.Instance.DungeonProgressUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                DungeonProgressType.INIT_COMBAT);
 
-        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
-        Debug.Log("[DungeonGamePlayManager] CombatInit completed successfully");
-        return _dungeonProgressApi.RespData.session_messages;
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] CombatInit: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] CombatInit failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+            Debug.Log("[DungeonGamePlayManager] CombatInit completed successfully");
+            return api.RespData.session_messages;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
     }
 
     /// <summary>
@@ -101,27 +94,41 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>会话消息列表，失败时返回 null</returns>
     public async UniTask<List<SessionMessage>> CombatStatusEvaluation()
     {
-        await _dungeonProgressApi.Call(
-            GameContext.Instance.DungeonProgressUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            DungeonProgressType.COMBAT_STATUS_EVALUATION);
-
-        if (_dungeonProgressApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[DungeonGamePlayManager] CombatStatusEvaluation: request result is null");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip CombatStatusEvaluation");
             return null;
         }
 
-        if (!_dungeonProgressApi.ReqResult.isSuccess)
+        var api = CreateApi<DungeonProgressApi>();
+        try
         {
-            Debug.LogError($"[DungeonGamePlayManager] CombatStatusEvaluation failed: {_dungeonProgressApi.ReqResult.responseText}");
-            return null;
-        }
+            await api.Call(
+                GameContext.Instance.DungeonProgressUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                DungeonProgressType.COMBAT_STATUS_EVALUATION);
 
-        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
-        Debug.Log("[DungeonGamePlayManager] CombatStatusEvaluation completed successfully");
-        return _dungeonProgressApi.RespData.session_messages;
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] CombatStatusEvaluation: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] CombatStatusEvaluation failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+            Debug.Log("[DungeonGamePlayManager] CombatStatusEvaluation completed successfully");
+            return api.RespData.session_messages;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
     }
 
     /// <summary>
@@ -131,35 +138,49 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>任务 ID 字符串，失败时返回 null</returns>
     public async UniTask<string> DrawCards(List<AllyDrawCardAction> specifiedActions, bool enableEnemyDraw)
     {
-        await _dungeonCombatDrawCardsApi.Call(
-            GameContext.Instance.DungeonCombatDrawCardsUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            specifiedActions,
-            enableEnemyDraw);
-
-        if (_dungeonCombatDrawCardsApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[DungeonGamePlayManager] DrawCards: request result is null");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip DrawCards");
             return null;
         }
 
-        if (!_dungeonCombatDrawCardsApi.ReqResult.isSuccess)
+        var api = CreateApi<DungeonCombatDrawCardsApi>();
+        try
         {
-            Debug.LogError($"[DungeonGamePlayManager] DrawCards failed: {_dungeonCombatDrawCardsApi.ReqResult.responseText}");
-            return null;
-        }
+            await api.Call(
+                GameContext.Instance.DungeonCombatDrawCardsUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                specifiedActions,
+                enableEnemyDraw);
 
-        Debug.Assert(_dungeonCombatDrawCardsApi.RespData != null, "DungeonCombatDrawCardsApi response data is null");
-        if (string.IsNullOrEmpty(_dungeonCombatDrawCardsApi.RespData.task_id) ||
-            _dungeonCombatDrawCardsApi.RespData.status != TaskStatus.RUNNING)
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] DrawCards: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] DrawCards failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonCombatDrawCardsApi response data is null");
+            if (string.IsNullOrEmpty(api.RespData.task_id) ||
+                api.RespData.status != TaskStatus.RUNNING)
+            {
+                Debug.LogError("[DungeonGamePlayManager] DrawCards: response data is invalid");
+                return null;
+            }
+
+            Debug.Log("[DungeonGamePlayManager] DrawCards completed successfully");
+            return api.RespData.task_id;
+        }
+        finally
         {
-            Debug.LogError("[DungeonGamePlayManager] DrawCards: response data is invalid");
-            return null;
+            Destroy(api.gameObject);
         }
-
-        Debug.Log("[DungeonGamePlayManager] DrawCards completed successfully");
-        return _dungeonCombatDrawCardsApi.RespData.task_id;
     }
 
     /// <summary>
@@ -169,33 +190,47 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>任务 ID 字符串，失败时返回 null</returns>
     public async UniTask<string> PlayCards()
     {
-        await _dungeonCombatPlayCardsApi.Call(
-            GameContext.Instance.DungeonCombatPlayCardsUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName);
-
-        if (_dungeonCombatPlayCardsApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[DungeonGamePlayManager] PlayCards: request result is null");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip PlayCards");
             return null;
         }
 
-        if (!_dungeonCombatPlayCardsApi.ReqResult.isSuccess)
+        var api = CreateApi<DungeonCombatPlayCardsApi>();
+        try
         {
-            Debug.LogError($"[DungeonGamePlayManager] PlayCards failed: {_dungeonCombatPlayCardsApi.ReqResult.responseText}");
-            return null;
-        }
+            await api.Call(
+                GameContext.Instance.DungeonCombatPlayCardsUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName);
 
-        Debug.Assert(_dungeonCombatPlayCardsApi.RespData != null, "DungeonCombatPlayCardsApi response data is null");
-        if (string.IsNullOrEmpty(_dungeonCombatPlayCardsApi.RespData.task_id) ||
-            _dungeonCombatPlayCardsApi.RespData.status != TaskStatus.RUNNING)
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] PlayCards: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] PlayCards failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonCombatPlayCardsApi response data is null");
+            if (string.IsNullOrEmpty(api.RespData.task_id) ||
+                api.RespData.status != TaskStatus.RUNNING)
+            {
+                Debug.LogError("[DungeonGamePlayManager] PlayCards: response data is invalid");
+                return null;
+            }
+
+            Debug.Log("[DungeonGamePlayManager] PlayCards completed successfully");
+            return api.RespData.task_id;
+        }
+        finally
         {
-            Debug.LogError("[DungeonGamePlayManager] PlayCards: response data is invalid");
-            return null;
+            Destroy(api.gameObject);
         }
-
-        Debug.Log("[DungeonGamePlayManager] PlayCards completed successfully");
-        return _dungeonCombatPlayCardsApi.RespData.task_id;
     }
 
     /// <summary>
@@ -205,27 +240,41 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>会话消息列表，失败时返回 null</returns>
     public async UniTask<List<SessionMessage>> AdvanceStage()
     {
-        await _dungeonProgressApi.Call(
-            GameContext.Instance.DungeonProgressUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            DungeonProgressType.ADVANCE_STAGE);
-
-        if (_dungeonProgressApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[DungeonGamePlayManager] AdvanceNextDungeon: request result is null");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip AdvanceStage");
             return null;
         }
 
-        if (!_dungeonProgressApi.ReqResult.isSuccess)
+        var api = CreateApi<DungeonProgressApi>();
+        try
         {
-            Debug.LogError($"[DungeonGamePlayManager] AdvanceNextDungeon failed: {_dungeonProgressApi.ReqResult.responseText}");
-            return null;
-        }
+            await api.Call(
+                GameContext.Instance.DungeonProgressUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                DungeonProgressType.ADVANCE_STAGE);
 
-        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
-        Debug.Log("[DungeonGamePlayManager] AdvanceNextDungeon completed successfully");
-        return _dungeonProgressApi.RespData.session_messages;
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] AdvanceNextDungeon: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] AdvanceNextDungeon failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+            Debug.Log("[DungeonGamePlayManager] AdvanceNextDungeon completed successfully");
+            return api.RespData.session_messages;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
     }
 
     /// <summary>
@@ -235,27 +284,41 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>会话消息列表，失败时返回 null</returns>
     public async UniTask<List<SessionMessage>> RetreatFromDungeon()
     {
-        await _dungeonProgressApi.Call(
-            GameContext.Instance.DungeonProgressUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            DungeonProgressType.RETREAT);
-
-        if (_dungeonProgressApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[DungeonGamePlayManager] RetreatFromDungeon: request result is null");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip RetreatFromDungeon");
             return null;
         }
 
-        if (!_dungeonProgressApi.ReqResult.isSuccess)
+        var api = CreateApi<DungeonProgressApi>();
+        try
         {
-            Debug.LogError($"[DungeonGamePlayManager] RetreatFromDungeon failed: {_dungeonProgressApi.ReqResult.responseText}");
-            return null;
-        }
+            await api.Call(
+                GameContext.Instance.DungeonProgressUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                DungeonProgressType.RETREAT);
 
-        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
-        Debug.Log("[DungeonGamePlayManager] RetreatFromDungeon completed successfully");
-        return _dungeonProgressApi.RespData.session_messages;
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] RetreatFromDungeon: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] RetreatFromDungeon failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+            Debug.Log("[DungeonGamePlayManager] RetreatFromDungeon completed successfully");
+            return api.RespData.session_messages;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
     }
 
     /// <summary>
@@ -265,27 +328,41 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>会话消息列表，失败时返回 null</returns>
     public async UniTask<List<SessionMessage>> PostCombat()
     {
-        await _dungeonProgressApi.Call(
-            GameContext.Instance.DungeonProgressUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName,
-            DungeonProgressType.POST_COMBAT);
-
-        if (_dungeonProgressApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[DungeonGamePlayManager] PostCombat: request result is null");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip PostCombat");
             return null;
         }
 
-        if (!_dungeonProgressApi.ReqResult.isSuccess)
+        var api = CreateApi<DungeonProgressApi>();
+        try
         {
-            Debug.LogError($"[DungeonGamePlayManager] PostCombat failed: {_dungeonProgressApi.ReqResult.responseText}");
-            return null;
-        }
+            await api.Call(
+                GameContext.Instance.DungeonProgressUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName,
+                DungeonProgressType.POST_COMBAT);
 
-        Debug.Assert(_dungeonProgressApi.RespData != null, "DungeonProgressApi response data is null");
-        Debug.Log("[DungeonGamePlayManager] PostCombat completed successfully");
-        return _dungeonProgressApi.RespData.session_messages;
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] PostCombat: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] PostCombat failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+            Debug.Log("[DungeonGamePlayManager] PostCombat completed successfully");
+            return api.RespData.session_messages;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
     }
 
     /// <summary>
@@ -295,25 +372,39 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// <returns>成功返回 true，失败返回 false</returns>
     public async UniTask<bool> TransHome()
     {
-        await _transHomeApi.Call(
-            GameContext.Instance.DungeonTransHomeUrl,
-            GameContext.Instance.UserName,
-            GameContext.Instance.GameName);
-
-        if (_transHomeApi.ReqResult == null)
+        if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogError("[DungeonGamePlayManager] TransHome: request result is null");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip TransHome");
             return false;
         }
 
-        if (!_transHomeApi.ReqResult.isSuccess)
+        var api = CreateApi<TransHomeApi>();
+        try
         {
-            Debug.LogError($"[DungeonGamePlayManager] TransHome failed: {_transHomeApi.ReqResult.responseText}");
-            return false;
-        }
+            await api.Call(
+                GameContext.Instance.DungeonTransHomeUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName);
 
-        Debug.Assert(_transHomeApi.RespData != null, "TransHomeApi response data is null");
-        Debug.Log("[DungeonGamePlayManager] TransHome completed successfully");
-        return true;
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] TransHome: request result is null");
+                return false;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] TransHome failed: {api.ReqResult.responseText}");
+                return false;
+            }
+
+            Debug.Assert(api.RespData != null, "TransHomeApi response data is null");
+            Debug.Log("[DungeonGamePlayManager] TransHome completed successfully");
+            return true;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
     }
 }

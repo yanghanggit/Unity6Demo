@@ -76,7 +76,7 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
     private async UniTaskVoid InitCombatSceneAsync()
     {
         // 获取当前战斗状态，如果当前战斗对象不存在则默认设置为 NONE，并在日志中输出警告信息
-        CombatState lastCombatState = CombatState.NONE;
+        CombatState lastCombatState;
 
         if (!GameContext.Instance.IsLoggedIn)
         {

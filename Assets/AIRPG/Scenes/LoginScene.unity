@@ -266,9 +266,6 @@ GameObject:
   m_Component:
   - component: {fileID: 128522041}
   - component: {fileID: 128522042}
-  - component: {fileID: 128522043}
-  - component: {fileID: 128522044}
-  - component: {fileID: 128522045}
   m_Layer: 0
   m_Name: HomeGamePlayManager
   m_TagString: Untagged
@@ -303,48 +300,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 519685dc4bcd145cc83ed539bc39f511, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HomeGamePlayManager
-  _homePlayerActionApi: {fileID: 128522043}
-  _transDungeonApi: {fileID: 128522044}
-  _homeAdvanceApi: {fileID: 128522045}
---- !u!114 &128522043
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 128522040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 549d431be56eb4c9e95c52a7eb426b12, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HomeGamePlayApi
-  requestTimeout: 30
---- !u!114 &128522044
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 128522040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97be35b404dfd432dbb3b4aa5188f89a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TransDungeonApi
-  requestTimeout: 30
---- !u!114 &128522045
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 128522040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f9918b850a92487397f42b7683eb012, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HomeAdvanceApi
-  requestTimeout: 30
 --- !u!1 &143863050
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,10 +448,6 @@ GameObject:
   m_Component:
   - component: {fileID: 290427721}
   - component: {fileID: 290427724}
-  - component: {fileID: 290427723}
-  - component: {fileID: 290427722}
-  - component: {fileID: 290427725}
-  - component: {fileID: 290427726}
   m_Layer: 0
   m_Name: DungeonGamePlayManager
   m_TagString: Untagged
@@ -519,32 +470,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &290427722
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290427720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c985746fe8e8a4d06b9c925a32d0c49c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TransHomeApi
-  requestTimeout: 30
---- !u!114 &290427723
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290427720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d46a85287e2f9434db43aceb5e6b17ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonGamePlayApi
-  requestTimeout: 60
 --- !u!114 &290427724
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -557,36 +482,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53254e3ce6ec84313b48fe460146f192, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGamePlayManager
-  _dungeonProgressApi: {fileID: 290427723}
-  _transHomeApi: {fileID: 290427722}
-  _dungeonCombatPlayCardsApi: {fileID: 290427725}
-  _dungeonCombatDrawCardsApi: {fileID: 290427726}
---- !u!114 &290427725
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290427720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 039666ae1e4d54f12ae33961e9b68def, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonCombatPlayCardsApi
-  requestTimeout: 30
---- !u!114 &290427726
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 290427720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f35f9bcc9ae214750a8266efe2b6a080, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonCombatDrawCardsApi
-  requestTimeout: 30
 --- !u!1 &399892899
 GameObject:
   m_ObjectHideFlags: 0
@@ -1314,7 +1209,6 @@ GameObject:
   - component: {fileID: 1736060655}
   - component: {fileID: 1736060654}
   - component: {fileID: 1736060653}
-  - component: {fileID: 1736060656}
   m_Layer: 0
   m_Name: SessionManager
   m_TagString: Untagged
@@ -1352,7 +1246,6 @@ MonoBehaviour:
   _loginApi: {fileID: 1736060655}
   _startApi: {fileID: 1736060654}
   _logoutApi: {fileID: 1736060653}
-  _sessionMessagesApi: {fileID: 1736060656}
 --- !u!114 &1736060653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1366,6 +1259,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LogoutApi
   requestTimeout: 30
+  maxRetryCount: 3
+  retryDelaySeconds: 1
+  useExponentialBackoff: 1
 --- !u!114 &1736060654
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1379,6 +1275,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StartApi
   requestTimeout: 30
+  maxRetryCount: 3
+  retryDelaySeconds: 1
+  useExponentialBackoff: 1
 --- !u!114 &1736060655
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1392,19 +1291,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LoginApi
   requestTimeout: 30
---- !u!114 &1736060656
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1736060650}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78512a357abee4a4d8b11712a2e6443e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SessionMessagesApi
-  requestTimeout: 30
+  maxRetryCount: 3
+  retryDelaySeconds: 1
+  useExponentialBackoff: 1
 --- !u!1 &1985693585
 GameObject:
   m_ObjectHideFlags: 0
@@ -1554,10 +1443,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2047208667}
   - component: {fileID: 2047208668}
-  - component: {fileID: 2047208670}
-  - component: {fileID: 2047208669}
-  - component: {fileID: 2047208671}
-  - component: {fileID: 2047208672}
   m_Layer: 0
   m_Name: GameStateSync
   m_TagString: Untagged
@@ -1592,62 +1477,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2b3dd15d5fde46b5a888d5518dc0e55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameStateSync
-  _stagesStateApi: {fileID: 2047208670}
-  _entityDetailsApi: {fileID: 2047208669}
-  _dungeonStateApi: {fileID: 2047208671}
-  _dungeonCombatApi: {fileID: 2047208672}
---- !u!114 &2047208669
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2047208666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e1ef5e385ceb46ea824910e77c561a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ActorDetailsApi
-  requestTimeout: 30
---- !u!114 &2047208670
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2047208666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e3be24e7a16bd42a9b0f0a5b47fc88e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StagesStateApi
-  requestTimeout: 30
---- !u!114 &2047208671
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2047208666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8a573799922e489ba7cd168349339df, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonStateApi
-  requestTimeout: 30
---- !u!114 &2047208672
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2047208666}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3d963d961765407581dcedb7dbbc99f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DungeonCombatApi
-  requestTimeout: 30
 --- !u!1 &2110898351
 GameObject:
   m_ObjectHideFlags: 0
