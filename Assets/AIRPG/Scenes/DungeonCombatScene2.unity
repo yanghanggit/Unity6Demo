@@ -624,6 +624,7 @@ GameObject:
   - component: {fileID: 104793517}
   - component: {fileID: 104793519}
   - component: {fileID: 104793516}
+  - component: {fileID: 104793520}
   m_Layer: 5
   m_Name: EnemyHandPanel
   m_TagString: Untagged
@@ -716,6 +717,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHandPanel
   _infoText: {fileID: 339413142}
+  _tasksStatusApi: {fileID: 104793520}
+--- !u!114 &104793520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104793513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b4b41fbe39740799fa3830acf2686f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TasksStatusApi
+  requestTimeout: 30
+  maxRetryCount: 3
+  retryDelaySeconds: 1
+  useExponentialBackoff: 1
+  _pollInterval: 2
+  _maxAttempts: 60
 --- !u!1 &114127148
 GameObject:
   m_ObjectHideFlags: 0

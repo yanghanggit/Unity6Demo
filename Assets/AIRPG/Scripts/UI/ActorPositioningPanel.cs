@@ -5,8 +5,7 @@ using UnityEngine;
 
 public class ActorPositioningPanel : MonoBehaviour
 {
-    public static readonly int MaxPositioningObjects = 6;
-
+    public static readonly int MaxPositioningObjects = 6; // 本游戏目前的最高敌人数量为3，最高探险队成员数量为3，因此总共需要6个定位对象来显示所有角色。
 
     [Header("UI Components")]
     [SerializeField] private ActorPositioningObject[] _positioningObjects;
@@ -19,7 +18,7 @@ public class ActorPositioningPanel : MonoBehaviour
     /// <summary>
     /// 刷新界面显示，根据当前的角色数据列表更新每个定位对象的显示状态和内容。
     /// </summary>
-    public void RefreshPositioningView(List<EntitySerialization> sortedActorEntities, List<string> actionOrder)
+    public void RefreshView(List<EntitySerialization> sortedActorEntities, List<string> actionOrder)
     {
         // 先隐藏所有定位对象
         for (int i = 0; i < MaxPositioningObjects; i++)

@@ -35,6 +35,14 @@ public class ActorPositioningObject : MonoBehaviour
             return;
         }
 
+        // 点击事件触发时，首先检查角色是否已经死亡，如果已经死亡则不触发事件，避免对已死亡角色进行无效操作。
+        var deadthComponent = GameUtils.GetComponent<DeathComponent>(_actorEntity);
+        if (deadthComponent != null)
+        {
+            Debug.LogWarning($"Clicked on a dead actor: {_actorEntity.name}. Event will not be raised.");
+            return;
+        }
+
         var eventData = new UIEventData(
             UIEventType.ActorPositioningClicked,
             _actorEntity.name

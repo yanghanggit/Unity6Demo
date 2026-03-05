@@ -327,19 +327,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
             return;
         }
 
-        // var dungeon = await GameStateSync.Instance.GetDungeon();
-        // if (dungeon == null)
-        // {
-        //     Debug.LogError("Failed to refresh dungeon data");
-        //     return;
-        // }
-
-        // Debug.Log("PlayCards action completed and combat status evaluated");
-
-        // // 获取最新的地下城回合信息
-        // Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
-        // Debug.Assert(round != null, "Round data is null after playing cards");
-
         // 异步跑着，评估战斗状态，完成后会刷新地下城状态并更新UI显示
         DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
     }
@@ -400,13 +387,6 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
             Debug.LogWarning("Failed to advance to next dungeon, no messages returned");
             return;
         }
-
-        // var syncErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-        // if (syncErr != GameSyncError.None)
-        // {
-        //     Debug.LogError($"[DungeonCombatScene] Failed to refresh dungeon and actors data: {syncErr}");
-        //     return;
-        // }
 
         await UniTask.Yield();
         SceneManager.LoadScene(NextSceneName);

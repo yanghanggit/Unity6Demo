@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-//using TMPro;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
@@ -15,9 +14,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onActorPositioningClickedEvent; // 角色站位点击事件
 
-    // 实现 ICombatState 接口的 CombatScene 属性，用于接收当前战斗场景的引用
-    public ICombatScene CombatScene { get; set; }
-
+    public ICombatScene CombatScene { get; set; } // 实现 ICombatState 接口的 CombatScene 属性，用于接收当前战斗场景的引用
 
     void OnDestroy()
     {
@@ -26,7 +23,6 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
             _onActorPositioningClickedEvent.UnregisterListener(this);
         }
     }
-
 
     void Start()
     {
@@ -49,22 +45,36 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         OnPlayAsync().Forget();
     }
 
+    /// <summary>
+    /// 关闭卡牌构筑面板，并重新刷新站位面板以显示最新数据
+    /// </summary>
     public void OnClickCloseCardBuildPanel()
     {
         _cardBuildPanel.gameObject.SetActive(false);
-        OnEnterAsync().Forget(); // 重新刷新界面显示，确保站位面板等内容是最新的
+        RefreshPositioningAsync().Forget(); // 重新刷新界面显示，确保站位面板等内容是最新的
     }
 
+    /// <summary>
+    /// 关闭敌方手牌面板
+    /// </summary>
     public void OnClickCloseEnemyHandPanel()
     {
         _enemyHandPanel.gameObject.SetActive(false);
+        RefreshPositioningAsync().Forget(); // 重新刷新界面显示，确保站位面板等内容是最新的
     }
 
+    /// <summary>
+    /// 关闭仲裁面板
+    /// </summary>
     public void OnClickCloseArbitrationPanel()
     {
         _arbitrationPanel.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// 点击出牌按钮后的异步处理逻辑：拉取最新战斗状态，根据结果决定显示仲裁面板还是跳转至战后状态。
+    /// 未登录时使用随机 mock 数据模拟两种结果。
+    /// </summary>
     private async UniTaskVoid OnPlayAsync()
     {
         // 获取当前战斗状态，如果当前战斗对象不存在则默认设置为 NONE，并在日志中输出警告信息
@@ -142,15 +152,20 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
 
             // positioning 显示。
             _actorPositioningPanel.gameObject.SetActive(true);
-            _actorPositioningPanel.RefreshPositioningView(MockData.CreateActorData(), new List<string>());
+            _actorPositioningPanel.RefreshView(MockData.CreateActorData(), new List<string>());
         }
         else
         {
-            OnEnterAsync().Forget();
+            RefreshPositioningAsync().Forget();
         }
     }
 
-    private async UniTaskVoid OnEnterAsync()
+    /// <summary>
+    /// 异步刷新站位面板及顶部信息栏：
+    /// 并行拉取战斗数据与场景-演员映射，找到玩家所在场景的演员列表，
+    /// 按创建顺序排序后更新站位面板显示。
+    /// </summary>
+    private async UniTaskVoid RefreshPositioningAsync()
     {
         // 阶段1：并行获取战斗状态和场景-演员映射关系（两者互相独立）
         var (combat, stagesState) = await UniTask.WhenAll(
@@ -202,7 +217,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
 
         // 站位面板显示
         _actorPositioningPanel.gameObject.SetActive(true);
-        _actorPositioningPanel.RefreshPositioningView(sortedByCreationOrder, round.action_order);
+        _actorPositioningPanel.RefreshView(sortedByCreationOrder, round.action_order);
     }
 
     /// <summary>
@@ -219,8 +234,6 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
             case UIEventType.ActorPositioningClicked:
                 {
                     Debug.Log($"角色站位被点击，目标角色: {eventData.targetId}");
-
-
                     var actorName = eventData.targetId;
                     if (!GameContext.Instance.IsLoggedIn)
                     {
@@ -246,7 +259,6 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
                         OnHandleActorPositioningClicked(eventData).Forget();
                     }
                 }
-
                 break;
 
             default:
@@ -255,7 +267,12 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         }
     }
 
-
+    /// <summary>
+    /// 处理已登录用户点击站位角色的异步逻辑：
+    /// 拉取战斗及演员数据，判断点击目标是敌方或己方，
+    /// 敌方显示手牌面板，己方按行动顺序排序后显示卡牌构筑面板。
+    /// </summary>
+    /// <param name="eventData">包含被点击角色名称（targetId）的 UI 事件数据</param>
     private async UniTaskVoid OnHandleActorPositioningClicked(UIEventData eventData)
     {
         Debug.Log($"角色站位被点击，目标角色: {eventData.targetId}");
@@ -333,6 +350,4 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
             _cardBuildPanel.SetupForActor(selectedActorEntity, sortedActorEntities);
         }
     }
-
-
 }
