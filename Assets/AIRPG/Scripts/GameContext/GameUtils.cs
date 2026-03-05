@@ -29,15 +29,15 @@ public static partial class GameUtils
     /// 从实体序列化数据中获取指定类型的组件
     /// </summary>
     /// <typeparam name="T">组件类型</typeparam>
-    /// <param name="actorEntitySerialization">实体序列化数据</param>
+    /// <param name="entitySerialization">实体序列化数据</param>
     /// <returns>如果找到返回组件实例，否则返回 null</returns>
-    public static T GetComponent<T>(EntitySerialization actorEntitySerialization) where T : class
+    public static T GetComponent<T>(EntitySerialization entitySerialization) where T : class
     {
-        if (actorEntitySerialization?.components == null)
+        if (entitySerialization?.components == null)
             return null;
 
         string componentName = typeof(T).Name;
-        foreach (var component in actorEntitySerialization.components)
+        foreach (var component in entitySerialization.components)
         {
             if (component.name == componentName)
             {
@@ -46,6 +46,25 @@ public static partial class GameUtils
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// 从实体列表中筛选出包含指定类型组件的实体
+    /// </summary>
+    /// <typeparam name="T">组件类型</typeparam>
+    /// <param name="entities">实体列表</param>
+    /// <returns>仅包含指定类型组件的实体列表</returns>
+    public static List<EntitySerialization> FilterEntitiesByComponent<T>(List<EntitySerialization> entities) where T : class
+    {
+        var filteredEntities = new List<EntitySerialization>();
+        foreach (var entity in entities)
+        {
+            if (GetComponent<T>(entity) != null)
+            {
+                filteredEntities.Add(entity);
+            }
+        }
+        return filteredEntities;
     }
 
     /// <summary>

@@ -3693,6 +3693,7 @@ GameObject:
   - component: {fileID: 1055363933}
   - component: {fileID: 1055363935}
   - component: {fileID: 1055363936}
+  - component: {fileID: 1055363937}
   m_Layer: 5
   m_Name: ArbitrationPanel
   m_TagString: Untagged
@@ -3772,8 +3773,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24911dff35c37481197e14a85b1b2ad1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArbitrationPanel
-  _backgroundImage: {fileID: 1055363933}
   _arbitrationText: {fileID: 1259827920}
+  _tasksStatusApi: {fileID: 1055363937}
 --- !u!114 &1055363936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3787,6 +3788,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatBackground
   _backgroundImage: {fileID: 1055363933}
+--- !u!114 &1055363937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1055363931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48b4b41fbe39740799fa3830acf2686f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TasksStatusApi
+  requestTimeout: 30
+  maxRetryCount: 3
+  retryDelaySeconds: 1
+  useExponentialBackoff: 1
+  _pollInterval: 2
+  _maxAttempts: 60
 --- !u!1 &1058006131
 GameObject:
   m_ObjectHideFlags: 0
@@ -5887,6 +5906,7 @@ MonoBehaviour:
   - {fileID: 359754129}
   - {fileID: 2013654581}
   - {fileID: 2043487060}
+  _playButton: {fileID: 647806279}
 --- !u!114 &1475957529
 MonoBehaviour:
   m_ObjectHideFlags: 0

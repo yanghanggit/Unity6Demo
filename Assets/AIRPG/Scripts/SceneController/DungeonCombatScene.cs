@@ -1,5 +1,4 @@
 using UnityEngine;
-//using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 
@@ -62,76 +61,6 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
 
         /// 场景异步初始化入口，根据当前战斗状态执行对应的初始化逻辑
         InitCombatSceneAsync().Forget();
-    }
-
-    /// <summary>
-    /// 处理抽卡行动：根据当前 CardBuilder.Build 的数据决定执行敌人抽卡或盟友抽卡
-    /// </summary>
-    // private void HandleDrawCardAction()
-    // {
-    //     // 如果未登录，就不要处理这段提交代码。
-    //     if (!GameContext.Instance.IsLoggedIn)
-    //     {
-    //         Debug.Log("Simulating successful escape for non-logged-in user");
-    //         return;
-    //     }
-
-    //     if (CardBuilder.Build.owner == null)
-    //     {
-    //         Debug.LogWarning("No actor selected, cannot execute escape action");
-    //         return;
-    //     }
-
-    //     var enemyComponent = GameUtils.GetComponent<EnemyComponent>(CardBuilder.Build.owner);
-    //     if (enemyComponent != null)
-    //     {
-    //         // 敌人直接执行抽卡行动，传入空的行动列表和启用敌人抽卡的标志
-    //         ExecuteDrawCards(new List<AllyDrawCardAction>(), true).Forget();
-    //         return;
-    //     }
-
-    //     // 目标角色、技能和状态效果都是必选的，缺一不可，否则无法执行抽卡行动
-    //     if (CardBuilder.Build.targetActors == null || CardBuilder.Build.targetActors.Count == 0)
-    //     {
-    //         Debug.LogWarning("No target actors selected, cannot execute escape action");
-    //         return;
-    //     }
-
-    //     if (CardBuilder.Build.skill == null || CardBuilder.Build.skill.name == "")
-    //     {
-    //         Debug.LogWarning("No skill selected, cannot execute escape action");
-    //         return;
-    //     }
-
-    //     if (CardBuilder.Build.statusEffects == null || CardBuilder.Build.statusEffects.Count == 0)
-    //     {
-    //         Debug.LogWarning("No status effects selected, cannot execute escape action");
-    //         return;
-    //     }
-
-    //     // 创建抽卡行动
-    //     var allyDrawAction = new AllyDrawCardAction
-    //     {
-    //         entity_name = CardBuilder.Build.owner.name,
-    //         skill_name = CardBuilder.Build.skill.name,
-    //         target_names = CardBuilder.Build.targetActors != null ? CardBuilder.Build.targetActors.ConvertAll(actor => actor.name) : new List<string>(),
-    //         status_effect_names = CardBuilder.Build.statusEffects != null ? CardBuilder.Build.statusEffects.ConvertAll(effect => effect.name) : new List<string>()
-    //     };
-
-    //     // 调用抽卡接口，传入构建的行动数据
-    //     ExecuteDrawCards(new List<AllyDrawCardAction> { allyDrawAction }, false).Forget();
-    // }
-
-    /// <summary>
-    /// 处理出牌行动：所有存活演员均已有手牌后执行
-    /// TODO: 实现出牌逻辑
-    /// </summary>
-    private void HandlePlayCardAction()
-    {
-        Debug.Log("[DungeonCombatScene] HandlePlayCardAction: 所有演员已有手牌，出牌逻辑待实现");
-        // 我已经添加了 ExecutePlayCards 函数，请你在此调用点进行使用。
-
-        ExecutePlayCards().Forget();
     }
 
     /// <summary>
@@ -269,67 +198,44 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
     }
 
     /// <summary>
-    /// 执行抽卡操作并轮询任务状态，完成后显示手牌
-    /// 调用服务器 draw_cards 接口，获取任务ID后轮询查询任务状态
-    /// 当任务完成时，刷新数据并显示角色手牌信息
-    /// </summary>
-    // private async UniTaskVoid ExecuteDrawCards(List<AllyDrawCardAction> specifiedActions, bool enableEnemyDraw)
-    // {
-    //     string taskId = await DungeonGamePlayManager.Instance.DrawCards(specifiedActions, enableEnemyDraw);
-    //     if (string.IsNullOrEmpty(taskId))
-    //     {
-    //         Debug.LogError("DrawCards API call failed, no task ID returned");
-    //         return;
-    //     }
-
-    //     Debug.Log($"DrawCards initiated successfully, task ID: {taskId}");
-    //     var taskRecord = await PollTaskStatus(taskId);
-    //     if (taskRecord == null)
-    //     {
-    //         Debug.LogError($"Failed to get task record for task ID: {taskId}");
-    //         return;
-    //     }
-    // }
-
-    /// <summary>
     /// 轮询查询任务状态直到完成或失败
     /// 委托 TasksStatusApi 执行轮询逻辑，完成后通过回调函数返回结果
     /// </summary>
     /// <param name="taskId">要查询的任务ID</param>
     /// <param name="onComplete">轮询完成后的回调函数，参数为(成功标志, 消息, 任务记录)</param>
-    private async UniTask<TaskRecord> PollTaskStatus(string taskId)
-    {
-        return await _tasksStatusApi.PollTaskStatus(
-            GameContext.Instance.TasksStatusUrl,
-            taskId);
-    }
+    // private async UniTask<TaskRecord> PollTaskStatus(string taskId)
+    // {
+    //     return await _tasksStatusApi.PollTaskStatus(
+    //         GameContext.Instance.TasksStatusUrl,
+    //         taskId);
+    // }
 
     /// <summary>
     /// 执行出牌操作并轮询任务状态，完成后刷新数据并评估战斗状态
     /// 调用服务器 play_cards 接口，获取任务ID后轮询查询任务状态
     /// 当任务完成时，刷新数据并调用 CombatStatusEvaluation 接口评估当前战斗状态
     /// </summary>
-    private async UniTaskVoid ExecutePlayCards()
-    {
+    // private async UniTaskVoid ExecutePlayCards()
+    // {
 
-        string taskId = await DungeonGamePlayManager.Instance.PlayCards();
-        if (string.IsNullOrEmpty(taskId))
-        {
-            return;
-        }
+    //     string taskId = await DungeonGamePlayManager.Instance.PlayCards();
+    //     if (string.IsNullOrEmpty(taskId))
+    //     {
+    //         return;
+    //     }
 
-        Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
+    //     Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
 
-        //ShowArbitrationPanel("出牌操作已提交，任务id: " + taskId + "，正在等待服务器处理...");
-        var taskRecord = await PollTaskStatus(taskId);
-        if (taskRecord == null)
-        {
-            return;
-        }
+    //     //ShowArbitrationPanel("出牌操作已提交，任务id: " + taskId + "，正在等待服务器处理...");
+    //     var taskRecord = await PollTaskStatus(taskId);
+    //     if (taskRecord == null)
+    //     {
+    //         return;
+    //     }
 
-        // 异步跑着，评估战斗状态，完成后会刷新地下城状态并更新UI显示
-        DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
-    }
+    //     // 异步跑着，评估战斗状态，完成后会刷新地下城状态并更新UI显示
+    //     DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
+    // }
 
     /// <summary>
     /// 战斗后处理

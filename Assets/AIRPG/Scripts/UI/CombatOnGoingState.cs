@@ -69,6 +69,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
     public void OnClickCloseArbitrationPanel()
     {
         _arbitrationPanel.gameObject.SetActive(false);
+        RefreshPositioningAsync().Forget(); // 重新刷新界面显示，确保站位面板等内容是最新的
     }
 
     /// <summary>
@@ -82,21 +83,9 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
 
         if (!GameContext.Instance.IsLoggedIn)
         {
-            // 模拟未登录用户的战斗状态，这里直接设置为 ONGOING，后续可以根据需要调整为其他状态
-            await UniTask.Delay(100);
-
-            // 随机一个0～100 之间的数，模拟不同的战斗状态
-            int randomValue = Random.Range(0, 101);
-            if (randomValue < 50)
-            {
-                _arbitrationPanel.gameObject.SetActive(true);
-                //_arbitrationPanel.LastRound = GameUtils.GetLastRound(GameContext.Instance.Dungeon); // 显示最新的回合信息
-            }
-            else
-            {
-                CombatScene.OnEnterPostCombatState();
-            }
-            return;
+            await UniTask.Delay(0); // 模拟异步等待
+            lastCombatState = CombatState.ONGOING;
+            Debug.LogWarning($"Player is not logged in, using mock combat state: {lastCombatState}");
         }
         else
         {
@@ -116,10 +105,13 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         {
             case CombatState.ONGOING:
                 Debug.Log("[DungeonCombatScene] Combat is ongoing, showing ongoing UI");
+                _arbitrationPanel.gameObject.SetActive(true);
+                _arbitrationPanel.OnArbitrationPhaseEntered(); // 刷新仲裁面板显示内容
                 break;
 
             case CombatState.COMPLETE:
                 Debug.Log("[DungeonCombatScene] Combat is complete, showing post-combat UI");
+                CombatScene.OnEnterPostCombatState();
                 break;
 
             case CombatState.POST_COMBAT:
@@ -152,7 +144,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
 
             // positioning 显示。
             _actorPositioningPanel.gameObject.SetActive(true);
-            _actorPositioningPanel.RefreshView(MockData.CreateActorData(), new List<string>());
+            _actorPositioningPanel.UpdateCombatView(MockData.CreateActorData(), new Combat()); // 传入空的 action order 和 combat 对象，确保界面显示正常但不依赖实际数据
         }
         else
         {
@@ -208,8 +200,8 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         _topBar.SetText(topBarInfo);
 
         //
-        var round = combat.rounds.Count > 0 ? combat.rounds[^1] : null;
-        Debug.Assert(round != null, "Combat has no rounds data");
+        // var round = combat.rounds.Count > 0 ? combat.rounds[^1] : null;
+        // Debug.Assert(round != null, "Combat has no rounds data");
 
         // 排序一下，不然每次都是乱的。
         var sortedByCreationOrder = GameUtils.SortActorsByCreationOrder(actorEntitiesInStage);
@@ -217,7 +209,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
 
         // 站位面板显示
         _actorPositioningPanel.gameObject.SetActive(true);
-        _actorPositioningPanel.RefreshView(sortedByCreationOrder, round.action_order);
+        _actorPositioningPanel.UpdateCombatView(sortedByCreationOrder, combat);
     }
 
     /// <summary>

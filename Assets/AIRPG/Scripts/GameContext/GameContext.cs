@@ -11,7 +11,6 @@ public partial class GameContext
     public static string BaseUrl
     {
         get; set;
-        //set { _baseUrl = value; }
     }
 
     /// <summary>
