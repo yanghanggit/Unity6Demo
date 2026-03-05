@@ -154,24 +154,6 @@ public class CardElementScrollViewItem : UIBehaviour, IScrollViewItem, IUIEventL
             baseColor = Color.red;// 已选中的项目背景色改为红色，便于测试阶段查看效果
         }
 
-        // 如果用户已登录，并且点击的要素对应的角色是敌人，就不允许点击。
-        // if (GameContext.Instance.IsLoggedIn)
-        // {
-        //     var enemyComponent = GameUtils.GetComponent<EnemyComponent>(CardBuilder.Build.owner);
-        //     if (enemyComponent != null)
-        //     {
-        //         // 如果登陆了，并且是敌人，就不允许点击。
-        //         baseColor = Color.gray;
-        //     }
-
-        //     var deathComponent = GameUtils.GetComponent<DeathComponent>(CardBuilder.Build.owner);
-        //     if (deathComponent != null)
-        //     {
-        //         // 如果登陆了，并且是死了，就不允许点击。
-        //         baseColor = Color.gray;
-        //     }
-        // }
-
         _title.text = displayName;
         _background.color = baseColor;
     }

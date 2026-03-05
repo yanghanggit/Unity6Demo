@@ -221,7 +221,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         if (selectedActor == null)
         {
             Debug.LogWarning("[LoadCardElementsFromActor] selectedActor is null");
-            _scrollView.totalCount = CardBuilder.Count;
+            _scrollView.totalCount = CardBuilder.ElementsCount;
             _scrollView.RefillCells(); // 重建列表并回到顶部
             return;
         }
@@ -258,9 +258,9 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         Debug.Log($"[LoadCardElementsFromActor] 添加了 {targetCount} 个目标角色");
 
         // 更新滚动视图
-        _scrollView.totalCount = CardBuilder.Count;
+        _scrollView.totalCount = CardBuilder.ElementsCount;
         _scrollView.RefillCells(); // 重建列表并回到顶部
-        Debug.Log($"[LoadCardElementsFromActor] 总共加载 {CardBuilder.Count} 个卡牌要素");
+        Debug.Log($"[LoadCardElementsFromActor] 总共加载 {CardBuilder.ElementsCount} 个卡牌要素");
     }
 
     /// <summary>
@@ -294,13 +294,17 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         }
 
         // 更新当前角色数据
-        CardBuilder.Clear();
         CardBuilder.Build = new CardBuildData
         {
             owner = actorEntities.Count > 0 ? actorEntities[0] : null
         };
 
+        //
         UpdateMainText(CardBuilder.Build);
+
+        //
+        //_scrollView.totalCount = CardBuilder.ElementsCount;
+        _scrollView.RefillCells(); // 重建列表并回到顶部
     }
 
     /// <summary>

@@ -1,6 +1,5 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
-using UnityEngine.SceneManagement;
 
 public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
 {
@@ -27,15 +26,11 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
     [Header("Setting Panel")]
     [SerializeField] private GameObject _settingPanel; // 设置面板对象
 
-    [Header("API Components")]
-    [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
-
 
     void Start()
     {
         // 断言检查，确保所有必要的组件和数据都已正确设置
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
-        Debug.Assert(_tasksStatusApi != null, "TasksStatusApi component is not assigned in the inspector.");
         Debug.Assert(_topBar != null, "_topBar is null");
         Debug.Assert(_initializationState != null, "_initializationState is null");
         Debug.Assert(_onGoingState != null, "_onGoingState is null");
@@ -62,61 +57,6 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
         /// 场景异步初始化入口，根据当前战斗状态执行对应的初始化逻辑
         InitCombatSceneAsync().Forget();
     }
-
-    /// <summary>
-    /// 刷新当前场景中所有演员数据，并检查是否所有存活演员都已完成抽卡
-    /// 存活演员定义：没有 DeathComponent 组件的演员
-    /// 抽卡完成定义：存活演员的 HandComponent.cards 不为空
-    /// </summary>
-    /// <returns>是否所有存活演员都已完成抽卡</returns>
-    // private async UniTask<bool> RefreshAndCheckAllActorsDrawn()
-    // {
-    //     // 刷新玩家所在场景中所有演员的最新数据
-    //     var actorEntities = await GameStateSync.Instance.RefreshActorsInStageFromServer(GameContext.Instance.PlayerActorName);
-    //     if (actorEntities == null)
-    //     {
-    //         Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: failed to refresh actors in stage");
-    //         return false;
-    //     }
-
-    //     // 数据已是最新，获取当前回合的角色列表
-    //     var actors = GetCurrentRoundActors();
-    //     if (actors == null || actors.Count == 0)
-    //     {
-    //         Debug.LogWarning("[DungeonCombatScene] RefreshAndCheckAllActorsDrawn: no actors found in current round");
-    //         return false;
-    //     }
-
-    //     // 检查所有存活演员（没有 DeathComponent）是否都已有手牌数据
-    //     bool allDrawn = true;
-    //     foreach (var actor in actors)
-    //     {
-    //         var deathComponent = GameUtils.GetComponent<DeathComponent>(actor);
-    //         if (deathComponent != null)
-    //         {
-    //             // 已死亡，跳过检查
-    //             continue;
-    //         }
-
-    //         var handComponent = GameUtils.GetComponent<HandComponent>(actor);
-    //         if (handComponent == null || handComponent.cards == null || handComponent.cards.Count == 0)
-    //         {
-    //             allDrawn = false;
-    //             break;
-    //         }
-    //     }
-
-    //     if (allDrawn)
-    //     {
-    //         Debug.Log("[DungeonCombatScene] 所有存活演员均已完成抽卡");
-    //     }
-    //     else
-    //     {
-    //         Debug.Log("[DungeonCombatScene] 尚有存活演员未完成抽卡");
-    //     }
-
-    //     return allDrawn;
-    // }
 
     /// <summary>
     /// IUIEventListener 接口实现
@@ -165,7 +105,7 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
             case CombatState.INITIALIZATION:
                 {
                     Debug.Log("[DungeonCombatScene] Combat is in initialization state, showing initialization UI");
-                    var messages = await DungeonGamePlayManager.Instance.CombatInit();
+                    var messages = await DungeonGamePlayManager.Instance.InitCombat();
                     if (messages == null)
                     {
                         Debug.LogError("CombatInit failed, messages is null");
@@ -197,106 +137,6 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
         }
     }
 
-    /// <summary>
-    /// 轮询查询任务状态直到完成或失败
-    /// 委托 TasksStatusApi 执行轮询逻辑，完成后通过回调函数返回结果
-    /// </summary>
-    /// <param name="taskId">要查询的任务ID</param>
-    /// <param name="onComplete">轮询完成后的回调函数，参数为(成功标志, 消息, 任务记录)</param>
-    // private async UniTask<TaskRecord> PollTaskStatus(string taskId)
-    // {
-    //     return await _tasksStatusApi.PollTaskStatus(
-    //         GameContext.Instance.TasksStatusUrl,
-    //         taskId);
-    // }
-
-    /// <summary>
-    /// 执行出牌操作并轮询任务状态，完成后刷新数据并评估战斗状态
-    /// 调用服务器 play_cards 接口，获取任务ID后轮询查询任务状态
-    /// 当任务完成时，刷新数据并调用 CombatStatusEvaluation 接口评估当前战斗状态
-    /// </summary>
-    // private async UniTaskVoid ExecutePlayCards()
-    // {
-
-    //     string taskId = await DungeonGamePlayManager.Instance.PlayCards();
-    //     if (string.IsNullOrEmpty(taskId))
-    //     {
-    //         return;
-    //     }
-
-    //     Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
-
-    //     //ShowArbitrationPanel("出牌操作已提交，任务id: " + taskId + "，正在等待服务器处理...");
-    //     var taskRecord = await PollTaskStatus(taskId);
-    //     if (taskRecord == null)
-    //     {
-    //         return;
-    //     }
-
-    //     // 异步跑着，评估战斗状态，完成后会刷新地下城状态并更新UI显示
-    //     DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
-    // }
-
-    /// <summary>
-    /// 战斗后处理
-    /// 调用服务器 post_combat 接口进行战斗后处理，成功后刷新地下城状态显示
-    /// </summary>
-    private async UniTaskVoid ExecutePostCombat()
-    {
-
-        var sessionMessages = await DungeonGamePlayManager.Instance.PostCombat();
-        if (sessionMessages == null)
-        {
-            Debug.LogWarning("Failed to get session messages from post combat");
-            //ShowPostCombatPanel("战斗后处理失败，无法获取事件信息");
-            return;
-        }
-
-        // 然后逐个处理返回的 SessionMessage，特别是 CombatArchiveEvent
-        var showText = "战斗后事件：\n\n";
-
-        for (int i = 0; i < sessionMessages.Count; i++)
-        {
-            SessionMessage sessionMessage = sessionMessages[i];
-            if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
-            {
-                continue;
-            }
-
-            var agentEvent = GameUtils.ParseAgentEvent(sessionMessage);
-            if (agentEvent == null)
-            {
-                Debug.LogWarning("Failed to parse agent event from session message");
-                continue;
-            }
-
-            if (agentEvent.head == (int)EventHead.COMBAT_ARCHIVE_EVENT)
-            {
-                Debug.Log("Processing CombatArchiveEvent from post combat");
-                if (agentEvent is CombatArchiveEvent combatArchiveEvent)
-                {
-                    showText += $"Actor: {combatArchiveEvent.actor}\nSummary: {combatArchiveEvent.summary}\n\n";
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// 进入下一关处理
-    /// </summary>
-    /// <returns></returns>
-    private async UniTaskVoid ExecuteAdvanceNext()
-    {
-        var messages = await DungeonGamePlayManager.Instance.AdvanceNextDungeon();
-        if (messages == null)
-        {
-            Debug.LogWarning("Failed to advance to next dungeon, no messages returned");
-            return;
-        }
-
-        await UniTask.Yield();
-        SceneManager.LoadScene(NextSceneName);
-    }
 
     /// <summary>
     /// 显示仲裁面板并设置文本内容

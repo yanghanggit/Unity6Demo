@@ -35,6 +35,12 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// </summary>
     [SerializeField] private DungeonCombatDrawCardsApi _dungeonCombatDrawCardsApi;
 
+    /// <summary>
+    /// 公开访问接口
+    /// </summary>
+    public DungeonProgressApi ProgressApi => _dungeonProgressApi;
+
+    
     private void Awake()
     {
         // 单例模式处理
@@ -63,7 +69,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 combat_init 端点开始战斗
     /// </summary>
     /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> CombatInit()
+    public async UniTask<List<SessionMessage>> InitCombat()
     {
         await _dungeonProgressApi.Call(
             GameContext.Instance.DungeonProgressUrl,
@@ -197,7 +203,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 advance_next_dungeon 端点推进地下城进度
     /// </summary>
     /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> AdvanceNextDungeon()
+    public async UniTask<List<SessionMessage>> AdvanceStage()
     {
         await _dungeonProgressApi.Call(
             GameContext.Instance.DungeonProgressUrl,

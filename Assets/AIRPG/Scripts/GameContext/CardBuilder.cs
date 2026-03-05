@@ -149,7 +149,7 @@ public static class CardBuilder
     /// <summary>
     /// 获取要素数量
     /// </summary>
-    public static int Count => _elements.Count;
+    public static int ElementsCount => _elements.Count;
 
     /// <summary>
     /// 判断是否包含指定类型的要素

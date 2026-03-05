@@ -80,19 +80,43 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
     {
         // 获取当前战斗状态，如果当前战斗对象不存在则默认设置为 NONE，并在日志中输出警告信息
         CombatState lastCombatState = CombatState.NONE;
+        List<EntitySerialization> actorEntitiesInStage = new();
 
         if (!GameContext.Instance.IsLoggedIn)
         {
             await UniTask.Delay(0); // 模拟异步等待
-            lastCombatState = CombatState.ONGOING;
+            lastCombatState = CombatState.COMPLETE; // 模拟战斗完成状态
             Debug.LogWarning($"Player is not logged in, using mock combat state: {lastCombatState}");
         }
         else
         {
-            var combat = await GameStateSync.Instance.GetCombat();
-            if (combat == null)
+            // 阶段1：并行获取战斗状态和场景-演员映射关系（两者互相独立）
+            var (combat, stagesState) = await UniTask.WhenAll(
+                GameStateSync.Instance.GetCombat(),
+                GameStateSync.Instance.GetStagesState()
+            );
+
+            if (combat == null || stagesState == null)
             {
-                Debug.LogError("[DungeonCombatScene] Combat data is null after refresh");
+                Debug.LogError("CombatOnGoingState: Dungeon data is null, cannot refresh combat view");
+                return;
+            }
+
+            // 阶段2：依据映射结果获取当前场景中的演员列表
+            List<string> actorNamesInStage = new();
+            foreach (var kvp in stagesState)
+            {
+                if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
+                {
+                    actorNamesInStage = kvp.Value;
+                    break;
+                }
+            }
+
+            actorEntitiesInStage = await GameStateSync.Instance.GetEntities(actorNamesInStage);
+            if (actorEntitiesInStage == null)
+            {
+                Debug.LogError("CombatOnGoingState: Actor entities data is null, cannot refresh combat view");
                 return;
             }
 
@@ -104,9 +128,24 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         switch (lastCombatState)
         {
             case CombatState.ONGOING:
-                Debug.Log("[DungeonCombatScene] Combat is ongoing, showing ongoing UI");
-                _arbitrationPanel.gameObject.SetActive(true);
-                _arbitrationPanel.OnArbitrationPhaseEntered(); // 刷新仲裁面板显示内容
+                {
+                    // 每个人都有手牌了，就进行战斗演绎
+                    var hasHandComponentEntities = GameUtils.FilterEntitiesByComponent<HandComponent>(actorEntitiesInStage);
+                    var hasDeathComponentEntities = GameUtils.FilterEntitiesByComponent<DeathComponent>(actorEntitiesInStage);
+                    int aliveCount = actorEntitiesInStage.Count - hasDeathComponentEntities.Count;
+                    if (aliveCount > 0 && hasHandComponentEntities.Count >= aliveCount)
+                    {
+                        // 所有活着的角色都有手牌了，可以执行行动了
+                        Debug.Log("[DungeonCombatScene] Combat is ongoing, showing ongoing UI");
+                        _arbitrationPanel.gameObject.SetActive(true);
+                        _arbitrationPanel.OnArbitrationPhaseEntered(); // 刷新仲裁面板显示内容
+                    }
+                    else
+                    {
+                        // 还有角色没有手牌，或者所有角色都死了，不能执行行动
+                        Debug.Log("[DungeonCombatScene] Combat is ongoing but not all actors are ready, showing ongoing UI without arbitration");
+                    }
+                }
                 break;
 
             case CombatState.COMPLETE:
@@ -198,10 +237,6 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         // 刷新顶部信息显示，包含当前地下城、关卡和回合数等信息
         var topBarInfo = $"{DungeonCombatScene.CachedDungeonName} | {DungeonCombatScene.CachedStageName} | 回合数: {combat.rounds.Count}";
         _topBar.SetText(topBarInfo);
-
-        //
-        // var round = combat.rounds.Count > 0 ? combat.rounds[^1] : null;
-        // Debug.Assert(round != null, "Combat has no rounds data");
 
         // 排序一下，不然每次都是乱的。
         var sortedByCreationOrder = GameUtils.SortActorsByCreationOrder(actorEntitiesInStage);
