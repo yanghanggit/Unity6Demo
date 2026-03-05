@@ -6,6 +6,14 @@
 /// </summary>
 public static partial class ImageService
 {
+
+    /// <summary>
+    /// 获取生成图片API的URL地址
+    /// </summary>    
+    public static string BaseUrl
+    {
+        get; set;
+    }
     /// <summary>
     /// 获取生成图片API的URL地址
     /// </summary>
@@ -13,7 +21,7 @@ public static partial class ImageService
     {
         get
         {
-            return ImageApiEndpointsManager.BaseUrl.TrimEnd('/') + ImageApiEndpointsManager.ImageGenerate;
+            return BaseUrl.TrimEnd('/') + "/api/generate/v1";
         }
     }
 }

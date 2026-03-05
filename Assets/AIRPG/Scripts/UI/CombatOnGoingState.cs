@@ -90,7 +90,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
             if (randomValue < 50)
             {
                 _arbitrationPanel.gameObject.SetActive(true);
-                _arbitrationPanel.LastRound = GameUtils.GetLastRound(GameContext.Instance.Dungeon); // 显示最新的回合信息
+                //_arbitrationPanel.LastRound = GameUtils.GetLastRound(GameContext.Instance.Dungeon); // 显示最新的回合信息
             }
             else
             {
@@ -204,7 +204,7 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
         }
 
         // 刷新顶部信息显示，包含当前地下城、关卡和回合数等信息
-        var topBarInfo = $"{DungeonCombatScene2.DungeonName} | {DungeonCombatScene2.StageName} | 回合数: {combat.rounds.Count}";
+        var topBarInfo = $"{DungeonCombatScene2.CachedDungeonName} | {DungeonCombatScene2.CachedStageName} | 回合数: {combat.rounds.Count}";
         _topBar.SetText(topBarInfo);
 
         //

@@ -63,7 +63,6 @@ public class LaunchScene : MonoBehaviour
     private async UniTaskVoid InitializeGameApiEndpoints()
     {
         await _rootApi.Call(_gameApiBaseUrl);
-
         if (_rootApi.ReqResult == null)
         {
             Debug.LogError($"Failed to initialize API endpoints from {_gameApiBaseUrl}: request result is null");
@@ -81,7 +80,7 @@ public class LaunchScene : MonoBehaviour
         _loginButton.gameObject.SetActive(true);
 
         // 设置全局游戏上下文的基础URL和根响应数据
-        GameApiEndpointsManager.BaseUrl = _gameApiBaseUrl;
+        GameContext.BaseUrl = _gameApiBaseUrl;
     }
 
     /// <summary>

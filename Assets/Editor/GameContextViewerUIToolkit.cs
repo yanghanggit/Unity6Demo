@@ -51,7 +51,7 @@ public class GameContextViewerUIToolkit : EditorWindow
         CacheUIElements();
 
         // 绑定按钮事件
-        BindButtons();
+        // BindButtons();
 
         // 初始化数据
         RefreshData();
@@ -110,40 +110,40 @@ public class GameContextViewerUIToolkit : EditorWindow
         agentEventsFoldout = rootVisualElement.Q<Foldout>("agent-events-foldout");
     }
 
-    private void BindButtons()
-    {
-        var refreshButton = rootVisualElement.Q<Button>("refresh-button");
-        if (refreshButton != null)
-        {
-            refreshButton.clicked += RefreshData;
-        }
+    // private void BindButtons()
+    // {
+    //     var refreshButton = rootVisualElement.Q<Button>("refresh-button");
+    //     if (refreshButton != null)
+    //     {
+    //         refreshButton.clicked += RefreshData;
+    //     }
 
-        var clearEventsButton = rootVisualElement.Q<Button>("clear-events-button");
-        if (clearEventsButton != null)
-        {
-            clearEventsButton.clicked += () =>
-            {
-                if (EditorUtility.DisplayDialog("确认", "确定要清除所有事件历史吗?", "确定", "取消"))
-                {
-                    GameContext.Instance?.ClearAgentEventsHistory();
-                    RefreshData();
-                }
-            };
-        }
+    //     var clearEventsButton = rootVisualElement.Q<Button>("clear-events-button");
+    //     if (clearEventsButton != null)
+    //     {
+    //         clearEventsButton.clicked += () =>
+    //         {
+    //             if (EditorUtility.DisplayDialog("确认", "确定要清除所有事件历史吗?", "确定", "取消"))
+    //             {
+    //                 GameContext.Instance?.ClearAgentEventsHistory();
+    //                 RefreshData();
+    //             }
+    //         };
+    //     }
 
-        var clearContextButton = rootVisualElement.Q<Button>("clear-context-button");
-        if (clearContextButton != null)
-        {
-            clearContextButton.clicked += () =>
-            {
-                if (EditorUtility.DisplayDialog("确认", "确定要清除GameContext实例吗?", "确定", "取消"))
-                {
-                    GameContext.ClearInstance();
-                    RefreshData();
-                }
-            };
-        }
-    }
+    //     var clearContextButton = rootVisualElement.Q<Button>("clear-context-button");
+    //     if (clearContextButton != null)
+    //     {
+    //         clearContextButton.clicked += () =>
+    //         {
+    //             if (EditorUtility.DisplayDialog("确认", "确定要清除GameContext实例吗?", "确定", "取消"))
+    //             {
+    //                 GameContext.ClearInstance();
+    //                 RefreshData();
+    //             }
+    //         };
+    //     }
+    // }
 
     private float lastUpdateTime;
     private void OnEditorUpdate()
@@ -179,8 +179,8 @@ public class GameContextViewerUIToolkit : EditorWindow
         //UpdateStageMapping();
         //UpdateActorEntities();
         //UpdateStageEntities();
-        UpdateDungeonData();
-        UpdateAgentEvents();
+        //UpdateDungeonData();
+        //UpdateAgentEvents();
     }
 
     private void UpdateUserInfo()
@@ -411,95 +411,95 @@ public class GameContextViewerUIToolkit : EditorWindow
         return card;
     }
 
-    private void UpdateDungeonData()
-    {
-        if (dungeonField == null) return;
+    // private void UpdateDungeonData()
+    // {
+    //     if (dungeonField == null) return;
 
-        if (GameContext.Instance.Dungeon != null)
-        {
-            try
-            {
-                string json = JsonConvert.SerializeObject(GameContext.Instance.Dungeon, Formatting.Indented);
-                dungeonField.value = json;
-            }
-            catch (System.Exception ex)
-            {
-                dungeonField.value = $"无法序列化地牢数据: {ex.Message}";
-            }
-        }
-        else
-        {
-            dungeonField.value = "地牢数据为空";
-        }
-    }
+    //     if (GameContext.Instance.Dungeon != null)
+    //     {
+    //         try
+    //         {
+    //             string json = JsonConvert.SerializeObject(GameContext.Instance.Dungeon, Formatting.Indented);
+    //             dungeonField.value = json;
+    //         }
+    //         catch (System.Exception ex)
+    //         {
+    //             dungeonField.value = $"无法序列化地牢数据: {ex.Message}";
+    //         }
+    //     }
+    //     else
+    //     {
+    //         dungeonField.value = "地牢数据为空";
+    //     }
+    // }
 
-    private void UpdateAgentEvents()
-    {
-        if (agentEventsContainer == null) return;
+    // private void UpdateAgentEvents()
+    // {
+    //     if (agentEventsContainer == null) return;
 
-        agentEventsContainer.Clear();
+    //     agentEventsContainer.Clear();
 
-        var allEvents = GameContext.Instance.AgentEventsHistory;
-        int totalEvents = 0;
-        foreach (var kvp in allEvents)
-        {
-            totalEvents += kvp.Value.Count;
-        }
+    //     var allEvents = GameContext.Instance.AgentEventsHistory;
+    //     int totalEvents = 0;
+    //     foreach (var kvp in allEvents)
+    //     {
+    //         totalEvents += kvp.Value.Count;
+    //     }
 
-        if (agentEventsFoldout != null)
-        {
-            agentEventsFoldout.text = $"代理事件历史 (角色数: {allEvents.Count}, 总事件数: {totalEvents})";
-        }
+    //     if (agentEventsFoldout != null)
+    //     {
+    //         agentEventsFoldout.text = $"代理事件历史 (角色数: {allEvents.Count}, 总事件数: {totalEvents})";
+    //     }
 
-        // 显示最后一轮事件
-        var lastRound = GameContext.Instance.LastAgentEventsHistory;
-        if (lastRound.Count > 0)
-        {
-            var lastRoundLabel = new Label("最后一轮事件:");
-            lastRoundLabel.AddToClassList("bold-label");
-            agentEventsContainer.Add(lastRoundLabel);
+    //     // 显示最后一轮事件
+    //     var lastRound = GameContext.Instance.LastAgentEventsHistory;
+    //     if (lastRound.Count > 0)
+    //     {
+    //         var lastRoundLabel = new Label("最后一轮事件:");
+    //         lastRoundLabel.AddToClassList("bold-label");
+    //         agentEventsContainer.Add(lastRoundLabel);
 
-            foreach (var kvp in lastRound)
-            {
-                var eventLabel = new Label($"{kvp.Key}: {kvp.Value.Count} 个事件");
-                eventLabel.AddToClassList("info-label");
-                agentEventsContainer.Add(eventLabel);
-            }
+    //         foreach (var kvp in lastRound)
+    //         {
+    //             var eventLabel = new Label($"{kvp.Key}: {kvp.Value.Count} 个事件");
+    //             eventLabel.AddToClassList("info-label");
+    //             agentEventsContainer.Add(eventLabel);
+    //         }
 
-            agentEventsContainer.Add(new VisualElement { style = { height = 10 } });
-        }
+    //         agentEventsContainer.Add(new VisualElement { style = { height = 10 } });
+    //     }
 
-        // 显示所有历史事件
-        if (allEvents.Count > 0)
-        {
-            var allEventsLabel = new Label("所有历史事件:");
-            allEventsLabel.AddToClassList("bold-label");
-            agentEventsContainer.Add(allEventsLabel);
+    //     // 显示所有历史事件
+    //     if (allEvents.Count > 0)
+    //     {
+    //         var allEventsLabel = new Label("所有历史事件:");
+    //         allEventsLabel.AddToClassList("bold-label");
+    //         agentEventsContainer.Add(allEventsLabel);
 
-            foreach (var kvp in allEvents)
-            {
-                var actorFoldout = new Foldout
-                {
-                    text = $"角色: {kvp.Key} (事件数: {kvp.Value.Count})",
-                    value = false
-                };
+    //         foreach (var kvp in allEvents)
+    //         {
+    //             var actorFoldout = new Foldout
+    //             {
+    //                 text = $"角色: {kvp.Key} (事件数: {kvp.Value.Count})",
+    //                 value = false
+    //             };
 
-                foreach (var agentEvent in kvp.Value)
-                {
-                    var eventCard = CreateEventCard(agentEvent);
-                    actorFoldout.Add(eventCard);
-                }
+    //             foreach (var agentEvent in kvp.Value)
+    //             {
+    //                 var eventCard = CreateEventCard(agentEvent);
+    //                 actorFoldout.Add(eventCard);
+    //             }
 
-                agentEventsContainer.Add(actorFoldout);
-            }
-        }
-        else
-        {
-            var emptyLabel = new Label("暂无事件数据");
-            emptyLabel.AddToClassList("empty-message");
-            agentEventsContainer.Add(emptyLabel);
-        }
-    }
+    //             agentEventsContainer.Add(actorFoldout);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         var emptyLabel = new Label("暂无事件数据");
+    //         emptyLabel.AddToClassList("empty-message");
+    //         agentEventsContainer.Add(emptyLabel);
+    //     }
+    // }
 
     private VisualElement CreateEventCard(AgentEvent agentEvent)
     {

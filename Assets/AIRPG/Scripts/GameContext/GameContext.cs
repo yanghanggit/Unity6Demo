@@ -8,6 +8,12 @@ using System.Diagnostics;
 /// </summary>
 public partial class GameContext
 {
+    public static string BaseUrl
+    {
+        get; set;
+        //set { _baseUrl = value; }
+    }
+
     /// <summary>
     /// 单例实例
     /// </summary>
@@ -178,7 +184,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.Login;
+            return BaseUrl.TrimEnd('/') + "/api/login/v1/";
         }
     }
 
@@ -189,7 +195,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.Logout;
+            return BaseUrl.TrimEnd('/') + "/api/logout/v1/";
         }
     }
 
@@ -200,7 +206,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.HomePlayerAction;
+            return BaseUrl.TrimEnd('/') + "/api/home/player_action/v1/";
         }
     }
 
@@ -211,7 +217,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.HomeAdvance;
+            return BaseUrl.TrimEnd('/') + "/api/home/advance/v1/";
         }
     }
 
@@ -223,7 +229,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + $"{GameApiEndpointsManager.StagesState}{UserName}/{GameName}/state";
+            return BaseUrl.TrimEnd('/') + $"/api/stages/v1/{UserName}/{GameName}/state";
         }
     }
 
@@ -235,7 +241,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + $"{GameApiEndpointsManager.DungeonState}{UserName}/{GameName}/state";
+            return BaseUrl.TrimEnd('/') + $"/api/dungeons/v1/{UserName}/{GameName}/state";
         }
     }
 
@@ -247,7 +253,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + $"{GameApiEndpointsManager.DungeonCombat}{UserName}/{GameName}/combat";
+            return BaseUrl.TrimEnd('/') + $"/api/dungeons/v1/{UserName}/{GameName}/combat";
         }
     }
 
@@ -259,7 +265,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + $"{GameApiEndpointsManager.EntityDetails}{UserName}/{GameName}/details";
+            return BaseUrl.TrimEnd('/') + $"/api/entities/v1/{UserName}/{GameName}/details";
         }
     }
 
@@ -270,7 +276,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.StartGame;
+            return BaseUrl.TrimEnd('/') + "/api/start/v1/";
         }
     }
 
@@ -281,7 +287,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.HomeTransDungeon;
+            return BaseUrl.TrimEnd('/') + "/api/home/trans_dungeon/v1/";
         }
     }
 
@@ -292,7 +298,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.DungeonProgress;
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/progress/v1/";
         }
     }
 
@@ -303,7 +309,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.DungeonCombatDrawCards;
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/combat/draw_cards/v1/";
         }
     }
 
@@ -314,7 +320,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.DungeonCombatPlayCards;
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/combat/play_cards/v1/";
         }
     }
 
@@ -325,7 +331,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.DungeonTransHome;
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/trans_home/v1/";
         }
     }
 
@@ -337,18 +343,7 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + $"{GameApiEndpointsManager.SessionMessages}{UserName}/{GameName}/since";
-        }
-    }
-
-    /// <summary>
-    /// 获取任务触发API的URL地址
-    /// </summary>
-    public string TasksTriggerUrl
-    {
-        get
-        {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.TasksTrigger;
+            return BaseUrl.TrimEnd('/') + $"/api/session_messages/v1/{UserName}/{GameName}/since";
         }
     }
 
@@ -360,7 +355,8 @@ public partial class GameContext
     {
         get
         {
-            return GameApiEndpointsManager.BaseUrl.TrimEnd('/') + GameApiEndpointsManager.TasksStatus;
+            //public static readonly string TasksStatus = "/api/tasks/v1/status";
+            return BaseUrl.TrimEnd('/') + "/api/tasks/v1/status";
         }
     }
 }
