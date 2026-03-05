@@ -212,7 +212,7 @@ public class DungeonCombatScene2 : MonoBehaviour, IUIEventListener, ICombatScene
         if (!GameContext.Instance.IsLoggedIn)
         {
             // 模拟未登录用户的战斗状态，这里直接设置为 ONGOING，后续可以根据需要调整为其他状态
-            await UniTask.Delay(500);
+            //await UniTask.Delay(0);
 
             // 假设未登录用户没有战斗数据，直接设置为 NONE 状态，并在日志中输出相关信息
             lastCombatState = CombatState.ONGOING;

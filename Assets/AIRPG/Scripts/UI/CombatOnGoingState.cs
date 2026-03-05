@@ -3,29 +3,41 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
-public class CombatOnGoingState : MonoBehaviour, ICombatState
+public class CombatOnGoingState : MonoBehaviour, ICombatState, IUIEventListener
 {
     [Header("UI Components")]
     [SerializeField] private ActorPositioningPanel _actorPositioningPanel; // 角色站位面板控制器
     [SerializeField] private ArbitrationPanel _arbitrationPanel; // 仲裁面板对象
     [SerializeField] private CombatTopBar _topBar; // 顶部UI控制器
-    // 用于存储 mock 数据的字段
-    private List<EntitySerialization> _mockActorData;
+    [SerializeField] private CardBuildPanel _cardBuildPanel; // 卡牌构筑面板
+    [SerializeField] private EnemyHandPanel _enemyHandPanel; // 敌方手牌面板
+
+    [Header("Events")]
+    [SerializeField] private UIEventGameEvent _onActorPositioningClickedEvent; // 角色站位点击事件
 
     // 实现 ICombatState 接口的 CombatScene 属性，用于接收当前战斗场景的引用
     public ICombatScene CombatScene { get; set; }
 
-    void Awake()
+
+    void OnDestroy()
     {
-        // 创建 mock 数据
-        _mockActorData = MockData.CreateActorData();
+        if (_onActorPositioningClickedEvent != null)
+        {
+            _onActorPositioningClickedEvent.UnregisterListener(this);
+        }
     }
+
 
     void Start()
     {
         Debug.Assert(_topBar != null, "_topBar is null");
         Debug.Assert(_actorPositioningPanel != null, "_actorPositioningPanel is null");
         Debug.Assert(_arbitrationPanel != null, "_arbitrationPanel is null");
+        Debug.Assert(_cardBuildPanel != null, "_cardBuildPanel is null");
+        Debug.Assert(_enemyHandPanel != null, "_enemyHandPanel is null");
+        Debug.Assert(_onActorPositioningClickedEvent != null, "_onActorPositioningClickedEvent is null");
+
+        _onActorPositioningClickedEvent.RegisterListener(this);
     }
 
     /// <summary>
@@ -61,14 +73,6 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
         }
         else
         {
-            // 先刷新一次
-            // var refreshErr = await GameStateSync.Instance.RefreshCombatStateFromServer();
-            // if (refreshErr != GameSyncError.None)
-            // {
-            //     Debug.LogError($"[DungeonCombatScene] Failed to refresh combat state from server: {refreshErr}");
-            //     return;
-            // }
-
             var combat = await GameStateSync.Instance.GetCombat();
             if (combat == null)
             {
@@ -107,11 +111,10 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
     public void OnEnter()
     {
         // 进入战斗进行中状态时，默认先隐藏卡牌构筑面板和敌人手牌面板，确保界面干净
-        _actorPositioningPanel.HideCardBuildPanel();
-        _actorPositioningPanel.HideEnemyHandPanel();
-
-        // 先关掉仲裁面板，避免显示错误数据
-        HideArbitrationPanel();
+        _cardBuildPanel.gameObject.SetActive(false);
+        _enemyHandPanel.gameObject.SetActive(false);
+        _arbitrationPanel.gameObject.SetActive(false);
+        _actorPositioningPanel.gameObject.SetActive(false);
 
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -122,13 +125,14 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
 
             // positioning 显示。
             _actorPositioningPanel.gameObject.SetActive(true);
-            _actorPositioningPanel.ActorEntities = _mockActorData;
-            _actorPositioningPanel.RefreshPositioningView();
-            return;
+            _actorPositioningPanel.RefreshPositioningView(MockData.CreateActorData());
+            //return;
 
         }
-
-        OnEnterAsync().Forget();
+        else
+        {
+            OnEnterAsync().Forget();
+        }
     }
 
     private async UniTaskVoid OnEnterAsync()
@@ -169,27 +173,69 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
             return;
         }
 
-        // 等待1秒钟，模拟加载过程中的等待时间，提升用户体验
-        //await UniTask.Delay(1000 * 60);
-
-
         // 刷新顶部信息显示，包含当前地下城、关卡和回合数等信息
         var topBarInfo = $"{DungeonCombatScene2.DungeonName} | {DungeonCombatScene2.StageName} | 回合数: {combat.rounds.Count}";
         _topBar.SetText(topBarInfo);
 
         // 站位面板显示
         _actorPositioningPanel.gameObject.SetActive(true);
-        _actorPositioningPanel.ActorEntities = actorEntities;
-        _actorPositioningPanel.RefreshPositioningView();
+        _actorPositioningPanel.RefreshPositioningView(actorEntities);
     }
 
     /// <summary>
-    /// 从当前的角色实体列表中筛选出需要在站位面板中显示的角色实体，通常是玩家队伍中的角色。
-    /// </summary>    
-    public void HideArbitrationPanel()
+    /// 显示卡牌构筑面板并为指定角色初始化数据
+    /// </summary>
+    // public void ShowCardBuildPanelForActor(EntitySerialization actorEntity)
+    // {
+    //     _cardBuildPanel.gameObject.SetActive(true);
+
+    //     if (GameContext.Instance.IsLoggedIn)
+    //     {
+    //         Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+    //         Debug.Assert(round != null, "CombatOnGoingState: No round data found for current dungeon");
+    //         var actionOrderEntities = GameContext.Instance.GetActorEntities(round.action_order);
+    //         Debug.Assert(actionOrderEntities != null && actionOrderEntities.Count > 0, "CombatOnGoingState: No action order entities found, cannot refresh view");
+    //         _cardBuildPanel.SetupForActor(actorEntity, actionOrderEntities);
+    //     }
+    //     else
+    //     {
+    //         // mock 数据，所有的角色都显示同样的构筑界面
+    //         _cardBuildPanel.SetupForActor(actorEntity, MockData.CreateActorData());
+    //     }
+    // }
+
+    /// <summary>
+    /// 隐藏卡牌构筑面板
+    /// </summary>
+    // public void HideCardBuildPanel()
+    // {
+    //     _cardBuildPanel.gameObject.SetActive(false);
+    // }
+
+    /// <summary>
+    /// 显示敌方手牌面板并为指定角色初始化数据
+    /// </summary>
+    public void ShowEnemyHandPanel(EntitySerialization actorEntity)
     {
-        _arbitrationPanel.gameObject.SetActive(false);
+        _enemyHandPanel.gameObject.SetActive(true);
+        _enemyHandPanel.SetupForActor(actorEntity);
     }
+
+    // /// <summary>
+    // /// 隐藏敌方手牌面板
+    // /// </summary>
+    // public void HideEnemyHandPanel()
+    // {
+    //     _enemyHandPanel.gameObject.SetActive(false);
+    // }
+
+    // /// <summary>
+    // /// 从当前的角色实体列表中筛选出需要在站位面板中显示的角色实体，通常是玩家队伍中的角色。
+    // /// </summary>    
+    // public void HideArbitrationPanel()
+    // {
+    //     _arbitrationPanel.gameObject.SetActive(false);
+    // }
 
     /// <summary>
     /// 显示仲裁面板并刷新显示内容，通常在点击顶部信息按钮时调用。
@@ -198,5 +244,85 @@ public class CombatOnGoingState : MonoBehaviour, ICombatState
     {
         _arbitrationPanel.gameObject.SetActive(true);
         _arbitrationPanel.LastRound = GameUtils.GetLastRound(GameContext.Instance.Dungeon); // 显示最新的回合信息
+    }
+
+    public void OnEventRaised(UIEventData eventData)
+    {
+        Debug.Log($"[TestDungeonCombatScenePrototype] {eventData}");
+        Debug.Log($"OnEventRaised: {eventData.eventType}, TargetId: {eventData.targetId}, Index: {eventData.index}, ExtraData: {eventData.extraData}");
+
+        switch (eventData.eventType)
+        {
+
+            case UIEventType.ActorPositioningClicked:
+                Debug.Log($"角色站位被点击，目标角色: {eventData.targetId}");
+                OnHandleActorPositioningClicked(eventData).Forget();
+                break;
+
+            default:
+                Debug.LogWarning($"未处理的事件类型: {eventData.eventType}");
+                break;
+        }
+    }
+
+
+    private async UniTaskVoid OnHandleActorPositioningClicked(UIEventData eventData)
+    {
+        Debug.Log($"角色站位被点击，目标角色: {eventData.targetId}");
+        // 这里可以添加点击角色站位的处理逻辑，例如显示该角色的详细信息或者切换选中状态等
+
+        var actorName = eventData.targetId;
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            var mockData = MockData.CreateActorData();
+            var selectedActor = mockData.Find(actor => actor.name == actorName);
+            if (selectedActor == null)
+            {
+                Debug.LogError($"MockData does not contain actor with name: {actorName}");
+                return;
+            }
+
+            //gameObject.SetActive(true);
+            _cardBuildPanel.gameObject.SetActive(true);
+            _cardBuildPanel.SetupForActor(selectedActor, mockData);
+            return;
+        }
+
+        var combat = await GameStateSync.Instance.GetCombat();
+        if (combat == null)
+        {
+            Debug.LogError("CombatOnGoingState: Combat data is null, cannot handle actor positioning click");
+            return;
+        }
+
+        var actorEntities = await GameStateSync.Instance.GetEntities(new List<string> { actorName });
+        if (actorEntities == null)
+        {
+            Debug.LogError($"Failed to get actor entities from server for actor name: {actorName}");
+            return;
+        }
+
+        _cardBuildPanel.gameObject.SetActive(true);
+        _cardBuildPanel.SetupForActor(actorEntities[0], actorEntities);
+        // Round round = GameUtils.GetLastRound(GameContext.Instance.Dungeon);
+        // Debug.Assert(round != null, "CombatOnGoingState: No round data found for current dungeon");
+        // var actionOrderEntities = GameContext.Instance.GetActorEntities(round.action_order);
+        // Debug.Assert(actionOrderEntities != null && actionOrderEntities.Count > 0, "CombatOnGoingState: No action order entities found, cannot refresh view");
+        // SetupForActor(actorEntities[0], actionOrderEntities);
+    }
+
+    public void OnClickCloseCardBuildPanel()
+    {
+        _cardBuildPanel.gameObject.SetActive(false);
+    }
+
+    public void OnClickCloseEnemyHandPanel()
+    {
+        _enemyHandPanel.gameObject.SetActive(false);
+    }
+
+    public void OnClickCloseArbitrationPanel()
+    {
+        _arbitrationPanel.gameObject.SetActive(false);
     }
 }

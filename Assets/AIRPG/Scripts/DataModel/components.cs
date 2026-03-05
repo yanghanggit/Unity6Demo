@@ -1,5 +1,14 @@
 using System.Collections.Generic;
 
+
+[System.Serializable]
+public sealed class IdentityComponent
+{
+    public string name = "";
+    public int creation_order = 0;
+    public string entity_id = "";
+}
+
 /// <summary>
 /// 角色组件。
 /// </summary>

@@ -8,6 +8,7 @@ public enum UIEventType
     CardElementScrollViewItemClick = 10, // CombatSceneUI 卡牌滚动视图项点击事件
     ActionOrderClick = 20, // CombatSceneUI 角色执行顺序槽位相关事件
     CardBuilderDataChanged = 30, // CardBuilder.Build 数据被修改时触发
+    ActorPositioningClicked = 40, // ActorPositioningPanel 中角色站位对象被点击
 }
 
 /// <summary>

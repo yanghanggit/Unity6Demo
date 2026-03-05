@@ -16,7 +16,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onCardElementClickedEvent; // 卡牌点击事件
     [SerializeField] private UIEventGameEvent _onCardBuilderDataChangedEvent; // CardBuilder 数据变化事件 
-
+    
 
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
@@ -28,6 +28,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         Debug.Assert(_scrollView != null, "Scroll View component is not assigned in the inspector.");
         Debug.Assert(_onCardElementClickedEvent != null, "_onCardElementClickedEvent is null");
         Debug.Assert(_onCardBuilderDataChangedEvent != null, "_onCardBuilderDataChangedEvent is null");
+        
         Debug.Assert(_iconImage != null, "_iconImage is null");
         Debug.Assert(_statsText != null, "_statsText is null");
         Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
@@ -35,6 +36,7 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
         // 注册事件监听器
         _onCardElementClickedEvent.RegisterListener(this);
         _onCardBuilderDataChangedEvent.RegisterListener(this);
+       
     }
 
     void OnDestroy()
@@ -176,6 +178,11 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
                 UpdateMainText(CardBuilder.Build);
                 break;
 
+            // case UIEventType.ActorPositioningClicked:
+            //     Debug.Log($"角色站位被点击，目标角色: {eventData.targetId}");
+            //     OnHandleActorPositioningClicked(eventData).Forget();
+            //     break;
+
             default:
                 Debug.LogWarning($"未处理的事件类型: {eventData.eventType}");
                 break;
@@ -314,5 +321,8 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
             GameContext.Instance.TasksStatusUrl,
             taskId);
     }
+
+
+    
 
 }
