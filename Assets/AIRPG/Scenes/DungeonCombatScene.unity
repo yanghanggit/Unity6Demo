@@ -2270,6 +2270,7 @@ GameObject:
   - component: {fileID: 500167794}
   - component: {fileID: 500167796}
   - component: {fileID: 500167795}
+  - component: {fileID: 500167797}
   m_Layer: 5
   m_Name: SettingPanel
   m_TagString: Untagged
@@ -2335,6 +2336,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 500167793}
   m_CullTransparentMesh: 1
+--- !u!114 &500167797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 500167793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0548b705beea8453283701fc7d85e124, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatSettingPanel
 --- !u!1 &524838950
 GameObject:
   m_ObjectHideFlags: 0
@@ -7259,7 +7272,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1965228971
 MonoBehaviour:
   m_ObjectHideFlags: 0
