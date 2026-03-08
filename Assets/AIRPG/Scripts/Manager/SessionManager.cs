@@ -149,24 +149,24 @@ public class SessionManager : MonoBehaviour
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
     /// <returns>是否成功</returns>
-    public async UniTask<bool> LoginAndStart(string userName, string gameName)
-    {
-        // 1. 登录
-        bool isLoginSuccessful = await Login(userName, gameName);
-        if (!isLoginSuccessful)
-        {
-            Debug.LogError("[SessionManager] LoginAndStart failed at Login step");
-            return false;
-        }
+    // public async UniTask<bool> LoginAndStart(string userName, string gameName)
+    // {
+    //     // 1. 登录
+    //     bool isLoginSuccessful = await Login(userName, gameName);
+    //     if (!isLoginSuccessful)
+    //     {
+    //         Debug.LogError("[SessionManager] LoginAndStart failed at Login step");
+    //         return false;
+    //     }
 
-        // 2. 开始游戏
-        bool isStartSuccessful = await StartGame(userName, gameName);
-        if (!isStartSuccessful)
-        {
-            Debug.LogError("[SessionManager] LoginAndStart failed at StartGame step");
-            return false;
-        }
+    //     // 2. 开始游戏
+    //     bool isStartSuccessful = await StartGame(userName, gameName);
+    //     if (!isStartSuccessful)
+    //     {
+    //         Debug.LogError("[SessionManager] LoginAndStart failed at StartGame step");
+    //         return false;
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 }

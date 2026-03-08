@@ -13,11 +13,6 @@ public class LoginScene : MonoBehaviour
     [SerializeField] private TMP_Text _userNameText;
     [SerializeField] private TMP_Text _gameNameText;
 
-
-    /// 加一个Header 叫测试测试，内加一个变量叫固定玩家ID，用于测试用途
-    [Header("测试测试")]
-    [SerializeField] private string _fixedPlayerId;
-
     // 内部使用的玩家标识符
     private string _playerIdentifier;
 
@@ -26,17 +21,9 @@ public class LoginScene : MonoBehaviour
         Debug.Assert(_userNameText != null, "_userNameText is null");
         Debug.Assert(_gameNameText != null, "_gameNameText is null");
         Debug.Assert(!string.IsNullOrEmpty(GameName), "_gameName is null");
-        //Debug.Assert(!string.IsNullOrEmpty(_nextSceneName), "_nextSceneName is null");
 
         // 如果固定就使用固定的玩家ID，否则生成一个临时ID
-        if (!string.IsNullOrEmpty(_fixedPlayerId))
-        {
-            _playerIdentifier = _fixedPlayerId;
-        }
-        else
-        {
-            _playerIdentifier = GeneratePlayerId();
-        }
+        _playerIdentifier = GeneratePlayerId();
 
         //_playerIdentifier = GeneratePlayerId();
         _userNameText.text = "临时ID = " + _playerIdentifier;
@@ -67,22 +54,22 @@ public class LoginScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid StartGameFlow(string userName, string gameName)
     {
-        // 1. 使用 SessionManager 执行登录和开始游戏
-        bool apiSuccess = await SessionManager.Instance.LoginAndStart(userName, gameName);
-        if (!apiSuccess)
+        bool isLoginSuccessful = await SessionManager.Instance.Login(userName, gameName);
+        if (!isLoginSuccessful)
         {
-            Debug.LogError("[LoginScene] LoginAndStart failed");
+            Debug.LogError("[SessionManager] LoginAndStart failed at Login step");
             return;
         }
 
-        // 2. 刷新全局游戏状态
-        // var syncErr = await GameStateSync.Instance.RefreshMappingAndEntitiesFromServer();
-        // if (syncErr != GameSyncError.None)
-        // {
-        //     Debug.LogError($"[LoginScene] RefreshMappingAndEntitiesFromServer failed: {syncErr}");
-        //     return;
-        // }
+        // 2. 开始游戏
+        bool isStartSuccessful = await SessionManager.Instance.StartGame(userName, gameName);
+        if (!isStartSuccessful)
+        {
+            Debug.LogError("[SessionManager] LoginAndStart failed at StartGame step");
+            return;
+        }
 
+        // 3. 同步游戏状态
         await UniTask.Yield();
 
         // 3. 切换场景

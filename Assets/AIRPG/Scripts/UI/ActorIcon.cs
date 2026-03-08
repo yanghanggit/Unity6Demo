@@ -33,6 +33,7 @@ public class ActorIcon : MonoBehaviour
     /// </summary>
     private async UniTaskVoid RefreshView()
     {
+        await UniTask.Yield(); // 等待一帧，确保GameContext已初始化
 
         // 设置角色名称
         _nameText.text = GameUtils.GetDisplayName(ActorName);

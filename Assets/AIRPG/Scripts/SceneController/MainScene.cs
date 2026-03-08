@@ -28,17 +28,18 @@ public class MainScene : MonoBehaviour
     /// <summary>
     /// 玩家信息栏UI对象(显示玩家头像等基本信息)
     /// </summary>
-    [SerializeField] private GameObject _playerInfoBar;
+    [SerializeField] private GameObject _topBar;
 
     /// <summary>
     /// 玩家详细信息面板UI对象(点击头像后显示)
     /// </summary>
-    [SerializeField] private GameObject _playerInfoDetails;
+    [SerializeField] private GameObject _playerInfoPanel;
 
     /// <summary>
     /// 角色迷你图标预制件
     /// </summary>
     [SerializeField] private GameObject _actorAvatarPrefab;
+
     /// <summary>
     /// 场景启动初始化方法
     /// 验证所有必需的组件引用,注册UI事件回调,刷新游戏状态
@@ -46,47 +47,13 @@ public class MainScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_dungeonButton != null, "_dungeonButton is null");
-        Debug.Assert(_playerInfoBar != null, "_playerInfoBar is null");
-        Debug.Assert(_playerInfoDetails != null, "_playerInfoDetails is null");
-        Debug.Assert(_actorAvatarPrefab != null, "_actorMiniIconPrefab is null");
-        Debug.Assert(_actorAvatarPrefab.GetComponent<ActorIcon>() != null, "ActorMiniIcon component not found on _actorMiniIconPrefab");
-
-        // 设置头像点击回调
-        _playerInfoBar.GetComponent<PlayerInfoBar>().OnHeadIconClickedCallback += OnHeadIconClicked;
-
-        // 设置关闭回调
-        _playerInfoDetails.GetComponent<PlayerInfoDetails>().OnCloseButtonClickedCallback += OnClickClosePlayerInfoDetails;
-        _playerInfoDetails.SetActive(false);
+        Debug.Assert(_topBar != null, "_topBar is null");
+        Debug.Assert(_playerInfoPanel != null, "_playerInfoPanel is null");
+        Debug.Assert(_actorAvatarPrefab != null, "_actorAvatarPrefab is null");
+        Debug.Assert(_actorAvatarPrefab.GetComponent<ActorIcon>() != null, "ActorIcon component not found on _actorAvatarPrefab");
 
         // 启动时立即刷新游戏状态
         RefreshActorLocations().Forget();
-    }
-
-    /// <summary>
-    /// 场景销毁时的清理方法
-    /// 取消注册所有事件回调,防止内存泄漏
-    /// </summary>
-    void OnDestroy()
-    {
-        // 清除玩家信息栏的头像点击回调
-        if (_playerInfoBar != null)
-        {
-            PlayerInfoBar playerInfoBar = _playerInfoBar.GetComponent<PlayerInfoBar>();
-            if (playerInfoBar != null)
-            {
-                playerInfoBar.OnHeadIconClickedCallback -= OnHeadIconClicked;
-            }
-        }
-
-        // 清除玩家详细信息面板的关闭按钮回调
-        if (_playerInfoDetails != null)
-        {
-            PlayerInfoDetails playerInfoDetails = _playerInfoDetails.GetComponent<PlayerInfoDetails>();
-            if (playerInfoDetails != null)
-            {
-                playerInfoDetails.OnCloseButtonClickedCallback -= OnClickClosePlayerInfoDetails;
-            }
-        }
     }
 
     /// <summary>
@@ -157,20 +124,10 @@ public class MainScene : MonoBehaviour
     /// 玩家头像点击事件回调
     /// 显示玩家详细信息面板
     /// </summary>
-    private void OnHeadIconClicked()
+    public void OnClickTopBarPlayerIcon()
     {
         //Debug.Log("Head icon clicked in MainScene!");
-        _playerInfoDetails.SetActive(true);
-    }
-
-    /// <summary>
-    /// 关闭玩家详细信息面板的回调
-    /// 隐藏玩家详细信息面板
-    /// </summary>
-    public void OnClickClosePlayerInfoDetails()
-    {
-        //Debug.Log("Player info details clicked!");
-        _playerInfoDetails.SetActive(false);
+        _playerInfoPanel.SetActive(true);
     }
 
     /// <summary>
@@ -232,6 +189,16 @@ public class MainScene : MonoBehaviour
     /// <param name="sceneConfig">目标场景的配置数据(包含 StageName 和 SceneDisplayName)</param>
     private async UniTaskVoid TransitionToScene(HomeSceneConfig sceneConfig)
     {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Player is not logged in, cannot transition to scene");
+            await UniTask.Yield();
+            HomeScene.PendingHomeSceneConfig = sceneConfig;
+            SceneManager.LoadScene(NextSceneName);
+            return;
+        }
+
+
         var stagesState = await GameStateSync.Instance.GetStagesState();
         if (stagesState == null)
         {
@@ -266,7 +233,6 @@ public class MainScene : MonoBehaviour
         }
 
         await UniTask.Yield();
-
         HomeScene.PendingHomeSceneConfig = sceneConfig;
         SceneManager.LoadScene(NextSceneName);
     }
@@ -281,6 +247,12 @@ public class MainScene : MonoBehaviour
         for (int i = 0; i < _homeSceneObjects.Length; i++)
         {
             ClearActorIcons(_homeSceneObjects[i]);
+        }
+
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Player is not logged in, skipping actor location refresh");
+            return;
         }
 
         // 从服务器刷新场景-角色映射关系
