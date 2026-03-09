@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 /// </summary>
 public static class MockData
 {
+    public static readonly string MockUserName = "测试玩家";
+    public static readonly string MockActorName = "角色.猎人.石坚";
 
     //var mockStageName = "场景.山林边缘";
     public static readonly string MockStageName = "场景.山林边缘";

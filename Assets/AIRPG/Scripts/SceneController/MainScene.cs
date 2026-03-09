@@ -62,7 +62,7 @@ public class MainScene : MonoBehaviour
     /// </summary>
     public void OnClickBack()
     {
-        ReturnToLoginScene().Forget();
+        LogoutAsync().Forget();
     }
 
     /// <summary>
@@ -114,10 +114,16 @@ public class MainScene : MonoBehaviour
     /// 运行按钮点击事件处理
     /// 推进游戏状态，让所有角色执行行动
     /// </summary>
-    public void OnClickRun()
+    public void OnClickAdvanceGameState()
     {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Player is not logged in, cannot advance game state");
+            return;
+        }
+
         Debug.Log("Run button clicked in MainScene.");
-        AdvanceGameState().Forget();
+        AdvanceGameStateAsync().Forget();
     }
 
     /// <summary>
@@ -134,7 +140,7 @@ public class MainScene : MonoBehaviour
     /// 打开地牢浏览场景的协程
     /// 直接加载 ViewDungeonScene 场景
     /// </summary>
-    async UniTaskVoid LoadDungeonOverviewScene()
+    private async UniTaskVoid LoadDungeonOverviewScene()
     {
         await UniTask.Yield();
         SceneManager.LoadScene(DungeonOverviewSceneName);
@@ -145,7 +151,7 @@ public class MainScene : MonoBehaviour
     /// 1. 使用 SessionManager 执行登出
     /// 2. 加载登录场景
     /// </summary>
-    async UniTaskVoid ReturnToLoginScene()
+    private async UniTaskVoid LogoutAsync()
     {
         bool isLogoutSuccessful = await SessionManager.Instance.Logout();
         if (!isLogoutSuccessful)
@@ -163,18 +169,16 @@ public class MainScene : MonoBehaviour
     /// 调用 HomeGamePlayManager 推进所有角色的行动，并同步最新的游戏状态
     /// </summary>
     /// <returns>协程迭代器</returns>
-    private async UniTaskVoid AdvanceGameState()
+    private async UniTaskVoid AdvanceGameStateAsync()
     {
-        bool isGameAdvanced = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
-        if (!isGameAdvanced)
+        bool isGameSuccessfullyAdvanced = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
+        if (!isGameSuccessfullyAdvanced)
         {
             Debug.LogError("[MainScene] AdvanceGame failed");
             return;
         }
 
         Debug.Log("[MainScene] Game state advanced successfully");
-
-        //await GameStateSync.Instance.RefreshMappingAndActorsFromServer();
         RefreshActorLocations().Forget();
     }
 
