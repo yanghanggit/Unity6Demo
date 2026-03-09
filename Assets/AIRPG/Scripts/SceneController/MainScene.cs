@@ -28,7 +28,7 @@ public class MainScene : MonoBehaviour
     /// <summary>
     /// 玩家信息栏UI对象(显示玩家头像等基本信息)
     /// </summary>
-    [SerializeField] private GameObject _topBar;
+    [SerializeField] private PlayerTopBar _topBar;
 
     /// <summary>
     /// 玩家详细信息面板UI对象(点击头像后显示)
@@ -39,6 +39,9 @@ public class MainScene : MonoBehaviour
     /// 角色迷你图标预制件
     /// </summary>
     [SerializeField] private GameObject _actorAvatarPrefab;
+
+
+    [SerializeField] private HomeScenesPanel _homeScenesPanel;
 
     /// <summary>
     /// 场景启动初始化方法
@@ -51,6 +54,12 @@ public class MainScene : MonoBehaviour
         Debug.Assert(_playerInfoPanel != null, "_playerInfoPanel is null");
         Debug.Assert(_actorAvatarPrefab != null, "_actorAvatarPrefab is null");
         Debug.Assert(_actorAvatarPrefab.GetComponent<ActorIcon>() != null, "ActorIcon component not found on _actorAvatarPrefab");
+        Debug.Assert(_homeScenesPanel != null, "_homeScenesPanel is null");
+
+        //_topBar.gameObject.setActive(true);
+        _topBar.gameObject.SetActive(true);
+        _playerInfoPanel.gameObject.SetActive(false);
+        _homeScenesPanel.gameObject.SetActive(true);
 
         // 启动时立即刷新游戏状态
         RefreshActorLocations().Forget();
@@ -116,12 +125,6 @@ public class MainScene : MonoBehaviour
     /// </summary>
     public void OnClickAdvanceGameState()
     {
-        if (!GameContext.Instance.IsLoggedIn)
-        {
-            Debug.LogWarning("Player is not logged in, cannot advance game state");
-            return;
-        }
-
         Debug.Log("Run button clicked in MainScene.");
         AdvanceGameStateAsync().Forget();
     }
@@ -153,6 +156,12 @@ public class MainScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid LogoutAsync()
     {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Player is not logged in, skipping logout process");
+            return;
+        }
+
         bool isLogoutSuccessful = await SessionManager.Instance.Logout();
         if (!isLogoutSuccessful)
         {
@@ -171,6 +180,12 @@ public class MainScene : MonoBehaviour
     /// <returns>协程迭代器</returns>
     private async UniTaskVoid AdvanceGameStateAsync()
     {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Player is not logged in, cannot advance game state");
+            return;
+        }
+
         bool isGameSuccessfullyAdvanced = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
         if (!isGameSuccessfullyAdvanced)
         {

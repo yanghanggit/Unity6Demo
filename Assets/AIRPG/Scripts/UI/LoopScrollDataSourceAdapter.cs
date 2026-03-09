@@ -21,14 +21,20 @@ public class LoopScrollDataSourceAdapter : MonoBehaviour, LoopScrollPrefabSource
 
     private void Awake()
     {
-        var scrollRect = GetComponent<LoopHorizontalScrollRect>();
-        if (scrollRect == null)
+        if (TryGetComponent<LoopHorizontalScrollRect>(out var horizontalScrollRect))
         {
-            Debug.LogError("[LoopScrollDataSourceAdapter] 未找到同一 GameObject 上的 LoopHorizontalScrollRect");
-            return;
+            horizontalScrollRect.prefabSource = this;
+            horizontalScrollRect.dataSource = this;
         }
-        scrollRect.prefabSource = this;
-        scrollRect.dataSource   = this;
+        else if (TryGetComponent<LoopVerticalScrollRect>(out var verticalScrollRect))
+        {
+            verticalScrollRect.prefabSource = this;
+            verticalScrollRect.dataSource = this;
+        }
+        else
+        {
+            Debug.LogError($"[LoopScrollDataSourceAdapter] No LoopScrollRect found on GameObject '{gameObject.name}'");
+        }
     }
 
     // -------- LoopScrollPrefabSource --------
@@ -57,8 +63,7 @@ public class LoopScrollDataSourceAdapter : MonoBehaviour, LoopScrollPrefabSource
 
     public void ProvideData(Transform trans, int idx)
     {
-        var item = trans.GetComponent<IScrollViewItem>();
-        if (item != null)
+        if (trans.TryGetComponent<IScrollViewItem>(out var item))
         {
             item.OnUpdateItem(idx);
         }
