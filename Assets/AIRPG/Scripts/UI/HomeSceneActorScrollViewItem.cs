@@ -7,14 +7,14 @@ using TMPro;
 /// 角色滚动视图项组件
 /// 用于在动态滚动视图中显示单个角色的信息和交互
 /// </summary>
-public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
+public class HomeSceneActorScrollViewItem : UIBehaviour, IScrollViewItem
 {
     // UI组件引用
     [Header("UI Components")]
     [SerializeField] private Image _icon;                               // 角色图标
     [SerializeField] private TMP_Text _title;                           // 角色名称文本
-    [SerializeField] private Image _background;                         // 背景图片
-    [SerializeField] private Button _overlayButton;             // 覆盖层按钮,用于接收点击
+    //[SerializeField] private Image _background;                         // 背景图片
+    //[SerializeField] private Button _button;             // 覆盖层按钮,用于接收点击
     [SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
 
     /// <summary>
@@ -29,7 +29,7 @@ public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
     protected override void OnEnable()
     {
         base.OnEnable();
-        _overlayButton.onClick.AddListener(OnClick);
+        //_button.onClick.AddListener(OnClick);
     }
 
     /// <summary>
@@ -39,14 +39,14 @@ public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
     protected override void OnDisable()
     {
         base.OnDisable();
-        _overlayButton.onClick.RemoveListener(OnClick);
+        //_button.onClick.RemoveListener(OnClick);
     }
 
     /// <summary>
     /// 按钮点击事件处理
     /// 触发角色点击游戏事件,将角色名称传递给监听者
     /// </summary>
-    void OnClick()
+    public void OnClick()
     {
         Debug.Log("Clicked on " + _actorName);
         _onActorClickedEvent.Raise(_actorName);
@@ -62,8 +62,8 @@ public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
         // 验证所有必需的UI组件引用
         Debug.Assert(_icon != null, "_icon != null");
         Debug.Assert(_title != null, "_title != null");
-        Debug.Assert(_background != null, "_background != null");
-        Debug.Assert(_overlayButton != null, "_overlayButton != null");
+        //Debug.Assert(_background != null, "_background != null");
+        //Debug.Assert(_button != null, "_overlayButton != null");
         Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent != null");
 
         // 获取当前场景中除了玩家角色外的其他角色列表
@@ -75,10 +75,10 @@ public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
 
             // 这段是正常的逻辑，也就是说有服务器返回其他角色数据
             //Debug.Assert(actorNamesInStage.Count > 0, "actorsInStage.Count > 0");
-            Debug.Assert(index < HomeScene.ActorNamesInCurrentStage.Count, "index < ActorNamesInCurrentStage.Count");
+            Debug.Assert(index < HomeScene.ActorNamesOnStage.Count, "index < ActorNamesInCurrentStage.Count");
 
             // 根据索引获取对应的角色名称
-            _actorName = HomeScene.ActorNamesInCurrentStage[index];
+            _actorName = HomeScene.ActorNamesOnStage[index];
 
             // 更新UI显示:设置角色名称文本
             _title.text = GameUtils.GetDisplayName(_actorName);
@@ -91,10 +91,20 @@ public class ActorScrollViewItem : UIBehaviour, IScrollViewItem
         else
         {
             // 如果没有其他角色，显示默认信息
-            _actorName = string.Empty;
+            _actorName = HomeScene.ActorNamesOnStage[index];
             _title.text = "";
             // 设置一个默认的图标或清空图标
-            _icon.sprite = null; // 或者设置为一个默认的Sprite
+            //var mockName = HomeScene.ActorNamesOnStage[index];
+            var actorSprite = SpriteCacheManager.Instance.GetSprite(_actorName);
+            if (actorSprite != null)
+            {
+                _icon.sprite = actorSprite;
+            }
+            else
+            {
+                Debug.LogWarning("Mock actor sprite not found for: " + _actorName);
+                _icon.sprite = null; // 或者设置为一个默认的Sprite
+            }
         }
 
     }

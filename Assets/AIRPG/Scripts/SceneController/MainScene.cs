@@ -164,13 +164,13 @@ public class MainScene : MonoBehaviour, IUIEventListener
     /// 4. 设置待处理的场景配置并加载目标 Unity 场景
     /// </summary>
     /// <param name="sceneConfig">目标场景的配置数据(包含 StageName 和 SceneDisplayName)</param>
-    private async UniTaskVoid TransitionToScene(HomeSceneConfig sceneConfig)
+    private async UniTaskVoid TransitionToScene(string targetStageName)
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("Player is not logged in, cannot transition to scene");
             await UniTask.Yield();
-            HomeScene.PendingHomeSceneConfig = sceneConfig;
+            HomeScene.CachedHomeStageName = targetStageName;
             SceneManager.LoadScene(NextSceneName);
             return;
         }
@@ -193,24 +193,24 @@ public class MainScene : MonoBehaviour, IUIEventListener
             }
         }
 
-        Debug.Log($"Current stage: {currentStageName}, Target stage: {sceneConfig.StageName}");
-        if (currentStageName != sceneConfig.StageName)
+        //Debug.Log($"Current stage: {currentStageName}, Target stage: {HomeScene.CachedHomeStageName}");
+        if (currentStageName != targetStageName)
         {
-            bool switchSuccess = await HomeGamePlayManager.Instance.SwitchStage(sceneConfig.StageName);
+            bool switchSuccess = await HomeGamePlayManager.Instance.SwitchStage(targetStageName);
 
             if (!switchSuccess)
             {
-                Debug.LogError($"[MainScene] SwitchStage to {sceneConfig.StageName} failed");
+                Debug.LogError($"[MainScene] SwitchStage to {targetStageName} failed");
                 return;
             }
         }
         else
         {
-            Debug.Log($"Already in target stage: {sceneConfig.StageName}, no need to switch.");
+            Debug.Log($"Already in target stage: {targetStageName}, no need to switch.");
         }
 
         await UniTask.Yield();
-        HomeScene.PendingHomeSceneConfig = sceneConfig;
+        HomeScene.CachedHomeStageName = targetStageName;
         SceneManager.LoadScene(NextSceneName);
     }
 
@@ -238,9 +238,9 @@ public class MainScene : MonoBehaviour, IUIEventListener
                         return;
                     }
 
-                    var tempConfig = ScriptableObject.CreateInstance<HomeSceneConfig>();
-                    tempConfig.StageName = stageName;
-                    TransitionToScene(tempConfig).Forget();
+                    // var tempConfig = ScriptableObject.CreateInstance<HomeSceneConfig>();
+                    // tempConfig.StageName = stageName;
+                    TransitionToScene(stageName).Forget();
                 }
                 break;
 
