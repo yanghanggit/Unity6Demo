@@ -68,25 +68,15 @@ public class HomeAdvanceApi : BaseApiClient
 
         // 发送请求
         _requestResult = await PostRequestAsync(url, jsonData);
-
-        // 处理请求结果
         if (!_requestResult.isSuccess)
         {
             Debug.LogError($"Request failed: {_requestResult.error}");
             return;
         }
 
-        // 解析响应数据
-        if (string.IsNullOrEmpty(_requestResult.responseText))
-        {
-            Debug.LogError("Response text is empty");
-            return;
-        }
-
         try
         {
             _responseData = JsonConvert.DeserializeObject<HomeAdvanceResponse>(_requestResult.responseText);
-
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");

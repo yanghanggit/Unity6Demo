@@ -81,7 +81,7 @@ public class HomeScene : MonoBehaviour
     {
         Debug.Log($"Current actor icon clicked: {_homeSceneMainStatePanel.SelectedActorName}");
         _homeSceneInputStatePanel.gameObject.SetActive(true); // 显示输入状态面板
-        _homeSceneInputStatePanel.SetInputText(_homeSceneMainStatePanel.SelectedActorName); // 设置输入字段为选中角色名称
+        _homeSceneInputStatePanel.OnActivate(_homeSceneMainStatePanel.SelectedActorName); // 设置输入字段为选中角色名称
     }
 
     /// <summary>
@@ -215,7 +215,6 @@ public class HomeScene : MonoBehaviour
         }
 
         Debug.Log("[HomeScene] Speak action completed successfully");
-        // _homeSceneMainStatePanel.OnSpeak();
     }
 }
 

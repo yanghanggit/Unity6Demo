@@ -151,6 +151,8 @@ public class HomeSceneMainStatePanel : MonoBehaviour, IStringGameEventListener
 
         // 更新UI显示选中的角色
         RefreshSelectedActorPortrait(_selectedActorName);
+
+        // 根据选中角色刷新聊天气泡内容
         RefreshActorEventSummary(_selectedActorName);
     }
 
@@ -207,15 +209,4 @@ public class HomeSceneMainStatePanel : MonoBehaviour, IStringGameEventListener
             _chatBubblePanel.GetComponentInChildren<TMP_Text>().text = $"{actorName}: 暂无最近事件";
         }
     }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    // public void OnSpeak()
-    // {
-    //     if (_chatBubblePanel.activeSelf)
-    //     {
-    //         RefreshActorEventSummary(_selectedActorName);
-    //     }
-    // }
 }

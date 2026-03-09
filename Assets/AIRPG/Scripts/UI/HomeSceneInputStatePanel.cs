@@ -55,8 +55,16 @@ public class HomeSceneInputStatePanel : MonoBehaviour
         return _inputField.text;
     }
 
-    public void SetInputText(string text)
+    public void OnActivate(string targetActorName)
     {
-        _inputField.text = text;
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("User is not logged in. Input may not be functional.");
+            _inputField.text = targetActorName;
+            return;
+        }
+
+        _inputField.text = string.Empty; // 激活时清空输入字段
+
     }
 }
