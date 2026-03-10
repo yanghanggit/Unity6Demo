@@ -33,13 +33,13 @@ public class MainScene : MonoBehaviour, IUIEventListener
     [SerializeField] private HomeScenesPanel _homeScenesPanel;
 
     [Header("Events")]
-    [SerializeField] private UIEventGameEvent _onMainSceneHomeSceneItemClickedEvent;
+    [SerializeField] private UIEventGameEvent _onMainSceneStageItemClickedEvent;
 
     void OnDestroy()
     {
-        if (_onMainSceneHomeSceneItemClickedEvent != null)
+        if (_onMainSceneStageItemClickedEvent != null)
         {
-            _onMainSceneHomeSceneItemClickedEvent.UnregisterListener(this);
+            _onMainSceneStageItemClickedEvent.UnregisterListener(this);
         }
     }
 
@@ -52,10 +52,10 @@ public class MainScene : MonoBehaviour, IUIEventListener
         Debug.Assert(_topBar != null, "_topBar is null");
         Debug.Assert(_playerInfoPanel != null, "_playerInfoPanel is null");
         Debug.Assert(_homeScenesPanel != null, "_homeScenesPanel is null");
-        Debug.Assert(_onMainSceneHomeSceneItemClickedEvent != null, "_onMainSceneHomeSceneItemClickedEvent is null");
+        Debug.Assert(_onMainSceneStageItemClickedEvent != null, "_onMainSceneStageItemClickedEvent is null");
 
-        // 注册 MainSceneHomeSceneItemClicked 事件监听器
-        _onMainSceneHomeSceneItemClickedEvent.RegisterListener(this);
+        // 注册 MainSceneStageItemClicked 事件监听器
+        _onMainSceneStageItemClickedEvent.RegisterListener(this);
 
         // 刚进入主场景时，先隐藏玩家信息面板和场景列表，等数据加载完成后再显示
         _topBar.gameObject.SetActive(true);
@@ -224,7 +224,7 @@ public class MainScene : MonoBehaviour, IUIEventListener
         switch (eventData.eventType)
         {
 
-            case UIEventType.MainSceneHomeSceneItemClicked:
+            case UIEventType.MainSceneStageItemClicked:
                 {
                     var stageName = eventData.targetId;
                     var dungeonName = eventData.extraData;

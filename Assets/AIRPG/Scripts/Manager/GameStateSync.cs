@@ -10,6 +10,10 @@ using System.Threading;
 /// </summary>
 public class GameStateSync : MonoBehaviour
 {
+    //GameStateUpdated
+    [Header("Events")]
+    [SerializeField] private UIEventGameEvent _onGameStateUpdatedEvent; // 游戏状态更新事件，携带最新的 GameContext 数据
+
     /// <summary>
     /// 单例实例
     /// </summary>
@@ -35,6 +39,8 @@ public class GameStateSync : MonoBehaviour
 
     private void Start()
     {
+        Debug.Assert(_onGameStateUpdatedEvent != null, "_onGameStateUpdatedEvent is not assigned in the inspector.");
+
         // 由同步管理器自行启动会话轮询，调用方无需感知内部细节。
         ResetSessionMessageCursor();
         StartSessionMessagesPolling(destroyCancellationToken).Forget();
@@ -113,10 +119,19 @@ public class GameStateSync : MonoBehaviour
             return;
         }
 
+        // 更新全局场景-演员映射状态，供其他模块查询使用
+        GameContext.Instance.StagesState = stagesState;
+
+        // 处理会话消息，更新本地事件历史和最新序列ID
         if (sessionMessages.Count > 0)
         {
             GameContext.Instance.CollectEventsByActor(sessionMessages);
             _lastSessionSequenceId = sessionMessages[^1].sequence_id;
+
+            var eventData = new UIEventData(
+                UIEventType.GameStateUpdated
+            );
+            _onGameStateUpdatedEvent.Raise(eventData);
         }
     }
 

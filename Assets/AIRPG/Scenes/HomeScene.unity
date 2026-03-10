@@ -950,7 +950,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HomeScene
   _homeSceneMainStatePanel: {fileID: 1390926336}
   _homeSceneInputStatePanel: {fileID: 217303598}
-  _onActorClickedEvent: {fileID: 11400000, guid: cdb300192ace1475990159f868b47bcc,
+  _onHomeSceneActorItemClickedEvent: {fileID: 11400000, guid: 002cd69ee2df845639dcf7973fd22d83,
+    type: 2}
+  _onGameStateUpdatedEvent: {fileID: 11400000, guid: 242bcd03b28a34224bc7af940f530091,
     type: 2}
 --- !u!1 &469215743
 GameObject:
@@ -2571,7 +2573,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1504511431
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3394,7 +3396,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Mosframe.ActorScrollViewItem
   _icon: {fileID: 469215745}
   _title: {fileID: 1093686371}
-  _onActorClickedEvent: {fileID: 11400000, guid: cdb300192ace1475990159f868b47bcc,
+  _onHomeSceneActorItemClickedEvent: {fileID: 11400000, guid: 002cd69ee2df845639dcf7973fd22d83,
     type: 2}
 --- !u!114 &2046704174
 MonoBehaviour:

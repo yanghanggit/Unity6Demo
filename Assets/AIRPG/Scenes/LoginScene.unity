@@ -528,7 +528,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _userNameText: {fileID: 470425677}
   _gameNameText: {fileID: 143863052}
-  _fixedPlayerId: 
 --- !u!1 &470425675
 GameObject:
   m_ObjectHideFlags: 0
@@ -1477,6 +1476,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2b3dd15d5fde46b5a888d5518dc0e55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameStateSync
+  _onGameStateUpdatedEvent: {fileID: 11400000, guid: 242bcd03b28a34224bc7af940f530091,
+    type: 2}
 --- !u!1 &2110898351
 GameObject:
   m_ObjectHideFlags: 0

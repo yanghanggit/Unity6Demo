@@ -13,7 +13,10 @@ public class HomeSceneActorScrollViewItem : UIBehaviour, IScrollViewItem
     [Header("UI Components")]
     [SerializeField] private Image _icon;                               // 角色图标
     [SerializeField] private TMP_Text _title;                           // 角色名称文本
-    [SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
+                                                                        //[SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
+
+    [SerializeField] private UIEventGameEvent _onHomeSceneActorItemClickedEvent; // MainScene HomeScene 列表项被点击事件, 这个事件自己不可以再听了，是发送端，不能再监听了，否则会死循环。
+
 
     /// <summary>
     /// 当前显示的角色名称
@@ -27,7 +30,15 @@ public class HomeSceneActorScrollViewItem : UIBehaviour, IScrollViewItem
     public void OnClick()
     {
         Debug.Log("Clicked on " + _actorName);
-        _onActorClickedEvent.Raise(_actorName);
+
+        // 创建并发送结构化的事件数据，通知需要刷新UI
+        //var elementData = CardBuilder.GetElement(_currentIndex);
+        // 创建并发送结构化的事件数据，通知系统哪个卡牌要素被点击了
+        var eventData = new UIEventData(
+            UIEventType.HomeSceneActorItemClicked,
+            _actorName
+        );
+        _onHomeSceneActorItemClickedEvent.Raise(eventData);
     }
 
     /// <summary>
@@ -40,7 +51,7 @@ public class HomeSceneActorScrollViewItem : UIBehaviour, IScrollViewItem
         // 验证所有必需的UI组件引用
         Debug.Assert(_icon != null, "_icon != null");
         Debug.Assert(_title != null, "_title != null");
-        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent != null");
+        Debug.Assert(_onHomeSceneActorItemClickedEvent != null, "onActorClickedEvent != null");
 
         // 获取当前场景中除了玩家角色外的其他角色列表
 

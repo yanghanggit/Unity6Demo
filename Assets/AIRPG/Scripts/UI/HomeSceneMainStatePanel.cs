@@ -130,9 +130,6 @@ public class HomeSceneMainStatePanel : MonoBehaviour
     {
         Debug.Log($"[HomeScene] Handling selection for actor: {actorName}");
 
-        // selectedActorName 必须在 HomeScene.ActorNamesOnStage 内
-        //Debug.Assert(HomeScene.CachedActorNamesOnStage.Contains(actorName), $"Selected actor {actorName} is not in the current stage.");
-
         // // 更新当前角色的Sprite显示
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(actorName);
         Debug.Assert(cachedSprite != null, "Player actor sprite is null for entity: " + actorName);
@@ -167,12 +164,17 @@ public class HomeSceneMainStatePanel : MonoBehaviour
             // 设置内容
             if (agentEventSummaries.Count > 0)
             {
-                _chatBubblePanel.GetComponentInChildren<Text>().text = string.Join("\n", agentEventSummaries);
+                SetChatBubble(string.Join("\n", agentEventSummaries));
             }
         }
         else
         {
-            _chatBubblePanel.GetComponentInChildren<TMP_Text>().text = $"{actorName}: 暂无最近事件";
+            SetChatBubble(string.Empty);
         }
+    }
+
+    public void SetChatBubble(string content)
+    {
+        _chatBubblePanel.GetComponentInChildren<TMP_Text>().text = content;
     }
 }

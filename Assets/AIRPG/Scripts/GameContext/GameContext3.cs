@@ -6,6 +6,14 @@ using UnityEngine;
 
 public partial class GameContext
 {
+
+    /// <summary>
+    /// 当前游戏阶段-角色状态映射关系字典，键为阶段名称，值为该阶段包含的角色列表。
+    /// 通过 <see cref="StagesState"/> 可获取当前最新的完整映射关系。
+    /// </summary>
+    public Dictionary<string, List<string>> StagesState { get; set; } = new Dictionary<string, List<string>>();
+
+
     /// <summary>
     /// 按轮次累积的代理事件历史记录，每个元素对应一轮的「角色 → 事件列表」映射。
     /// 通过 <see cref="GetAgentEventsHistory"/> 可获取合并后的全量数据。

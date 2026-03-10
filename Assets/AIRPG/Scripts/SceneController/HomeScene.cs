@@ -9,7 +9,7 @@ using System.Collections.Generic;
 /// 主场景控制器
 /// 负责管理主场景的UI交互、角色选择和状态切换
 /// </summary>
-public class HomeScene : MonoBehaviour, IStringGameEventListener
+public class HomeScene : MonoBehaviour, IUIEventListener
 {
     public static readonly string PreScene = "MainScene";   // 上一个场景名称
     public static string CachedStageName = string.Empty;
@@ -20,7 +20,9 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     [SerializeField] private HomeSceneInputStatePanel _homeSceneInputStatePanel; // 输入状态面板组件
 
     [Header("Events")]
-    [SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
+    [SerializeField] private UIEventGameEvent _onHomeSceneActorItemClickedEvent; // 角色点击事件
+
+    [SerializeField] private UIEventGameEvent _onGameStateUpdatedEvent; // 游戏状态更新事件，携带最新的 GameContext 数据
 
     private string _currentSelectedActor = string.Empty; // 当前选中角色名称
     //
@@ -48,10 +50,12 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
         Debug.Assert(_homeSceneMainStatePanel != null, "_homeSceneMainStatePanel is null");
         Debug.Assert(_homeSceneInputStatePanel != null, "_homeSceneInputStatePanel is null");
-        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
+        Debug.Assert(_onHomeSceneActorItemClickedEvent != null, "onActorClickedEvent is null");
+        Debug.Assert(_onGameStateUpdatedEvent != null, "_onGameStateUpdatedEvent is null");
 
         // 注册角色点击事件监听器
-        _onActorClickedEvent.RegisterListener(this);
+        _onHomeSceneActorItemClickedEvent.RegisterListener(this);
+        _onGameStateUpdatedEvent.RegisterListener(this);
 
         // 刚进入主场景时，先隐藏玩家信息面板和场景列表，等数据加载完成后再显示
         _currentSelectedActor = string.Empty;
@@ -68,9 +72,14 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     void OnDestroy()
     {
         // 注销角色点击事件监听器
-        if (_onActorClickedEvent != null)
+        if (_onHomeSceneActorItemClickedEvent != null)
         {
-            _onActorClickedEvent.UnregisterListener(this);
+            _onHomeSceneActorItemClickedEvent.UnregisterListener(this);
+        }
+
+        if (_onGameStateUpdatedEvent != null)
+        {
+            _onGameStateUpdatedEvent.UnregisterListener(this);
         }
     }
 
@@ -258,11 +267,60 @@ public class HomeScene : MonoBehaviour, IStringGameEventListener
     /// 
     /// </summary>
     /// <param name="actorName"></param>
-    public void OnEventRaised(string actorName)
+    // public void OnEventRaised(string actorName)
+    // {
+    //     Debug.Log($"[HomeScene] Actor clicked: {actorName}");
+    //     _currentSelectedActor = actorName;
+    //     _homeSceneMainStatePanel.ShowActorDetails(actorName);
+    // }
+
+    /// <summary>
+    /// 监听游戏状态更新事件,根据最新的 GameContext 数据刷新主场景
+    /// 
+    public void OnEventRaised(UIEventData eventData)
     {
-        Debug.Log($"[HomeScene] Actor clicked: {actorName}");
-        _currentSelectedActor = actorName;
-        _homeSceneMainStatePanel.ShowActorDetails(actorName);
+        Debug.Log($"[TestDungeonCombatScenePrototype] {eventData}");
+        Debug.Log($"OnEventRaised: {eventData.eventType}, TargetId: {eventData.targetId}, Index: {eventData.index}, ExtraData: {eventData.extraData}");
+
+        switch (eventData.eventType)
+        {
+            case UIEventType.GameStateUpdated:
+                {
+                    Debug.Log("[HomeScene] Received GameStateUpdated event, refreshing main state panel");
+
+                    var latestRoundEventsForActor = GameContext.Instance.GetLatestRoundEventsForActor(_currentSelectedActor);
+                    if (latestRoundEventsForActor.Count > 0)
+                    {
+                        List<string> agentEventSummaries = new();
+                        foreach (var agentEvent in latestRoundEventsForActor)
+                        {
+                            Debug.Log($"[HomeScene] Last event for {_currentSelectedActor}: {agentEvent.GetType().Name}");
+                            var summary = GameUtils.FormatAgentEventSummary(agentEvent);
+                            agentEventSummaries.Add(summary);
+                        }
+
+                        // 设置内容
+                        if (agentEventSummaries.Count > 0)
+                        {
+                            // _chatBubblePanel.GetComponentInChildren<Text>().text = string.Join("\n", agentEventSummaries);
+                            _homeSceneMainStatePanel.SetChatBubble(string.Join("\n", agentEventSummaries));
+                        }
+                    }
+                }
+                break;
+
+            case UIEventType.HomeSceneActorItemClicked:
+                {
+                    Debug.Log($"[HomeScene] Actor item clicked: {eventData.targetId}");
+                    _currentSelectedActor = eventData.targetId;
+                    _homeSceneMainStatePanel.ShowActorDetails(_currentSelectedActor);
+                }
+                break;
+
+            default:
+                Debug.LogWarning($"未处理的事件类型: {eventData.eventType}");
+                break;
+        }
     }
 }
 

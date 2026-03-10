@@ -9,7 +9,9 @@ public enum UIEventType
     ActionOrderClick = 20, // CombatSceneUI 角色执行顺序槽位相关事件
     CardBuilderDataChanged = 30, // CardBuilder.Build 数据被修改时触发
     ActorPositioningClicked = 40, // ActorPositioningPanel 中角色站位对象被点击
-    MainSceneHomeSceneItemClicked = 50, // MainScene 中 HomeScene 列表项被点击
+    MainSceneStageItemClicked = 50, // MainScene 中场景列表项被点击
+    HomeSceneActorItemClicked = 60, // HomeScene 中角色被点击事件，携带角色名称等信息
+    GameStateUpdated = 100, // 游戏状态更新事件，携带最新的 GameContext 数据
 }
 
 /// <summary>

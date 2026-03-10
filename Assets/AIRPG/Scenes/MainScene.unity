@@ -515,7 +515,7 @@ MonoBehaviour:
   _topBar: {fileID: 4501079723245603897}
   _playerInfoPanel: {fileID: 1320500612679273179}
   _homeScenesPanel: {fileID: 1274171719}
-  _onMainSceneHomeSceneItemClickedEvent: {fileID: 11400000, guid: 6034a4212ec79480f8ec14d19da7ebbf,
+  _onMainSceneStageItemClickedEvent: {fileID: 11400000, guid: 6034a4212ec79480f8ec14d19da7ebbf,
     type: 2}
 --- !u!1 &524838950
 GameObject:
@@ -1472,7 +1472,7 @@ MonoBehaviour:
   - {fileID: 1863021012}
   - {fileID: 774759590}
   - {fileID: 778852994}
-  _onMainSceneHomeSceneItemClickedEvent: {fileID: 11400000, guid: 6034a4212ec79480f8ec14d19da7ebbf,
+  _onMainSceneStageItemClickedEvent: {fileID: 11400000, guid: 6034a4212ec79480f8ec14d19da7ebbf,
     type: 2}
 --- !u!114 &966820412
 MonoBehaviour:

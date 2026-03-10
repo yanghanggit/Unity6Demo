@@ -7,7 +7,7 @@ using TMPro;
 /// 卡牌要素滚动视图项组件
 /// 用于在动态滚动视图中显示单个卡牌要素的信息和交互
 /// </summary>
-public class HomeSceneStateScrollViewItem : UIBehaviour, IScrollViewItem
+public class MainSceneStageScrollViewItem : UIBehaviour, IScrollViewItem
 {
     public static readonly int MaxActorIcons = 4; // 最大状态图标数量
 
@@ -16,7 +16,7 @@ public class HomeSceneStateScrollViewItem : UIBehaviour, IScrollViewItem
     [SerializeField] private Image[] _actorIcons; // 状态图标数组
 
     [Header("Events")]
-    [SerializeField] private UIEventGameEvent _onMainSceneHomeSceneItemClickedEvent; // MainScene HomeScene 列表项被点击事件, 这个事件自己不可以再听了，是发送端，不能再监听了，否则会死循环。
+    [SerializeField] private UIEventGameEvent _onMainSceneStageItemClickedEvent; // MainScene HomeScene 列表项被点击事件, 这个事件自己不可以再听了，是发送端，不能再监听了，否则会死循环。
 
 
     // 保存当前索引，用于事件传递
@@ -67,15 +67,15 @@ public class HomeSceneStateScrollViewItem : UIBehaviour, IScrollViewItem
         //var elementData = CardBuilder.GetElement(_currentIndex);
         // 创建并发送结构化的事件数据，通知系统哪个卡牌要素被点击了
         var eventData = new UIEventData(
-            UIEventType.MainSceneHomeSceneItemClicked,
+            UIEventType.MainSceneStageItemClicked,
             data.stageName, // 可以根据需要传递更多数据，例如关卡名称、角色列表等   
             _currentIndex,
             extra: data.dungeonName
         );
 
         // 触发事件，通知系统哪个卡牌要素被点击了
-        Debug.Assert(_onMainSceneHomeSceneItemClickedEvent != null, "_onMainSceneHomeSceneItemClickedEvent is null");
-        _onMainSceneHomeSceneItemClickedEvent.Raise(eventData);
+        Debug.Assert(_onMainSceneStageItemClickedEvent != null, "_onMainSceneStageItemClickedEvent is null");
+        _onMainSceneStageItemClickedEvent.Raise(eventData);
     }
 
 
