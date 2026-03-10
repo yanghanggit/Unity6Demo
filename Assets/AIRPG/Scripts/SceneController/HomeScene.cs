@@ -1,6 +1,4 @@
 using UnityEngine;
-// using UnityEngine.UI;
-// using TMPro;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
@@ -214,6 +212,7 @@ public class HomeScene : MonoBehaviour, IUIEventListener
         }
 
         await UniTask.Yield();
+        CachedStageName = string.Empty; // 回到主场景就请把关于本类的缓存都清掉吧,免得搞混了。
         SceneManager.LoadScene(PreScene);
     }
 
@@ -264,17 +263,6 @@ public class HomeScene : MonoBehaviour, IUIEventListener
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="actorName"></param>
-    // public void OnEventRaised(string actorName)
-    // {
-    //     Debug.Log($"[HomeScene] Actor clicked: {actorName}");
-    //     _currentSelectedActor = actorName;
-    //     _homeSceneMainStatePanel.ShowActorDetails(actorName);
-    // }
-
-    /// <summary>
     /// 监听游戏状态更新事件,根据最新的 GameContext 数据刷新主场景
     /// 
     public void OnEventRaised(UIEventData eventData)
@@ -287,25 +275,7 @@ public class HomeScene : MonoBehaviour, IUIEventListener
             case UIEventType.GameStateUpdated:
                 {
                     Debug.Log("[HomeScene] Received GameStateUpdated event, refreshing main state panel");
-
-                    var latestRoundEventsForActor = GameContext.Instance.GetLatestRoundEventsForActor(_currentSelectedActor);
-                    if (latestRoundEventsForActor.Count > 0)
-                    {
-                        List<string> agentEventSummaries = new();
-                        foreach (var agentEvent in latestRoundEventsForActor)
-                        {
-                            Debug.Log($"[HomeScene] Last event for {_currentSelectedActor}: {agentEvent.GetType().Name}");
-                            var summary = GameUtils.FormatAgentEventSummary(agentEvent);
-                            agentEventSummaries.Add(summary);
-                        }
-
-                        // 设置内容
-                        if (agentEventSummaries.Count > 0)
-                        {
-                            // _chatBubblePanel.GetComponentInChildren<Text>().text = string.Join("\n", agentEventSummaries);
-                            _homeSceneMainStatePanel.SetChatBubble(string.Join("\n", agentEventSummaries));
-                        }
-                    }
+                    _homeSceneMainStatePanel.RefreshChatBubble(_currentSelectedActor);
                 }
                 break;
 

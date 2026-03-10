@@ -119,20 +119,60 @@ public class GameStateSync : MonoBehaviour
             return;
         }
 
+        // 保存旧状态用于比较
+        var oldStagesState = GameContext.Instance.StagesState;
+        bool stagesStateChanged = !AreStagesStateEqual(oldStagesState, stagesState);
+        bool hasNewMessages = sessionMessages.Count > 0;
+
         // 更新全局场景-演员映射状态，供其他模块查询使用
         GameContext.Instance.StagesState = stagesState;
 
         // 处理会话消息，更新本地事件历史和最新序列ID
-        if (sessionMessages.Count > 0)
+        if (hasNewMessages)
         {
             GameContext.Instance.CollectEventsByActor(sessionMessages);
             _lastSessionSequenceId = sessionMessages[^1].sequence_id;
-
-            var eventData = new UIEventData(
-                UIEventType.GameStateUpdated
-            );
-            _onGameStateUpdatedEvent.Raise(eventData);
         }
+
+        // 只有在状态变化或收到新消息时才触发事件
+        if (stagesStateChanged || hasNewMessages)
+        {
+            var eventData = new UIEventData(UIEventType.GameStateUpdated);
+            _onGameStateUpdatedEvent.Raise(eventData);
+            Debug.Log($"[GameStateSync] Game state updated - StagesChanged: {stagesStateChanged}, NewMessages: {hasNewMessages}");
+        }
+    }
+
+    /// <summary>
+    /// 比较两个 StagesState 字典是否相等（深度比较）
+    /// </summary>
+    private bool AreStagesStateEqual(Dictionary<string, List<string>> state1, Dictionary<string, List<string>> state2)
+    {
+        // 如果两者都为 null，认为相等
+        if (state1 == null && state2 == null) return true;
+        // 如果只有一个为 null，不相等
+        if (state1 == null || state2 == null) return false;
+        // 如果键数量不同，不相等
+        if (state1.Count != state2.Count) return false;
+
+        // 逐个比较每个键值对
+        foreach (var kvp in state1)
+        {
+            if (!state2.TryGetValue(kvp.Key, out var list2)) return false;
+
+            var list1 = kvp.Value;
+            // 比较列表内容
+            if (list1 == null && list2 == null) continue;
+            if (list1 == null || list2 == null) return false;
+            if (list1.Count != list2.Count) return false;
+
+            // 比较列表元素（假设顺序可能不同，使用集合比较）
+            var set1 = new HashSet<string>(list1);
+            var set2 = new HashSet<string>(list2);
+            if (!set1.SetEquals(set2)) return false;
+        }
+
+        return true;
     }
 
     /// <summary>

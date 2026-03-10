@@ -119,7 +119,7 @@ public class HomeSceneMainStatePanel : MonoBehaviour
         RefreshSelectedActorPortrait(actorName);
 
         // 根据选中角色刷新聊天气泡内容
-        RefreshActorEventSummary(actorName);
+        RefreshChatBubble(actorName);
     }
 
     /// <summary>
@@ -148,33 +148,25 @@ public class HomeSceneMainStatePanel : MonoBehaviour
     /// 根据选中的角色名称更新聊天气泡内容
     /// </summary>
     /// <param name="actorName"></param>
-    public void RefreshActorEventSummary(string actorName)
+    public void RefreshChatBubble(string actorName)
+    {
+        _chatBubblePanel.GetComponentInChildren<TMP_Text>().text = FormatLastEventSummary(actorName);
+    }
+
+    /// <summary>
+    /// 格式化指定角色的最近一轮事件摘要信息，用于在聊天气泡中显示
+    /// </summary> <param name="actorName">角色名称</param>
+    /// <returns>格式化后的事件摘要字符串，如果没有事件则返回空字符串</returns>
+    private string FormatLastEventSummary(string actorName)
     {
         var latestRoundEventsForActor = GameContext.Instance.GetLatestRoundEventsForActor(actorName);
         if (latestRoundEventsForActor.Count > 0)
         {
-            List<string> agentEventSummaries = new();
-            foreach (var agentEvent in latestRoundEventsForActor)
-            {
-                Debug.Log($"[HomeScene] Last event for {actorName}: {agentEvent.GetType().Name}");
-                var summary = GameUtils.FormatAgentEventSummary(agentEvent);
-                agentEventSummaries.Add(summary);
-            }
-
-            // 设置内容
-            if (agentEventSummaries.Count > 0)
-            {
-                SetChatBubble(string.Join("\n", agentEventSummaries));
-            }
+            var lastEvent = latestRoundEventsForActor[^1];
+            Debug.Log($"[HomeScene] Last event for {actorName}: {lastEvent.GetType().Name}");
+            return GameUtils.FormatAgentEventSummary(lastEvent);
         }
-        else
-        {
-            SetChatBubble(string.Empty);
-        }
-    }
 
-    public void SetChatBubble(string content)
-    {
-        _chatBubblePanel.GetComponentInChildren<TMP_Text>().text = content;
+        return string.Empty;
     }
 }
