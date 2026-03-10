@@ -70,7 +70,7 @@ public class HomeAdvanceRequest
 [System.Serializable]
 public class HomeAdvanceResponse
 {
-    public List<SessionMessage> session_messages = new();
+    //public List<SessionMessage> session_messages = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +98,7 @@ public class HomePlayerActionRequest
 [System.Serializable]
 public class HomePlayerActionResponse
 {
-    public List<SessionMessage> session_messages = new();
+    //public List<SessionMessage> session_messages = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
