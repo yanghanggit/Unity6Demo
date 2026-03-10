@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HomeSceneMainStatePanel : MonoBehaviour, IStringGameEventListener
+public class HomeSceneMainStatePanel : MonoBehaviour
 {
     [Header("UI Components")]
     [SerializeField] private Image _background;                 // 顶部信息栏
@@ -12,40 +12,28 @@ public class HomeSceneMainStatePanel : MonoBehaviour, IStringGameEventListener
     [SerializeField] private GameObject _chatBubblePanel;      // 聊天气泡面板
     [SerializeField] private Image _currentActorIcon;      // 当前选中角色图标
 
-    [Header("Events")]
-    [SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
-
-    private string _selectedActorName = string.Empty;
-
-    public string SelectedActorName => _selectedActorName;
-
-
     void Start()
     {
         Debug.Assert(_background != null, "Background Image component is not assigned in the inspector.");
         Debug.Assert(_scrollView != null, "ScrollView component is not assigned in the inspector.");
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is not available.");
         Debug.Assert(_chatBubblePanel != null, "ChatBubblePanel GameObject is not assigned in the inspector.");
-        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
-
-        _onActorClickedEvent.RegisterListener(this);
 
         // 初始化滚动视图
         _chatBubblePanel.SetActive(false); // 初始状态隐藏聊天气泡面板
         _currentActorIcon.gameObject.SetActive(false); // 初始状态隐藏当前角色图标
-        _selectedActorName = string.Empty;
 
         // 根据登录状态设置背景图
         if (GameContext.Instance.IsLoggedIn)
         {
-            var stageSprite = SpriteCacheManager.Instance.GetSprite(HomeScene.CachedHomeStageName);
+            var stageSprite = SpriteCacheManager.Instance.GetSprite(HomeScene.CachedStageName);
             if (stageSprite != null)
             {
                 _background.sprite = stageSprite;
             }
             else
             {
-                Debug.LogWarning("Stage sprite not found for: " + HomeScene.CachedHomeStageName);
+                Debug.LogWarning("Stage sprite not found for: " + HomeScene.CachedStageName);
             }
         }
         else
@@ -62,45 +50,25 @@ public class HomeSceneMainStatePanel : MonoBehaviour, IStringGameEventListener
         }
     }
 
-    void OnDestroy()
-    {
-        // 注销角色点击事件监听器
-        if (_onActorClickedEvent != null)
-        {
-            _onActorClickedEvent.UnregisterListener(this);
-        }
-    }
-
-    /// <summary>
-    /// 当前角色图标被点击时调用,隐藏聊天气泡和当前角色图标,并清空选中角色状态
-    /// </summary>
-    public void OnClickCloseChatBubble()
-    {
-        Debug.Log($"Current actor icon clicked: {_selectedActorName}");
-        _chatBubblePanel.SetActive(false); // 初始状态隐藏聊天气泡面板
-        _currentActorIcon.gameObject.SetActive(false); // 初始状态隐藏当前角色图标
-        _selectedActorName = string.Empty;
-    }
-
     /// <summary>
     /// 刷新主状态面板显示,包括根据当前玩家所在Stage刷新角色列表,以及如果有选中角色则刷新当前角色图标和聊天气泡显示
     /// </summary>
     /// <returns></returns>
-    public async UniTaskVoid RefreshView()
+    public async UniTaskVoid RefreshActorsSync()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.Log("[HomeScene] GameContext Root is null");
-            HomeScene.ActorNamesOnStage.Clear();
+            HomeScene.CachedActorNames.Clear();
 
 
             var mockData = MockData.CreateActorData();
             for (int i = 0; i < mockData.Count; i++)
             {
-                HomeScene.ActorNamesOnStage.Add(mockData[i].name);
+                HomeScene.CachedActorNames.Add(mockData[i].name);
             }
 
-            _scrollView.totalCount = HomeScene.ActorNamesOnStage.Count;
+            _scrollView.totalCount = HomeScene.CachedActorNames.Count;
             _scrollView.RefillCells();
             return;
         }
@@ -109,8 +77,8 @@ public class HomeSceneMainStatePanel : MonoBehaviour, IStringGameEventListener
         if (stagesState == null)
         {
             Debug.LogError("[HomeScene] Failed to get stages state from server");
-            HomeScene.ActorNamesOnStage.Clear();
-            _scrollView.totalCount = HomeScene.ActorNamesOnStage.Count;
+            HomeScene.CachedActorNames.Clear();
+            _scrollView.totalCount = HomeScene.CachedActorNames.Count;
             _scrollView.RefillCells();
             return;
         }
@@ -119,41 +87,39 @@ public class HomeSceneMainStatePanel : MonoBehaviour, IStringGameEventListener
         {
             if (kvp.Value.Contains(GameContext.Instance.PlayerActorName))
             {
-                HomeScene.ActorNamesOnStage = kvp.Value;
+                HomeScene.CachedActorNames = kvp.Value;
                 break;
             }
         }
 
-        HomeScene.ActorNamesOnStage.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
-        Debug.Log($"Actors in current stage: {string.Join(", ", HomeScene.ActorNamesOnStage)}");
-        _scrollView.totalCount = HomeScene.ActorNamesOnStage.Count;
+        HomeScene.CachedActorNames.Remove(GameContext.Instance.PlayerActorName); // 移除玩家角色自己
+        Debug.Log($"Actors in current stage: {string.Join(", ", HomeScene.CachedActorNames)}");
+        _scrollView.totalCount = HomeScene.CachedActorNames.Count;
         _scrollView.RefillCells();
     }
 
-    public void OnEventRaised(string actorName)
+    /// <summary>
+    /// 
+    /// </summary>
+    public void HideActorDetails()
+    {
+        _chatBubblePanel.SetActive(false);
+        _currentActorIcon.gameObject.SetActive(false);
+    }
+
+    public void ShowActorDetails(string actorName)
     {
         Debug.Log($"[HomeScene] Actor clicked: {actorName}");
-
-        // 防止重复选择同一角色
-        if (_selectedActorName == actorName)
-        {
-            Debug.Log($"[HomeScene] Actor {actorName} is already selected.");
-            return;
-        }
-
-        // 更新选中的角色名称
-        _selectedActorName = actorName;
-        Debug.Log($"[HomeScene] Selected actor updated to: {_selectedActorName}");
 
         // 更新显示
         _currentActorIcon.gameObject.SetActive(true);
         _chatBubblePanel.SetActive(true);
 
         // 更新UI显示选中的角色
-        RefreshSelectedActorPortrait(_selectedActorName);
+        RefreshSelectedActorPortrait(actorName);
 
         // 根据选中角色刷新聊天气泡内容
-        RefreshActorEventSummary(_selectedActorName);
+        RefreshActorEventSummary(actorName);
     }
 
     /// <summary>
@@ -165,7 +131,7 @@ public class HomeSceneMainStatePanel : MonoBehaviour, IStringGameEventListener
         Debug.Log($"[HomeScene] Handling selection for actor: {actorName}");
 
         // selectedActorName 必须在 HomeScene.ActorNamesOnStage 内
-        Debug.Assert(HomeScene.ActorNamesOnStage.Contains(actorName), $"Selected actor {actorName} is not in the current stage.");
+        //Debug.Assert(HomeScene.CachedActorNamesOnStage.Contains(actorName), $"Selected actor {actorName} is not in the current stage.");
 
         // // 更新当前角色的Sprite显示
         var cachedSprite = SpriteCacheManager.Instance.GetSprite(actorName);

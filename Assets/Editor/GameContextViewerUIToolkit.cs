@@ -191,8 +191,8 @@ public class GameContextViewerUIToolkit : EditorWindow
             gamenameField.value = GameContext.Instance.GameName ?? "未设置";
         if (actornameField != null)
             actornameField.value = GameContext.Instance.PlayerActorName ?? "未设置";
-        if (sequenceIdField != null)
-            sequenceIdField.value = GameContext.Instance.LastSequenceId.ToString();
+        // if (sequenceIdField != null)
+        //     sequenceIdField.value = GameContext.Instance.LastSequenceId.ToString();
     }
 
     private void UpdateUrls()

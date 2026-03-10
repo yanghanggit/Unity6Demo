@@ -93,17 +93,17 @@ public class HomeGamePlayManager : MonoBehaviour
         }
 
         // 从服务器获取并同步最新的会话消息
-        var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
-        if (sessionMessages == null)
-        {
-            Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after advancing");
-            return false;
-        }
+        // var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
+        // if (sessionMessages == null)
+        // {
+        //     Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after advancing");
+        //     return false;
+        // }
 
-        Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after advancing");
-        GameContext.Instance.CollectEventsByActor(sessionMessages);
+        // Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after advancing");
+        // GameContext.Instance.CollectEventsByActor(sessionMessages);
 
-        Debug.Log($"[HomeGamePlayManager] AdvanceGame completed successfully for actors: [{string.Join(", ", actors)}]");
+        // Debug.Log($"[HomeGamePlayManager] AdvanceGame completed successfully for actors: [{string.Join(", ", actors)}]");
         return true;
     }
 
@@ -166,17 +166,17 @@ public class HomeGamePlayManager : MonoBehaviour
             Destroy(api.gameObject);
         }
 
-        var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
-        if (sessionMessages == null)
-        {
-            Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after speaking");
-            return false;
-        }
+        // var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
+        // if (sessionMessages == null)
+        // {
+        //     Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after speaking");
+        //     return false;
+        // }
 
-        Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after speaking");
-        GameContext.Instance.CollectEventsByActor(sessionMessages);
+        // Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after speaking");
+        // GameContext.Instance.CollectEventsByActor(sessionMessages);
 
-        Debug.Log($"[HomeGamePlayManager] SpeakToActor completed successfully: {targetActorName}");
+        // Debug.Log($"[HomeGamePlayManager] SpeakToActor completed successfully: {targetActorName}");
         return true;
     }
 
@@ -237,17 +237,17 @@ public class HomeGamePlayManager : MonoBehaviour
             Destroy(api.gameObject);
         }
 
-        var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
-        if (sessionMessages == null)
-        {
-            Debug.LogError($"[HomeGamePlayManager] Failed to fetch session messages after switching to {stageName}");
-            return false;
-        }
+        // var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
+        // if (sessionMessages == null)
+        // {
+        //     Debug.LogError($"[HomeGamePlayManager] Failed to fetch session messages after switching to {stageName}");
+        //     return false;
+        // }
 
-        Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after stage switch");
-        GameContext.Instance.CollectEventsByActor(sessionMessages);
+        // Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after stage switch");
+        // GameContext.Instance.CollectEventsByActor(sessionMessages);
 
-        Debug.Log($"[HomeGamePlayManager] SwitchStage completed successfully: {stageName}");
+        // Debug.Log($"[HomeGamePlayManager] SwitchStage completed successfully: {stageName}");
         return true;
     }
 
@@ -296,17 +296,17 @@ public class HomeGamePlayManager : MonoBehaviour
             Destroy(api.gameObject);
         }
 
-        var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
-        if (sessionMessages == null)
-        {
-            Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after trans dungeon");
-            return false;
-        }
+        // var sessionMessages = await GameStateSync.Instance.GetSessionMessages();
+        // if (sessionMessages == null)
+        // {
+        //     Debug.LogError("[HomeGamePlayManager] Failed to fetch session messages after trans dungeon");
+        //     return false;
+        // }
 
-        Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after trans dungeon");
-        GameContext.Instance.CollectEventsByActor(sessionMessages);
+        // Debug.Log($"[HomeGamePlayManager] Fetched {sessionMessages.Count} session messages after trans dungeon");
+        // GameContext.Instance.CollectEventsByActor(sessionMessages);
 
-        Debug.Log("[HomeGamePlayManager] TransDungeon completed successfully");
+        // Debug.Log("[HomeGamePlayManager] TransDungeon completed successfully");
         return true;
     }
 }

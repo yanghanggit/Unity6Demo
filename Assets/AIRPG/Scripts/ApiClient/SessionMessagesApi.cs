@@ -9,22 +9,6 @@ using System.Collections.Generic;
 public class SessionMessagesApi : BaseApiClient
 {
     /// <summary>
-    /// 获取响应中的最后一条消息的序列 ID
-    /// </summary>
-    public int RespLastSequenceId
-    {
-        get
-        {
-            if (_responseData != null && _responseData.session_messages != null && _responseData.session_messages.Count > 0)
-            {
-                var lastMessage = _responseData.session_messages[^1];
-                return lastMessage.sequence_id;
-            }
-            return -1;
-        }
-    }
-
-    /// <summary>
     /// 请求结果
     /// </summary>
     private RequestResult _requestResult;
@@ -68,8 +52,6 @@ public class SessionMessagesApi : BaseApiClient
     /// <returns>协程枚举器</returns>
     public async UniTask Call(string url, string userName, string gameName, int requestLastSequenceId)
     {
-        //Initialize(url, userName, gameName, requestLastSequenceId);
-
         // 记录请求信息
         Debug.Log("Starting SessionMessagesApi call...");
         Debug.Log($"URL: {url}");

@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using System.Threading;
 
 /// <summary>
 /// 游戏状态同步管理器
@@ -13,6 +14,9 @@ public class GameStateSync : MonoBehaviour
     /// 单例实例
     /// </summary>
     public static GameStateSync Instance { get; private set; }
+
+    private int _lastSessionSequenceId = 0;
+    private bool _isSessionPolling = false;
 
     private void Awake()
     {
@@ -29,6 +33,13 @@ public class GameStateSync : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        // 由同步管理器自行启动会话轮询，调用方无需感知内部细节。
+        ResetSessionMessageCursor();
+        StartSessionMessagesPolling(destroyCancellationToken).Forget();
+    }
+
     /// <summary>
     /// 创建一个独立的临时 API 实例，挂载于自身 Transform 下。
     /// 每次调用均产生隔离对象，避免并发时共享 ReqResult / RespData 导致竞态。
@@ -40,6 +51,73 @@ public class GameStateSync : MonoBehaviour
         go.transform.SetParent(transform);
         go.hideFlags = HideFlags.HideInHierarchy;
         return go.AddComponent<T>();
+    }
+
+    /// <summary>
+    /// 重置会话消息拉取游标，通常在进入 HomeScene 时调用。
+    /// </summary>
+    public void ResetSessionMessageCursor(int lastSequenceId = 0)
+    {
+        _lastSessionSequenceId = Mathf.Max(0, lastSequenceId);
+    }
+
+    /// <summary>
+    /// 启动会话消息轮询。若已在轮询中，则忽略重复启动。
+    /// </summary>
+    public async UniTask StartSessionMessagesPolling(CancellationToken cancellationToken, int intervalMs = 3000)
+    {
+        if (_isSessionPolling)
+        {
+            Debug.LogWarning("[GameStateSync] Session polling is already running, skip duplicate start.");
+            return;
+        }
+
+        _isSessionPolling = true;
+        try
+        {
+            while (true)
+            {
+                await FetchPlayerSessionMessages();
+                bool cancelled = await UniTask.Delay(intervalMs, ignoreTimeScale: true, cancellationToken: cancellationToken).SuppressCancellationThrow();
+                if (cancelled)
+                {
+                    break;
+                }
+            }
+        }
+        finally
+        {
+            _isSessionPolling = false;
+        }
+    }
+
+    /// <summary>
+    /// 从服务器拉取玩家会话消息，并更新本地最新序列号。
+    /// </summary>
+    private async UniTask FetchPlayerSessionMessages()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[GameStateSync] Player is not logged in, cannot fetch session messages");
+            return;
+        }
+
+        var (sessionMessages, stagesState) = await UniTask.WhenAll(
+            GetSessionMessages(_lastSessionSequenceId),
+            GetStagesState()
+        );
+
+        if (sessionMessages == null || stagesState == null)
+        {
+            Debug.LogError("[GameStateSync] Failed to fetch session messages or stages state from server");
+            return;
+        }
+
+        if (sessionMessages.Count > 0)
+        {
+            GameContext.Instance.CollectEventsByActor(sessionMessages);
+            _lastSessionSequenceId = sessionMessages[^1].sequence_id;
+        }
     }
 
     /// <summary>
@@ -209,7 +287,7 @@ public class GameStateSync : MonoBehaviour
     /// 从服务器获取会话消息，并更新序列ID
     /// </summary>
     /// <returns>成功时返回会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> GetSessionMessages()
+    public async UniTask<List<SessionMessage>> GetSessionMessages(int lastSequenceId)
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -225,7 +303,7 @@ public class GameStateSync : MonoBehaviour
                 GameContext.Instance.SessionMessagesUrl,
                 GameContext.Instance.UserName,
                 GameContext.Instance.GameName,
-                GameContext.Instance.LastSequenceId
+                lastSequenceId
             );
 
             if (api.ReqResult == null)
@@ -243,11 +321,6 @@ public class GameStateSync : MonoBehaviour
             Debug.Assert(api.RespData != null, "[GameStateSync] SessionMessagesApi response data is null");
 
             // 更新最后一个序列ID
-            if (api.RespLastSequenceId >= 0)
-            {
-                GameContext.Instance.LastSequenceId = api.RespLastSequenceId;
-            }
-
             return new List<SessionMessage>(api.RespData.session_messages);
         }
         finally

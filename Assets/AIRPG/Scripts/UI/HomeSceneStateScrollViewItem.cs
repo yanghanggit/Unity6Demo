@@ -13,9 +13,7 @@ public class HomeSceneStateScrollViewItem : UIBehaviour, IScrollViewItem
 
     [Header("UI Components")]
     [SerializeField] private TMP_Text _title; // card名称文本
-
     [SerializeField] private Image[] _actorIcons; // 状态图标数组
-
 
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onMainSceneHomeSceneItemClickedEvent; // MainScene HomeScene 列表项被点击事件, 这个事件自己不可以再听了，是发送端，不能再监听了，否则会死循环。
@@ -175,14 +173,12 @@ public class HomeSceneStateScrollViewItem : UIBehaviour, IScrollViewItem
     /// <returns></returns>
     private HomeSceneData GetData()
     {
-        if (_currentIndex >= 0 && _currentIndex < MainScene.HomeSceneDataList.Count)
+        if (_currentIndex >= 0 && _currentIndex < MainScene.HomeScenes.Count)
         {
-            return MainScene.HomeSceneDataList[_currentIndex];
+            return MainScene.HomeScenes[_currentIndex];
         }
-        else
-        {
-            Debug.LogError($"Invalid index {_currentIndex} for HomeSceneDataList with count {MainScene.HomeSceneDataList.Count}");
-            return null;
-        }
+
+        Debug.LogError($"Invalid index {_currentIndex} for HomeSceneDataList with count {MainScene.HomeScenes.Count}");
+        return null;
     }
 }

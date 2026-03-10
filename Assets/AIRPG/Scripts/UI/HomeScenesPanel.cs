@@ -3,9 +3,6 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-
-
-
 public class HomeScenesPanel : MonoBehaviour
 {
     [Header("UI Components")]
@@ -55,7 +52,7 @@ public class HomeScenesPanel : MonoBehaviour
             return;
         }
 
-        MainScene.HomeSceneDataList.Clear();
+        MainScene.HomeScenes.Clear();
         foreach (var kvp in stagesState)
         {
             var stageName = kvp.Key;
@@ -90,14 +87,14 @@ public class HomeScenesPanel : MonoBehaviour
                 }
             }
 
-            MainScene.HomeSceneDataList.Add(sceneData);
+            MainScene.HomeScenes.Add(sceneData);
         }
 
         // 如果 dungeon name 不为空，
         if (!string.IsNullOrEmpty(dungeon.name))
         {
             // 将 dungeon name 添加到每个 HomeSceneData 的 dungeonName 字段中
-            MainScene.HomeSceneDataList.Add(new HomeSceneData
+            MainScene.HomeScenes.Add(new HomeSceneData
             {
                 stageName = dungeon.name,
                 actorsOnStage = new List<EntitySerialization>(),
@@ -106,8 +103,7 @@ public class HomeScenesPanel : MonoBehaviour
         }
 
         _scrollView.gameObject.SetActive(true);
-        _scrollView.totalCount = MainScene.HomeSceneDataList.Count;
+        _scrollView.totalCount = MainScene.HomeScenes.Count;
         _scrollView.RefillCells(); // 重建列表并回到顶部
     }
-
 }

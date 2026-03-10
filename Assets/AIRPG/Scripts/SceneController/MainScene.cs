@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 
 /// <summary>
-/// 卡牌构建数据
+/// 主场景数据结构，包含当前场景的关键信息，如场景名、在场景中的角色列表、所属地下城等
 /// </summary>
 [System.Serializable]
 public class HomeSceneData
@@ -21,7 +21,7 @@ public class HomeSceneData
 /// </summary>
 public class MainScene : MonoBehaviour, IUIEventListener
 {
-    public static readonly List<HomeSceneData> HomeSceneDataList = new();
+    public static readonly List<HomeSceneData> HomeScenes = new();
 
     public static readonly string PreSceneName = "LoginScene";
     public static readonly string NextSceneName = "HomeScene";
@@ -31,7 +31,6 @@ public class MainScene : MonoBehaviour, IUIEventListener
     [SerializeField] private PlayerTopBar _topBar;
     [SerializeField] private GameObject _playerInfoPanel;
     [SerializeField] private HomeScenesPanel _homeScenesPanel;
-
 
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onMainSceneHomeSceneItemClickedEvent;
@@ -152,7 +151,6 @@ public class MainScene : MonoBehaviour, IUIEventListener
 
         Debug.Log("[MainScene] Game state advanced successfully");
         _homeScenesPanel.RereshViewAsync().Forget();
-        //RefreshActorLocations().Forget();
     }
 
     /// <summary>
@@ -170,7 +168,7 @@ public class MainScene : MonoBehaviour, IUIEventListener
         {
             Debug.LogWarning("Player is not logged in, cannot transition to scene");
             await UniTask.Yield();
-            HomeScene.CachedHomeStageName = targetStageName;
+            HomeScene.CachedStageName = targetStageName;
             SceneManager.LoadScene(NextSceneName);
             return;
         }
@@ -210,7 +208,7 @@ public class MainScene : MonoBehaviour, IUIEventListener
         }
 
         await UniTask.Yield();
-        HomeScene.CachedHomeStageName = targetStageName;
+        HomeScene.CachedStageName = targetStageName;
         SceneManager.LoadScene(NextSceneName);
     }
 
@@ -238,8 +236,6 @@ public class MainScene : MonoBehaviour, IUIEventListener
                         return;
                     }
 
-                    // var tempConfig = ScriptableObject.CreateInstance<HomeSceneConfig>();
-                    // tempConfig.StageName = stageName;
                     TransitionToScene(stageName).Forget();
                 }
                 break;
@@ -248,6 +244,5 @@ public class MainScene : MonoBehaviour, IUIEventListener
                 Debug.LogWarning($"未处理的事件类型: {eventData.eventType}");
                 break;
         }
-
     }
 }

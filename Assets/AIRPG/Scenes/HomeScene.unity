@@ -950,6 +950,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HomeScene
   _homeSceneMainStatePanel: {fileID: 1390926336}
   _homeSceneInputStatePanel: {fileID: 217303598}
+  _onActorClickedEvent: {fileID: 11400000, guid: cdb300192ace1475990159f868b47bcc,
+    type: 2}
 --- !u!1 &469215743
 GameObject:
   m_ObjectHideFlags: 0
@@ -1329,8 +1331,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1390926336}
-        m_TargetAssemblyTypeName: HomeSceneMainStatePanel, Assembly-CSharp
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: HomeScene, Assembly-CSharp
         m_MethodName: OnClickCloseChatBubble
         m_Mode: 1
         m_Arguments:
@@ -1963,7 +1965,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1390926333
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2042,8 +2044,6 @@ MonoBehaviour:
   _scrollView: {fileID: 1768923941}
   _chatBubblePanel: {fileID: 18363598}
   _currentActorIcon: {fileID: 1853668880}
-  _onActorClickedEvent: {fileID: 11400000, guid: cdb300192ace1475990159f868b47bcc,
-    type: 2}
 --- !u!1 &1421765692
 GameObject:
   m_ObjectHideFlags: 0

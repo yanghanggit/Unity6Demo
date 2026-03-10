@@ -45,10 +45,10 @@ public class HomeSceneActorScrollViewItem : UIBehaviour, IScrollViewItem
         // 获取当前场景中除了玩家角色外的其他角色列表
 
         // 这段是正常的逻辑，也就是说有服务器返回其他角色数据
-        Debug.Assert(index < HomeScene.ActorNamesOnStage.Count, "index < ActorNamesInCurrentStage.Count");
+        Debug.Assert(index < HomeScene.CachedActorNames.Count, "index < ActorNamesInCurrentStage.Count");
 
         // 根据索引获取对应的角色名称
-        _actorName = HomeScene.ActorNamesOnStage[index];
+        _actorName = HomeScene.CachedActorNames[index];
 
         // 更新UI显示:设置角色名称文本
         _title.text = GameUtils.GetDisplayName(_actorName);

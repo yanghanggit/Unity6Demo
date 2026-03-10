@@ -9,27 +9,31 @@ using System.Collections.Generic;
 /// 主场景控制器
 /// 负责管理主场景的UI交互、角色选择和状态切换
 /// </summary>
-public class HomeScene : MonoBehaviour
+public class HomeScene : MonoBehaviour, IStringGameEventListener
 {
     public static readonly string PreScene = "MainScene";   // 上一个场景名称
+    public static string CachedStageName = string.Empty;
+    public static List<string> CachedActorNames = new();
 
-    public static string CachedHomeStageName = string.Empty;
-    public static List<string> ActorNamesOnStage = new();
-
+    [Header("UI Components")]
     [SerializeField] private HomeSceneMainStatePanel _homeSceneMainStatePanel; // 主状态面板组件
     [SerializeField] private HomeSceneInputStatePanel _homeSceneInputStatePanel; // 输入状态面板组件
 
+    [Header("Events")]
+    [SerializeField] private StringGameEvent _onActorClickedEvent; // 角色点击事件
+
+    private string _currentSelectedActor = string.Empty; // 当前选中角色名称
     //
     void Awake()
     {
         // 如果有从 MainScene 传递过来的配置,使用它
         if (!GameContext.Instance.IsLoggedIn)
         {
-            CachedHomeStageName = MockData.MockStageName;
+            CachedStageName = MockData.MockStageName;
         }
         else
         {
-            Debug.Log($"[CachedHomeStageName: {CachedHomeStageName}]");
+            Debug.Log($"[CachedHomeStageName: {CachedStageName}]");
         }
     }
 
@@ -44,13 +48,30 @@ public class HomeScene : MonoBehaviour
         Debug.Assert(SpriteCacheManager.Instance != null, "SpriteCacheManager instance is null");
         Debug.Assert(_homeSceneMainStatePanel != null, "_homeSceneMainStatePanel is null");
         Debug.Assert(_homeSceneInputStatePanel != null, "_homeSceneInputStatePanel is null");
+        Debug.Assert(_onActorClickedEvent != null, "onActorClickedEvent is null");
+
+        // 注册角色点击事件监听器
+        _onActorClickedEvent.RegisterListener(this);
+
+        // 刚进入主场景时，先隐藏玩家信息面板和场景列表，等数据加载完成后再显示
+        _currentSelectedActor = string.Empty;
+
 
         // 初始UI状态设置
         _homeSceneMainStatePanel.gameObject.SetActive(true); // 显示主状态面板
         _homeSceneInputStatePanel.gameObject.SetActive(false); // 隐藏输入状态面板
 
         // 刷新角色列表
-        _homeSceneMainStatePanel.RefreshView().Forget();
+        _homeSceneMainStatePanel.RefreshActorsSync().Forget();
+    }
+
+    void OnDestroy()
+    {
+        // 注销角色点击事件监听器
+        if (_onActorClickedEvent != null)
+        {
+            _onActorClickedEvent.UnregisterListener(this);
+        }
     }
 
     // UI按钮回调方法
@@ -79,9 +100,10 @@ public class HomeScene : MonoBehaviour
     /// </summary>
     public void OnClickSelectActor()
     {
-        Debug.Log($"Current actor icon clicked: {_homeSceneMainStatePanel.SelectedActorName}");
+        //Debug.Log($"Current actor icon clicked: {HomeScene.CachedSelectedActor}");
         _homeSceneInputStatePanel.gameObject.SetActive(true); // 显示输入状态面板
-        _homeSceneInputStatePanel.OnActivate(_homeSceneMainStatePanel.SelectedActorName); // 设置输入字段为选中角色名称
+        Debug.Assert(!string.IsNullOrEmpty(_currentSelectedActor), "Selected actor is null or empty when trying to activate input panel");
+        _homeSceneInputStatePanel.OnActivate(_currentSelectedActor); // 设置输入字段为选中角色名称
     }
 
     /// <summary>
@@ -101,7 +123,22 @@ public class HomeScene : MonoBehaviour
             return;
         }
 
-        ExecuteSpeakAction(_homeSceneMainStatePanel.SelectedActorName, _homeSceneInputStatePanel.GetInputText()).Forget();
+        if (string.IsNullOrEmpty(_currentSelectedActor))
+        {
+            Debug.LogWarning("No actor selected, cannot send message");
+            return;
+        }
+
+        ExecuteSpeakAction(_currentSelectedActor, _homeSceneInputStatePanel.GetInputText()).Forget();
+    }
+
+    /// <summary>
+    /// 当前角色图标被点击时调用,隐藏聊天气泡和当前角色图标,并清空选中角色状态
+    /// </summary>
+    public void OnClickCloseChatBubble()
+    {
+        _currentSelectedActor = string.Empty;
+        _homeSceneMainStatePanel.HideActorDetails();
     }
 
     /// <summary>
@@ -216,8 +253,17 @@ public class HomeScene : MonoBehaviour
 
         Debug.Log("[HomeScene] Speak action completed successfully");
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="actorName"></param>
+    public void OnEventRaised(string actorName)
+    {
+        Debug.Log($"[HomeScene] Actor clicked: {actorName}");
+        _currentSelectedActor = actorName;
+        _homeSceneMainStatePanel.ShowActorDetails(actorName);
+    }
 }
-
-
 
 

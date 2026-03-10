@@ -86,23 +86,23 @@ public partial class GameContext
     /// <summary>
     /// 最后一次序列ID，用于追踪游戏事件的顺序
     /// </summary>
-    private int _lastSequenceId = 0;
+    // private int _lastSequenceId = 0;
 
-    /// <summary>
-    /// 获取或设置最后一次序列ID
-    /// </summary>
-    public int LastSequenceId
-    {
-        get
-        {
-            return _lastSequenceId;
-        }
-        set
-        {
-            Debug.Assert(value >= 0, "LastSequenceId cannot be negative");
-            _lastSequenceId = value;
-        }
-    }
+    // /// <summary>
+    // /// 获取或设置最后一次序列ID
+    // /// </summary>
+    // public int LastSequenceId
+    // {
+    //     get
+    //     {
+    //         return _lastSequenceId;
+    //     }
+    //     set
+    //     {
+    //         Debug.Assert(value >= 0, "LastSequenceId cannot be negative");
+    //         _lastSequenceId = value;
+    //     }
+    // }
 
     /// <summary>
     /// 获取或设置用户名
