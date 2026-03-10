@@ -164,7 +164,7 @@ public class DungeonProgressRequest
 [System.Serializable]
 public class DungeonProgressResponse
 {
-    public List<SessionMessage> session_messages = new();
+    //public List<SessionMessage> session_messages = new();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
