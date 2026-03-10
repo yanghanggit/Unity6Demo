@@ -70,7 +70,9 @@ public class HomeAdvanceRequest
 [System.Serializable]
 public class HomeAdvanceResponse
 {
-    //public List<SessionMessage> session_messages = new();
+    public string task_id = "";
+    public string status = "";
+    public string message = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +100,9 @@ public class HomePlayerActionRequest
 [System.Serializable]
 public class HomePlayerActionResponse
 {
-    //public List<SessionMessage> session_messages = new();
+    public string task_id = "";
+    public string status = "";
+    public string message = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,6 +121,8 @@ public class HomeTransDungeonRequest
 [System.Serializable]
 public class HomeTransDungeonResponse
 {
+    public string task_id = "";
+    public string status = "";
     public string message = "";
 }
 

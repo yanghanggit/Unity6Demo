@@ -50,8 +50,8 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
     /// </summary>
     private async UniTaskVoid FetchAndDisplayPostCombatResultAsync()
     {
-        var sessionMessages = await DungeonGamePlayManager.Instance.PostCombat();
-        if (sessionMessages == null)
+        var postCombatResponse = await DungeonGamePlayManager.Instance.PostCombat();
+        if (postCombatResponse == null)
         {
             Debug.LogWarning("Failed to get session messages from post combat");
             _mainText.text = "战斗结束！(未能获取战斗结果)";
@@ -59,29 +59,29 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
         }
 
         // 遍历 SessionMessage，收集 CombatArchiveEvent 中的战斗总结
-        var showText = "战斗后事件：\n\n";
+        // var showText = "战斗后事件：\n\n";
 
-        foreach (var sessionMessage in sessionMessages)
-        {
-            if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
-                continue;
+        // foreach (var sessionMessage in sessionMessages)
+        // {
+        //     if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
+        //         continue;
 
-            var agentEvent = GameUtils.ParseAgentEvent(sessionMessage);
-            if (agentEvent == null)
-            {
-                Debug.LogWarning("Failed to parse agent event from session message");
-                continue;
-            }
+        //     var agentEvent = GameUtils.ParseAgentEvent(sessionMessage);
+        //     if (agentEvent == null)
+        //     {
+        //         Debug.LogWarning("Failed to parse agent event from session message");
+        //         continue;
+        //     }
 
-            if (agentEvent.head == (int)EventHead.COMBAT_ARCHIVE_EVENT
-                && agentEvent is CombatArchiveEvent combatArchiveEvent)
-            {
-                Debug.Log("Processing CombatArchiveEvent from post combat");
-                showText += $"Actor: {combatArchiveEvent.actor}\nSummary: {combatArchiveEvent.summary}\n\n";
-            }
-        }
+        //     if (agentEvent.head == (int)EventHead.COMBAT_ARCHIVE_EVENT
+        //         && agentEvent is CombatArchiveEvent combatArchiveEvent)
+        //     {
+        //         Debug.Log("Processing CombatArchiveEvent from post combat");
+        //         showText += $"Actor: {combatArchiveEvent.actor}\nSummary: {combatArchiveEvent.summary}\n\n";
+        //     }
+        // }
 
-        _mainText.text = showText;
+        // _mainText.text = showText;
     }
 
     /// <summary>

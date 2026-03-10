@@ -48,7 +48,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 combat_init 端点开始战斗
     /// </summary>
     /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> InitCombat()
+    public async UniTask<DungeonProgressResponse> InitCombat()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -79,7 +79,7 @@ public class DungeonGamePlayManager : MonoBehaviour
 
             Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
             Debug.Log("[DungeonGamePlayManager] CombatInit completed successfully");
-            return api.RespData.session_messages;
+            return api.RespData;
         }
         finally
         {
@@ -92,7 +92,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 status_evaluation 端点进行状态评估
     /// </summary>
     /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> CombatStatusEvaluation()
+    public async UniTask<DungeonProgressResponse> CombatStatusEvaluation()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -123,7 +123,7 @@ public class DungeonGamePlayManager : MonoBehaviour
 
             Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
             Debug.Log("[DungeonGamePlayManager] CombatStatusEvaluation completed successfully");
-            return api.RespData.session_messages;
+            return api.RespData;
         }
         finally
         {
@@ -238,7 +238,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 advance_next_dungeon 端点推进地下城进度
     /// </summary>
     /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> AdvanceStage()
+    public async UniTask<DungeonProgressResponse> AdvanceStage()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -269,7 +269,7 @@ public class DungeonGamePlayManager : MonoBehaviour
 
             Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
             Debug.Log("[DungeonGamePlayManager] AdvanceNextDungeon completed successfully");
-            return api.RespData.session_messages;
+            return api.RespData;
         }
         finally
         {
@@ -282,7 +282,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 retreat 端点从地下城撤退
     /// </summary>
     /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> RetreatFromDungeon()
+    public async UniTask<DungeonProgressResponse> RetreatFromDungeon()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -313,7 +313,7 @@ public class DungeonGamePlayManager : MonoBehaviour
 
             Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
             Debug.Log("[DungeonGamePlayManager] RetreatFromDungeon completed successfully");
-            return api.RespData.session_messages;
+            return api.RespData;
         }
         finally
         {
@@ -326,7 +326,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 post_combat 端点进行战斗后处理
     /// </summary>
     /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<List<SessionMessage>> PostCombat()
+    public async UniTask<DungeonProgressResponse> PostCombat()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -357,7 +357,7 @@ public class DungeonGamePlayManager : MonoBehaviour
 
             Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
             Debug.Log("[DungeonGamePlayManager] PostCombat completed successfully");
-            return api.RespData.session_messages;
+            return api.RespData;
         }
         finally
         {
