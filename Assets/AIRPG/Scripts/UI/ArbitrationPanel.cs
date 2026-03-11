@@ -82,7 +82,7 @@ public class ArbitrationPanel : MonoBehaviour
         _closeButton.gameObject.SetActive(true);
 
         // 通知其他系统战斗状态已更新，确保站位面板等内容及时刷新
-        DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
+        //DungeonGamePlayManager.Instance.CombatStatusEvaluation().Forget();
     }
 
     /// <summary>

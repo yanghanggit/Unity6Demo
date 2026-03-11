@@ -152,8 +152,6 @@ public class DungeonTransHomeResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 public sealed class DungeonProgressType
 {
-    public static readonly string INIT_COMBAT = "initialization";
-    public static readonly string COMBAT_STATUS_EVALUATION = "combat_status_evaluation";
     public static readonly string POST_COMBAT = "post_combat";
     public static readonly string ADVANCE_STAGE = "advance_stage";
     public static readonly string RETREAT = "retreat";
@@ -208,16 +206,35 @@ public class AllyDrawCardAction
 }
 
 [System.Serializable]
-public class DungeonCombatDrawCardsRequest
+public class DungeonCombatDrawAllyCardsRequest
 {
     public string user_name = "";
     public string game_name = "";
     public List<AllyDrawCardAction> specified_actions = new();
-    public bool enable_enemy_draw = true;
 }
 
 [System.Serializable]
-public class DungeonCombatDrawCardsResponse
+public class DungeonCombatDrawAllyCardsResponse
+{
+    public string task_id = "";
+    public string status = "";
+    public string message = "";
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[System.Serializable]
+public class DungeonCombatDrawEnemyCardsRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+}
+
+[System.Serializable]
+public class DungeonCombatDrawEnemyCardsResponse
 {
     public string task_id = "";
     public string status = "";

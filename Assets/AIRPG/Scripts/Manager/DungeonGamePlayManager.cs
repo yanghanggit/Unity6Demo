@@ -47,7 +47,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 初始化战斗
     /// 调用 combat_init 端点开始战斗
     /// </summary>
-    /// <returns>会话消息列表，失败时返回 null</returns>
+    /// <returns>战斗初始化响应，失败时返回 null</returns>
     public async UniTask<DungeonCombatInitResponse> InitCombat()
     {
         if (!GameContext.Instance.IsLoggedIn)
@@ -90,52 +90,52 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 状态评估
     /// 调用 status_evaluation 端点进行状态评估
     /// </summary>
-    /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<DungeonProgressResponse> CombatStatusEvaluation()
-    {
-        if (!GameContext.Instance.IsLoggedIn)
-        {
-            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip CombatStatusEvaluation");
-            return null;
-        }
+    /// <returns>状态评估响应，失败时返回 null</returns>
+    // public async UniTask<DungeonProgressResponse> CombatStatusEvaluation()
+    // {
+    //     if (!GameContext.Instance.IsLoggedIn)
+    //     {
+    //         Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip CombatStatusEvaluation");
+    //         return null;
+    //     }
 
-        var api = CreateApi<DungeonProgressApi>();
-        try
-        {
-            await api.Call(
-                GameContext.Instance.DungeonProgressUrl,
-                GameContext.Instance.UserName,
-                GameContext.Instance.GameName,
-                DungeonProgressType.COMBAT_STATUS_EVALUATION);
+    //     var api = CreateApi<DungeonProgressApi>();
+    //     try
+    //     {
+    //         await api.Call(
+    //             GameContext.Instance.DungeonProgressUrl,
+    //             GameContext.Instance.UserName,
+    //             GameContext.Instance.GameName,
+    //             DungeonProgressType.COMBAT_STATUS_EVALUATION);
 
-            if (api.ReqResult == null)
-            {
-                Debug.LogError("[DungeonGamePlayManager] CombatStatusEvaluation: request result is null");
-                return null;
-            }
+    //         if (api.ReqResult == null)
+    //         {
+    //             Debug.LogError("[DungeonGamePlayManager] CombatStatusEvaluation: request result is null");
+    //             return null;
+    //         }
 
-            if (!api.ReqResult.isSuccess)
-            {
-                Debug.LogError($"[DungeonGamePlayManager] CombatStatusEvaluation failed: {api.ReqResult.responseText}");
-                return null;
-            }
+    //         if (!api.ReqResult.isSuccess)
+    //         {
+    //             Debug.LogError($"[DungeonGamePlayManager] CombatStatusEvaluation failed: {api.ReqResult.responseText}");
+    //             return null;
+    //         }
 
-            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
-            Debug.Log("[DungeonGamePlayManager] CombatStatusEvaluation completed successfully");
-            return api.RespData;
-        }
-        finally
-        {
-            Destroy(api.gameObject);
-        }
-    }
+    //         Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+    //         Debug.Log("[DungeonGamePlayManager] CombatStatusEvaluation completed successfully");
+    //         return api.RespData;
+    //     }
+    //     finally
+    //     {
+    //         Destroy(api.gameObject);
+    //     }
+    // }
 
     /// <summary>
     /// 抽卡
-    /// 调用地下城战斗抽牌端点执行抽卡操作
+    /// 调用地下城战斗盟友抽牌端点执行抽卡操作
     /// </summary>
-    /// <returns>任务 ID 字符串，失败时返回 null</returns>
-    public async UniTask<string> DrawCards(List<AllyDrawCardAction> specifiedActions, bool enableEnemyDraw)
+    /// <returns>盟友抽牌响应，失败时返回 null</returns>
+    public async UniTask<DungeonCombatDrawAllyCardsResponse> DrawAllyCards(List<AllyDrawCardAction> specifiedActions)
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -143,15 +143,14 @@ public class DungeonGamePlayManager : MonoBehaviour
             return null;
         }
 
-        var api = CreateApi<DungeonCombatDrawCardsApi>();
+        var api = CreateApi<DungeonCombatDrawAllyCardsApi>();
         try
         {
             await api.Call(
-                GameContext.Instance.DungeonCombatDrawCardsUrl,
+                GameContext.Instance.DungeonCombatDrawAllyCardsUrl,
                 GameContext.Instance.UserName,
                 GameContext.Instance.GameName,
-                specifiedActions,
-                enableEnemyDraw);
+                specifiedActions);
 
             if (api.ReqResult == null)
             {
@@ -174,7 +173,57 @@ public class DungeonGamePlayManager : MonoBehaviour
             }
 
             Debug.Log("[DungeonGamePlayManager] DrawCards completed successfully");
-            return api.RespData.task_id;
+            return api.RespData;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
+    }
+
+    /// <summary>
+    /// 抽敌人牌
+    /// 调用地下城战斗敌方抽牌端点执行抽卡操作
+    /// </summary>
+    /// <returns>敌方抽牌响应，失败时返回 null</returns>
+    public async UniTask<DungeonCombatDrawEnemyCardsResponse> DrawEnemyCards()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip DrawEnemyCards");
+            return null;
+        }
+
+        var api = CreateApi<DungeonCombatDrawEnemyCardsApi>();
+        try
+        {
+            await api.Call(
+                GameContext.Instance.DungeonCombatDrawEnemyCardsUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName);
+
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] DrawEnemyCards: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] DrawEnemyCards failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonCombatDrawEnemyCardsApi response data is null");
+            if (string.IsNullOrEmpty(api.RespData.task_id) ||
+                api.RespData.status != TaskStatus.RUNNING)
+            {
+                Debug.LogError("[DungeonGamePlayManager] DrawEnemyCards: response data is invalid");
+                return null;
+            }
+
+            Debug.Log("[DungeonGamePlayManager] DrawEnemyCards completed successfully");
+            return api.RespData;
         }
         finally
         {
@@ -236,7 +285,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 前进到下一个地下城
     /// 调用 advance_next_dungeon 端点推进地下城进度
     /// </summary>
-    /// <returns>会话消息列表，失败时返回 null</returns>
+    /// <returns>地下城推进响应，失败时返回 null</returns>
     public async UniTask<DungeonProgressResponse> AdvanceStage()
     {
         if (!GameContext.Instance.IsLoggedIn)
@@ -280,7 +329,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 从地下城撤退
     /// 调用 retreat 端点从地下城撤退
     /// </summary>
-    /// <returns>会话消息列表，失败时返回 null</returns>
+    /// <returns>撤退响应，失败时返回 null</returns>
     public async UniTask<DungeonProgressResponse> RetreatFromDungeon()
     {
         if (!GameContext.Instance.IsLoggedIn)
@@ -324,7 +373,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 战斗后处理
     /// 调用 post_combat 端点进行战斗后处理
     /// </summary>
-    /// <returns>会话消息列表，失败时返回 null</returns>
+    /// <returns>战斗后处理响应，失败时返回 null</returns>
     public async UniTask<DungeonProgressResponse> PostCombat()
     {
         if (!GameContext.Instance.IsLoggedIn)

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// 地下城战斗抽牌 API 客户端
 /// 用于处理地下城战斗中的抽卡请求
 /// </summary>
-public class DungeonCombatDrawCardsApi : BaseApiClient
+public class DungeonCombatDrawAllyCardsApi : BaseApiClient
 {
     /// <summary>
     /// API 请求结果
@@ -22,12 +22,12 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
     /// <summary>
     /// API 响应数据
     /// </summary>
-    private DungeonCombatDrawCardsResponse _responseData;
+    private DungeonCombatDrawAllyCardsResponse _responseData;
 
     /// <summary>
     /// 获取 API 响应数据
     /// </summary>
-    public DungeonCombatDrawCardsResponse RespData => _responseData;
+    public DungeonCombatDrawAllyCardsResponse RespData => _responseData;
 
     /// <summary>
     /// 调用地下城战斗抽牌 API
@@ -36,11 +36,10 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名称</param>
     /// <param name="specifiedActions">指定的盟友抽卡行动列表</param>
-    /// <param name="enable_enemy_draw">是否启用敌人抽牌</param>
-    /// <returns>协程枚举器</returns>
-    public async UniTask Call(string url, string userName, string gameName, List<AllyDrawCardAction> specifiedActions, bool enable_enemy_draw)
+    /// <returns>异步任务</returns>
+    public async UniTask Call(string url, string userName, string gameName, List<AllyDrawCardAction> specifiedActions)
     {
-        Debug.Log("Starting DungeonCombatDrawCardsApi call...");
+        Debug.Log("Starting DungeonCombatDrawAllyCardsApi call...");
         Debug.Log($"URL: {url}");
         Debug.Log($"UserName: {userName}");
         Debug.Log($"GameName: {gameName}");
@@ -58,12 +57,11 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
         }
 
         // 创建请求数据对象并序列化为 JSON
-        var requestData = new DungeonCombatDrawCardsRequest
+        var requestData = new DungeonCombatDrawAllyCardsRequest
         {
             user_name = userName,
             game_name = gameName,
             specified_actions = specifiedActions,
-            enable_enemy_draw = enable_enemy_draw
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
@@ -86,7 +84,7 @@ public class DungeonCombatDrawCardsApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<DungeonCombatDrawCardsResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<DungeonCombatDrawAllyCardsResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");

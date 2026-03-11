@@ -312,14 +312,19 @@ public partial class GameContext
         }
     }
 
-    /// <summary>
-    /// 获取地牢战斗抽卡API的URL地址
-    /// </summary>
-    public string DungeonCombatDrawCardsUrl
+    public string DungeonCombatDrawAllyCardsUrl
     {
         get
         {
-            return BaseUrl.TrimEnd('/') + "/api/dungeon/combat/draw_cards/v1/";
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/combat/draw_cards/ally/v1/";
+        }
+    }
+
+    public string DungeonCombatDrawEnemyCardsUrl
+    {
+        get
+        {
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/combat/draw_cards/enemy/v1/";
         }
     }
 

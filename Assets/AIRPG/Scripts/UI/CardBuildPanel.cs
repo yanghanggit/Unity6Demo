@@ -335,18 +335,18 @@ public class CardBuildPanel : MonoBehaviour, IUIEventListener
     /// </summary>
     private async UniTaskVoid ExecuteDrawCards(AllyDrawCardAction allyDrawAction)
     {
-        string taskId = await DungeonGamePlayManager.Instance.DrawCards(new List<AllyDrawCardAction> { allyDrawAction }, false);
-        if (string.IsNullOrEmpty(taskId))
+        var response = await DungeonGamePlayManager.Instance.DrawAllyCards(new List<AllyDrawCardAction> { allyDrawAction });
+        if (response == null || string.IsNullOrEmpty(response.task_id))
         {
             Debug.LogError("DrawCards API call failed, no task ID returned");
             return;
         }
 
-        Debug.Log($"DrawCards initiated successfully, task ID: {taskId}");
-        var taskRecord = await PollTaskStatus(taskId);
+        Debug.Log($"DrawCards initiated successfully, task ID: {response.task_id}");
+        var taskRecord = await PollTaskStatus(response.task_id);
         if (taskRecord == null)
         {
-            Debug.LogError($"Failed to get task record for task ID: {taskId}");
+            Debug.LogError($"Failed to get task record for task ID: {response.task_id}");
             return;
         }
 

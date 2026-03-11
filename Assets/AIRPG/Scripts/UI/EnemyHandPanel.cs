@@ -77,19 +77,19 @@ public class EnemyHandPanel : MonoBehaviour
         // 仍未获取到 HandComponent，发起 DrawCards 请求
         Debug.LogWarning($"HandComponent not found for actor: {actorEntityName}, fetching via DrawCards API");
 
-        string taskId = await DungeonGamePlayManager.Instance.DrawCards(new List<AllyDrawCardAction>(), true);
-        if (string.IsNullOrEmpty(taskId))
+        var response = await DungeonGamePlayManager.Instance.DrawEnemyCards();
+        if (response == null || string.IsNullOrEmpty(response.task_id))
         {
             Debug.LogError("DrawCards API call failed, no task ID returned");
             _infoText.text = "(加载手牌信息失败)";
             return;
         }
 
-        Debug.Log($"DrawCards initiated successfully, task ID: {taskId}");
-        var taskRecord = await PollTaskStatus(taskId);
+        Debug.Log($"DrawCards initiated successfully, task ID: {response.task_id}");
+        var taskRecord = await PollTaskStatus(response.task_id);
         if (taskRecord == null)
         {
-            Debug.LogError($"Failed to get task record for task ID: {taskId}");
+            Debug.LogError($"Failed to get task record for task ID: {response.task_id}");
             _infoText.text = "(加载手牌信息失败)";
             return;
         }
