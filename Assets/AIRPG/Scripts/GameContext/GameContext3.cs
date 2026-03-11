@@ -163,10 +163,10 @@ public partial class GameContext
                 AddEventToActor(agentEventsByActor, mindVoiceEvent.actor, mindVoiceEvent);
                 break;
 
-            case EventHead.TRANS_STAGE_EVENT:
-                TransStageEvent transStageEvent = (TransStageEvent)agentEvent;
-                AddEventToActor(agentEventsByActor, transStageEvent.actor, transStageEvent);
-                break;
+            // case EventHead.TRANS_STAGE_EVENT:
+            //     TransStageEvent transStageEvent = (TransStageEvent)agentEvent;
+            //     AddEventToActor(agentEventsByActor, transStageEvent.actor, transStageEvent);
+            //     break;
 
             default:
                 Debug.LogWarning("Unknown agent event head: " + agentEvent.head);

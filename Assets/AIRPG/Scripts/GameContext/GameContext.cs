@@ -1,4 +1,3 @@
-using System.Diagnostics;
 
 
 /// <summary>
@@ -290,14 +289,11 @@ public partial class GameContext
         }
     }
 
-    /// <summary>
-    /// 获取地牢游戏玩法API的URL地址
-    /// </summary> dungeon_progress DungeonProgressUrl
-    public string DungeonProgressUrl
+    public string DungeonCombatRetreatUrl
     {
         get
         {
-            return BaseUrl.TrimEnd('/') + "/api/dungeon/progress/v1/";
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/combat/retreat/v1/";
         }
     }
 

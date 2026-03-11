@@ -3,9 +3,9 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// DungeonProgress API 客户端，用于处理地下城进度请求
+/// DungeonCombatRetreat API 客户端，用于处理战斗撤退请求
 /// </summary>
-public class DungeonProgressApi : BaseApiClient
+public class DungeonCombatRetreatApi : BaseApiClient
 {
     /// <summary>
     /// 请求结果
@@ -20,29 +20,27 @@ public class DungeonProgressApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private DungeonProgressResponse _responseData;
+    private DungeonCombatRetreatResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public DungeonProgressResponse RespData => _responseData;
+    public DungeonCombatRetreatResponse RespData => _responseData;
 
     /// <summary>
-    /// 调用地下城进度 API
+    /// 调用战斗撤退 API
     /// </summary>
     /// <param name="url">请求 URL</param>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
-    /// <param name="action">操作类型</param>
-    /// <returns>协程枚举器</returns>
-    public async UniTask Call(string url, string userName, string gameName, string action)
+    /// <returns>异步任务</returns>
+    public async UniTask Call(string url, string userName, string gameName)
     {
         // 记录请求信息
-        Debug.Log("Starting DungeonProgressApi call...");
+        Debug.Log("Starting DungeonCombatRetreatApi call...");
         Debug.Log($"URL: {url}");
         Debug.Log($"UserName: {userName}");
         Debug.Log($"GameName: {gameName}");
-        Debug.Log($"Action: {action}");
 
         //清除
         _requestResult = null;
@@ -56,11 +54,10 @@ public class DungeonProgressApi : BaseApiClient
         }
 
         // 创建请求数据
-        var requestData = new DungeonProgressRequest
+        var requestData = new DungeonCombatRetreatRequest
         {
             user_name = userName,
-            game_name = gameName,
-            action = action
+            game_name = gameName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
@@ -83,7 +80,7 @@ public class DungeonProgressApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<DungeonProgressResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<DungeonCombatRetreatResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");

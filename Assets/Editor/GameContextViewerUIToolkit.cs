@@ -175,7 +175,7 @@ public class GameContextViewerUIToolkit : EditorWindow
         }
 
         UpdateUserInfo();
-        UpdateUrls();
+        //UpdateUrls();
         //UpdateStageMapping();
         //UpdateActorEntities();
         //UpdateStageEntities();
@@ -195,33 +195,33 @@ public class GameContextViewerUIToolkit : EditorWindow
         //     sequenceIdField.value = GameContext.Instance.LastSequenceId.ToString();
     }
 
-    private void UpdateUrls()
-    {
-        if (urlsContainer == null) return;
+    // private void UpdateUrls()
+    // {
+    //     if (urlsContainer == null) return;
 
-        urlsContainer.Clear();
+    //     urlsContainer.Clear();
 
-        var urls = new Dictionary<string, string>
-        {
-            { "Login URL", GameContext.Instance.LoginUrl },
-            { "Logout URL", GameContext.Instance.LogoutUrl },
-            { "Home GamePlay URL", GameContext.Instance.HomePlayerActionUrl },
-            { "Stages State URL", GameContext.Instance.StagesStateUrl },
-            { "Dungeon State URL", GameContext.Instance.DungeonStateUrl },
-            { "Entity Details URL", GameContext.Instance.EntityDetailsUrl },
-            { "Start URL", GameContext.Instance.StartUrl },
-            { "Home Trans Dungeon URL", GameContext.Instance.HomeTransDungeonUrl },
-            { "Dungeon GamePlay URL", GameContext.Instance.DungeonProgressUrl },
-            { "Dungeon Trans Home URL", GameContext.Instance.DungeonTransHomeUrl },
-            { "Session Messages URL", GameContext.Instance.SessionMessagesUrl }
-        };
+    //     var urls = new Dictionary<string, string>
+    //     {
+    //         { "Login URL", GameContext.Instance.LoginUrl },
+    //         { "Logout URL", GameContext.Instance.LogoutUrl },
+    //         { "Home GamePlay URL", GameContext.Instance.HomePlayerActionUrl },
+    //         { "Stages State URL", GameContext.Instance.StagesStateUrl },
+    //         { "Dungeon State URL", GameContext.Instance.DungeonStateUrl },
+    //         { "Entity Details URL", GameContext.Instance.EntityDetailsUrl },
+    //         { "Start URL", GameContext.Instance.StartUrl },
+    //         { "Home Trans Dungeon URL", GameContext.Instance.HomeTransDungeonUrl },
+    //         { "Dungeon GamePlay URL", GameContext.Instance.DungeonProgressUrl },
+    //         { "Dungeon Trans Home URL", GameContext.Instance.DungeonTransHomeUrl },
+    //         { "Session Messages URL", GameContext.Instance.SessionMessagesUrl }
+    //     };
 
-        foreach (var kvp in urls)
-        {
-            var row = CreateUrlRow(kvp.Key, kvp.Value);
-            urlsContainer.Add(row);
-        }
-    }
+    //     foreach (var kvp in urls)
+    //     {
+    //         var row = CreateUrlRow(kvp.Key, kvp.Value);
+    //         urlsContainer.Add(row);
+    //     }
+    // }
 
     private VisualElement CreateUrlRow(string label, string url)
     {

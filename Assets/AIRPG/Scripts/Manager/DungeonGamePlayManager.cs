@@ -192,7 +192,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 play_cards 端点执行打牌操作
     /// </summary>
     /// <returns>任务 ID 字符串，失败时返回 null</returns>
-    public async UniTask<string> PlayCards()
+    public async UniTask<DungeonCombatPlayCardsResponse> PlayCards()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -229,7 +229,7 @@ public class DungeonGamePlayManager : MonoBehaviour
             }
 
             Debug.Log("[DungeonGamePlayManager] PlayCards completed successfully");
-            return api.RespData.task_id;
+            return api.RespData;
         }
         finally
         {
@@ -285,7 +285,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 retreat 端点从地下城撤退
     /// </summary>
     /// <returns>撤退响应，失败时返回 null</returns>
-    public async UniTask<DungeonProgressResponse> RetreatFromDungeon()
+    public async UniTask<DungeonCombatRetreatResponse> RetreatFromDungeon()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -293,14 +293,13 @@ public class DungeonGamePlayManager : MonoBehaviour
             return null;
         }
 
-        var api = CreateApi<DungeonProgressApi>();
+        var api = CreateApi<DungeonCombatRetreatApi>();
         try
         {
             await api.Call(
-                GameContext.Instance.DungeonProgressUrl,
+                GameContext.Instance.DungeonCombatRetreatUrl,
                 GameContext.Instance.UserName,
-                GameContext.Instance.GameName,
-                DungeonProgressType.RETREAT);
+                GameContext.Instance.GameName);
 
             if (api.ReqResult == null)
             {
@@ -314,7 +313,7 @@ public class DungeonGamePlayManager : MonoBehaviour
                 return null;
             }
 
-            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+            Debug.Assert(api.RespData != null, "DungeonCombatRetreatApi response data is null");
             Debug.Log("[DungeonGamePlayManager] RetreatFromDungeon completed successfully");
             return api.RespData;
         }

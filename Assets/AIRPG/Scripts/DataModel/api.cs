@@ -149,38 +149,25 @@ public class DungeonTransHomeResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Dungeon gameplay request/response classes
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-public sealed class DungeonProgressType
-{
-    // public static readonly string POST_COMBAT = "post_combat";
-    //public static readonly string ADVANCE_STAGE = "advance_stage";
-    public static readonly string RETREAT = "retreat";
-}
 
 [System.Serializable]
-public class DungeonProgressRequest
+public class DungeonCombatRetreatRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public string action = "";
 }
 
 [System.Serializable]
-public class DungeonProgressResponse
+public class DungeonCombatRetreatResponse
 {
     public string task_id = "";
     public string status = "";
     public string message = "";
 }
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// @final
-// class DungeonAdvanceStageRequest(BaseModel):
-//     user_name: str
-//     game_name: str
 [System.Serializable]
 public class DungeonAdvanceStageRequest
 {
@@ -188,10 +175,6 @@ public class DungeonAdvanceStageRequest
     public string game_name = "";
 }
 
-
-// @final
-// class DungeonAdvanceStageResponse(BaseModel):
-//     message: str
 [System.Serializable]
 public class DungeonAdvanceStageResponse
 {

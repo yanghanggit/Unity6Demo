@@ -12,7 +12,7 @@ public class ArbitrationPanel : MonoBehaviour
 
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
-    
+
 
     void Start()
     {
@@ -45,16 +45,16 @@ public class ArbitrationPanel : MonoBehaviour
 
         _arbitrationText.text = "正在执行仲裁操作，请稍候...";
 
-        string taskId = await DungeonGamePlayManager.Instance.PlayCards();
-        if (string.IsNullOrEmpty(taskId))
+        var response = await DungeonGamePlayManager.Instance.PlayCards();
+        if (response == null || string.IsNullOrEmpty(response.task_id))
         {
             _arbitrationText.text = "Failed to initiate PlayCards action.";
             _closeButton.gameObject.SetActive(true);
             return;
         }
 
-        Debug.Log($"PlayCards initiated successfully, task ID: {taskId}");
-        var taskRecord = await PollTaskStatus(taskId);
+        Debug.Log($"PlayCards initiated successfully, task ID: {response.task_id}");
+        var taskRecord = await PollTaskStatus(response.task_id);
         if (taskRecord == null)
         {
             _arbitrationText.text = "Failed to retrieve task status.";
