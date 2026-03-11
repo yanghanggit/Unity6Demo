@@ -139,7 +139,8 @@ public class ActorPositioningPanel : MonoBehaviour
                 break;
 
             case CombatState.POST_COMBAT:
-                Debug.Log("战斗结束，进入战斗结算界面");
+                //Debug.Log("战斗结束，进入战斗结算界面");
+                _playButton.GetComponentInChildren<TMP_Text>().text = combat.result == CombatResult.WIN ? "胜利" : "失败";
                 break;
 
             default:

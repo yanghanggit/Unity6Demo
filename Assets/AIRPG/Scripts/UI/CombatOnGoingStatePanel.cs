@@ -150,11 +150,12 @@ public class CombatOnGoingStatePanel : MonoBehaviour, ICombatState, IUIEventList
 
             case CombatState.COMPLETE:
                 Debug.Log("[DungeonCombatScene] Combat is complete, showing post-combat UI");
-                CombatScene.OnEnterPostCombatState();
+                //CombatScene.OnEnterPostCombatState();
                 break;
 
             case CombatState.POST_COMBAT:
                 Debug.Log("[DungeonCombatScene] Combat is in post-combat state, showing post-combat UI");
+                CombatScene.OnEnterPostCombatState();
                 break;
 
             default:

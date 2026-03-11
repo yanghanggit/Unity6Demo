@@ -301,6 +301,18 @@ public partial class GameContext
         }
     }
 
+    /// <summary> 
+    /// 获取地牢推进API的URL地址
+    /// </summary>
+    public string DungeonAdvanceStageUrl
+    {
+        get
+        {
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/progress/advance_stage/v1/";
+        }
+    }
+
+
     /// <summary>
     /// 获取地牢战斗初始化API的URL地址
     /// </summary>

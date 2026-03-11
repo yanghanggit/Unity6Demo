@@ -37,51 +37,8 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
         }
         else
         {
-            _mainText.text = "战斗结束！正在处理战斗结果...";
-
-            // 调用服务器接口进行战斗后处理，并根据返回的结果更新 UI 显示
-            FetchAndDisplayPostCombatResultAsync().Forget();
+            _mainText.text = "战斗结束！";
         }
-    }
-
-    /// <summary>
-    /// 调用服务器 PostCombat 接口，解析返回的 SessionMessage 列表，
-    /// 提取其中的 <see cref="CombatArchiveEvent"/> 并将战斗总结文本更新到 UI 上。
-    /// </summary>
-    private async UniTaskVoid FetchAndDisplayPostCombatResultAsync()
-    {
-        var postCombatResponse = await DungeonGamePlayManager.Instance.PostCombat();
-        if (postCombatResponse == null)
-        {
-            Debug.LogWarning("Failed to get session messages from post combat");
-            _mainText.text = "战斗结束！(未能获取战斗结果)";
-            return;
-        }
-
-        // 遍历 SessionMessage，收集 CombatArchiveEvent 中的战斗总结
-        // var showText = "战斗后事件：\n\n";
-
-        // foreach (var sessionMessage in sessionMessages)
-        // {
-        //     if (sessionMessage.message_type != (int)MessageType.AGENT_EVENT)
-        //         continue;
-
-        //     var agentEvent = GameUtils.ParseAgentEvent(sessionMessage);
-        //     if (agentEvent == null)
-        //     {
-        //         Debug.LogWarning("Failed to parse agent event from session message");
-        //         continue;
-        //     }
-
-        //     if (agentEvent.head == (int)EventHead.COMBAT_ARCHIVE_EVENT
-        //         && agentEvent is CombatArchiveEvent combatArchiveEvent)
-        //     {
-        //         Debug.Log("Processing CombatArchiveEvent from post combat");
-        //         showText += $"Actor: {combatArchiveEvent.actor}\nSummary: {combatArchiveEvent.summary}\n\n";
-        //     }
-        // }
-
-        // _mainText.text = showText;
     }
 
     /// <summary>
@@ -114,8 +71,8 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
             return;
         }
 
-        var responseSessionMessages = await DungeonGamePlayManager.Instance.AdvanceStage();
-        if (responseSessionMessages == null)
+        var response = await DungeonGamePlayManager.Instance.AdvanceStage();
+        if (response == null)
         {
             Debug.LogWarning("Failed to advance to next dungeon, no messages returned");
             _mainText.text = "推进下一关失败！";

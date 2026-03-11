@@ -87,50 +87,6 @@ public class DungeonGamePlayManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 状态评估
-    /// 调用 status_evaluation 端点进行状态评估
-    /// </summary>
-    /// <returns>状态评估响应，失败时返回 null</returns>
-    // public async UniTask<DungeonProgressResponse> CombatStatusEvaluation()
-    // {
-    //     if (!GameContext.Instance.IsLoggedIn)
-    //     {
-    //         Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip CombatStatusEvaluation");
-    //         return null;
-    //     }
-
-    //     var api = CreateApi<DungeonProgressApi>();
-    //     try
-    //     {
-    //         await api.Call(
-    //             GameContext.Instance.DungeonProgressUrl,
-    //             GameContext.Instance.UserName,
-    //             GameContext.Instance.GameName,
-    //             DungeonProgressType.COMBAT_STATUS_EVALUATION);
-
-    //         if (api.ReqResult == null)
-    //         {
-    //             Debug.LogError("[DungeonGamePlayManager] CombatStatusEvaluation: request result is null");
-    //             return null;
-    //         }
-
-    //         if (!api.ReqResult.isSuccess)
-    //         {
-    //             Debug.LogError($"[DungeonGamePlayManager] CombatStatusEvaluation failed: {api.ReqResult.responseText}");
-    //             return null;
-    //         }
-
-    //         Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
-    //         Debug.Log("[DungeonGamePlayManager] CombatStatusEvaluation completed successfully");
-    //         return api.RespData;
-    //     }
-    //     finally
-    //     {
-    //         Destroy(api.gameObject);
-    //     }
-    // }
-
-    /// <summary>
     /// 抽卡
     /// 调用地下城战斗盟友抽牌端点执行抽卡操作
     /// </summary>
@@ -286,7 +242,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 advance_next_dungeon 端点推进地下城进度
     /// </summary>
     /// <returns>地下城推进响应，失败时返回 null</returns>
-    public async UniTask<DungeonProgressResponse> AdvanceStage()
+    public async UniTask<DungeonAdvanceStageResponse> AdvanceStage()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -294,14 +250,13 @@ public class DungeonGamePlayManager : MonoBehaviour
             return null;
         }
 
-        var api = CreateApi<DungeonProgressApi>();
+        var api = CreateApi<DungeonAdvanceStageApi>();
         try
         {
             await api.Call(
-                GameContext.Instance.DungeonProgressUrl,
+                GameContext.Instance.DungeonAdvanceStageUrl,
                 GameContext.Instance.UserName,
-                GameContext.Instance.GameName,
-                DungeonProgressType.ADVANCE_STAGE);
+                GameContext.Instance.GameName);
 
             if (api.ReqResult == null)
             {
@@ -315,7 +270,7 @@ public class DungeonGamePlayManager : MonoBehaviour
                 return null;
             }
 
-            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+            Debug.Assert(api.RespData != null, "DungeonAdvanceStageApi response data is null");
             Debug.Log("[DungeonGamePlayManager] AdvanceNextDungeon completed successfully");
             return api.RespData;
         }
@@ -361,50 +316,6 @@ public class DungeonGamePlayManager : MonoBehaviour
 
             Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
             Debug.Log("[DungeonGamePlayManager] RetreatFromDungeon completed successfully");
-            return api.RespData;
-        }
-        finally
-        {
-            Destroy(api.gameObject);
-        }
-    }
-
-    /// <summary>
-    /// 战斗后处理
-    /// 调用 post_combat 端点进行战斗后处理
-    /// </summary>
-    /// <returns>战斗后处理响应，失败时返回 null</returns>
-    public async UniTask<DungeonProgressResponse> PostCombat()
-    {
-        if (!GameContext.Instance.IsLoggedIn)
-        {
-            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip PostCombat");
-            return null;
-        }
-
-        var api = CreateApi<DungeonProgressApi>();
-        try
-        {
-            await api.Call(
-                GameContext.Instance.DungeonProgressUrl,
-                GameContext.Instance.UserName,
-                GameContext.Instance.GameName,
-                DungeonProgressType.POST_COMBAT);
-
-            if (api.ReqResult == null)
-            {
-                Debug.LogError("[DungeonGamePlayManager] PostCombat: request result is null");
-                return null;
-            }
-
-            if (!api.ReqResult.isSuccess)
-            {
-                Debug.LogError($"[DungeonGamePlayManager] PostCombat failed: {api.ReqResult.responseText}");
-                return null;
-            }
-
-            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
-            Debug.Log("[DungeonGamePlayManager] PostCombat completed successfully");
             return api.RespData;
         }
         finally
