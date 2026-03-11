@@ -2190,6 +2190,7 @@ MonoBehaviour:
   _onGoingState: {fileID: 680271569}
   _postCombatState: {fileID: 337745496}
   _settingPanel: {fileID: 500167793}
+  _tasksStatusApi: {fileID: 399892902}
 --- !u!114 &399892902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3786,8 +3787,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ArbitrationPanel
   _arbitrationText: {fileID: 1259827920}
-  _tasksStatusApi: {fileID: 1055363937}
   _closeButton: {fileID: 196173619}
+  _tasksStatusApi: {fileID: 1055363937}
 --- !u!114 &1055363936
 MonoBehaviour:
   m_ObjectHideFlags: 0

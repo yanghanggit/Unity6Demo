@@ -26,6 +26,9 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
     [Header("Setting Panel")]
     [SerializeField] private GameObject _settingPanel; // 设置面板对象
 
+    [Header("API Components")]
+    [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
+
 
     void Start()
     {
@@ -36,6 +39,7 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
         Debug.Assert(_onGoingState != null, "_onGoingState is null");
         Debug.Assert(_postCombatState != null, "_postCombatState is null");
         Debug.Assert(_settingPanel != null, "_settingPanel is null");
+        Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
         // 场景初始状态设置为隐藏所有状态对象和设置面板，确保场景初始状态是干净的
         _topBar.gameObject.SetActive(true);
@@ -102,14 +106,20 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
             case CombatState.INITIALIZATION:
                 {
                     Debug.Log("[DungeonCombatScene] Combat is in initialization state, showing initialization UI");
-                    var initResponse = await DungeonGamePlayManager.Instance.InitCombat();
-                    if (initResponse == null)
+                    var response = await DungeonGamePlayManager.Instance.InitCombat();
+                    if (response == null)
                     {
                         Debug.LogError("[DungeonCombatScene] Combat initialization failed, response data is null");
                         return;
                     }
 
-                    Debug.Log("[DungeonCombatScene] Combat initialization succeeded, response data received taskid = " + initResponse.task_id);
+                    Debug.Log("[DungeonCombatScene] Combat initialization succeeded, response data received taskid = " + response.task_id);
+                    var taskRecord = await PollTaskStatus(response.task_id);
+                    if (taskRecord == null)
+                    {
+                        Debug.LogError("[DungeonCombatScene] Failed to retrieve task status, taskRecord is null");
+                        return;
+                    }
 
                     OnEnterOnGoingState();
                 }
@@ -178,6 +188,16 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
     {
         Debug.Log("[DungeonCombatScene] Close Setting button clicked");
         _settingPanel.SetActive(false);
+    }
+
+    /// <summary>
+    /// 轮询任务状态，直到任务完成并返回结果
+    /// </summary>
+    private async UniTask<TaskRecord> PollTaskStatus(string taskId)
+    {
+        return await _tasksStatusApi.PollTaskStatus(
+            GameContext.Instance.TasksStatusUrl,
+            taskId);
     }
 }
 

@@ -8,10 +8,11 @@ public class ArbitrationPanel : MonoBehaviour
 {
     [Header("UI Components")]
     [SerializeField] private TMP_Text _arbitrationText; // 仲裁面板文本对象
+    [SerializeField] private Button _closeButton; // 关闭仲裁面板的按钮
 
     [Header("API Components")]
     [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
-    [SerializeField] private Button _closeButton; // 关闭仲裁面板的按钮
+    
 
     void Start()
     {
