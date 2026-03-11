@@ -48,7 +48,7 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用 combat_init 端点开始战斗
     /// </summary>
     /// <returns>会话消息列表，失败时返回 null</returns>
-    public async UniTask<DungeonProgressResponse> InitCombat()
+    public async UniTask<DungeonCombatInitResponse> InitCombat()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -56,14 +56,13 @@ public class DungeonGamePlayManager : MonoBehaviour
             return null;
         }
 
-        var api = CreateApi<DungeonProgressApi>();
+        var api = CreateApi<DungeonCombatInitApi>();
         try
         {
             await api.Call(
-                GameContext.Instance.DungeonProgressUrl,
+                GameContext.Instance.DungeonCombatInitUrl,
                 GameContext.Instance.UserName,
-                GameContext.Instance.GameName,
-                DungeonProgressType.INIT_COMBAT);
+                GameContext.Instance.GameName);
 
             if (api.ReqResult == null)
             {
@@ -77,7 +76,7 @@ public class DungeonGamePlayManager : MonoBehaviour
                 return null;
             }
 
-            Debug.Assert(api.RespData != null, "DungeonProgressApi response data is null");
+            Debug.Assert(api.RespData != null, "DungeonCombatInitApi response data is null");
             Debug.Log("[DungeonGamePlayManager] CombatInit completed successfully");
             return api.RespData;
         }

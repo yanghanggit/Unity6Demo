@@ -302,6 +302,17 @@ public partial class GameContext
     }
 
     /// <summary>
+    /// 获取地牢战斗初始化API的URL地址
+    /// </summary>
+    public string DungeonCombatInitUrl
+    {
+        get
+        {
+            return BaseUrl.TrimEnd('/') + "/api/dungeon/combat/init/v1/";
+        }
+    }
+
+    /// <summary>
     /// 获取地牢战斗抽卡API的URL地址
     /// </summary>
     public string DungeonCombatDrawCardsUrl

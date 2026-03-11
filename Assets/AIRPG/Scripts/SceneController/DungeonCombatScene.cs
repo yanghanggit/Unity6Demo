@@ -102,12 +102,15 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
             case CombatState.INITIALIZATION:
                 {
                     Debug.Log("[DungeonCombatScene] Combat is in initialization state, showing initialization UI");
-                    var responseSessionMessages = await DungeonGamePlayManager.Instance.InitCombat();
-                    if (responseSessionMessages == null)
+                    var initResponse = await DungeonGamePlayManager.Instance.InitCombat();
+                    if (initResponse == null)
                     {
-                        Debug.LogError("[DungeonCombatScene] Combat initialization failed, response session messages is null");
+                        Debug.LogError("[DungeonCombatScene] Combat initialization failed, response data is null");
                         return;
                     }
+
+                    Debug.Log("[DungeonCombatScene] Combat initialization succeeded, response data received taskid = " + initResponse.task_id);
+
                     OnEnterOnGoingState();
                 }
                 break;
