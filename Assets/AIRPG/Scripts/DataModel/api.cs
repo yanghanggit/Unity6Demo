@@ -170,7 +170,9 @@ public class DungeonProgressRequest
 [System.Serializable]
 public class DungeonProgressResponse
 {
-    //public List<SessionMessage> session_messages = new();
+    public string task_id = "";
+    public string status = "";
+    public string message = "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
