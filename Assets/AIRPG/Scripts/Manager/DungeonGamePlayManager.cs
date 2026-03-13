@@ -324,40 +324,40 @@ public class DungeonGamePlayManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 传送回家
-    /// 调用传送回家端点，返回主场景
+    /// 退出地下城
+    /// 调用退出地下城端点,返回主场景
     /// </summary>
-    /// <returns>成功返回 true，失败返回 false</returns>
-    public async UniTask<bool> TransHome()
+    /// <returns>成功返回 true,失败返回 false</returns>
+    public async UniTask<bool> ExitDungeon()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip TransHome");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip ExitDungeon");
             return false;
         }
 
-        var api = CreateApi<TransHomeApi>();
+        var api = CreateApi<DungeonExitApi>();
         try
         {
             await api.Call(
-                GameContext.Instance.DungeonTransHomeUrl,
+                GameContext.Instance.DungeonExitUrl,
                 GameContext.Instance.UserName,
                 GameContext.Instance.GameName);
 
             if (api.ReqResult == null)
             {
-                Debug.LogError("[DungeonGamePlayManager] TransHome: request result is null");
+                Debug.LogError("[DungeonGamePlayManager] ExitDungeon: request result is null");
                 return false;
             }
 
             if (!api.ReqResult.isSuccess)
             {
-                Debug.LogError($"[DungeonGamePlayManager] TransHome failed: {api.ReqResult.responseText}");
+                Debug.LogError($"[DungeonGamePlayManager] ExitDungeon failed: {api.ReqResult.responseText}");
                 return false;
             }
 
-            Debug.Assert(api.RespData != null, "TransHomeApi response data is null");
-            Debug.Log("[DungeonGamePlayManager] TransHome completed successfully");
+            Debug.Assert(api.RespData != null, "DungeonExitApi response data is null");
+            Debug.Log("[DungeonGamePlayManager] ExitDungeon completed successfully");
             return true;
         }
         finally

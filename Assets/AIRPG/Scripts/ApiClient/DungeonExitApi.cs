@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// TransHome API 客户端，用于处理转换到家园请求
 /// </summary>
-public class TransHomeApi : BaseApiClient
+public class DungeonExitApi : BaseApiClient
 {
     /// <summary>
     /// 请求结果

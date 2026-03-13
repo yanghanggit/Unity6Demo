@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class CombatPostCombatState : MonoBehaviour, ICombatState
 {
+    public static readonly string PreSceneName = "MainScene";
     public static readonly string NextSceneName = "DungeonCombatScene";
 
     [Header("UI Components")]
@@ -24,6 +25,13 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
     {
         Debug.Log("Advance Button Clicked");
         ExecuteAdvanceStage().Forget();  // 在这里添加点击继续按钮后的逻辑，例如返回主界面或进入下一个关卡
+    }
+
+    public void OnClickExitButton()
+    {
+        Debug.Log("Exit Button Clicked");
+        //SceneManager.LoadScene("HomeScene"); // 返回主界面
+        ExecuteExitDungeon().Forget();
     }
 
     public void OnEnter()
@@ -103,5 +111,50 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
         DungeonCombatScene.CachedDungeonName = dungeon.name;
 
         SceneManager.LoadScene(NextSceneName);
+    }
+
+    /// <summary>
+    /// 退出地下城的处理逻辑
+    /// 检查战斗状态，调用退出地下城接口，清空缓存并返回主场景
+    /// </summary>
+    private async UniTaskVoid ExecuteExitDungeon()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Not in dungeon, cannot advance to next stage");
+            await UniTask.Yield();
+            SceneManager.LoadScene(NextSceneName);
+            return;
+        }
+
+        var combatState = await GameStateSync.Instance.GetCombat();
+        if (combatState == null)
+        {
+            Debug.LogError("Failed to get combat state information from server");
+            _mainText.text = "Failed to get combat state information";
+            return;
+        }
+
+        if (combatState.state != CombatState.POST_COMBAT)
+        {
+            Debug.LogWarning("Combat is not finished, cannot exit dungeon");
+            _mainText.text = "战斗还未结束，无法退出地下城！";
+            return;
+        }
+
+        var exitResult = await DungeonGamePlayManager.Instance.ExitDungeon();
+        if (!exitResult)
+        {
+            Debug.LogWarning("Failed to exit dungeon, no messages returned");
+            _mainText.text = "退出地下城失败！";
+            return;
+        }
+
+        await UniTask.Yield();
+
+        DungeonCombatScene.CachedStageName = string.Empty; // 退出地下城后不再缓存关卡信息
+        DungeonCombatScene.CachedDungeonName = string.Empty; // 退出地下城后不再缓存地下城信息
+
+        SceneManager.LoadScene(PreSceneName);
     }
 }

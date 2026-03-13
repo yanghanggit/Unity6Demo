@@ -19,6 +19,12 @@ public class GameStateSync : MonoBehaviour
     /// </summary>
     public static GameStateSync Instance { get; private set; }
 
+    /// <summary>
+    /// 控制会话消息轮询是否启用
+    /// 默认关闭，需要在场景中手动启用（例如在 MainScene 中）
+    /// </summary>
+    public bool EnableSessionPolling { get; set; } = false;
+
     private int _lastSessionSequenceId = 0;
     private bool _isSessionPolling = false;
 
@@ -69,6 +75,7 @@ public class GameStateSync : MonoBehaviour
 
     /// <summary>
     /// 启动会话消息轮询。若已在轮询中，则忽略重复启动。
+    /// 轮询执行取决于 <see cref="EnableSessionPolling"/> 标志的状态。
     /// </summary>
     public async UniTask StartSessionMessagesPolling(CancellationToken cancellationToken, int intervalMs = 3000)
     {
@@ -78,10 +85,16 @@ public class GameStateSync : MonoBehaviour
             return;
         }
 
+        if (!EnableSessionPolling)
+        {
+            Debug.LogWarning("[GameStateSync] Session polling is disabled, skip start.");
+            return;
+        }
+
         _isSessionPolling = true;
         try
         {
-            while (true)
+            while (EnableSessionPolling)
             {
                 await FetchPlayerSessionMessages();
                 bool cancelled = await UniTask.Delay(intervalMs, ignoreTimeScale: true, cancellationToken: cancellationToken).SuppressCancellationThrow();

@@ -57,6 +57,17 @@ public class MainScene : MonoBehaviour, IUIEventListener
         // 注册 MainSceneStageItemClicked 事件监听器
         _onMainSceneStageItemClickedEvent.RegisterListener(this);
 
+        if (GameContext.Instance.IsLoggedIn)
+        {
+            // Debug.Log("Player is logged in, refreshing game state in MainScene.");
+            // _homeScenesPanel.RereshViewAsync().Forget();
+            GameStateSync.Instance.EnableSessionPolling = true; // 启用会话轮询以保持游戏状态更新
+        }
+        // else
+        // {
+        //     Debug.Log("Player is not logged in, skipping game state refresh in MainScene.");
+        // }
+
         // 刚进入主场景时，先隐藏玩家信息面板和场景列表，等数据加载完成后再显示
         _topBar.gameObject.SetActive(true);
         _playerInfoPanel.gameObject.SetActive(false);
@@ -124,6 +135,8 @@ public class MainScene : MonoBehaviour, IUIEventListener
             Debug.LogError("[MainScene] Logout failed");
             return;
         }
+
+        GameStateSync.Instance.EnableSessionPolling = false; // 禁用会话轮询，停止游戏状态更新
 
         await UniTask.Yield();
         SceneManager.LoadScene(PreSceneName);
