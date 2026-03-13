@@ -133,14 +133,14 @@ public class HomeTransDungeonResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [System.Serializable]
-public class DungeonTransHomeRequest
+public class DungeonExitRequest
 {
     public string user_name = "";
     public string game_name = "";
 }
 
 [System.Serializable]
-public class DungeonTransHomeResponse
+public class DungeonExitResponse
 {
     public string message = "";
 }

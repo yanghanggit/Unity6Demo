@@ -20,12 +20,12 @@ public class DungeonExitApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private DungeonTransHomeResponse _responseData;
+    private DungeonExitResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public DungeonTransHomeResponse RespData => _responseData;
+    public DungeonExitResponse RespData => _responseData;
 
     /// <summary>
     /// 调用转换家园 API
@@ -55,7 +55,7 @@ public class DungeonExitApi : BaseApiClient
         }
 
         // 创建请求数据
-        var requestData = new DungeonTransHomeRequest
+        var requestData = new DungeonExitRequest
         {
             user_name = user,
             game_name = game
@@ -81,7 +81,7 @@ public class DungeonExitApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<DungeonTransHomeResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<DungeonExitResponse>(_requestResult.responseText);
 
             if (_responseData == null)
             {

@@ -142,8 +142,8 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
             return;
         }
 
-        var exitResult = await DungeonGamePlayManager.Instance.ExitDungeon();
-        if (!exitResult)
+        var response = await DungeonGamePlayManager.Instance.ExitDungeon();
+        if (response == null)
         {
             Debug.LogWarning("Failed to exit dungeon, no messages returned");
             _mainText.text = "退出地下城失败！";

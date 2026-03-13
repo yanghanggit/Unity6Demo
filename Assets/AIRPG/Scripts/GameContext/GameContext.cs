@@ -350,9 +350,6 @@ public partial class GameContext
     /// <summary>
     /// 获取从地牢场景转换到主场景API的URL地址
     /// </summary>
-    /// 
-    /// @dungeon_gameplay_api_router.post(
-    //path="/api/dungeon/exit/v1/", response_model=DungeonTransHomeResponse
     public string DungeonExitUrl
     {
         get

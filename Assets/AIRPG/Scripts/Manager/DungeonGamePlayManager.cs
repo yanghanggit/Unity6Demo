@@ -328,12 +328,12 @@ public class DungeonGamePlayManager : MonoBehaviour
     /// 调用退出地下城端点,返回主场景
     /// </summary>
     /// <returns>成功返回 true,失败返回 false</returns>
-    public async UniTask<bool> ExitDungeon()
+    public async UniTask<DungeonExitResponse> ExitDungeon()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip ExitDungeon");
-            return false;
+            return null;
         }
 
         var api = CreateApi<DungeonExitApi>();
@@ -347,18 +347,18 @@ public class DungeonGamePlayManager : MonoBehaviour
             if (api.ReqResult == null)
             {
                 Debug.LogError("[DungeonGamePlayManager] ExitDungeon: request result is null");
-                return false;
+                return null;
             }
 
             if (!api.ReqResult.isSuccess)
             {
                 Debug.LogError($"[DungeonGamePlayManager] ExitDungeon failed: {api.ReqResult.responseText}");
-                return false;
+                return null;
             }
 
             Debug.Assert(api.RespData != null, "DungeonExitApi response data is null");
             Debug.Log("[DungeonGamePlayManager] ExitDungeon completed successfully");
-            return true;
+            return api.RespData;
         }
         finally
         {
