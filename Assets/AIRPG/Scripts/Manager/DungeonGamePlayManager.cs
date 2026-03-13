@@ -281,15 +281,15 @@ public class DungeonGamePlayManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 从地下城撤退
-    /// 调用 retreat 端点从地下城撤退
+    /// 从战斗中撤退
+    /// 调用 retreat 端点从当前战斗中撤退
     /// </summary>
     /// <returns>撤退响应，失败时返回 null</returns>
-    public async UniTask<DungeonCombatRetreatResponse> RetreatFromDungeon()
+    public async UniTask<DungeonCombatRetreatResponse> RetreatFromCombat()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
-            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip RetreatFromDungeon");
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip RetreatFromCombat");
             return null;
         }
 
@@ -303,18 +303,18 @@ public class DungeonGamePlayManager : MonoBehaviour
 
             if (api.ReqResult == null)
             {
-                Debug.LogError("[DungeonGamePlayManager] RetreatFromDungeon: request result is null");
+                Debug.LogError("[DungeonGamePlayManager] RetreatFromCombat: request result is null");
                 return null;
             }
 
             if (!api.ReqResult.isSuccess)
             {
-                Debug.LogError($"[DungeonGamePlayManager] RetreatFromDungeon failed: {api.ReqResult.responseText}");
+                Debug.LogError($"[DungeonGamePlayManager] RetreatFromCombat failed: {api.ReqResult.responseText}");
                 return null;
             }
 
             Debug.Assert(api.RespData != null, "DungeonCombatRetreatApi response data is null");
-            Debug.Log("[DungeonGamePlayManager] RetreatFromDungeon completed successfully");
+            Debug.Log("[DungeonGamePlayManager] RetreatFromCombat completed successfully");
             return api.RespData;
         }
         finally

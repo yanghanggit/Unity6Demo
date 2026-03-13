@@ -24,6 +24,10 @@ public class CombatSettingPanel : MonoBehaviour
         ExecuteRetreatSync().Forget();
     }
 
+    /// <summary>
+    /// 点击撤退按钮的处理逻辑，根据新的战斗状态切换 UI 显示和交互逻辑
+    /// </summary>
+    /// <returns></returns>
     public async UniTaskVoid ExecuteRetreatSync()
     {
         if (!GameContext.Instance.IsLoggedIn)
@@ -33,22 +37,31 @@ public class CombatSettingPanel : MonoBehaviour
             return;
         }
 
-        var response = await DungeonGamePlayManager.Instance.RetreatFromDungeon();
-        if (response == null || string.IsNullOrEmpty(response.task_id))
+        var retreatResponse = await DungeonGamePlayManager.Instance.RetreatFromCombat();
+        if (retreatResponse == null || string.IsNullOrEmpty(retreatResponse.task_id))
         {
             Debug.LogError("Retreat failed: no response data");
             return;
         }
 
-        Debug.Log($"DrawCards initiated successfully, task ID: {response.task_id}");
-        var taskRecord = await PollTaskStatus(response.task_id);
+        Debug.Log($"Retreat initiated successfully, task ID: {retreatResponse.task_id}");
+        var taskRecord = await PollTaskStatus(retreatResponse.task_id);
         if (taskRecord == null)
         {
-            Debug.LogError($"Failed to get task record for task ID: {response.task_id}");
+            Debug.LogError($"Failed to get task record for task ID: {retreatResponse.task_id}");
             return;
         }
 
-        Debug.Log($"Retreat successful: {response.message}");
+        Debug.Log($"Retreat successful: {retreatResponse.message}");
+
+        var exitResponse = await DungeonGamePlayManager.Instance.ExitDungeon();
+        if (exitResponse == null)
+        {
+            Debug.LogWarning("Failed to exit dungeon, no messages returned");
+            //_mainText.text = "退出地下城失败！";
+            return;
+        }
+
 
         await UniTask.Yield();
         SceneManager.LoadScene(MainSceneName);
