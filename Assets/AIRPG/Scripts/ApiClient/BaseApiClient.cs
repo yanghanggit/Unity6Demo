@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 /// <summary>
 /// API 请求基类
@@ -177,6 +178,11 @@ public abstract class BaseApiClient : MonoBehaviour
                     Debug.LogWarning($"{label} cancelled.");
                     return new RequestResult(false, "", 0, "Request cancelled", attempt);
                 }
+                catch (UnityWebRequestException)
+                {
+                    // 4xx / 5xx：请求已完成但服务端返回错误状态码
+                    // ToUniTask() 会对非 2xx 抛出此异常，交由 ProcessResponse 统一处理
+                }
 
                 lastResult = ProcessResponse(request);
                 lastResult.retryCount = attempt;
@@ -308,6 +314,39 @@ public abstract class BaseApiClient : MonoBehaviour
         }
 
         return uriBuilder.ToString();
+    }
+
+    /// <summary>
+    /// 尝试从最近一次失败请求中提取 FastAPI 错误信息。
+    /// 服务端以 HTTPException 响应时，响应体格式为 {"detail": "..."}。
+    /// </summary>
+    /// <param name="httpStatusCode">输出 HTTP 状态码，成功时为 0</param>
+    /// <param name="detail">输出 detail 字段内容，无法解析时为 null</param>
+    /// <returns>true 表示成功提取到 detail；false 表示请求成功或无可用信息</returns>
+    public bool TryGetErrorDetail(out long httpStatusCode, out string detail)
+    {
+        httpStatusCode = 0;
+        detail = null;
+
+        var result = ReqResult;
+        if (result == null || result.isSuccess)
+            return false;
+
+        httpStatusCode = result.responseCode;
+
+        if (string.IsNullOrEmpty(result.responseText))
+            return false;
+
+        try
+        {
+            var json = JObject.Parse(result.responseText);
+            detail = json["detail"]?.ToString();
+            return detail != null;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     /// <summary>

@@ -49,17 +49,10 @@ public class TestImageServiceScene : MonoBehaviour
     /// </summary>
     private async UniTaskVoid InitializeApiEndpoints()
     {
-        await _rootApi.Call(_baseUrl);
-
-        if (_rootApi.ReqResult == null)
+        var rootApiResponse = await _rootApi.Call(_baseUrl);
+        if (rootApiResponse == null)
         {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: request result is null");
-            return;
-        }
-
-        if (!_rootApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: {_rootApi.ReqResult.responseText}");
+            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: rootData is null");
             return;
         }
 

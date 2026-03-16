@@ -32,7 +32,7 @@ public class RootApi : BaseApiClient
     /// </summary>
     /// <param name="rootUrl">根 URL 地址</param>
     /// <returns>协程枚举器</returns>
-    public async UniTask Call(string rootUrl)
+    public async UniTask<JToken> Call(string rootUrl)
     {
         // 记录请求信息
         Debug.Log("Starting RootApi call...");
@@ -46,7 +46,7 @@ public class RootApi : BaseApiClient
         if (!IsNetworkReachable())
         {
             Debug.LogError("No network connection available");
-            return;
+            return null;
         }
 
         // 发送请求
@@ -56,14 +56,14 @@ public class RootApi : BaseApiClient
         if (!_requestResult.isSuccess)
         {
             Debug.LogError($"Request failed: {_requestResult.error}");
-            return;
+            return null;
         }
 
         // 解析响应数据
         if (string.IsNullOrEmpty(_requestResult.responseText))
         {
             Debug.LogError("Response text is empty");
-            return;
+            return null;
         }
 
         try
@@ -72,12 +72,16 @@ public class RootApi : BaseApiClient
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
-                return;
+                return null;
             }
+
+            Debug.Log("RootApi call successful, response data parsed");
+            return _responseData;
         }
         catch (System.Exception ex)
         {
             Debug.LogError($"Failed to parse response data: {ex.Message}");
+            return null;
         }
     }
 

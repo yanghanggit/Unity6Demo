@@ -5,9 +5,7 @@ using UnityEngine.UI;
 
 public class LaunchScene : MonoBehaviour
 {
-
     public static readonly string NextSceneName = "LoginScene";
-
 
     [Header("Network Settings")]
     [SerializeField] private string _baseUrl = "http://192.168.2.134:8000/";
@@ -47,21 +45,23 @@ public class LaunchScene : MonoBehaviour
     /// <returns>协程迭代器</returns>
     private async UniTaskVoid InitializeAsync()
     {
-        await _rootApi.Call(_baseUrl);
-        if (_rootApi.ReqResult == null)
+        var rootApiResponse = await _rootApi.Call(_baseUrl);
+        if (rootApiResponse == null)
         {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: request result is null");
+            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: rootApiResponse is null");
+
+            // 尝试获取更详细的错误信息，如果可用的话
+            if (_rootApi.TryGetErrorDetail(out var httpStatusCode, out var errorDetail))
+            {
+                Debug.LogError($"Root API call error details - HTTP Status Code: {httpStatusCode}, Detail: {errorDetail}");
+            }
             return;
         }
 
-        if (!_rootApi.ReqResult.isSuccess)
-        {
-            Debug.LogError($"Failed to initialize API endpoints from {_baseUrl}: {_rootApi.ReqResult.responseText}");
-            return;
-        }
-
+        Debug.Log("API endpoints initialized successfully from root data");
         Debug.Assert(_rootApi.RespData != null, "RootApi response data is null");
 
+        // 激活登录按钮，允许用户进入下一步
         _loginButton.gameObject.SetActive(true);
 
         // 设置全局游戏上下文的基础URL和根响应数据
