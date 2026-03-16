@@ -3,9 +3,9 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// TransDungeon API 客户端，用于处理转换到地下城请求
+/// HomeEnterDungeon API 客户端，用于处理进入地下城请求
 /// </summary>
-public class TransDungeonApi : BaseApiClient
+public class HomeEnterDungeonApi : BaseApiClient
 {
     /// <summary>
     /// 请求结果
@@ -20,24 +20,24 @@ public class TransDungeonApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private HomeTransDungeonResponse _responseData;
+    private HomeEnterDungeonResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public HomeTransDungeonResponse RespData => _responseData;
+    public HomeEnterDungeonResponse RespData => _responseData;
 
     /// <summary>
-    /// 调用转换地下城 API
+    /// 调用进入地下城 API
     /// </summary>
     /// <param name="url">请求 URL</param>
     /// <param name="user">用户名</param>
     /// <param name="game">游戏名</param>
-    /// <returns>协程枚举器</returns>
+    /// <returns>异步任务</returns>
     public async UniTask Call(string url, string user, string game)
     {
         // 记录请求信息
-        Debug.Log("Starting TransDungeonApi call...");
+        Debug.Log("Starting HomeEnterDungeonApi call...");
         Debug.Log($"URL: {url}");
         Debug.Log($"User: {user}");
         Debug.Log($"Game: {game}");
@@ -54,7 +54,7 @@ public class TransDungeonApi : BaseApiClient
         }
 
         // 创建请求数据
-        var requestData = new HomeTransDungeonRequest
+        var requestData = new HomeEnterDungeonRequest
         {
             user_name = user,
             game_name = game
@@ -80,7 +80,7 @@ public class TransDungeonApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<HomeTransDungeonResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<HomeEnterDungeonResponse>(_requestResult.responseText);
 
             if (_responseData == null)
             {
@@ -88,7 +88,7 @@ public class TransDungeonApi : BaseApiClient
                 return;
             }
 
-            Debug.Log($"Trans to dungeon successful. Message: {_responseData.message}");
+            Debug.Log($"Enter dungeon successful. Message: {_responseData.message}");
         }
         catch (System.Exception ex)
         {

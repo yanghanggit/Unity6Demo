@@ -179,8 +179,8 @@ public class HomeScene : MonoBehaviour, IUIEventListener
             return false;
         }
 
-        bool isStageSwitchSuccessful = await HomeGamePlayManager.Instance.SwitchStage(targetStageName);
-        if (!isStageSwitchSuccessful)
+        var switchStageResult = await HomeGamePlayManager.Instance.SwitchStage(targetStageName);
+        if (switchStageResult == null)
         {
             Debug.LogError($"[HomeScene] SwitchStage to {targetStageName} failed");
             return false;
@@ -229,8 +229,8 @@ public class HomeScene : MonoBehaviour, IUIEventListener
             return;
         }
 
-        bool isGameAdvanceSuccessful = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
-        if (!isGameAdvanceSuccessful)
+        var advanceResult = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
+        if (advanceResult == null)
         {
             Debug.LogError("[HomeScene] AdvanceGame failed");
             return;
@@ -252,8 +252,8 @@ public class HomeScene : MonoBehaviour, IUIEventListener
             return;
         }
 
-        bool speakSuccess = await HomeGamePlayManager.Instance.SpeakToActor(targetActorName, messageContent);
-        if (!speakSuccess)
+        var speakResult = await HomeGamePlayManager.Instance.SpeakToActor(targetActorName, messageContent);
+        if (speakResult == null)
         {
             Debug.LogError("[HomeScene] SpeakToActor failed");
             return;

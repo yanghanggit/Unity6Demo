@@ -112,14 +112,14 @@ public class HomePlayerActionResponse
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [System.Serializable]
-public class HomeTransDungeonRequest
+public class HomeEnterDungeonRequest
 {
     public string user_name = "";
     public string game_name = "";
 }
 
 [System.Serializable]
-public class HomeTransDungeonResponse
+public class HomeEnterDungeonResponse
 {
     public string task_id = "";
     public string status = "";

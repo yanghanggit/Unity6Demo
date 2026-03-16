@@ -155,8 +155,8 @@ public class MainScene : MonoBehaviour, IUIEventListener
             return;
         }
 
-        bool isGameSuccessfullyAdvanced = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
-        if (!isGameSuccessfullyAdvanced)
+        var advanceResult = await HomeGamePlayManager.Instance.AdvanceGame(new List<string>());
+        if (advanceResult == null)
         {
             Debug.LogError("[MainScene] AdvanceGame failed");
             return;
@@ -207,9 +207,9 @@ public class MainScene : MonoBehaviour, IUIEventListener
         //Debug.Log($"Current stage: {currentStageName}, Target stage: {HomeScene.CachedHomeStageName}");
         if (currentStageName != targetStageName)
         {
-            bool switchSuccess = await HomeGamePlayManager.Instance.SwitchStage(targetStageName);
+            var switchResult = await HomeGamePlayManager.Instance.SwitchStage(targetStageName);
 
-            if (!switchSuccess)
+            if (switchResult == null)
             {
                 Debug.LogError($"[MainScene] SwitchStage to {targetStageName} failed");
                 return;

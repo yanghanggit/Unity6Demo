@@ -278,14 +278,11 @@ public partial class GameContext
         }
     }
 
-    /// <summary>
-    /// 获取从主场景转换到地牢场景API的URL地址
-    /// </summary>
-    public string HomeTransDungeonUrl
+    public string HomeEnterDungeonUrl
     {
         get
         {
-            return BaseUrl.TrimEnd('/') + "/api/home/trans_dungeon/v1/";
+            return BaseUrl.TrimEnd('/') + "/api/home/enter_dungeon/v1/";
         }
     }
 

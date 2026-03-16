@@ -58,8 +58,8 @@ public class DungeonOverviewScene : MonoBehaviour
             return;
         }
 
-        var dungeonTransitionResult = await HomeGamePlayManager.Instance.TransDungeon();
-        if (!dungeonTransitionResult)
+        var homeEnterDungeonResponse = await HomeGamePlayManager.Instance.HomeEnterDungeon();
+        if (homeEnterDungeonResponse == null)
         {
             Debug.LogError("Failed to transition into dungeon");
             _mainText.text = "Failed to enter dungeon";
