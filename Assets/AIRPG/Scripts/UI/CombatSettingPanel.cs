@@ -54,11 +54,23 @@ public class CombatSettingPanel : MonoBehaviour
 
         Debug.Log($"Retreat successful: {retreatResponse.message}");
 
+        var combat = await GameStateSync.Instance.GetCombat();
+        if (combat == null)
+        {
+            Debug.LogError("Failed to get combat state after retreat");
+            return;
+        }
+
+        if (!combat.retreated)
+        {
+            Debug.LogWarning($"Combat state after retreat is unexpected: {combat.state}");
+            return;
+        }
+
         var exitResponse = await DungeonGamePlayManager.Instance.ExitDungeon();
         if (exitResponse == null)
         {
             Debug.LogWarning("Failed to exit dungeon, no messages returned");
-            //_mainText.text = "退出地下城失败！";
             return;
         }
 

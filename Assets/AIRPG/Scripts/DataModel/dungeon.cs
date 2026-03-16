@@ -77,6 +77,7 @@ public sealed class Combat
     public CombatState state = CombatState.NONE;
     public CombatResult result = CombatResult.NONE;
     public List<Round> rounds = new();
+    public bool retreated = false; // 是否已经撤退（如果玩家选择撤退则为true，反之为false）
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
