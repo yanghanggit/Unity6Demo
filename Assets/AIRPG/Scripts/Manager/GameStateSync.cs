@@ -26,7 +26,6 @@ public class GameStateSync : MonoBehaviour
     public bool EnableSessionPolling { get; set; } = false;
 
     private int _lastSessionSequenceId = 0;
-    private bool _isSessionPolling = false;
 
     private void Awake()
     {
@@ -74,39 +73,19 @@ public class GameStateSync : MonoBehaviour
     }
 
     /// <summary>
-    /// 启动会话消息轮询。若已在轮询中，则忽略重复启动。
-    /// 轮询执行取决于 <see cref="EnableSessionPolling"/> 标志的状态。
+    /// 启动会话消息轮询循环。若已在轮询中，则忽略重复启动。
+    /// 循环持续运行直到 CancellationToken 触发，<see cref="EnableSessionPolling"/> 作为运行时开关控制每轮是否真正执行拉取。
     /// </summary>
     public async UniTask StartSessionMessagesPolling(CancellationToken cancellationToken, int intervalMs = 3000)
     {
-        if (_isSessionPolling)
+        while (true)
         {
-            Debug.LogWarning("[GameStateSync] Session polling is already running, skip duplicate start.");
-            return;
-        }
-
-        if (!EnableSessionPolling)
-        {
-            Debug.LogWarning("[GameStateSync] Session polling is disabled, skip start.");
-            return;
-        }
-
-        _isSessionPolling = true;
-        try
-        {
-            while (EnableSessionPolling)
-            {
+            if (EnableSessionPolling)
                 await FetchPlayerSessionMessages();
-                bool cancelled = await UniTask.Delay(intervalMs, ignoreTimeScale: true, cancellationToken: cancellationToken).SuppressCancellationThrow();
-                if (cancelled)
-                {
-                    break;
-                }
-            }
-        }
-        finally
-        {
-            _isSessionPolling = false;
+
+            bool cancelled = await UniTask.Delay(intervalMs, ignoreTimeScale: true, cancellationToken: cancellationToken).SuppressCancellationThrow();
+            if (cancelled)
+                break;
         }
     }
 

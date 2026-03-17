@@ -72,7 +72,7 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
             return;
         }
 
-        if (dungeon.current_stage_index >= dungeon.stages.Count - 1)
+        if (dungeon.current_room_index >= dungeon.rooms.Count - 1)
         {
             Debug.LogWarning("Already at the last stage of the dungeon, cannot advance further");
             _mainText.text = "已经是地下城的最后一关了！";

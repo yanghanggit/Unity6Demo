@@ -194,10 +194,10 @@ public static partial class GameUtils
         var dungeonOverviewText = string.Empty;
         dungeonOverviewText += "地下城 = " + dungeon.name + "\n";
         dungeonOverviewText += "描述 = " + dungeon.description + "\n";
-        for (int i = 0; i < dungeon.stages.Count; i++)
+        for (int i = 0; i < dungeon.rooms.Count; i++)
         {
-            dungeonOverviewText += "第" + (i + 1) + "关 = " + dungeon.stages[i].name + "\n";
-            dungeonOverviewText += "怪物 = " + string.Join(", ", dungeon.stages[i].actors.Select(a => a.name)) + "\n";
+            dungeonOverviewText += "第" + (i + 1) + "关 = " + dungeon.rooms[i].stage.name + "\n";
+            dungeonOverviewText += "怪物 = " + string.Join(", ", dungeon.rooms[i].stage.actors.Select(a => a.name)) + "\n";
         }
 
         return dungeonOverviewText;

@@ -82,12 +82,13 @@ public sealed class Combat
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// <summary>
-/// 战斗参与
+/// 地下城房间（关卡包装）
 /// </summary>
 [System.Serializable]
-public sealed class CombatSequence
+public sealed class DungeonRoom
 {
-    public List<Combat> combats = new();
+    public Stage stage = new();
+    public Combat combat = new();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,10 +99,9 @@ public sealed class CombatSequence
 public sealed class Dungeon
 {
     public string name = "";
-    public List<Stage> stages = new();
+    public List<DungeonRoom> rooms = new();
     public string description = "";
-    public CombatSequence combat_sequence = new();
-    public int current_stage_index = -1;
+    public int current_room_index = -1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
