@@ -331,6 +331,45 @@ public class GameStateSync : MonoBehaviour
     }
 
     /// <summary>
+    /// 获取当前地下城房间状态
+    /// </summary>
+    /// <returns>成功时返回 <see cref="DungeonRoom"/>，失败时返回 null</returns>
+    public async UniTask<DungeonRoom> GetDungeonRoom()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[GameStateSync] Player is not logged in, skip GetDungeonRoom");
+            return null;
+        }
+
+        var api = CreateApi<DungeonRoomApi>();
+        try
+        {
+            await api.Call(GameContext.Instance.DungeonRoomUrl);
+
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[GameStateSync] GetDungeonRoom: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[GameStateSync] GetDungeonRoom failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "[GameStateSync] DungeonRoomApi response data is null");
+            Debug.Log("[GameStateSync] GetDungeonRoom completed successfully");
+            return api.RespData.room;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
+    }
+
+    /// <summary>
     /// 从服务器获取会话消息，并更新序列ID
     /// </summary>
     /// <returns>成功时返回会话消息列表，失败时返回 null</returns>

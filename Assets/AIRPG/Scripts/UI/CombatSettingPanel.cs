@@ -37,6 +37,14 @@ public class CombatSettingPanel : MonoBehaviour
             return;
         }
 
+        // 测试数据
+        // var dungeonRoom = await GameStateSync.Instance.GetDungeonRoom();
+        // if (dungeonRoom == null)
+        // {
+        //     Debug.LogError("Failed to get current dungeon room state");
+        //     return;
+        // }
+
         var retreatResponse = await DungeonGamePlayManager.Instance.RetreatFromCombat();
         if (retreatResponse == null || string.IsNullOrEmpty(retreatResponse.task_id))
         {
