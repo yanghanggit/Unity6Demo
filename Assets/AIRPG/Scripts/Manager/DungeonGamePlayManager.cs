@@ -324,6 +324,45 @@ public class DungeonGamePlayManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 获取当前地下城房间状态
+    /// </summary>
+    /// <returns>成功时返回 <see cref="DungeonRoom"/>，失败时返回 null</returns>
+    public async UniTask<DungeonRoom> GetRoom()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[DungeonGamePlayManager] Player is not logged in, skip GetRoom");
+            return null;
+        }
+
+        var api = CreateApi<DungeonRoomApi>();
+        try
+        {
+            await api.Call(GameContext.Instance.DungeonRoomUrl);
+
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[DungeonGamePlayManager] GetRoom: request result is null");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[DungeonGamePlayManager] GetRoom failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "DungeonRoomApi response data is null");
+            Debug.Log("[DungeonGamePlayManager] GetRoom completed successfully");
+            return api.RespData.room;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
+    }
+
+    /// <summary>
     /// 退出地下城
     /// 调用退出地下城端点,返回主场景
     /// </summary>

@@ -102,6 +102,7 @@ public sealed class Dungeon
     public List<DungeonRoom> rooms = new();
     public string description = "";
     public int current_room_index = -1;
+    public bool setup_entities = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

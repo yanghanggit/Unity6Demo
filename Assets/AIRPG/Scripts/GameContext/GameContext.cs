@@ -81,28 +81,6 @@ public partial class GameContext
     /// </summary>
     private string _playerOnlyStageName;
 
-
-    /// <summary>
-    /// 最后一次序列ID，用于追踪游戏事件的顺序
-    /// </summary>
-    // private int _lastSequenceId = 0;
-
-    // /// <summary>
-    // /// 获取或设置最后一次序列ID
-    // /// </summary>
-    // public int LastSequenceId
-    // {
-    //     get
-    //     {
-    //         return _lastSequenceId;
-    //     }
-    //     set
-    //     {
-    //         Debug.Assert(value >= 0, "LastSequenceId cannot be negative");
-    //         _lastSequenceId = value;
-    //     }
-    // }
-
     /// <summary>
     /// 获取或设置用户名
     /// </summary>
@@ -252,6 +230,17 @@ public partial class GameContext
         get
         {
             return BaseUrl.TrimEnd('/') + $"/api/dungeons/v1/{UserName}/{GameName}/combat";
+        }
+    }
+
+    /// <summary>
+    /// 获取当前所在的地牢房间API的URL地址
+    /// </summary>
+    public string DungeonRoomUrl
+    {
+        get
+        {
+            return BaseUrl.TrimEnd('/') + $"/api/dungeons/v1/{UserName}/{GameName}/room";
         }
     }
 
