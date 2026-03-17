@@ -100,7 +100,7 @@ public sealed class Dungeon
 {
     public string name = "";
     public List<DungeonRoom> rooms = new();
-    public string description = "";
+    public string ecology = "";
     public int current_room_index = -1;
     public bool setup_entities = false;
 }

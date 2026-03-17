@@ -193,7 +193,7 @@ public static partial class GameUtils
     {
         var dungeonOverviewText = string.Empty;
         dungeonOverviewText += "地下城 = " + dungeon.name + "\n";
-        dungeonOverviewText += "描述 = " + dungeon.description + "\n";
+        dungeonOverviewText += "生态 = " + dungeon.ecology + "\n";
         for (int i = 0; i < dungeon.rooms.Count; i++)
         {
             dungeonOverviewText += "第" + (i + 1) + "关 = " + dungeon.rooms[i].stage.name + "\n";
