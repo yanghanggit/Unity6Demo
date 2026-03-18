@@ -1243,7 +1243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SessionManager
   _loginApi: {fileID: 1736060655}
-  _startApi: {fileID: 1736060654}
+  _newGameApi: {fileID: 1736060654}
   _logoutApi: {fileID: 1736060653}
 --- !u!114 &1736060653
 MonoBehaviour:

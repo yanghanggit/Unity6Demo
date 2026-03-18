@@ -209,7 +209,7 @@ public class GameContextViewerUIToolkit : EditorWindow
     //         { "Stages State URL", GameContext.Instance.StagesStateUrl },
     //         { "Dungeon State URL", GameContext.Instance.DungeonStateUrl },
     //         { "Entity Details URL", GameContext.Instance.EntityDetailsUrl },
-    //         { "Start URL", GameContext.Instance.StartUrl },
+    //         { "NewGame URL", GameContext.Instance.NewGameUrl },
     //         { "Home Trans Dungeon URL", GameContext.Instance.HomeTransDungeonUrl },
     //         { "Dungeon GamePlay URL", GameContext.Instance.DungeonProgressUrl },
     //         { "Dungeon Trans Home URL", GameContext.Instance.DungeonTransHomeUrl },

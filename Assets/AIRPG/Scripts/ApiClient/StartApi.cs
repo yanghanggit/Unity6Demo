@@ -3,9 +3,9 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// Start API 客户端，用于处理开始游戏请求
+/// NewGame API 客户端，用于处理新建游戏请求
 /// </summary>
-public class StartApi : BaseApiClient
+public class NewGameApi : BaseApiClient
 {
     /// <summary>
     /// 请求结果
@@ -20,25 +20,24 @@ public class StartApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private StartResponse _responseData;
+    private NewGameResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public StartResponse RespData => _responseData;
+    public NewGameResponse RespData => _responseData;
 
     /// <summary>
-    /// 调用开始游戏 API
+    /// 调用新建游戏 API
     /// </summary>
     /// <param name="url">请求 URL</param>
     /// <param name="user">用户名</param>
     /// <param name="game">游戏名</param>
-    /// <param name="actor">角色名</param>
-    /// <returns>协程枚举器</returns>
+    /// <returns>异步任务</returns>
     public async UniTask Call(string url, string user, string game)
     {
         // 记录请求信息
-        Debug.Log("Starting StartApi call...");
+        Debug.Log("Starting NewGameApi call...");
         Debug.Log($"URL: {url}");
         Debug.Log($"User: {user}");
         Debug.Log($"Game: {game}");
@@ -55,11 +54,10 @@ public class StartApi : BaseApiClient
         }
 
         // 创建请求数据
-        var requestData = new StartRequest
+        var requestData = new NewGameRequest
         {
             user_name = user,
             game_name = game,
-            //actor_name = _actorName
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
@@ -82,7 +80,7 @@ public class StartApi : BaseApiClient
 
         try
         {
-            _responseData = JsonConvert.DeserializeObject<StartResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<NewGameResponse>(_requestResult.responseText);
 
             if (_responseData == null)
             {

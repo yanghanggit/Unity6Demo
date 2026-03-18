@@ -22,9 +22,9 @@ public class SessionManager : MonoBehaviour
     [SerializeField] private LoginApi _loginApi;
 
     /// <summary>
-    /// 开始游戏 API 接口
+    /// 新建游戏 API 接口
     /// </summary>
-    [SerializeField] private StartApi _startApi;
+    [SerializeField] private NewGameApi _newGameApi;
 
     /// <summary>
     /// 登出 API 接口
@@ -49,7 +49,7 @@ public class SessionManager : MonoBehaviour
     private void Start()
     {
         Debug.Assert(_loginApi != null, "_loginApi is null");
-        Debug.Assert(_startApi != null, "_startApi is null");
+        Debug.Assert(_newGameApi != null, "_newGameApi is null");
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
     }
 
@@ -81,28 +81,28 @@ public class SessionManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 开始游戏
-    /// 调用 /start 端点分配角色并初始化游戏
+    /// 新建游戏
+    /// 调用 /api/game/new/v1/ 端点创建并初始化游戏会话
     /// 自动保存角色名到 GameContext
     /// </summary>
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
     /// <returns>是否成功</returns>
-    public async UniTask<bool> StartGame(string userName, string gameName)
+    public async UniTask<bool> NewGame(string userName, string gameName)
     {
-        // 调用 StartApi
-        await _startApi.Call(GameContext.Instance.StartUrl, userName, gameName);
+        // 调用 NewGameApi
+        await _newGameApi.Call(GameContext.Instance.NewGameUrl, userName, gameName);
 
         // 检查结果
-        if (_startApi.ReqResult == null || !_startApi.ReqResult.isSuccess)
+        if (_newGameApi.ReqResult == null || !_newGameApi.ReqResult.isSuccess)
         {
-            Debug.LogError("[SessionManager] Start game request failed");
+            Debug.LogError("[SessionManager] NewGame request failed");
             return false;
         }
 
         // 保存角色信息到 GameContext
-        GameContext.Instance.PlayerActorName = _startApi.RespData.blueprint.player_actor;
-        GameContext.Instance.PlayerOnlyStageName = _startApi.RespData.blueprint.player_only_stage;
+        GameContext.Instance.PlayerActorName = _newGameApi.RespData.blueprint.player_actor;
+        GameContext.Instance.PlayerOnlyStageName = _newGameApi.RespData.blueprint.player_only_stage;
 
         return true;
     }

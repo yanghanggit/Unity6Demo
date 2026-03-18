@@ -61,11 +61,11 @@ public class LoginScene : MonoBehaviour
             return;
         }
 
-        // 2. 开始游戏
-        bool isStartSuccessful = await SessionManager.Instance.StartGame(userName, gameName);
+        // 2. 新建游戏
+        bool isStartSuccessful = await SessionManager.Instance.NewGame(userName, gameName);
         if (!isStartSuccessful)
         {
-            Debug.LogError("[SessionManager] LoginAndStart failed at StartGame step");
+            Debug.LogError("[SessionManager] LoginAndStart failed at NewGame step");
             return;
         }
 

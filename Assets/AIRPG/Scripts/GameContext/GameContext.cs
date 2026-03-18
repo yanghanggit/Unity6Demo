@@ -257,13 +257,13 @@ public partial class GameContext
     }
 
     /// <summary>
-    /// 获取游戏开始API的URL地址
+    /// 获取新建游戏API的URL地址
     /// </summary>
-    public string StartUrl
+    public string NewGameUrl
     {
         get
         {
-            return BaseUrl.TrimEnd('/') + "/api/start/v1/";
+            return BaseUrl.TrimEnd('/') + "/api/game/new/v1/";
         }
     }
 
