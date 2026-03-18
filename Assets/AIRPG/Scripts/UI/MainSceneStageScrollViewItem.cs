@@ -69,8 +69,8 @@ public class MainSceneStageScrollViewItem : UIBehaviour, IScrollViewItem
         var eventData = new UIEventData(
             UIEventType.MainSceneStageItemClicked,
             data.stageName, // 可以根据需要传递更多数据，例如关卡名称、角色列表等   
-            _currentIndex,
-            extra: data.dungeonName
+            _currentIndex
+            //extra: data.dungeonName
         );
 
         // 触发事件，通知系统哪个卡牌要素被点击了

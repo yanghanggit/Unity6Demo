@@ -9,9 +9,9 @@ using Cysharp.Threading.Tasks;
 [System.Serializable]
 public class HomeSceneData
 {
+    public static readonly  string DungeonOverviewSceneName = "<地下城>"; // 全局定义，是本地模拟用
     public string stageName;
     public List<EntitySerialization> actorsOnStage = new();
-    public string dungeonName = string.Empty;
 }
 
 /// <summary>
@@ -22,7 +22,6 @@ public class HomeSceneData
 public class MainScene : MonoBehaviour, IUIEventListener
 {
     public static readonly List<HomeSceneData> HomeScenes = new();
-
     public static readonly string PreSceneName = "LoginScene";
     public static readonly string NextSceneName = "HomeScene";
     public static readonly string DungeonOverviewSceneName = "DungeonOverviewScene";
@@ -240,11 +239,12 @@ public class MainScene : MonoBehaviour, IUIEventListener
             case UIEventType.MainSceneStageItemClicked:
                 {
                     var stageName = eventData.targetId;
-                    var dungeonName = eventData.extraData;
+                    //var dungeonName = eventData.extraData;
                     Debug.Log($"MainSceneHomeSceneItemClicked: StageName: {stageName}, Index: {eventData.index}");
 
-                    if (!string.IsNullOrEmpty(dungeonName))
+                    if (stageName == HomeSceneData.DungeonOverviewSceneName)
                     {
+                        // 特殊处理，因为是本地模拟的。
                         LoadDungeonOverviewScene().Forget();
                         return;
                     }

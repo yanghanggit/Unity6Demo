@@ -91,16 +91,16 @@ public class HomeScenesPanel : MonoBehaviour
         }
 
         // 如果 dungeon name 不为空，
-        if (!string.IsNullOrEmpty(dungeon.name))
+        //if (!string.IsNullOrEmpty(dungeon.name))
+        //{
+        // 将 dungeon name 添加到每个 HomeSceneData 的 dungeonName 字段中
+        MainScene.HomeScenes.Add(new HomeSceneData
         {
-            // 将 dungeon name 添加到每个 HomeSceneData 的 dungeonName 字段中
-            MainScene.HomeScenes.Add(new HomeSceneData
-            {
-                stageName = dungeon.name,
-                actorsOnStage = new List<EntitySerialization>(),
-                dungeonName = dungeon.name,
-            });
-        }
+            stageName = HomeSceneData.DungeonOverviewSceneName, // 这个名字是本地定义的，服务器不识别
+            actorsOnStage = new List<EntitySerialization>(),
+            //dungeonName = dungeon.name,
+        });
+        //}
 
         _scrollView.gameObject.SetActive(true);
         _scrollView.totalCount = MainScene.HomeScenes.Count;
