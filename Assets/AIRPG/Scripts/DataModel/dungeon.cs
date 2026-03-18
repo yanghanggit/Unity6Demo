@@ -88,7 +88,8 @@ public sealed class Combat
 public sealed class DungeonRoom
 {
     public Stage stage = new();
-    public Combat combat = new();
+    public Combat combat = new();          // 当前房间的战斗数据，默认为空战斗（state=NONE）
+    public GeneratedImage image = new();  // 当前房间的文生图数据，默认为空
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,8 +102,9 @@ public sealed class Dungeon
     public string name = "";
     public List<DungeonRoom> rooms = new();
     public string ecology = "";
-    public int current_room_index = -1;
-    public bool setup_entities = false;
+    public int current_room_index = -1;  // 当前所在房间索引，初始为 -1，表示尚未进入任何房间
+    public bool setup_entities = false;  // 是否已经根据模型创建了实体（敌人和场景），默认 false，创建后置 true
+    public GeneratedImage image = new(); // 地下城封面文生图数据，默认为空
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

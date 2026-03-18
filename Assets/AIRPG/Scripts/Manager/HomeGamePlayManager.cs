@@ -240,4 +240,46 @@ public class HomeGamePlayManager : MonoBehaviour
             Destroy(api.gameObject);
         }
     }
+
+    /// <summary>
+    /// 生成地下城
+    /// 在家园状态下触发地下城文本与图片的生成流程（dungeon_setup_pipeline）
+    /// </summary>
+    /// <returns>成功时返回 <see cref="HomeGenerateDungeonResponse"/>，失败时返回 null</returns>
+    public async UniTask<HomeGenerateDungeonResponse> GenerateDungeon()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("[HomeGamePlayManager] Player is not logged in, skip GenerateDungeon");
+            return null;
+        }
+
+        var api = CreateApi<HomeGenerateDungeonApi>();
+        try
+        {
+            await api.Call(
+                GameContext.Instance.HomeGenerateDungeonUrl,
+                GameContext.Instance.UserName,
+                GameContext.Instance.GameName);
+
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[HomeGamePlayManager] GenerateDungeon request failed");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[HomeGamePlayManager] GenerateDungeon request failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "[HomeGamePlayManager] GenerateDungeon response data is null");
+            return api.RespData;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
+    }
 }

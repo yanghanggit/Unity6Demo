@@ -368,4 +368,15 @@ public partial class GameContext
             return BaseUrl.TrimEnd('/') + "/api/tasks/v1/status";
         }
     }
+
+    /// <summary>
+    /// 获取主场景生成地牢API的URL地址
+    /// </summary>
+    public string HomeGenerateDungeonUrl
+    {
+        get
+        {
+            return BaseUrl.TrimEnd('/') + "/api/home/generate_dungeon/v1/";
+        }
+    }
 }
