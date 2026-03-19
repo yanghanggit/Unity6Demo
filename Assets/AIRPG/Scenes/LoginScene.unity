@@ -1143,6 +1143,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1455665588}
   - component: {fileID: 1455665587}
+  - component: {fileID: 1455665589}
   m_Layer: 0
   m_Name: SpriteCacheManager
   m_TagString: Untagged
@@ -1181,6 +1182,7 @@ MonoBehaviour:
   preloadSpriteKeys:
   - "\u89D2\u8272.\u730E\u4EBA.\u77F3\u575A"
   - "\u89D2\u8272.\u672F\u58EB.\u4E91\u97F3"
+  _textureLoader: {fileID: 1455665589}
 --- !u!4 &1455665588
 Transform:
   m_ObjectHideFlags: 0
@@ -1196,6 +1198,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1455665589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1455665586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49fb6417db8e640d09344703e629bbd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TextureLoader
 --- !u!1 &1736060650
 GameObject:
   m_ObjectHideFlags: 0

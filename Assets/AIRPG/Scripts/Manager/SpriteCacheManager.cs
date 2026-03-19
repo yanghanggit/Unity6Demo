@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -35,8 +36,14 @@ public class SpriteCacheManager : MonoBehaviour
     [SerializeField] private Sprite[] preloadSprites; // 在Inspector中赋值
     [SerializeField] private string[] preloadSpriteKeys; // 在Inspector中赋值
 
+    [Header("远程图片加载配置")]
+    [SerializeField] private TextureLoader _textureLoader;
+
     // 精灵缓存字典
     private readonly Dictionary<string, Sprite> spriteCache = new();
+
+    // 远程纹理缓存字典（URL 为键），与 spriteCache 独立，不互相影响
+    private readonly Dictionary<string, Texture2D> _remoteTextureCache = new();
 
     private void Awake()
     {
@@ -53,6 +60,52 @@ public class SpriteCacheManager : MonoBehaviour
             Debug.LogWarning("[SpriteCacheManager] Duplicate instance detected, destroying the new one.");
             Destroy(gameObject);
         }
+    }
+
+    /// <summary>
+    /// 从完整 URL 下载远程纹理并缓存。
+    /// 同一 URL 第二次调用直接返回缓存，不重复请求。
+    /// </summary>
+    /// <param name="url">纹理的完整 URL，由调用方构造</param>
+    /// <returns>加载成功时返回 Texture2D，失败时返回 null</returns>
+    public async UniTask<Texture2D> LoadRemoteTexture(string url)
+    {
+        if (_textureLoader == null)
+        {
+            Debug.LogError("[SpriteCacheManager] _textureLoader is not assigned");
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(url))
+        {
+            Debug.LogError("[SpriteCacheManager] LoadRemoteTexture called with null or empty url");
+            return null;
+        }
+
+        if (_remoteTextureCache.TryGetValue(url, out var cached))
+        {
+            Debug.Log($"[SpriteCacheManager] Returning cached texture for: {url}");
+            return cached;
+        }
+
+        await _textureLoader.LoadTexture(url);
+
+        if (_textureLoader.Result == null || !_textureLoader.Result.IsSuccess)
+        {
+            Debug.LogError($"[SpriteCacheManager] Failed to load remote texture: {_textureLoader.Result?.Error}");
+            return null;
+        }
+
+        var texture = _textureLoader.LoadedTexture;
+        if (texture == null)
+        {
+            Debug.LogError($"[SpriteCacheManager] Loaded texture is null for: {url}");
+            return null;
+        }
+
+        _remoteTextureCache[url] = texture;
+        Debug.Log($"[SpriteCacheManager] Remote texture cached: {url} ({texture.width}x{texture.height})");
+        return texture;
     }
 
     /// <summary>
@@ -230,9 +283,7 @@ public class SpriteCacheManager : MonoBehaviour
         {
             if (preloadSprites[i] != null && !string.IsNullOrEmpty(preloadSpriteKeys[i]))
             {
-                // 直接使用已有的 Sprite，无需创建
-               // Debug.Assert(spriteCache[preloadSpriteKeys[i]] == null, $"SpriteCacheManager: Key '{preloadSpriteKeys[i]}' already exists in cache");
-                
+                // 直接使用预配置的 Sprite，无需创建新 Sprite
                 Debug.Assert(!spriteCache.ContainsKey(preloadSpriteKeys[i]), $"SpriteCacheManager: Key '{preloadSpriteKeys[i]}' already exists in cache");
                 spriteCache[preloadSpriteKeys[i]] = preloadSprites[i];
                 loadedCount++;
