@@ -25,6 +25,10 @@ public class DungeonOverviewScene : MonoBehaviour
     [SerializeField] private DungeonOverviewListPanel _dungeonOverviewListPanel;
 
 
+    [Header("API Components")]
+    [SerializeField] private TasksStatusApi _tasksStatusApi; // 轮询任务状态的 API 组件
+
+
     /// <summary>
     /// 场景初始化
     /// 验证必要组件并加载地下城概览数据
@@ -32,39 +36,20 @@ public class DungeonOverviewScene : MonoBehaviour
     void Start()
     {
         Debug.Assert(_dungeonOverviewListPanel != null, "_dungeonOverviewListPanel is null");
+        Debug.Assert(_tasksStatusApi != null, "_tasksStatusApi is null");
 
-
-        // 旧代码。
-        LoadDungeonOverview().Forget();
-
-
-        if (!GameContext.Instance.IsLoggedIn)
-        {
-            //给添加 DungeonOverviews 添加10个mock数据
-            if (DungeonOverviews.Count == 0)
-            {
-                for (int i = 1; i <= 10; i++)
-                {
-                    DungeonOverviews.Add(new DungeonOveriewData
-                    {
-                        dungeonName = $"Dungeon {i}"
-                    });
-                }
-
-                _dungeonOverviewListPanel.RefreshView();
-            }
-        }
-
+        // 列出来地下城概览数据，实际项目中应该从服务器获取
+        ListDungeons().Forget();
     }
 
     /// <summary>
-    /// UI按钮回调：进入地下城
-    /// 触发地下城传送流程，成功后切换到地下城场景
+    /// UI按钮回调：新建地下城
     /// </summary>
-    public void OnClickTransDungeon()
+    public void OnClickGenerateDungeon()
     {
-        Debug.Log("OnClickTransDungeon");
-        EnterDungeon().Forget();
+        Debug.Log("OnClickGenerateDungeon");
+        // 这里可以添加新建地下城的逻辑，例如弹出新建地下城的UI，或者直接调用API创建新的地下城
+        ExecuteGenerateDungeon().Forget();
     }
 
     /// <summary>
@@ -128,25 +113,43 @@ public class DungeonOverviewScene : MonoBehaviour
     /// 加载并显示地下城概览信息
     /// 从服务器刷新地下城数据，并格式化显示在UI上
     /// </summary>
-    private async UniTaskVoid LoadDungeonOverview()
+    private async UniTaskVoid ListDungeons()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("Player is not logged in, cannot load dungeon overview");
-            //_mainText.text = "Player is not logged in";
+
+            for (int i = 1; i <= 10; i++)
+            {
+                DungeonOverviews.Add(new DungeonOveriewData
+                {
+                    dungeonName = $"Dungeon {i}"
+                });
+            }
+
+            _dungeonOverviewListPanel.RefreshView();
             return;
         }
 
-
-        var dungeon = await GameStateSync.Instance.GetDungeon();
-        if (dungeon == null)
+        var dungeons = await HomeGamePlayManager.Instance.ListDungeons();
+        if (dungeons == null)
         {
-            Debug.LogError("Failed to refresh dungeon data");
-            //_mainText.text = "Failed to load dungeon data";
+            Debug.LogError("Failed to retrieve dungeon list");
+            DungeonOverviews.Clear();
+            _dungeonOverviewListPanel.RefreshView();
             return;
         }
 
-        //_mainText.text = GameUtils.FormatDungeonOverview(dungeon);
+        DungeonOverviews.Clear();
+        foreach (var dungeon in dungeons)
+        {
+            DungeonOverviews.Add(new DungeonOveriewData
+            {
+                dungeonName = dungeon.name
+            });
+        }
+
+        _dungeonOverviewListPanel.RefreshView();
     }
 
     /// <summary>
@@ -175,5 +178,57 @@ public class DungeonOverviewScene : MonoBehaviour
         {
             Debug.LogWarning("Game is not set up. Staying in CampScene.");
         }
+    }
+
+
+    private async UniTaskVoid ExecuteGenerateDungeon()
+    {
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            Debug.LogWarning("Player is not logged in, cannot create new dungeon");
+            return;
+        }
+
+        // 这里可以添加新建地下城的逻辑，例如弹出新建地下城的UI，或者直接调用API创建新的地下城
+        Debug.Log("NewDungeon logic is not implemented yet");
+
+        var generateDungeonResponse = await HomeGamePlayManager.Instance.GenerateDungeon();
+        if (generateDungeonResponse == null || string.IsNullOrEmpty(generateDungeonResponse.task_id))
+        {
+            Debug.LogError("Retreat failed: no response data");
+            return;
+        }
+
+        Debug.Log($"Retreat initiated successfully, task ID: {generateDungeonResponse.task_id}");
+        var taskRecord = await PollTaskStatus(generateDungeonResponse.task_id);
+        if (taskRecord == null)
+        {
+            Debug.LogError($"Failed to get task record for task ID: {generateDungeonResponse.task_id}");
+            return;
+        }
+
+        Debug.Log($"Retreat successful: {generateDungeonResponse.message}");
+
+        var listDungeons = await HomeGamePlayManager.Instance.ListDungeons();
+        if (listDungeons == null)
+        {
+            Debug.LogError("Failed to retrieve dungeon list");
+            return;
+        }
+
+        Debug.Log($"Successfully retrieved dungeon list with {listDungeons.Count} dungeons");
+        ListDungeons().Forget();
+    }
+
+    /// <summary>
+    /// 轮询任务状态
+    /// </summary>
+    /// <param name="taskId">任务ID</param>
+    /// <returns>任务记录</returns>
+    private async UniTask<TaskRecord> PollTaskStatus(string taskId)
+    {
+        return await _tasksStatusApi.PollTaskStatus(
+            GameContext.Instance.TasksStatusUrl,
+            taskId);
     }
 }
