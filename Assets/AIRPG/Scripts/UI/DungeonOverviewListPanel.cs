@@ -14,7 +14,7 @@ public class DungeonOverviewListPanel : MonoBehaviour
     /// <summary>
     /// 刷新地下城概览列表显示,根据当前地下城数据刷新关卡列表显示
     /// </summary>
-    public void RefreshView()
+    public void RefreshScrollView()
     {
         _scrollView.totalCount = DungeonOverviewScene.DungeonOverviews.Count;
         _scrollView.RefillCells();

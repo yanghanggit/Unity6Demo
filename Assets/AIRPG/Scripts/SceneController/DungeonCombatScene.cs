@@ -1,7 +1,7 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 
-public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
+public class DungeonCombatScene : MonoBehaviour, ICombatScene
 {
     public static readonly string PreSceneName = "MainScene";
     public static readonly string NextSceneName = "DungeonCombatScene";
@@ -60,15 +60,6 @@ public class DungeonCombatScene : MonoBehaviour, IUIEventListener, ICombatScene
 
         /// 场景异步初始化入口，根据当前战斗状态执行对应的初始化逻辑
         InitCombatSceneAsync().Forget();
-    }
-
-    /// <summary>
-    /// IUIEventListener 接口实现
-    /// 处理所有UI事件的统一入口
-    /// </summary>
-    public void OnEventRaised(UIEventData eventData)
-    {
-
     }
 
     /// <summary>
