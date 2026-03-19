@@ -18,33 +18,8 @@ public class MainSceneStageScrollViewItem : UIBehaviour, IScrollViewItem
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onMainSceneStageItemClickedEvent; // MainScene HomeScene 列表项被点击事件, 这个事件自己不可以再听了，是发送端，不能再监听了，否则会死循环。
 
-
     // 保存当前索引，用于事件传递
     private int _currentIndex = -1;
-
-    /// <summary>
-    /// 当组件被启用时调用
-    /// 注册按钮点击事件监听
-    /// </summary>
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-    }
-
-    /// <summary>
-    /// 当组件被禁用时调用
-    /// 注销按钮点击事件监听,防止内存泄漏
-    /// </summary>
-    protected override void OnDisable()
-    {
-        base.OnDisable();
-    }
-
-    protected override void OnDestroy()
-    {
-
-    }
-
 
     /// <summary>
     /// 按钮点击事件处理方法

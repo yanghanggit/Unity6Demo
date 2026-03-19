@@ -1,7 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
-using TMPro;
+using System.Collections.Generic;
+
+
+[System.Serializable]
+public class DungeonOveriewData
+{
+    public string dungeonName;
+}
 
 /// <summary>
 /// 地下城概览场景控制器
@@ -12,9 +19,11 @@ public class DungeonOverviewScene : MonoBehaviour
 {
     public static readonly string PreSceneName = "MainScene";
     public static readonly string NextSceneName = "DungeonCombatScene";
+    public static readonly List<DungeonOveriewData> DungeonOverviews = new();
 
     [Header("UI Components")]
-    [SerializeField] private TMP_Text _mainText;
+    [SerializeField] private DungeonOverviewListPanel _dungeonOverviewListPanel;
+
 
     /// <summary>
     /// 场景初始化
@@ -22,9 +31,31 @@ public class DungeonOverviewScene : MonoBehaviour
     /// </summary>
     void Start()
     {
-        Debug.Assert(_mainText != null, "_mainText is null");
-        _mainText.text = "Loading dungeon data...";
+        Debug.Assert(_dungeonOverviewListPanel != null, "_dungeonOverviewListPanel is null");
+
+
+        // 旧代码。
         LoadDungeonOverview().Forget();
+
+
+        if (!GameContext.Instance.IsLoggedIn)
+        {
+            //给添加 DungeonOverviews 添加10个mock数据
+            if (DungeonOverviews.Count == 0)
+            {
+                for (int i = 1; i <= 10; i++)
+                {
+                    DungeonOverviews.Add(new DungeonOveriewData
+                    {
+                        dungeonName = $"Dungeon {i}"
+                    });
+                }
+
+                _dungeonOverviewListPanel.RefreshView();
+
+            }
+        }
+
     }
 
     /// <summary>
@@ -46,7 +77,7 @@ public class DungeonOverviewScene : MonoBehaviour
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("Player is not logged in, cannot load dungeon overview");
-            _mainText.text = "Player is not logged in";
+            //_mainText.text = "Player is not logged in";
             return;
         }
 
@@ -54,7 +85,7 @@ public class DungeonOverviewScene : MonoBehaviour
         if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data");
-            _mainText.text = "Failed to load dungeon data";
+            //_mainText.text = "Failed to load dungeon data";
             return;
         }
 
@@ -62,7 +93,7 @@ public class DungeonOverviewScene : MonoBehaviour
         if (homeEnterDungeonResponse == null)
         {
             Debug.LogError("Failed to transition into dungeon");
-            _mainText.text = "Failed to enter dungeon";
+            //_mainText.text = "Failed to enter dungeon";
             return;
         }
 
@@ -70,7 +101,7 @@ public class DungeonOverviewScene : MonoBehaviour
         if (stagesState == null)
         {
             Debug.LogError("[HomeScene] Failed to get stages state from server");
-            _mainText.text = "Failed to get stage information";
+            //_mainText.text = "Failed to get stage information";
             return;
         }
 
@@ -103,7 +134,7 @@ public class DungeonOverviewScene : MonoBehaviour
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("Player is not logged in, cannot load dungeon overview");
-            _mainText.text = "Player is not logged in";
+            //_mainText.text = "Player is not logged in";
             return;
         }
 
@@ -112,11 +143,11 @@ public class DungeonOverviewScene : MonoBehaviour
         if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data");
-            _mainText.text = "Failed to load dungeon data";
+            //_mainText.text = "Failed to load dungeon data";
             return;
         }
 
-        _mainText.text = GameUtils.FormatDungeonOverview(dungeon);
+        //_mainText.text = GameUtils.FormatDungeonOverview(dungeon);
     }
 
     /// <summary>
