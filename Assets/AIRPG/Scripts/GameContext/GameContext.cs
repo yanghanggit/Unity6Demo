@@ -379,4 +379,15 @@ public partial class GameContext
             return BaseUrl.TrimEnd('/') + "/api/home/generate_dungeon/v1/";
         }
     }
+
+    /// <summary>
+    /// 获取所有蓝图API的URL地址
+    /// </summary>
+    public string BlueprintsUrl
+    {
+        get
+        {
+            return BaseUrl.TrimEnd('/') + "/api/game/blueprints/v1/";
+        }
+    }
 }

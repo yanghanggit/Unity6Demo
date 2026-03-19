@@ -10,35 +10,37 @@ public class LoginScene : MonoBehaviour
     public static readonly string GameName = "Game1";
 
     [Header("UI Components")]
-    [SerializeField] private TMP_Text _userNameText;
-    [SerializeField] private TMP_Text _gameNameText;
+    [SerializeField] private TMP_Text _userName;
+    [SerializeField] private TMP_Text _bluePrints;
 
     // 内部使用的玩家标识符
-    private string _playerIdentifier;
+    private string _playerId;
+
+    public string PlayerId
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_playerId))
+            {
+                System.DateTime now = System.DateTime.Now;
+                string timestamp = now.ToString("yyyyMMddHHmmss");
+                _playerId = "unity-player-" + timestamp;
+            }
+            return _playerId;
+        }
+    }
 
     void Start()
     {
-        Debug.Assert(_userNameText != null, "_userNameText is null");
-        Debug.Assert(_gameNameText != null, "_gameNameText is null");
-        Debug.Assert(!string.IsNullOrEmpty(GameName), "_gameName is null");
+        Debug.Assert(_userName != null, "_userNameText is null");
+        Debug.Assert(_bluePrints != null, "_bluePrintsText is null");
 
-        // 如果固定就使用固定的玩家ID，否则生成一个临时ID
-        _playerIdentifier = GeneratePlayerId();
+        // 初始化玩家ID并显示在UI上
+        _userName.text = PlayerId;
+        _bluePrints.text = string.Empty;
 
-        //_playerIdentifier = GeneratePlayerId();
-        _userNameText.text = "临时ID = " + _playerIdentifier;
-        _gameNameText.text = "测试游戏 = " + GameName;
-    }
-
-    /// <summary>
-    /// 根据当前时间戳生成唯一的玩家ID
-    /// </summary>
-    private string GeneratePlayerId()
-    {
-        System.DateTime now = System.DateTime.Now;
-        string timestamp = now.ToString("yyyyMMddHHmmss");
-        string randomUserName = "unity-player-" + timestamp;
-        return randomUserName;
+        // 预加载蓝图数据，确保后续场景可以快速访问
+        GetBlueprints().Forget();
     }
 
     /// <summary>
@@ -46,7 +48,48 @@ public class LoginScene : MonoBehaviour
     /// </summary>
     public void OnStartGameClicked()
     {
-        StartGameFlow(_playerIdentifier, GameName).Forget();
+        StartGameFlow(_playerId, GameName).Forget();
+    }
+
+    /// <summary>
+    /// 获取蓝图列表并显示在UI上
+    /// </summary>
+    /// <returns></returns>
+    private async UniTaskVoid GetBlueprints()
+    {
+        if (string.IsNullOrEmpty(GameContext.BaseUrl))
+        {
+            Debug.LogWarning("BaseUrl is not set, cannot retrieve blueprints");
+            _bluePrints.text = "Base URL not configured";
+            return;
+        }
+
+        var blueprints = await SessionManager.Instance.GetBlueprints();
+        if (blueprints != null)
+        {
+            Debug.Log($"Successfully retrieved {blueprints.Count} blueprints");
+        }
+        else
+        {
+            Debug.LogError("Failed to retrieve blueprints");
+        }
+
+        // 遍历 blueprints 输出每个蓝图的name，然后赋值给 _gameName.text 显示在UI上
+        if (blueprints != null && blueprints.Count > 0)
+        {
+            string blueprintNames = string.Join(", ", blueprints.ConvertAll(b => b.name));
+            Debug.Log($"Blueprint names: {blueprintNames}");
+            _bluePrints.text = blueprintNames;
+
+            // assert GameName 一定在蓝图列表中
+            bool gameNameExists = blueprints.Exists(b => b.name == GameName);
+            Debug.Assert(gameNameExists, $"GameName '{GameName}' does not exist in blueprints list");
+        }
+        else
+        {
+            Debug.LogWarning("No blueprints available to display");
+            _bluePrints.text = "No blueprints available";
+        }
     }
 
     /// <summary>

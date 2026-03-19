@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using Cysharp.Threading.Tasks;
 
 /// <summary>
@@ -31,6 +30,11 @@ public class SessionManager : MonoBehaviour
     /// </summary>
     [SerializeField] private LogoutApi _logoutApi;
 
+    /// <summary>
+    /// 获取蓝图列表 API 接口
+    /// </summary>
+    [SerializeField] private GetBlueprintsApi _getBlueprintsApi;
+
     private void Awake()
     {
         // 单例模式处理
@@ -51,10 +55,9 @@ public class SessionManager : MonoBehaviour
         Debug.Assert(_loginApi != null, "_loginApi is null");
         Debug.Assert(_newGameApi != null, "_newGameApi is null");
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
+        Debug.Assert(_getBlueprintsApi != null, "_getBlueprintsApi is null");
     }
 
-    /// <summary>
-    /// 登录游戏
     /// <summary>
     /// 登录
     /// 调用 /login 端点进行用户认证
@@ -149,24 +152,21 @@ public class SessionManager : MonoBehaviour
     /// <param name="userName">用户名</param>
     /// <param name="gameName">游戏名</param>
     /// <returns>是否成功</returns>
-    // public async UniTask<bool> LoginAndStart(string userName, string gameName)
-    // {
-    //     // 1. 登录
-    //     bool isLoginSuccessful = await Login(userName, gameName);
-    //     if (!isLoginSuccessful)
-    //     {
-    //         Debug.LogError("[SessionManager] LoginAndStart failed at Login step");
-    //         return false;
-    //     }
+    /// <summary>
+    /// 获取所有蓝图配置
+    /// 调用 /api/game/blueprints/v1/ 端点
+    /// </summary>
+    /// <returns>蓝图列表，失败时返回 null</returns>
+    public async UniTask<List<Blueprint>> GetBlueprints()
+    {
+        await _getBlueprintsApi.Call(GameContext.Instance.BlueprintsUrl);
 
-    //     // 2. 开始游戏
-    //     bool isStartSuccessful = await StartGame(userName, gameName);
-    //     if (!isStartSuccessful)
-    //     {
-    //         Debug.LogError("[SessionManager] LoginAndStart failed at StartGame step");
-    //         return false;
-    //     }
+        if (_getBlueprintsApi.ReqResult == null || !_getBlueprintsApi.ReqResult.isSuccess)
+        {
+            Debug.LogError("[SessionManager] GetBlueprints request failed");
+            return null;
+        }
 
-    //     return true;
-    // }
+        return _getBlueprintsApi.RespData?.blueprints;
+    }
 }
