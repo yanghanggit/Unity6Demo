@@ -33,7 +33,7 @@ public class SessionManager : MonoBehaviour
     /// <summary>
     /// 获取蓝图列表 API 接口
     /// </summary>
-    [SerializeField] private GetBlueprintsApi _getBlueprintsApi;
+    [SerializeField] private ListBlueprintsApi _listBlueprintsApi;
 
     private void Awake()
     {
@@ -55,7 +55,7 @@ public class SessionManager : MonoBehaviour
         Debug.Assert(_loginApi != null, "_loginApi is null");
         Debug.Assert(_newGameApi != null, "_newGameApi is null");
         Debug.Assert(_logoutApi != null, "_logoutApi is null");
-        Debug.Assert(_getBlueprintsApi != null, "_getBlueprintsApi is null");
+        Debug.Assert(_listBlueprintsApi != null, "_getBlueprintsApi is null");
     }
 
     /// <summary>
@@ -154,19 +154,19 @@ public class SessionManager : MonoBehaviour
     /// <returns>是否成功</returns>
     /// <summary>
     /// 获取所有蓝图配置
-    /// 调用 /api/game/blueprints/v1/ 端点
+    /// 调用 /api/game/blueprint-list/v1/ 端点
     /// </summary>
     /// <returns>蓝图列表，失败时返回 null</returns>
     public async UniTask<List<Blueprint>> GetBlueprints()
     {
-        await _getBlueprintsApi.Call(GameContext.Instance.BlueprintsUrl);
+        await _listBlueprintsApi.Call(GameContext.Instance.BlueprintsUrl);
 
-        if (_getBlueprintsApi.ReqResult == null || !_getBlueprintsApi.ReqResult.isSuccess)
+        if (_listBlueprintsApi.ReqResult == null || !_listBlueprintsApi.ReqResult.isSuccess)
         {
             Debug.LogError("[SessionManager] GetBlueprints request failed");
             return null;
         }
 
-        return _getBlueprintsApi.RespData?.blueprints;
+        return _listBlueprintsApi.RespData?.blueprints;
     }
 }

@@ -52,7 +52,6 @@ public class DungeonOverviewScene : MonoBehaviour
                 }
 
                 _dungeonOverviewListPanel.RefreshView();
-
             }
         }
 

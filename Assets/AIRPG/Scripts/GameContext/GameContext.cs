@@ -381,13 +381,24 @@ public partial class GameContext
     }
 
     /// <summary>
-    /// 获取所有蓝图API的URL地址
+    /// 获取可用蓝图列表API的URL地址
     /// </summary>
     public string BlueprintsUrl
     {
         get
         {
-            return BaseUrl.TrimEnd('/') + "/api/game/blueprints/v1/";
+            return BaseUrl.TrimEnd('/') + "/api/game/blueprint-list/v1/";
+        }
+    }
+
+    /// <summary>
+    /// 获取可用地下城列表API的URL地址
+    /// </summary>
+    public string HomeDungeonListUrl
+    {
+        get
+        {
+            return BaseUrl.TrimEnd('/') + "/api/home/dungeon-list/v1/";
         }
     }
 }

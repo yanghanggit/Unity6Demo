@@ -528,6 +528,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _userName: {fileID: 470425677}
   _bluePrints: {fileID: 143863052}
+  _newGame: {fileID: 763722807}
 --- !u!1 &470425675
 GameObject:
   m_ObjectHideFlags: 0
@@ -1246,7 +1247,7 @@ MonoBehaviour:
   _loginApi: {fileID: 1736060655}
   _newGameApi: {fileID: 1736060654}
   _logoutApi: {fileID: 1736060653}
-  _getBlueprintsApi: {fileID: 1736060656}
+  _listBlueprintsApi: {fileID: 1736060656}
 --- !u!114 &1736060653
 MonoBehaviour:
   m_ObjectHideFlags: 0

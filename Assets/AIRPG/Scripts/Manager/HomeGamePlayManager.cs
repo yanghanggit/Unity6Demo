@@ -282,4 +282,37 @@ public class HomeGamePlayManager : MonoBehaviour
             Destroy(api.gameObject);
         }
     }
+
+    /// <summary>
+    /// 获取所有地下城配置
+    /// 调用 /api/home/dungeon-list/v1/ 端点读取可用地下城列表
+    /// </summary>
+    /// <returns>成功时返回地下城列表，失败时返回 null</returns>
+    public async UniTask<List<Dungeon>> ListDungeons()
+    {
+        var api = CreateApi<ListDungeonsApi>();
+        try
+        {
+            await api.Call(GameContext.Instance.HomeDungeonListUrl);
+
+            if (api.ReqResult == null)
+            {
+                Debug.LogError("[HomeGamePlayManager] ListDungeons request failed");
+                return null;
+            }
+
+            if (!api.ReqResult.isSuccess)
+            {
+                Debug.LogError($"[HomeGamePlayManager] ListDungeons request failed: {api.ReqResult.responseText}");
+                return null;
+            }
+
+            Debug.Assert(api.RespData != null, "[HomeGamePlayManager] ListDungeons response data is null");
+            return api.RespData?.dungeons;
+        }
+        finally
+        {
+            Destroy(api.gameObject);
+        }
+    }
 }

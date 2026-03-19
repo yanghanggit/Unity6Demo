@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Cysharp.Threading.Tasks;
 using TMPro;
+using UnityEngine.UI;
 
 public class LoginScene : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class LoginScene : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private TMP_Text _userName;
     [SerializeField] private TMP_Text _bluePrints;
+    [SerializeField] private Button _newGame;
 
     // 内部使用的玩家标识符
     private string _playerId;
@@ -34,10 +36,12 @@ public class LoginScene : MonoBehaviour
     {
         Debug.Assert(_userName != null, "_userNameText is null");
         Debug.Assert(_bluePrints != null, "_bluePrintsText is null");
+        Debug.Assert(_newGame != null, "_newGameButton is null");
 
         // 初始化玩家ID并显示在UI上
         _userName.text = PlayerId;
         _bluePrints.text = string.Empty;
+        _newGame.GetComponentInChildren<TMP_Text>().text = "新游戏: " + GameName;
 
         // 预加载蓝图数据，确保后续场景可以快速访问
         GetBlueprints().Forget();

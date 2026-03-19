@@ -3,9 +3,9 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 
 /// <summary>
-/// GetBlueprints API 客户端，用于获取所有蓝图配置
+/// HomeDungeonList API 客户端，用于获取可用地下城配置列表
 /// </summary>
-public class GetBlueprintsApi : BaseApiClient
+public class ListDungeonsApi : BaseApiClient
 {
     /// <summary>
     /// 请求结果
@@ -20,20 +20,20 @@ public class GetBlueprintsApi : BaseApiClient
     /// <summary>
     /// 响应数据
     /// </summary>
-    private BlueprintsResponse _responseData;
+    private DungeonListResponse _responseData;
 
     /// <summary>
     /// 获取响应数据
     /// </summary>
-    public BlueprintsResponse RespData => _responseData;
+    public DungeonListResponse RespData => _responseData;
 
     /// <summary>
-    /// 调用获取蓝图列表 API
+    /// 调用获取地下城列表 API
     /// </summary>
     /// <param name="url">接口 URL</param>
     public async UniTask Call(string url)
     {
-        Debug.Log("Starting GetBlueprintsApi call...");
+        Debug.Log("Starting HomeDungeonListApi call...");
         Debug.Log($"URL: {url}");
 
         // 清除请求状态
@@ -60,7 +60,7 @@ public class GetBlueprintsApi : BaseApiClient
         // 解析响应数据
         try
         {
-            _responseData = JsonConvert.DeserializeObject<BlueprintsResponse>(_requestResult.responseText);
+            _responseData = JsonConvert.DeserializeObject<DungeonListResponse>(_requestResult.responseText);
             if (_responseData == null)
             {
                 Debug.LogError("Deserialized response data is null");
