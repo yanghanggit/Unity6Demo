@@ -4,12 +4,6 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 
 
-[System.Serializable]
-public class DungeonOveriewData
-{
-    public string dungeonName;
-}
-
 /// <summary>
 /// 地下城概览场景控制器
 /// 负责显示地下城的宏观信息，包括关卡列表和怪物预览
@@ -19,7 +13,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
 {
     public static readonly string PreSceneName = "MainScene";
     public static readonly string NextSceneName = "DungeonCombatScene";
-    public static readonly List<DungeonOveriewData> DungeonOverviews = new();
+    public static List<Dungeon> CachedDungeonOverviews = new();
 
     [Header("UI Components")]
     [SerializeField] private DungeonOverviewListPanel _dungeonOverviewListPanel;
@@ -47,10 +41,11 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
         _onDungeonOverviewItemClickedEvent.RegisterListener(this);
 
         // 更新显示
+        _dungeonOverviewListPanel.gameObject.SetActive(true);
         _dungeonOverviewDetailPanel.gameObject.SetActive(false);
 
         // 列出来地下城概览数据，实际项目中应该从服务器获取
-        ListDungeons().Forget();
+        RefreshDungeonList().Forget();
     }
 
     /// <summary>
@@ -71,7 +66,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
     public void OnClickBack()
     {
         Debug.Log("Back button clicked");
-        ReturnToMainScene().Forget();
+        NavigateToMainScene().Forget();
     }
 
 
@@ -82,7 +77,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
     {
         Debug.Log("OnClickGenerateDungeon");
         // 这里可以添加新建地下城的逻辑，例如弹出新建地下城的UI，或者直接调用API创建新的地下城
-        ExecuteGenerateDungeon().Forget();
+        GenerateDungeon().Forget();
     }
 
     /// <summary>
@@ -91,7 +86,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
     public void OnClickEnterDungeon()
     {
         Debug.Log("Enter Dungeon button clicked");
-        //EnterDungeon().Forget();
+        //TransitionToDungeonCombat().Forget();
         _dungeonOverviewDetailPanel.gameObject.SetActive(false);
     }
 
@@ -117,7 +112,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
                         // 显示地下城详情面板
                         _dungeonOverviewDetailPanel.gameObject.SetActive(true);
                         // 这里可以根据 clickedDungeonName 来刷新详情面板的显示内容
-                        _dungeonOverviewDetailPanel.OnRefreshView(clickedDungeonName);
+                        _dungeonOverviewDetailPanel.OnRefreshView(clickedDungeonName).Forget();
                     }
                     else
                     {
@@ -133,15 +128,14 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
     }
 
     /// <summary>
-    /// 执行进入地下城的流程
-    /// 调用传送API，验证响应后切换场景
+    /// 切换到地下城战斗场景
+    /// 调用传送API，验证响应后加载 DungeonCombatScene
     /// </summary>
-    private async UniTaskVoid EnterDungeon()
+    private async UniTaskVoid TransitionToDungeonCombat()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("Player is not logged in, cannot load dungeon overview");
-            //_mainText.text = "Player is not logged in";
             return;
         }
 
@@ -149,7 +143,6 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
         if (dungeon == null)
         {
             Debug.LogError("Failed to refresh dungeon data");
-            //_mainText.text = "Failed to load dungeon data";
             return;
         }
 
@@ -157,7 +150,6 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
         if (homeEnterDungeonResponse == null)
         {
             Debug.LogError("Failed to transition into dungeon");
-            //_mainText.text = "Failed to enter dungeon";
             return;
         }
 
@@ -165,7 +157,6 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
         if (stagesState == null)
         {
             Debug.LogError("[HomeScene] Failed to get stages state from server");
-            //_mainText.text = "Failed to get stage information";
             return;
         }
 
@@ -190,20 +181,20 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
     }
 
     /// <summary>
-    /// 加载并显示地下城概览信息
-    /// 从服务器刷新地下城数据，并格式化显示在UI上
+    /// 从服务器拉取地下城列表并刷新概览 UI
     /// </summary>
-    private async UniTaskVoid ListDungeons()
+    private async UniTaskVoid RefreshDungeonList()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
             Debug.LogWarning("Player is not logged in, cannot load dungeon overview");
 
+            CachedDungeonOverviews.Clear();
             for (int i = 1; i <= 10; i++)
             {
-                DungeonOverviews.Add(new DungeonOveriewData
+                CachedDungeonOverviews.Add(new Dungeon
                 {
-                    dungeonName = $"Dungeon {i}"
+                    name = $"Dungeon {i}"
                 });
             }
 
@@ -215,28 +206,19 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
         if (dungeons == null)
         {
             Debug.LogError("Failed to retrieve dungeon list");
-            DungeonOverviews.Clear();
+            CachedDungeonOverviews.Clear();
             _dungeonOverviewListPanel.RefreshScrollView();
             return;
         }
 
-        DungeonOverviews.Clear();
-        foreach (var dungeon in dungeons)
-        {
-            DungeonOverviews.Add(new DungeonOveriewData
-            {
-                dungeonName = dungeon.name
-            });
-        }
-
+        CachedDungeonOverviews = dungeons;
         _dungeonOverviewListPanel.RefreshScrollView();
     }
 
     /// <summary>
-    /// 执行返回主场景的流程
-    /// 验证游戏状态后切换到主场景
+    /// 返回主场景
     /// </summary>
-    private async UniTaskVoid ReturnToMainScene()
+    private async UniTaskVoid NavigateToMainScene()
     {
         if (GameContext.Instance.IsLoggedIn)
         {
@@ -251,7 +233,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
     }
 
 
-    private async UniTaskVoid ExecuteGenerateDungeon()
+    private async UniTaskVoid GenerateDungeon()
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -287,7 +269,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
         }
 
         Debug.Log($"Successfully retrieved dungeon list with {listDungeons.Count} dungeons");
-        ListDungeons().Forget();
+        RefreshDungeonList().Forget();
     }
 
     /// <summary>

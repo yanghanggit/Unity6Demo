@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,9 +17,11 @@ public class DungeonOverviewDetailPanel : MonoBehaviour
 
     }
 
-    public void OnRefreshView(string dungeonNname)
+    public async UniTaskVoid OnRefreshView(string dungeonNname)
     {
         Debug.Log($"DungeonOverviewDetailPanel refreshing view for dungeon: {dungeonNname}");
+
+        await UniTask.Yield(); // 等待一帧，确保 UI 已经更新
 
         _enterDungeonButton.GetComponentInChildren<TMP_Text>().text = $"Enter {dungeonNname}";
 

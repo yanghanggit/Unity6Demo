@@ -16,7 +16,7 @@ public class DungeonOverviewListPanel : MonoBehaviour
     /// </summary>
     public void RefreshScrollView()
     {
-        _scrollView.totalCount = DungeonOverviewScene.DungeonOverviews.Count;
+        _scrollView.totalCount = DungeonOverviewScene.CachedDungeonOverviews.Count;
         _scrollView.RefillCells();
     }
 }

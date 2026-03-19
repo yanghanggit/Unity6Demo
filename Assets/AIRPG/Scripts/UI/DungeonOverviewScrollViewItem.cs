@@ -28,7 +28,7 @@ public class DungeonOverviewScrollViewItem : UIBehaviour, IScrollViewItem
         // // 创建并发送结构化的事件数据，通知需要刷新UI
         var eventData = new UIEventData(
             UIEventType.DungeonOverviewItemClicked,
-            data.dungeonName, // 可以根据需要传递更多数据，例如关卡名称、角色列表等   
+            data.name, // 可以根据需要传递更多数据，例如关卡名称、角色列表等   
             _currentIndex
         );
 
@@ -55,20 +55,20 @@ public class DungeonOverviewScrollViewItem : UIBehaviour, IScrollViewItem
             Debug.LogError($"No data found for index {_currentIndex} in DungeonOverviews list");
             return;
         }
-        _title.text = DungeonOverviewScene.DungeonOverviews[index].dungeonName;
+        _title.text = data.name; // 更新UI显示
     }
 
     /// <summary>
     ///  获取当前索引对应的数据
     /// </summary>
     /// <returns></returns>
-    private DungeonOveriewData GetData()
+    private Dungeon GetData()
     {
-        if (_currentIndex < 0 || _currentIndex >= DungeonOverviewScene.DungeonOverviews.Count)
+        if (_currentIndex < 0 || _currentIndex >= DungeonOverviewScene.CachedDungeonOverviews.Count)
         {
             Debug.LogError($"Index {_currentIndex} is out of range for DungeonOverviews list");
             return null;
         }
-        return DungeonOverviewScene.DungeonOverviews[_currentIndex];
+        return DungeonOverviewScene.CachedDungeonOverviews[_currentIndex];
     }
 }
