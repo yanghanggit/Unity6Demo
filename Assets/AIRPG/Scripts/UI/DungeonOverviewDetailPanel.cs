@@ -15,6 +15,7 @@ public class DungeonOverviewDetailPanel : MonoBehaviour
         Debug.Assert(_enterDungeonButton != null, "_enterDungeonButton is null");
         Debug.Assert(_mainText != null, "_mainText is null");
         Debug.Assert(_backgroundImage != null, "_backgroundImage is null");
+        Debug.Assert(_backgroundImage.sprite == null, "_backgroundImage should start with no sprite");
 
         // 设置初始状态
         _enterDungeonButton.GetComponentInChildren<TMP_Text>().text = "Enter Dungeon";

@@ -141,13 +141,12 @@ public class HomeEnterDungeonRequest
 {
     public string user_name = "";
     public string game_name = "";
+    public string dungeon_name = "";
 }
 
 [System.Serializable]
 public class HomeEnterDungeonResponse
 {
-    public string task_id = "";
-    public string status = "";
     public string message = "";
 }
 

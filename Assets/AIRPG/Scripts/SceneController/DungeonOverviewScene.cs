@@ -25,6 +25,9 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
     [Header("Events")]
     [SerializeField] private UIEventGameEvent _onDungeonOverviewItemClickedEvent; // 地下城概览列表项被点击事件, 这个事件自己不可以再听了，是发送端，不能再监听了，否则会死循环。
 
+    /// 当前选中的地下城名称
+    private string _selectedDungeonName = string.Empty;
+
 
     /// <summary>
     /// 场景初始化
@@ -86,8 +89,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
     public void OnClickEnterDungeon()
     {
         Debug.Log("Enter Dungeon button clicked");
-        //TransitionToDungeonCombat().Forget();
-        _dungeonOverviewDetailPanel.gameObject.SetActive(false);
+        TransitionToDungeonCombat().Forget();
     }
 
     /// <summary>
@@ -109,6 +111,7 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
 
                     if (!string.IsNullOrEmpty(clickedDungeonName))
                     {
+                        _selectedDungeonName = clickedDungeonName;
                         // 显示地下城详情面板
                         _dungeonOverviewDetailPanel.gameObject.SetActive(true);
                         // 这里可以根据 clickedDungeonName 来刷新详情面板的显示内容
@@ -139,21 +142,24 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
             return;
         }
 
-        var dungeon = await GameStateSync.Instance.GetDungeon();
-        if (dungeon == null)
-        {
-            Debug.LogError("Failed to refresh dungeon data");
-            return;
-        }
-
-        var homeEnterDungeonResponse = await HomeGamePlayManager.Instance.HomeEnterDungeon();
+        var homeEnterDungeonResponse = await HomeGamePlayManager.Instance.HomeEnterDungeon(_selectedDungeonName);
         if (homeEnterDungeonResponse == null)
         {
             Debug.LogError("Failed to transition into dungeon");
             return;
         }
 
-        var stagesState = await GameStateSync.Instance.GetStagesState();
+        var (dungeon, stagesState) = await UniTask.WhenAll(
+            GameStateSync.Instance.GetDungeon(),
+            GameStateSync.Instance.GetStagesState()
+        );
+
+        if (dungeon == null)
+        {
+            Debug.LogError("Failed to refresh dungeon data");
+            return;
+        }
+
         if (stagesState == null)
         {
             Debug.LogError("[HomeScene] Failed to get stages state from server");

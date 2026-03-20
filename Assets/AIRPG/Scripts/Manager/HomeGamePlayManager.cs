@@ -203,8 +203,9 @@ public class HomeGamePlayManager : MonoBehaviour
     /// 进入地下城
     /// 调用进入地下城端点，返回地下城响应数据
     /// </summary>
+    /// <param name="dungeonName">要进入的地下城名称</param>
     /// <returns>成功时返回 <see cref="HomeEnterDungeonResponse"/>，失败时返回 null</returns>
-    public async UniTask<HomeEnterDungeonResponse> HomeEnterDungeon()
+    public async UniTask<HomeEnterDungeonResponse> HomeEnterDungeon(string dungeonName)
     {
         if (!GameContext.Instance.IsLoggedIn)
         {
@@ -218,7 +219,8 @@ public class HomeGamePlayManager : MonoBehaviour
             await api.Call(
                 GameContext.Instance.HomeEnterDungeonUrl,
                 GameContext.Instance.UserName,
-                GameContext.Instance.GameName);
+                GameContext.Instance.GameName,
+                dungeonName);
 
             if (api.ReqResult == null)
             {

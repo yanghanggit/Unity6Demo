@@ -18,6 +18,8 @@ public class HomeScenesPanel : MonoBehaviour
 
     public async UniTaskVoid RereshViewAsync()
     {
+        var ct = this.GetCancellationTokenOnDestroy();
+
         if (!GameContext.Instance.IsLoggedIn)
         {
             _scrollView.gameObject.SetActive(false);
@@ -28,8 +30,8 @@ public class HomeScenesPanel : MonoBehaviour
         }
 
         var (dungeon, stagesState) = await UniTask.WhenAll(
-              GameStateSync.Instance.GetDungeon(),
-              GameStateSync.Instance.GetStagesState()
+              GameStateSync.Instance.GetDungeon().AttachExternalCancellation(ct),
+              GameStateSync.Instance.GetStagesState().AttachExternalCancellation(ct)
           );
 
         if (dungeon == null || stagesState == null)
@@ -45,7 +47,8 @@ public class HomeScenesPanel : MonoBehaviour
             allActorNames.AddRange(actorNames);
         }
 
-        var allActorEntities = await GameStateSync.Instance.GetEntities(allActorNames);
+        var allActorEntities = await GameStateSync.Instance.GetEntities(allActorNames).AttachExternalCancellation(ct);
+
         if (allActorEntities == null)
         {
             Debug.LogError("ActorPositioningPanel: Actor entities data is null, cannot refresh combat view");
@@ -90,18 +93,14 @@ public class HomeScenesPanel : MonoBehaviour
             MainScene.HomeScenes.Add(sceneData);
         }
 
-        // 如果 dungeon name 不为空，
-        //if (!string.IsNullOrEmpty(dungeon.name))
-        //{
-        // 将 dungeon name 添加到每个 HomeSceneData 的 dungeonName 字段中
+        // 确保至少有一个场景数据可供显示，如果没有则添加一个默认的空场景
         MainScene.HomeScenes.Add(new HomeSceneData
         {
             stageName = HomeSceneData.DungeonOverviewSceneName, // 这个名字是本地定义的，服务器不识别
             actorsOnStage = new List<EntitySerialization>(),
-            //dungeonName = dungeon.name,
         });
-        //}
-
+        
+        // 刷新滚动视图
         _scrollView.gameObject.SetActive(true);
         _scrollView.totalCount = MainScene.HomeScenes.Count;
         _scrollView.RefillCells(); // 重建列表并回到顶部

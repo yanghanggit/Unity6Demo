@@ -33,14 +33,16 @@ public class HomeEnterDungeonApi : BaseApiClient
     /// <param name="url">请求 URL</param>
     /// <param name="user">用户名</param>
     /// <param name="game">游戏名</param>
+    /// <param name="dungeon">地下城名</param>
     /// <returns>异步任务</returns>
-    public async UniTask Call(string url, string user, string game)
+    public async UniTask Call(string url, string user, string game, string dungeon)
     {
         // 记录请求信息
         Debug.Log("Starting HomeEnterDungeonApi call...");
         Debug.Log($"URL: {url}");
         Debug.Log($"User: {user}");
         Debug.Log($"Game: {game}");
+        Debug.Log($"Dungeon: {dungeon}");
 
         // 清除请求状态
         _requestResult = null;
@@ -57,7 +59,8 @@ public class HomeEnterDungeonApi : BaseApiClient
         var requestData = new HomeEnterDungeonRequest
         {
             user_name = user,
-            game_name = game
+            game_name = game,
+            dungeon_name = dungeon
         };
         var jsonData = JsonConvert.SerializeObject(requestData);
 
