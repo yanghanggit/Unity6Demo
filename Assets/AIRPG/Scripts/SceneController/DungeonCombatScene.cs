@@ -5,9 +5,7 @@ public class DungeonCombatScene : MonoBehaviour, ICombatScene
 {
     public static readonly string PreSceneName = "MainScene";
     public static readonly string NextSceneName = "DungeonCombatScene";
-
-    public static string CachedStageName = string.Empty;
-    public static string CachedDungeonName = string.Empty;
+    public static Dungeon CachedDungeon = new(); //主要是缓存不变的量，如地下城名字，每个stage名字和image url的，但是combat这样不停变动的不可以依赖这个。
 
     [Header("UI Components")]
 

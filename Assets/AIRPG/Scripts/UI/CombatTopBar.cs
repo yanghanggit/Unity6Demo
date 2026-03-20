@@ -14,7 +14,7 @@ public class CombatTopBar : MonoBehaviour
     {
         // 断言检查，确保所有必要的组件和数据都已正确设置
         Debug.Assert(_infoText != null, "_infoText is null");
-        _infoText.text = $"{DungeonCombatScene.CachedDungeonName} | {DungeonCombatScene.CachedStageName}";
+        _infoText.text = FormatCombatInfo(DungeonCombatScene.CachedDungeon);
     }
 
     /// <summary>
@@ -39,7 +39,23 @@ public class CombatTopBar : MonoBehaviour
         }
 
         // 刷新顶部信息显示，包含当前地下城、关卡和回合数等信息
-        _infoText.text = $"{DungeonCombatScene.CachedDungeonName} | {DungeonCombatScene.CachedStageName} | 回合数: {combat.rounds.Count}";
+        _infoText.text = $"{FormatCombatInfo(DungeonCombatScene.CachedDungeon)} | 回合数: {combat.rounds.Count}";
+    }
+
+    /// <summary>
+    /// 格式化战斗信息显示文本，包含当前地下城和关卡信息
+    /// </summary>
+    private string FormatCombatInfo(Dungeon dungeon)
+    {
+        var text = $"{dungeon.name}";
+        if (dungeon.rooms.Count > 0 && dungeon.current_room_index >= 0 && dungeon.current_room_index < dungeon.rooms.Count)
+        {
+            var dungeonRoom = dungeon.rooms[dungeon.current_room_index];
+            var stageName = dungeonRoom != null ? dungeonRoom.stage.name : "Unknown Stage";
+            text += $" | {stageName}";
+        }
+
+        return text;
     }
 
 }

@@ -88,16 +88,13 @@ public class DungeonOverviewDetailPanel : MonoBehaviour
             return;
         }
 
-        // 销毁旧的 Sprite 防止 native 内存泄漏（不影响全局缓存的 Texture2D）
-        if (_backgroundImage.sprite != null)
+        // 交由 SpriteCacheManager 持有 Sprite 生命周期，无需手动 Destroy
+        // 用 URL 作为 key；HasSprite 防止重复 AddSprite 导致 RemoteTextureCache 中的纹理被意外销毁
+        if (!SpriteCacheManager.Instance.HasSprite(fullUrl))
         {
-            Destroy(_backgroundImage.sprite);
+            SpriteCacheManager.Instance.AddSprite(fullUrl, texture);
         }
 
-        _backgroundImage.sprite = Sprite.Create(
-            texture,
-            new Rect(0, 0, texture.width, texture.height),
-            new Vector2(0.5f, 0.5f)
-        );
+        _backgroundImage.sprite = SpriteCacheManager.Instance.GetSprite(fullUrl);
     }
 }

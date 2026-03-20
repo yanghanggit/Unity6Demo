@@ -87,7 +87,20 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
             return;
         }
 
-        var stagesState = await GameStateSync.Instance.GetStagesState();
+        // 再刷新一次！因为 AdvanceStage 了。
+        var (dungeon2, stagesState) = await UniTask.WhenAll(
+            GameStateSync.Instance.GetDungeon(),
+            GameStateSync.Instance.GetStagesState()
+        );
+        dungeon = dungeon2;
+
+        if (dungeon == null)
+        {
+            Debug.LogError("Failed to get dungeon information from server");
+            _mainText.text = "Failed to get dungeon information";
+            return;
+        }
+
         if (stagesState == null)
         {
             Debug.LogError("[HomeScene] Failed to get stages state from server");
@@ -107,8 +120,8 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
 
         await UniTask.Yield();
 
-        DungeonCombatScene.CachedStageName = targetStageName;
-        DungeonCombatScene.CachedDungeonName = dungeon.name;
+        //DungeonCombatScene.CachedStageName = targetStageName;
+        DungeonCombatScene.CachedDungeon = dungeon;
 
         SceneManager.LoadScene(NextSceneName);
     }
@@ -152,8 +165,8 @@ public class CombatPostCombatState : MonoBehaviour, ICombatState
 
         await UniTask.Yield();
 
-        DungeonCombatScene.CachedStageName = string.Empty; // 退出地下城后不再缓存关卡信息
-        DungeonCombatScene.CachedDungeonName = string.Empty; // 退出地下城后不再缓存地下城信息
+        //DungeonCombatScene.CachedStageName = string.Empty; // 退出地下城后不再缓存关卡信息
+        DungeonCombatScene.CachedDungeon = new();
 
         SceneManager.LoadScene(PreSceneName);
     }

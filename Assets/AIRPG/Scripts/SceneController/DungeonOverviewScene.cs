@@ -179,8 +179,8 @@ public class DungeonOverviewScene : MonoBehaviour, IUIEventListener
         await UniTask.Yield();
 
         // 进入地下城后默认进入第一个关卡
-        DungeonCombatScene.CachedStageName = targetStageName;
-        DungeonCombatScene.CachedDungeonName = dungeon.name;
+        //DungeonCombatScene.CachedStageName = targetStageName;
+        DungeonCombatScene.CachedDungeon = dungeon;
 
         // 切换到地下城战斗场景
         SceneManager.LoadScene(NextSceneName);
