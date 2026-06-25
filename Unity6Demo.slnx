@@ -1,4 +1,6 @@
 ﻿<Solution>
+  <Project Path="Runtime.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Editor.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
 </Solution>

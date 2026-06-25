@@ -75,8 +75,6 @@ crashlytics-build.properties
 
 
 # 临时忽略。
-/WebApp/
-/Web/
 .VSCodeCounter
 
 # Node.js 相关
