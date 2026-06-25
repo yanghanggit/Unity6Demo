@@ -250,7 +250,7 @@ Transform:
   m_GameObject: {fileID: 60244926}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 561.38525, y: 1393.5431, z: -1.4870547}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -314,8 +314,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3634462889905557380, guid: d1879c8506c094c15b5e53b2ad4f3183,
-    type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -481,9 +480,8 @@ GameObject:
   m_Component:
   - component: {fileID: 399892900}
   - component: {fileID: 399892901}
-  - component: {fileID: 399892903}
   m_Layer: 0
-  m_Name: Controller
+  m_Name: Main Object
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -516,25 +514,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f08fca2d85854c409f7591e5632b09f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _baseUrl: http://192.168.192.109:8000/
-  _rootApi: {fileID: 399892903}
-  _loginButton: {fileID: 1202936521}
---- !u!114 &399892903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 399892899}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2a7b5dd5509e64e62b643ddf639ea270, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  requestTimeout: 30
-  maxRetryCount: 3
-  retryDelaySeconds: 1
-  useExponentialBackoff: 1
+  _button: {fileID: 1202936521}
 --- !u!1 &524838950
 GameObject:
   m_ObjectHideFlags: 0
@@ -709,8 +689,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: LaunchScene, Assembly-CSharp
-        m_MethodName: OnClickLogin
+        m_TargetAssemblyTypeName: LaunchScreenController, Runtime
+        m_MethodName: OnClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -835,6 +815,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
