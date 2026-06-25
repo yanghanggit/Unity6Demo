@@ -17,7 +17,6 @@ public enum CombatResult
     LOSE = 2,
 }
 
-[System.Serializable]
 public sealed class Round
 {
     public List<string> completed_actors = new List<string>();
@@ -35,7 +34,6 @@ public sealed class Round
     public int gear_use_count = 0;
 }
 
-[System.Serializable]
 public sealed class Combat
 {
     public string name = "";

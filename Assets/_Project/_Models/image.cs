@@ -1,5 +1,4 @@
 // 对应 Python models/image.py
-[System.Serializable]
 public sealed class GeneratedImage
 {
     public string filename = "";

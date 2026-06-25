@@ -15,7 +15,6 @@ public enum ItemType
     [EnumMember(Value = "MaterialItem")] MATERIAL_ITEM,
 }
 
-[System.Serializable]
 [JsonConverter(typeof(AnyItemConverter))]
 public class Item
 {
@@ -26,7 +25,6 @@ public class Item
     public int count = 1;
 }
 
-[System.Serializable]
 public sealed class GearItem : Item
 {
     public CharacterStats stat_bonuses = new CharacterStats();
@@ -39,13 +37,11 @@ public sealed class GearItem : Item
     public List<Item> craft_materials = new List<Item>();
 }
 
-[System.Serializable]
 public sealed class CostumeItem : Item
 {
     public List<Item> craft_materials = new List<Item>();
 }
 
-[System.Serializable]
 public sealed class ConsumableItem : Item
 {
     public TargetType target_type = TargetType.SELF_ONLY;
@@ -54,7 +50,6 @@ public sealed class ConsumableItem : Item
     public List<Item> craft_materials = new List<Item>();
 }
 
-[System.Serializable]
 public sealed class MaterialItem : Item
 {
 }

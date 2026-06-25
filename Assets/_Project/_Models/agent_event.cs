@@ -15,14 +15,12 @@ public enum EventHead
     APPEARANCE_UPDATE_EVENT = 10,
 }
 
-[System.Serializable]
 public class AgentEvent
 {
     public int head = (int)EventHead.NONE;
     public string message = "";
 }
 
-[System.Serializable]
 public sealed class SpeakEvent : AgentEvent
 {
     public string actor = "";
@@ -30,7 +28,6 @@ public sealed class SpeakEvent : AgentEvent
     public string content = "";
 }
 
-[System.Serializable]
 public sealed class WhisperEvent : AgentEvent
 {
     public string actor = "";
@@ -38,7 +35,6 @@ public sealed class WhisperEvent : AgentEvent
     public string content = "";
 }
 
-[System.Serializable]
 public sealed class AnnounceEvent : AgentEvent
 {
     public string actor = "";
@@ -46,14 +42,12 @@ public sealed class AnnounceEvent : AgentEvent
     public string content = "";
 }
 
-[System.Serializable]
 public sealed class MindEvent : AgentEvent
 {
     public string actor = "";
     public string content = "";
 }
 
-[System.Serializable]
 public sealed class TransStageEvent : AgentEvent
 {
     public string actor = "";
@@ -61,13 +55,11 @@ public sealed class TransStageEvent : AgentEvent
     public string to_stage = "";
 }
 
-[System.Serializable]
 public sealed class CombatInitiationEvent : AgentEvent
 {
     public string actor = "";
 }
 
-[System.Serializable]
 public sealed class CombatArbitrationEvent : AgentEvent
 {
     public string stage = "";
@@ -75,7 +67,6 @@ public sealed class CombatArbitrationEvent : AgentEvent
     public string narrative = "";
 }
 
-[System.Serializable]
 public sealed class AppearanceUpdateEvent : AgentEvent
 {
     public string actor = "";

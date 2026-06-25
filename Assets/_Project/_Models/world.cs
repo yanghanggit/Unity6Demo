@@ -10,7 +10,6 @@ public sealed class AgentContext
     public List<JObject> context = new List<JObject>(); // List[ContextMessage]，ContextMessage 为服务端内部类型
 }
 
-[System.Serializable]
 public sealed class Blueprint
 {
     public string name = "";

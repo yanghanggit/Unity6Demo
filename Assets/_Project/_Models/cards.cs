@@ -1,7 +1,6 @@
 // 对应 Python models/cards.py
 using System.Collections.Generic;
 
-[System.Serializable]
 public sealed class StatusEffect
 {
     public string name = "";
@@ -15,7 +14,6 @@ public sealed class StatusEffect
     public string uuid = "";
 }
 
-[System.Serializable]
 public sealed class Card
 {
     public string name = "";

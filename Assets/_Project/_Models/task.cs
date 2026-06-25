@@ -11,7 +11,6 @@ public enum TaskStatus
     [EnumMember(Value = "failed")] FAILED,
 }
 
-[System.Serializable]
 public sealed class TaskRecord
 {
     public string task_id = "";

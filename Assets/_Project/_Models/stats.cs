@@ -1,5 +1,4 @@
 // 对应 Python models/stats.py
-[System.Serializable]
 public sealed class CharacterStats
 {
     public int hp = 0;

@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
 
-[System.Serializable]
 public sealed class CharacterSheet
 {
     public string name = "";
@@ -13,7 +12,6 @@ public sealed class CharacterSheet
     public string base_body = "";
 }
 
-[System.Serializable]
 public sealed class StageProfile
 {
     public string name = "";
@@ -37,7 +35,6 @@ public enum StageType
     [EnumMember(Value = "Dungeon")] DUNGEON,
 }
 
-[System.Serializable]
 public sealed class Actor
 {
     public string name = "";
@@ -48,7 +45,6 @@ public sealed class Actor
     public List<string> keywords = new List<string>();
 }
 
-[System.Serializable]
 public sealed class Stage
 {
     public string name = "";
@@ -57,7 +53,6 @@ public sealed class Stage
     public List<Actor> actors = new List<Actor>();
 }
 
-[System.Serializable]
 public sealed class WorldSystem
 {
     public string name = "";

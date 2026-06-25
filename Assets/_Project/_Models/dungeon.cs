@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-[System.Serializable]
 public class DungeonRoom
 {
     public string room_type = "base";
@@ -12,7 +11,6 @@ public class DungeonRoom
     public GeneratedImage image = new GeneratedImage();
 }
 
-[System.Serializable]
 public sealed class CombatRoom : DungeonRoom
 {
     public Combat combat = new Combat();
@@ -46,7 +44,6 @@ public class DungeonRoomConverter : JsonConverter<DungeonRoom>
     }
 }
 
-[System.Serializable]
 public sealed class Dungeon
 {
     [JsonConverter(typeof(DungeonRoomListConverter))]

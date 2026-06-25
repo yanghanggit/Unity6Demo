@@ -7,7 +7,6 @@ public enum MessageType
     AGENT_EVENT = 1,
 }
 
-[System.Serializable]
 public sealed class SessionMessage
 {
     public int message_type = (int)MessageType.NONE;
