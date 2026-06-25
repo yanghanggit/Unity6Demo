@@ -23,10 +23,10 @@ public class LaunchScene : MonoBehaviour
         Debug.Assert(!string.IsNullOrEmpty(_baseUrl), "_baseUrl is null");
 
         // 在API端点配置完成之前隐藏登录按钮，防止用户在准备就绪之前尝试登录
-        _loginButton.gameObject.SetActive(false);
+        //_loginButton.gameObject.SetActive(false);
 
         // 异步初始化API端点配置，确保在完成后才激活登录按钮
-        InitializeAsync().Forget();
+        //InitializeAsync().Forget();
     }
 
     /// <summary>
