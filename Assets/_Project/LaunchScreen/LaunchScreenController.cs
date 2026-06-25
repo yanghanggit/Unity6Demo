@@ -1,3 +1,5 @@
+using Cysharp.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,8 +18,26 @@ public class LaunchScreenController : MonoBehaviour
     /// </summary>
     public void OnClick()
     {
-        //LoadLoginScene().Forget();
-        Debug.Log("Button clicked, proceeding to the next scene...");
+        LoadAsync().Forget();
+    }
+
+    private async UniTaskVoid LoadAsync()
+    {
+        _button.interactable = false;
+        try
+        {
+            JObject info = await GameServerClientHolder.Instance.Client.FetchServerInfoAsync(
+                this.GetCancellationTokenOnDestroy());
+            Debug.Log($"Server info: {info}");
+        }
+        catch (GameServerClient.ServerException ex)
+        {
+            Debug.LogError($"无法连接服务器 [{ex.StatusCode}]: {ex.Message}");
+        }
+        finally
+        {
+            _button.interactable = true;
+        }
     }
 }
 
