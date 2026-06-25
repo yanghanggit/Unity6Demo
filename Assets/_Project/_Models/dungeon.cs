@@ -7,13 +7,13 @@ using Newtonsoft.Json.Linq;
 public class DungeonRoom
 {
     public string room_type = "base";
-    public Stage stage = new Stage();
-    public GeneratedImage image = new GeneratedImage();
+    public Stage stage = new();
+    public GeneratedImage image = new();
 }
 
 public sealed class CombatRoom : DungeonRoom
 {
-    public Combat combat = new Combat();
+    public Combat combat = new();
 }
 
 // DungeonRoomUnion 判别联合转换器（discriminator: room_type）
@@ -47,19 +47,19 @@ public class DungeonRoomConverter : JsonConverter<DungeonRoom>
 public sealed class Dungeon
 {
     [JsonConverter(typeof(DungeonRoomListConverter))]
-    public List<DungeonRoom> rooms = new List<DungeonRoom>();
+    public List<DungeonRoom> rooms = new();
     public string name = "";
     public string ecology = "";
     public string created_at = "";
     public int current_room_index = -1;
     public bool setup_entities = false;
-    public GeneratedImage image = new GeneratedImage();
+    public GeneratedImage image = new();
 }
 
 // List<DungeonRoom> 转换器（处理列表中的多态元素）
 public class DungeonRoomListConverter : JsonConverter<List<DungeonRoom>>
 {
-    private static readonly DungeonRoomConverter _itemConverter = new DungeonRoomConverter();
+    private static readonly DungeonRoomConverter _itemConverter = new();
 
     public override List<DungeonRoom> ReadJson(JsonReader reader, Type objectType, List<DungeonRoom> existingValue, bool hasExistingValue, JsonSerializer serializer)
     {

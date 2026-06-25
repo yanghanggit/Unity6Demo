@@ -42,7 +42,7 @@ public sealed class NewGameRequest
 
 public sealed class NewGameResponse
 {
-    public Blueprint blueprint = new Blueprint();
+    public Blueprint blueprint = new();
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
@@ -53,7 +53,7 @@ public sealed class HomeAdvanceRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public List<string> actors = new List<string>();
+    public List<string> actors = new();
 }
 
 public sealed class HomeAdvanceResponse
@@ -132,7 +132,7 @@ public sealed class HomeItemMoveToInventoryRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public List<string> item_names = new List<string>();
+    public List<string> item_names = new();
 }
 
 public sealed class HomeItemMoveToInventoryResponse
@@ -144,7 +144,7 @@ public sealed class HomeItemMoveToStorageRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public List<string> item_names = new List<string>();
+    public List<string> item_names = new();
 }
 
 public sealed class HomeItemMoveToStorageResponse
@@ -179,7 +179,7 @@ public sealed class HomeCraftItemRequest
 {
     public string user_name = "";
     public string game_name = "";
-    public List<string> materials = new List<string>();
+    public List<string> materials = new();
 }
 
 public sealed class HomeCraftItemResponse
@@ -205,7 +205,7 @@ public sealed class HomePlayerActionRequest
     public string user_name = "";
     public string game_name = "";
     public HomePlayerActionType action;
-    public Dictionary<string, string> arguments = new Dictionary<string, string>();
+    public Dictionary<string, string> arguments = new();
 }
 
 public sealed class HomePlayerActionResponse
@@ -305,7 +305,7 @@ public sealed class DungeonCombatPlayCardsRequest
     public string game_name = "";
     public string actor_name = "";
     public string card_name = "";
-    public List<string> targets = new List<string>();
+    public List<string> targets = new();
 }
 
 public sealed class DungeonCombatPlayCardsResponse
@@ -338,7 +338,7 @@ public sealed class DungeonCombatUseConsumableItemRequest
     public string user_name = "";
     public string game_name = "";
     public string item_name = "";
-    public List<string> targets = new List<string>();
+    public List<string> targets = new();
 }
 
 public sealed class DungeonCombatUseConsumableItemResponse
@@ -353,7 +353,7 @@ public sealed class DungeonCombatUseGearItemRequest
     public string user_name = "";
     public string game_name = "";
     public string item_name = "";
-    public List<string> targets = new List<string>();
+    public List<string> targets = new();
 }
 
 public sealed class DungeonCombatUseGearItemResponse
@@ -369,32 +369,32 @@ public sealed class DungeonCombatUseGearItemResponse
 
 public sealed class DungeonStateResponse
 {
-    public Dungeon dungeon = new Dungeon();
+    public Dungeon dungeon = new();
 }
 
 public sealed class DungeonCombatResponse
 {
-    public Combat combat = new Combat();
+    public Combat combat = new();
 }
 
 public sealed class DungeonRoomResponse
 {
-    public CombatRoom room = new CombatRoom();
+    public CombatRoom room = new();
 }
 
 public sealed class StagesStateResponse
 {
-    public Dictionary<string, List<string>> mapping = new Dictionary<string, List<string>>();
+    public Dictionary<string, List<string>> mapping = new();
 }
 
 public sealed class EntitiesDetailsResponse
 {
-    public List<EntitySerialization> entities_serialization = new List<EntitySerialization>();
+    public List<EntitySerialization> entities_serialization = new();
 }
 
 public sealed class SessionMessageResponse
 {
-    public List<SessionMessage> session_messages = new List<SessionMessage>();
+    public List<SessionMessage> session_messages = new();
 }
 
 public sealed class TaskTriggerResponse
@@ -406,15 +406,15 @@ public sealed class TaskTriggerResponse
 
 public sealed class TasksStatusResponse
 {
-    public List<TaskRecord> tasks = new List<TaskRecord>();
+    public List<TaskRecord> tasks = new();
 }
 
 public sealed class BlueprintListResponse
 {
-    public List<Blueprint> blueprints = new List<Blueprint>();
+    public List<Blueprint> blueprints = new();
 }
 
 public sealed class DungeonListResponse
 {
-    public List<Dungeon> dungeons = new List<Dungeon>();
+    public List<Dungeon> dungeons = new();
 }

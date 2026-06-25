@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 public sealed class AgentContext
 {
     public string name = "";
-    public List<JObject> context = new List<JObject>(); // List[ContextMessage]，ContextMessage 为服务端内部类型
+    public List<JObject> context = new(); // List[ContextMessage]，ContextMessage 为服务端内部类型
 }
 
 public sealed class Blueprint
@@ -15,20 +15,20 @@ public sealed class Blueprint
     public string name = "";
     public string player_actor = "";
     public string campaign_setting = "";
-    public List<Stage> stages = new List<Stage>();
-    public List<WorldSystem> world_systems = new List<WorldSystem>();
+    public List<Stage> stages = new();
+    public List<WorldSystem> world_systems = new();
     public string storage_entity = "";
     [JsonConverter(typeof(AnyItemListConverter))]
-    public List<Item> storage = new List<Item>();
+    public List<Item> storage = new();
     [JsonConverter(typeof(AnyItemListConverter))]
-    public List<Item> inventory = new List<Item>();
-    public List<Artifact> artifacts = new List<Artifact>();
+    public List<Item> inventory = new();
+    public List<Artifact> artifacts = new();
 }
 
 // List<Item> (AnyItem) 转换器（处理列表中的多态元素）
 public class AnyItemListConverter : JsonConverter<List<Item>>
 {
-    private static readonly AnyItemConverter _itemConverter = new AnyItemConverter();
+    private static readonly AnyItemConverter _itemConverter = new();
 
     public override List<Item> ReadJson(JsonReader reader, Type objectType, List<Item> existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
@@ -52,8 +52,8 @@ public sealed class World
 {
     public int entity_counter = 0;
     public int home_planning_turn_index = 0;
-    public List<EntitySerialization> entities_serialization = new List<EntitySerialization>();
-    public Dictionary<string, AgentContext> agents_context = new Dictionary<string, AgentContext>();
-    public Dungeon dungeon = new Dungeon();
-    public Blueprint blueprint = new Blueprint();
+    public List<EntitySerialization> entities_serialization = new();
+    public Dictionary<string, AgentContext> agents_context = new();
+    public Dungeon dungeon = new();
+    public Blueprint blueprint = new();
 }

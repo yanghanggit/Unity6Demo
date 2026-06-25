@@ -18,8 +18,8 @@ public sealed class Card
 {
     public string name = "";
     public string description = "";
-    public List<string> affixes = new List<string>();
-    public List<string> modifiers = new List<string>();
+    public List<string> affixes = new();
+    public List<string> modifiers = new();
     public bool playable = true;
     public bool exhaust = false;
     public int damage_dealt = 0;

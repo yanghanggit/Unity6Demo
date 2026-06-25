@@ -10,6 +10,6 @@ public enum MessageType
 public sealed class SessionMessage
 {
     public int message_type = (int)MessageType.NONE;
-    public JObject data = new JObject();
+    public JObject data = new();
     public int sequence_id = 0;
 }

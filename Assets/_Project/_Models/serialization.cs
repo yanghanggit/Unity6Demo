@@ -6,11 +6,11 @@ using Newtonsoft.Json.Linq;
 public sealed class ComponentSerialization
 {
     public string name = "";
-    public JObject data = new JObject();
+    public JObject data = new();
 }
 
 public sealed class EntitySerialization
 {
     public string name = "";
-    public List<ComponentSerialization> components = new List<ComponentSerialization>();
+    public List<ComponentSerialization> components = new();
 }

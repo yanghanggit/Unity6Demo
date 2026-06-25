@@ -27,27 +27,27 @@ public class Item
 
 public sealed class GearItem : Item
 {
-    public CharacterStats stat_bonuses = new CharacterStats();
+    public CharacterStats stat_bonuses = new();
     public TargetType target_type = TargetType.ALLY_SINGLE;
-    public List<string> equip_affixes = new List<string>();
-    public List<string> on_hit_affixes = new List<string>();
-    public List<string> modifiers = new List<string>();
+    public List<string> equip_affixes = new();
+    public List<string> on_hit_affixes = new();
+    public List<string> modifiers = new();
     public int max_durability = 3;
     public int durability = 3;
-    public List<Item> craft_materials = new List<Item>();
+    public List<Item> craft_materials = new();
 }
 
 public sealed class CostumeItem : Item
 {
-    public List<Item> craft_materials = new List<Item>();
+    public List<Item> craft_materials = new();
 }
 
 public sealed class ConsumableItem : Item
 {
     public TargetType target_type = TargetType.SELF_ONLY;
-    public List<string> affixes = new List<string>();
-    public List<string> modifiers = new List<string>();
-    public List<Item> craft_materials = new List<Item>();
+    public List<string> affixes = new();
+    public List<string> modifiers = new();
+    public List<Item> craft_materials = new();
 }
 
 public sealed class MaterialItem : Item

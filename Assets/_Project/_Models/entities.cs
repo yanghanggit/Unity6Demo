@@ -38,24 +38,24 @@ public enum StageType
 public sealed class Actor
 {
     public string name = "";
-    public CharacterSheet character_sheet = new CharacterSheet();
+    public CharacterSheet character_sheet = new();
     public string system_message = "";
-    public CharacterStats character_stats = new CharacterStats();
+    public CharacterStats character_stats = new();
     public CostumeItem custom_item = null; // Optional[CostumeItem]
-    public List<string> keywords = new List<string>();
+    public List<string> keywords = new();
 }
 
 public sealed class Stage
 {
     public string name = "";
-    public StageProfile stage_profile = new StageProfile();
+    public StageProfile stage_profile = new();
     public string system_message = "";
-    public List<Actor> actors = new List<Actor>();
+    public List<Actor> actors = new();
 }
 
 public sealed class WorldSystem
 {
     public string name = "";
     public string system_message = "";
-    public List<ComponentSerialization> components = new List<ComponentSerialization>();
+    public List<ComponentSerialization> components = new();
 }
