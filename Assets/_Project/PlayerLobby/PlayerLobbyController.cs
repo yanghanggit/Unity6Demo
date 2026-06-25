@@ -1,6 +1,6 @@
-// using Cysharp.Threading.Tasks;
-// using Newtonsoft.Json.Linq;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class PlayerLobbyController : MonoBehaviour
@@ -9,9 +9,8 @@ public class PlayerLobbyController : MonoBehaviour
     [SerializeField] private TMP_Text _playerIdText;
     [SerializeField] private TMP_Text _gameNameText;
 
-
-    /// 私有字段
-    private string _randomPlayerId = string.Empty;
+    private const string NextSceneName = "HomeScene"; // TODO: 待确认目标场景
+    private string _randomPlayerId = null;
     private const string _gameName = "Game1";
 
     void Awake()
@@ -40,8 +39,35 @@ public class PlayerLobbyController : MonoBehaviour
     /// </summary>
     public void OnClickNewGame()
     {
-        Debug.Log($"点击新游戏按钮，玩家ID: {_randomPlayerId}, 游戏名: {_gameName}");
-        // 这里可以添加进入新游戏的逻辑，例如加载新场景或初始化
+        StartNewGameAsync().Forget();
+    }
+
+    /// <summary>
+    /// 异步启动新游戏
+    /// </summary>
+    private async UniTaskVoid StartNewGameAsync()
+    {
+        var ct = this.GetCancellationTokenOnDestroy();
+        var client = GameManager.Instance.ServerClient;
+        try
+        {
+            // 登录并创建新游戏
+            await client.LoginAsync(_randomPlayerId, _gameName, ct);
+            await client.NewGameAsync(_randomPlayerId, _gameName, ct);
+
+            GameManager.Instance.UserName = _randomPlayerId;
+            GameManager.Instance.GameName = _gameName;
+
+            await SceneManager.LoadSceneAsync(NextSceneName);
+        }
+        catch (GameServerClient.ServerException ex)
+        {
+            Debug.LogError($"新游戏失败 [{ex.StatusCode}]: {ex.Message}");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"新游戏未知错误: {ex.Message}");
+        }
     }
 }
 

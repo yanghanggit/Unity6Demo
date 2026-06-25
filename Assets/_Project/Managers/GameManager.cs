@@ -19,6 +19,17 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public GameServerClient ServerClient => _serverClientHolder.Client;
 
+    // ── 当前登录会话 ──────────────────────────────────────────────────────────
+    public string UserName { get; set; }
+    public string GameName { get; set; }
+    public bool IsSessionActive => !string.IsNullOrEmpty(UserName) && !string.IsNullOrEmpty(GameName);
+
+    public void ClearSession()
+    {
+        UserName = null;
+        GameName = null;
+    }
+
     // 从任意场景按 Play 时，自动创建 GameManager（若尚未存在）。
     // 在所有场景 Awake 之前执行，Build 中同样生效。
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]

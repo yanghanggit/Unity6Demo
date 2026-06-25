@@ -6,10 +6,11 @@ using UnityEngine.UI;
 
 public class LaunchScreenController : MonoBehaviour
 {
-    private const string PlayerLobbySceneName = "PlayerLobby";
-
     [Header("UI Components")]
     [SerializeField] private Button _button;
+
+
+    private const string PlayerLobbySceneName = "PlayerLobby";
 
     void Start()
     {
