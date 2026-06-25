@@ -1,0 +1,325 @@
+"""地下城总览 Screen"""
+
+from typing import List, Optional
+
+from loguru import logger
+from textual import on, work
+from textual.app import ComposeResult
+from textual.containers import Horizontal
+from textual.widgets import Input, RichLog, Static
+
+from .base import BaseGameScreen
+
+from ..models import Dungeon, ActorType
+from .server_client import (
+    fetch_dungeon_list,
+    fetch_entities_details,
+    watch_task_until_done,
+    TaskFailedError,
+    home_enter_dungeon as server_home_enter_dungeon,
+)
+from .server_client import home_generate_dungeon as server_home_generate_dungeon
+from .utils import display_name
+
+MENU_TEXT = """\
+[bold cyan]── 地下城总览 ──────────────────────────────────────[/]
+
+"""
+
+
+class DungeonOverviewScreen(BaseGameScreen):
+    """地下城总览 Screen：列出全部地下城副本，按编号查看详情。"""
+
+    CSS = """
+    DungeonOverviewScreen {
+        align: center middle;
+    }
+
+    #dungeon-log {
+        border: solid $primary;
+        padding: 0 1;
+        height: 1fr;
+    }
+
+    #dungeon-input-row {
+        height: 3;
+        dock: bottom;
+    }
+
+    #dungeon-prompt {
+        width: 6;
+        height: 3;
+        content-align: left middle;
+        color: $success;
+    }
+
+    #dungeon-input {
+        width: 1fr;
+    }
+    """
+
+    BINDINGS = [
+        ("escape", "go_back", "Back"),
+    ]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._dungeons: List[Dungeon] = []
+        self._selected_dungeon: Optional[str] = None
+
+    def compose(self) -> ComposeResult:
+        yield RichLog(id="dungeon-log", highlight=True, markup=True, wrap=True)
+        with Horizontal(id="dungeon-input-row"):
+            yield Static("> ", id="dungeon-prompt")
+            yield Input(placeholder="输入编号执行操作...", id="dungeon-input")
+
+    def on_mount(self) -> None:
+        log = self.query_one(RichLog)
+        log.write(MENU_TEXT)
+        self.query_one(Input).focus()
+        self._load_dungeons()
+
+    def action_go_back(self) -> None:
+        self.app.pop_screen()
+
+    @on(Input.Submitted, "#dungeon-input")
+    def handle_input(self, event: Input.Submitted) -> None:
+        raw = event.value.strip()
+        event.input.clear()
+        log = self.query_one(RichLog)
+
+        if not raw:
+            return
+
+        log.write(f"[dim]> {raw}[/]")
+
+        if raw == "0":
+            log.clear()
+            log.write(MENU_TEXT)
+            self._load_dungeons()
+            return
+
+        if raw.lower() == "/enter":
+            if self._selected_dungeon is None:
+                log.write("[yellow]请先输入编号选择一个副本。[/]")
+            else:
+                self._do_enter_dungeon(self._selected_dungeon)
+            return
+
+        if not raw.isdigit():
+            log.write("[red]请输入有效编号或 0 刷新页面[/]")
+            return
+
+        idx = int(raw) - 1
+        generate_idx = len(self._dungeons)  # 0-based index of the generate command
+
+        if idx == generate_idx:
+            self._do_generate_dungeon()
+        elif 0 <= idx < len(self._dungeons):
+            dungeon = self._dungeons[idx]
+            self._selected_dungeon = dungeon.name
+            self._show_dungeon(dungeon, log)
+            log.write(
+                f"[dim]输入 /enter 进入此副本：[bold cyan]{display_name(dungeon.name)}[/][/]"
+            )
+        else:
+            n = len(self._dungeons)
+            hint = f"1–{n} 查看副本，{n + 1} 生成新地下城" if n else "1 生成新地下城"
+            log.write(f"[red]编号超出范围，可用：{hint}，0 刷新页面[/]")
+
+    def _render_list(self, log: RichLog) -> None:
+        """将已缓存的地下城列表渲染到 log，并追加动态操作提示。"""
+        generate_no = len(self._dungeons) + 1
+        if not self._dungeons:
+            log.write("[yellow]暂无可用副本。[/]")
+        else:
+            log.write(
+                "[bold yellow]── 可用副本 ──────────────────────────────────────[/]"
+            )
+            for i, dungeon in enumerate(self._dungeons, start=1):
+                preview = dungeon.ecology[:40].replace("\n", " ")
+                room_count = len(dungeon.rooms)
+                log.write(
+                    f"  [bold]{i}.[/] [bold cyan]{display_name(dungeon.name)}[/]"
+                    f"  [dim]{preview}…  ({room_count} 个房间)[/]"
+                )
+            log.write("")
+        log.write(f"[bold cyan]── 操作 ──────────────────────────────────────────[/]")
+        if self._dungeons:
+            log.write(f"  [bold green]1–{len(self._dungeons)}[/]  查看副本详情")
+        log.write(f"  [bold green]{generate_no}[/]  生成新地下城")
+        log.write(f"  [bold green]0[/]  刷新此页面")
+        log.write(f"  [bold dim]Escape[/]  返回")
+        log.write("")
+
+    def _show_dungeon(self, dungeon: Dungeon, log: RichLog) -> None:
+        """内联渲染地下城详情（纯同步，数据已在内存中）。"""
+        log.write(
+            f"[bold yellow]── 副本：{display_name(dungeon.name)} ──────────────────────────────────────[/]"
+        )
+        log.write(f"  [bold]生态环境：[/] {dungeon.ecology}")
+        log.write(f"  [bold]房间数：[/]   {len(dungeon.rooms)}")
+        log.write("")
+
+        for i, room in enumerate(dungeon.rooms, start=1):
+            stage = room.stage
+            is_combat = any(
+                actor.character_sheet.type == ActorType.MONSTER
+                for actor in stage.actors
+            )
+            room_tag = "[bold red]⚔ 战斗[/]" if is_combat else "[dim cyan]○ 探索[/]"
+            log.write(
+                f"  [bold cyan]房间 {i}：[/][green]{display_name(stage.name)}[/]  {room_tag}"
+            )
+            if is_combat:
+                for actor in stage.actors:
+                    if actor.character_sheet.type == ActorType.MONSTER:
+                        stats = actor.character_stats
+                        log.write(
+                            f"    · [bold]{display_name(actor.name)}[/]"
+                            f"  HP:[yellow]{stats.max_hp}[/]"
+                            f"  ATK:[red]{stats.attack}[/]"
+                            f"  DEF:[blue]{stats.defense}[/]"
+                        )
+            else:
+                log.write("    [dim]（无敌人）[/]")
+        log.write("")
+
+    @work
+    async def _do_enter_dungeon(self, dungeon_name: str) -> None:
+        """调用 home_enter_dungeon，成功后 push DungeonRoomScreen。"""
+        log = self.query_one(RichLog)
+        inp = self.query_one(Input)
+        inp.disabled = True
+
+        log.write(f"[dim]▶ 正在进入地下城：{dungeon_name}...[/]")
+        logger.info(f"DungeonOverviewScreen._do_enter_dungeon: dungeon={dungeon_name}")
+
+        app = self.game_client
+        if app.session is None:
+            return
+        user_name = app.session.user_name
+        game_name = app.session.game_name
+
+        try:
+            await server_home_enter_dungeon(user_name, game_name, dungeon_name)
+            log.write(f"[bold green]✅ 已进入地下城：{dungeon_name}[/]")
+            logger.info(
+                f"DungeonOverviewScreen._do_enter_dungeon: 进入成功 dungeon={dungeon_name}"
+            )
+            from .combat_room import CombatRoomScreen
+
+            self.app.push_screen(CombatRoomScreen())
+        except Exception as e:
+            logger.error(f"DungeonOverviewScreen._do_enter_dungeon: 进入失败 error={e}")
+            log.write(f"[bold red]❌ 进入地下城失败: {e}[/]")
+            inp.disabled = False
+            inp.focus()
+
+    @work
+    async def _do_generate_dungeon(self) -> None:
+        """触发地下城生成 pipeline，等待完成后刷新列表。"""
+        log = self.query_one(RichLog)
+        inp = self.query_one(Input)
+        inp.disabled = True
+
+        log.write("[dim]▶ 正在触发地下城生成流程...[/]")
+        logger.info(f"DungeonOverviewScreen._do_generate_dungeon")
+
+        app = self.game_client
+        if app.session is None:
+            inp.disabled = False
+            inp.focus()
+            return
+        user_name = app.session.user_name
+        game_name = app.session.game_name
+
+        task_id: str = ""
+        success = False
+        try:
+            resp = await server_home_generate_dungeon(user_name, game_name)
+            task_id = resp.task_id
+            log.write(f"[dim]任务已创建：{task_id}[/]")
+            logger.info(
+                f"DungeonOverviewScreen._do_generate_dungeon: 任务已创建 task_id={task_id}"
+            )
+        except Exception as e:
+            logger.error(
+                f"DungeonOverviewScreen._do_generate_dungeon: 请求失败 error={e}"
+            )
+            log.write(f"[bold red]❌ 地下城生成请求失败: {e}[/]")
+            inp.disabled = False
+            inp.focus()
+            return
+
+        try:
+            await watch_task_until_done(task_id)
+            log.write("[bold green]✅ 地下城生成完成，正在刷新列表...[/]")
+            logger.info(
+                f"DungeonOverviewScreen._do_generate_dungeon: 任务完成 task_id={task_id}"
+            )
+            success = True
+        except TaskFailedError as e:
+            log.write(f"[bold red]❌ 地下城生成失败: {e}[/]")
+            logger.error(
+                f"DungeonOverviewScreen._do_generate_dungeon: 任务失败 task_id={task_id} error={e}"
+            )
+        except TimeoutError:
+            log.write("[bold yellow]⚠️ 等待超时，请检查服务器状态[/]")
+            logger.warning(
+                f"DungeonOverviewScreen._do_generate_dungeon: 轮询超时 task_id={task_id}"
+            )
+        except Exception as e:
+            logger.warning(
+                f"DungeonOverviewScreen._do_generate_dungeon: 等待任务失败 error={e}"
+            )
+
+        inp.disabled = False
+        inp.focus()
+        if success:
+            self._load_dungeons()
+
+    @work
+    async def _load_dungeons(self) -> None:
+        log = self.query_one(RichLog)
+        logger.info("_load_dungeons: 正在获取地下城列表...")
+
+        # 显示远征队名单
+        app = self.game_client
+        if app.session is None:
+            return
+        user_name = app.session.user_name
+        game_name = app.session.game_name
+        bp = app.session.blueprint
+        player_actor = bp.player_actor
+        if player_actor:
+            try:
+                resp = await fetch_entities_details(
+                    user_name, game_name, [player_actor]
+                )
+                members: List[str] = []
+                for entity in resp.entities_serialization:
+                    for comp in entity.components:
+                        if comp.name == "PartyRosterComponent":
+                            members = list(comp.data.get("members", []))
+                            break
+                roster = [player_actor] + members
+                log.write(
+                    "[bold yellow]── 当前远征队 ──────────────────────────────────────[/]"
+                )
+                for member in roster:
+                    tag = "  [bold magenta][玩家][/]" if member == player_actor else ""
+                    log.write(f"  · [bold cyan]{display_name(member)}[/]{tag}")
+                log.write("")
+                logger.info(f"_load_dungeons: 远征队 roster={roster}")
+            except Exception as e:
+                logger.warning(f"_load_dungeons: 读取远征队失败 error={e}")
+
+        try:
+            resp2 = await fetch_dungeon_list()
+            self._dungeons = resp2.dungeons
+            self._render_list(log)
+            logger.info(f"_load_dungeons: 获取成功，共 {len(self._dungeons)} 个地下城")
+        except Exception as e:
+            logger.error(f"_load_dungeons: 获取失败 error={e}")
+            log.write(f"[bold red]❌ 地下城列表加载失败: {e}[/]")
