@@ -224,7 +224,6 @@ public enum HomePlayerActionType
     [EnumMember(Value = "/switch_stage")] SWITCH_STAGE,
 }
 
-[System.Serializable]
 public sealed class HomePlayerActionRequest
 {
     public string user_name = "";
@@ -431,7 +430,6 @@ public sealed class DungeonRoomResponse
     public CombatRoom room = new CombatRoom();
 }
 
-[System.Serializable]
 public sealed class StagesStateResponse
 {
     public Dictionary<string, List<string>> mapping = new Dictionary<string, List<string>>();

@@ -71,7 +71,7 @@ public class DungeonRoomListConverter : JsonConverter<List<DungeonRoom>>
         foreach (var token in array)
         {
             using var tokenReader = token.CreateReader();
-            list.Add(_itemConverter.ReadJson(tokenReader, typeof(DungeonRoom), null, serializer));
+            list.Add(_itemConverter.ReadJson(tokenReader, typeof(DungeonRoom), null, false, serializer));
         }
         return list;
     }
