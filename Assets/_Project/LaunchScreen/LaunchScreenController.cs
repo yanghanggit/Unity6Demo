@@ -9,7 +9,7 @@ public class LaunchScreenController : MonoBehaviour
     [Header("UI Components")]
     [SerializeField] private Button _button;
 
-
+    /// 内部数据
     private const string PlayerLobbySceneName = "PlayerLobby";
 
     void Start()
@@ -38,6 +38,9 @@ public class LaunchScreenController : MonoBehaviour
             JObject info = await GameServerClientHolder.Instance.Client.FetchServerInfoAsync(
                 this.GetCancellationTokenOnDestroy());
             Debug.Log($"Server info: {info}");
+
+            // 服务器连通，存储服务器信息
+            GameManager.Instance.ServerInfo = info;
         }
         catch (GameServerClient.ServerException ex)
         {

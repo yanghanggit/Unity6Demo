@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/PlayerLobby/PlayerLobby.unity
     guid: 434232c73d7a2474a8c84e42e66a11e8
+  - enabled: 1
+    path: Assets/_Project/TestLanding/TestLanding.unity
+    guid: be4404737df2648e58442cf00e1ce93a
   m_configObjects: {}
