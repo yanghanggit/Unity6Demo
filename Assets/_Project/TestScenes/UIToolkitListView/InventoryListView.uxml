@@ -2,31 +2,18 @@
     <ui:Style src="InventoryListView.uss" />
     <ui:VisualElement name="root" class="root-container">
 
-        <ui:Label text="背包系统 — UI Toolkit ListView Demo" class="title" />
+        <ui:Button name="btn-add" text="+ 添加" class="btn btn-add" />
 
-        <!-- 工具栏：搜索 + 操作按钮 -->
-        <ui:VisualElement class="toolbar">
-            <ui:TextField name="search-field" class="search-field" placeholder-text="搜索物品名称..." />
-            <ui:Button name="btn-add" text="+ 添加物品" class="btn btn-add" />
-            <ui:Button name="btn-remove" text="删除选中" class="btn btn-remove" />
-            <ui:Button name="btn-add-bulk" text="批量 +50" class="btn btn-bulk" />
-        </ui:VisualElement>
+        <!-- 当前显示条数 -->
+        <ui:Label name="label-count" class="count-label" />
 
-        <!-- 统计信息 -->
-        <ui:Label name="label-count" class="count-label" text="共 0 件物品" />
-
-        <!-- 核心：ListView（虚拟化，只渲染可见行） -->
+        <!-- 核心：ListView，内部就是一个带虚拟化的 ScrollView -->
         <ui:ListView name="inventory-list-view" class="inventory-list"
-                     fixed-item-height="52"
+                     fixed-item-height="72"
                      virtualization-method="FixedHeight"
                      selection-type="Single"
                      show-alternating-row-backgrounds="ContentOnly"
                      show-border="false" />
-
-        <!-- 选中详情面板 -->
-        <ui:VisualElement name="detail-panel" class="detail-panel">
-            <ui:Label name="detail-text" class="detail-text" text="点击列表中的物品查看详情" />
-        </ui:VisualElement>
 
     </ui:VisualElement>
 </ui:UXML>
