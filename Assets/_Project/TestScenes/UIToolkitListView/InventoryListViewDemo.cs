@@ -17,7 +17,7 @@ using UnityEngine.UIElements;
 public class InventoryListViewDemo : MonoBehaviour
 {
     [Header("UI Toolkit")]
-    [SerializeField] private UIDocument _uiDocument;
+    [SerializeField] private PanelRenderer _panelRenderer;
 
     // ── 数据层 ──────────────────────────────────────────────────────
     private readonly List<InventoryItem> _allItems      = new();
@@ -39,8 +39,24 @@ public class InventoryListViewDemo : MonoBehaviour
     // ────────────────────────────────────────────────────────────────
     void Start()
     {
-        var root = _uiDocument.rootVisualElement;
+        // PanelRenderer 没有公开的 rootVisualElement 属性，正确的公开 API 是 RegisterUIReloadCallback。
+        // 源码显示：若 Panel 已初始化（Awake 完成后），回调会立即同步触发。
+        _panelRenderer.RegisterUIReloadCallback(OnPanelLoaded);
+    }
 
+    void OnDestroy()
+    {
+        if (_panelRenderer != null)
+            _panelRenderer.UnregisterUIReloadCallback(OnPanelLoaded);
+    }
+
+    /// <summary>
+    /// Panel 已加载时回调。
+    /// • 游戏运行时：仅在 Start() 后立即触发一次。
+    /// • Editor 热重载 UXML/USS 时会再次触发，新根元素传入，旧元素被替换不会重复监听。
+    /// </summary>
+    void OnPanelLoaded(PanelRenderer pr, VisualElement root)
+    {
         _listView    = root.Q<ListView>("inventory-list-view");
         _searchField = root.Q<TextField>("search-field");
         _countLabel  = root.Q<Label>("label-count");
@@ -49,15 +65,16 @@ public class InventoryListViewDemo : MonoBehaviour
         _btnRemove   = root.Q<Button>("btn-remove");
         _btnBulk     = root.Q<Button>("btn-add-bulk");
 
-        // 初始种子数据（直接操作列表，不触发刷新）
-        for (int i = 0; i < 30; i++)
-            _allItems.Add(InventoryItem.CreateRandom(_nextId++));
-        _filteredItems.AddRange(_allItems);
+        // 种子数据仅在首次加载时初始化（热重载时不重复添加）
+        if (_allItems.Count == 0)
+        {
+            for (int i = 0; i < 30; i++)
+                _allItems.Add(InventoryItem.CreateRandom(_nextId++));
+            _filteredItems.AddRange(_allItems);
+        }
 
-        // 配置 ListView（只需调用一次）
         SetupListView();
 
-        // 注册事件
         _searchField.RegisterValueChangedCallback(evt => ApplyFilter(evt.newValue));
         _btnAdd.clicked    += () => AddItems(1);
         _btnRemove.clicked += RemoveSelected;
