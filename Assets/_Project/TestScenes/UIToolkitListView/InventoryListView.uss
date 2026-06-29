@@ -1,0 +1,194 @@
+/* ===================================================================
+   InventoryListView.uss
+   适配目标：1080 × 1920 竖屏（PanelSettings 参考分辨率请同步设置）
+   =================================================================== */
+
+/* ===== 根容器 ===== */
+.root-container {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(18, 18, 28);
+    padding: 32px 28px 24px 28px;
+    align-items: stretch;
+}
+
+/* ===== 标题 ===== */
+.title {
+    font-size: 38px;
+    color: rgb(220, 195, 100);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom-width: 1px;
+    border-color: rgb(60, 55, 40);
+}
+
+/* ===== 工具栏 ===== */
+.toolbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 14px;
+    height: 64px;
+}
+
+.search-field {
+    flex-grow: 1;
+    margin-right: 10px;
+    height: 62px;
+}
+
+.search-field > .unity-text-field__input {
+    background-color: rgb(35, 35, 50);
+    border-color: rgb(70, 70, 90);
+    border-radius: 6px;
+    color: rgb(210, 210, 210);
+    padding: 0 16px;
+    font-size: 26px;
+    height: 62px;
+}
+
+.search-field > .unity-text-field__input:focus {
+    border-color: rgb(100, 140, 200);
+}
+
+/* ===== 按鈕通用 ===== */
+.btn {
+    height: 62px;
+    border-radius: 6px;
+    border-width: 0;
+    padding: 0 22px;
+    color: white;
+    -unity-font-style: bold;
+    font-size: 22px;
+    margin-left: 6px;
+    cursor: link;
+    transition-duration: 0.1s;
+    transition-property: background-color;
+}
+
+.btn-add {
+    background-color: rgb(38, 120, 60);
+}
+.btn-add:hover {
+    background-color: rgb(48, 150, 75);
+}
+
+.btn-remove {
+    background-color: rgb(140, 38, 38);
+}
+.btn-remove:hover {
+    background-color: rgb(170, 50, 50);
+}
+
+.btn-bulk {
+    background-color: rgb(60, 80, 140);
+}
+.btn-bulk:hover {
+    background-color: rgb(75, 100, 170);
+}
+
+/* ===== 统计标签 ===== */
+.count-label {
+    color: rgb(130, 130, 150);
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+/* ===== ListView 容器 ===== */
+.inventory-list {
+    flex-grow: 1;
+    background-color: rgb(24, 24, 38);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(55, 55, 75);
+    min-height: 300px;
+}
+
+/* Unity 内置交替背景色（偶数行） */
+.unity-list-view__item--even {
+    background-color: rgb(30, 30, 44);
+}
+
+/* Unity 内置交替背景色（奇数行） */
+.unity-list-view__item--odd {
+    background-color: rgb(24, 24, 38);
+}
+
+/* 选中高亮 */
+.unity-list-view__item:checked {
+    background-color: rgb(50, 80, 130);
+}
+
+/* ===== 列表项（makeItem 生成的根元素）===== */
+.list-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 20px;
+    height: 90px;           /* 与 C# 中 k_FixedItemHeight = 90f 保持一致 */
+    border-bottom-width: 1px;
+    border-color: rgb(42, 42, 60);
+}
+
+
+/* 稀有度色块 */
+.rarity-badge {
+    width: 54px;
+    height: 54px;
+    border-radius: 27px;
+    margin-right: 18px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.rarity-badge-label {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+
+/* 物品名称 */
+.item-name {
+    flex-grow: 1;
+    color: rgb(220, 220, 220);
+    font-size: 28px;
+}
+
+/* 数量 */
+.item-quantity {
+    color: rgb(150, 150, 160);
+    font-size: 26px;
+    margin-left: 10px;
+    min-width: 90px;
+    -unity-text-align: upper-right;
+}
+
+/* 稀有度文字（右侧） */
+.item-rarity-text {
+    font-size: 22px;
+    -unity-font-style: bold;
+    min-width: 70px;
+    -unity-text-align: upper-right;
+    margin-left: 14px;
+}
+
+/* ===== 底部详情面板 ===== */
+.detail-panel {
+    margin-top: 14px;
+    padding: 18px 22px;
+    background-color: rgb(28, 32, 48);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(55, 65, 90);
+    min-height: 80px;
+    justify-content: center;
+}
+
+.detail-text {
+    color: rgb(180, 180, 200);
+    font-size: 24px;
+    white-space: normal;
+}
+
