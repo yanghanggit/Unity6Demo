@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 4968277}
   - component: {fileID: 4968276}
   - component: {fileID: 4968278}
+  - component: {fileID: 4968279}
   m_Layer: 5
   m_Name: BottomNavBar
   m_TagString: Untagged
@@ -223,6 +224,24 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &4968279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4968274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46faf8048e9a04830ba481c8fd6fb42d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::BottomNavBarController
+  _navTabButtonTexts:
+  - {fileID: 1198038844}
+  - {fileID: 234286517}
+  - {fileID: 1277160914}
+  - {fileID: 2146727776}
+  - {fileID: 1098173339}
 --- !u!1 &60244926
 GameObject:
   m_ObjectHideFlags: 0
@@ -460,6 +479,7 @@ GameObject:
   - component: {fileID: 146523552}
   - component: {fileID: 146523554}
   - component: {fileID: 146523553}
+  - component: {fileID: 146523555}
   m_Layer: 5
   m_Name: MainHubUI
   m_TagString: Untagged
@@ -527,6 +547,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 146523551}
   m_CullTransparentMesh: 1
+--- !u!114 &146523555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 146523551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77c37b2888da341c3853c78e47427012, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::MainHubUIController
+  _topHUDBarController: {fileID: 123390212}
+  _bottomNavBarController: {fileID: 4968279}
 --- !u!1 &174847608
 GameObject:
   m_ObjectHideFlags: 0
@@ -847,12 +881,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8f0d449ffc3845bca4a1e58714b75c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::MainHubController
-  _navTabButtonTexts:
-  - {fileID: 1198038844}
-  - {fileID: 234286517}
-  - {fileID: 1277160914}
-  - {fileID: 2146727776}
-  - {fileID: 1098173339}
+  _mainHubUIController: {fileID: 146523555}
 --- !u!1 &459938160
 GameObject:
   m_ObjectHideFlags: 0
@@ -1101,8 +1130,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: MainHubController, Runtime
+      - m_Target: {fileID: 4968279}
+        m_TargetAssemblyTypeName: BottomNavBarController, Runtime
         m_MethodName: OnNavTabButtonClicked
         m_Mode: 3
         m_Arguments:
@@ -1372,8 +1401,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: MainHubController, Runtime
+      - m_Target: {fileID: 4968279}
+        m_TargetAssemblyTypeName: BottomNavBarController, Runtime
         m_MethodName: OnNavTabButtonClicked
         m_Mode: 3
         m_Arguments:
@@ -1505,8 +1534,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: MainHubController, Runtime
+      - m_Target: {fileID: 4968279}
+        m_TargetAssemblyTypeName: BottomNavBarController, Runtime
         m_MethodName: OnNavTabButtonClicked
         m_Mode: 3
         m_Arguments:
@@ -1638,8 +1667,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: MainHubController, Runtime
+      - m_Target: {fileID: 4968279}
+        m_TargetAssemblyTypeName: BottomNavBarController, Runtime
         m_MethodName: OnNavTabButtonClicked
         m_Mode: 3
         m_Arguments:
@@ -2318,8 +2347,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 399892901}
-        m_TargetAssemblyTypeName: MainHubController, Runtime
+      - m_Target: {fileID: 4968279}
+        m_TargetAssemblyTypeName: BottomNavBarController, Runtime
         m_MethodName: OnNavTabButtonClicked
         m_Mode: 3
         m_Arguments:

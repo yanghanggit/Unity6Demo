@@ -25,12 +25,6 @@ public class TopHUDBarController : MonoBehaviour
         _playerAvatarText.text = "玩家头像";
     }
 
-    // Update is called once per frame
-    // void Update()
-    // {
-
-    // }
-
     public void OnClickPlayerAvatar()
     {
         Debug.Log("点击了玩家头像");
