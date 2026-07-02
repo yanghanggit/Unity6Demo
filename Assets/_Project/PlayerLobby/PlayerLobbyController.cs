@@ -10,7 +10,7 @@ public class PlayerLobbyController : MonoBehaviour
     [SerializeField] private TMP_Text _gameNameText;
 
     // 内部数据
-    private const string NextSceneName = "HomeScene"; // TODO: 待确认目标场景
+    private const string NextSceneName = "MainHub"; // TODO: 待确认目标场景
     private const string MockNextSceneName = "TestLanding";
     private string _randomPlayerId = null;
     private const string _gameName = "Game1";

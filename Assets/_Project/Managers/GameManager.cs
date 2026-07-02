@@ -1,5 +1,5 @@
 // 全局游戏管理器。
-// 正常流程：在 MainScene（Bootstrap 场景）中放一个带有此组件以及 GameServerClientHolder 组件的 GameObject。
+// 正常流程：在（Bootstrap 场景）中放一个带有此组件以及 GameServerClientHolder 组件的 GameObject。
 // 从任意场景 Play：RuntimeInitializeOnLoadMethod 会在任何场景加载前自动创建此 GameObject，
 // 配置从 Resources/ServerConfig.asset 读取，与 Inspector 路径完全一致。
 // 其他脚本通过 GameManager.Instance.ServerClient 访问服务器客户端。
