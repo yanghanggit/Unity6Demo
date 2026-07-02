@@ -371,6 +371,7 @@ GameObject:
   - component: {fileID: 123390209}
   - component: {fileID: 123390211}
   - component: {fileID: 123390210}
+  - component: {fileID: 123390212}
   m_Layer: 5
   m_Name: TopHUDBar
   m_TagString: Untagged
@@ -434,6 +435,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 123390208}
   m_CullTransparentMesh: 1
+--- !u!114 &123390212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 123390208}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15c5c79e38d36435ba7b449a4974bbf5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::TopHUDBarController
+  _resourcesText: {fileID: 174847610}
+  _playerAvatarText: {fileID: 645253141}
 --- !u!1 &146523551
 GameObject:
   m_ObjectHideFlags: 0
@@ -832,6 +847,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8f0d449ffc3845bca4a1e58714b75c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::MainHubController
+  _navTabButtonTexts:
+  - {fileID: 1198038844}
+  - {fileID: 234286517}
+  - {fileID: 1277160914}
+  - {fileID: 2146727776}
+  - {fileID: 1098173339}
 --- !u!1 &459938160
 GameObject:
   m_ObjectHideFlags: 0
@@ -1079,7 +1100,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 538076913}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: MainHubController, Runtime
+        m_MethodName: OnNavTabButtonClicked
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &538076913
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1338,7 +1371,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 650601516}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: MainHubController, Runtime
+        m_MethodName: OnNavTabButtonClicked
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 4
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &650601516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1459,7 +1504,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 726713123}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: MainHubController, Runtime
+        m_MethodName: OnNavTabButtonClicked
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 3
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &726713123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1580,7 +1637,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 821970557}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: MainHubController, Runtime
+        m_MethodName: OnNavTabButtonClicked
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &821970557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1839,7 +1908,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1150372239}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 123390212}
+        m_TargetAssemblyTypeName: TopHUDBarController, Runtime
+        m_MethodName: OnClickPlayerAvatar
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1150372239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2236,7 +2317,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1373908569}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 399892901}
+        m_TargetAssemblyTypeName: MainHubController, Runtime
+        m_MethodName: OnNavTabButtonClicked
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 2
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1373908569
 MonoBehaviour:
   m_ObjectHideFlags: 0
