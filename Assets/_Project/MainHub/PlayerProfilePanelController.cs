@@ -129,7 +129,7 @@ public class PlayerProfilePanelController : MonoBehaviour
                     foreach (var comp in entity.components)
                     {
                         if (_skippedComponents.Contains(comp.name)) continue;
-                        var rendered = RenderComponent(comp.name, comp.data);
+                        var rendered = ComponentUtils.RenderComponent(comp.name, comp.data);
                         if (!string.IsNullOrEmpty(rendered))
                         {
                             sb.AppendLine(rendered);
@@ -148,127 +148,6 @@ public class PlayerProfilePanelController : MonoBehaviour
     }
 
     /// <summary>
-    /// 将服务端组件数据渲染为可读文本，对应 Python _render_component。
-    /// 返回空字符串表示跳过。
-    /// </summary>
-    private static string RenderComponent(string name, JObject data)
-    {
-        var lines = new List<string> { $"  ◆ {name}" };
-
-        switch (name)
-        {
-            case nameof(ActorComponent):
-                {
-                    var sheetName = data["character_sheet_name"]?.ToString();
-                    var stage = data["current_stage"]?.ToString();
-                    if (!string.IsNullOrEmpty(sheetName))
-                        lines.Add($"    职业模板：{sheetName}");
-                    if (!string.IsNullOrEmpty(stage))
-                        lines.Add($"    当前场景：{stage}");
-                    break;
-                }
-            case nameof(AppearanceComponent):
-                {
-                    var baseBody = data["base_body"]?.ToString();
-                    var appearance = data["appearance"]?.ToString();
-                    if (!string.IsNullOrEmpty(baseBody))
-                    {
-                        lines.Add("    基础体型：");
-                        lines.Add($"    {baseBody}");
-                    }
-                    if (!string.IsNullOrEmpty(appearance))
-                    {
-                        lines.Add("    当前外观：");
-                        lines.Add($"    {appearance}");
-                    }
-                    if (string.IsNullOrEmpty(baseBody) && string.IsNullOrEmpty(appearance))
-                        lines.Add("    （暂无描述）");
-                    break;
-                }
-            case nameof(CharacterStatsComponent):
-                {
-                    if (data["stats"] is JObject stats)
-                        lines.Add($"    HP {stats["hp"]} / {stats["max_hp"]}" +
-                                  $"   攻击 {stats["attack"]}" +
-                                  $"   防御 {stats["defense"]}" +
-                                  $"   行动 {stats["energy"]}" +
-                                  $"   速度 {stats["speed"]}");
-                    break;
-                }
-            case nameof(InventoryComponent):
-                {
-                    var items = data["items"] as JArray;
-                    if (items == null || items.Count == 0)
-                    {
-                        lines.Add("    （背包为空）");
-                    }
-                    else
-                    {
-                        lines.Add($"    共 {items.Count} 件道具：");
-                        foreach (var item in items)
-                        {
-                            var itemName = item["name"]?.ToString() ?? "";
-                            var itemDesc = item["description"]?.ToString() ?? "";
-                            var itemCount = item["count"]?.ToString() ?? "1";
-                            lines.Add($"    • {itemName} ×{itemCount} — {itemDesc}");
-                        }
-                    }
-                    break;
-                }
-            case nameof(CostumeComponent):
-                {
-                    if (data["item"] is not JObject item)
-                    {
-                        lines.Add("    （未穿戴时装）");
-                    }
-                    else
-                    {
-                        lines.Add("    当前穿戴时装：");
-                        lines.Add($"    • {item["name"]} — {item["description"]}");
-                    }
-                    break;
-                }
-            case nameof(DeckComponent):
-                {
-                    if (data["keywords"] is JArray keywords)
-                        for (int i = 0; i < keywords.Count; i++)
-                            lines.Add($"    {i + 1}. {keywords[i]}");
-                    break;
-                }
-            case nameof(DrawPileComponent):
-                {
-                    var cards = data["cards"] as JArray;
-                    lines.Add(cards == null || cards.Count == 0 ? "    （空）" : $"    共 {cards.Count} 张");
-                    break;
-                }
-            case nameof(ExhaustPileComponent):
-                {
-                    var cards = data["cards"] as JArray;
-                    lines.Add(cards == null || cards.Count == 0 ? "    （空）" : $"    共 {cards.Count} 张已消耗");
-                    break;
-                }
-            case nameof(DiscardPileComponent):
-                {
-                    var cards = data["cards"] as JArray;
-                    lines.Add(cards == null || cards.Count == 0 ? "    （空）" : $"    共 {cards.Count} 张已弃置");
-                    break;
-                }
-            default:
-                {
-                    // 通用展示：key-value，跳过 name 字段
-                    foreach (var prop in data.Properties())
-                    {
-                        if (prop.Name == "name") continue;
-                        lines.Add($"    {prop.Name}：{prop.Value}");
-                    }
-                    break;
-                }
-        }
-
-        return string.Join("\n", lines);
-    }
-
-    /// <summary>
     /// 使用 Mock 数据填充并显示面板，模拟服务端各组件（参考 player_status.py）。
     /// 显示管线与 ShowLivePanelAsync 完全相同，均通过 RenderComponent 渲染。
     /// </summary>
@@ -283,18 +162,18 @@ public class PlayerProfilePanelController : MonoBehaviour
         // 构造 mock 组件 DTO，转换为与服务端相同的 ComponentSerialization 格式
         var mockComponents = new List<ComponentSerialization>
         {
-            ToComp(new ActorComponent
+            ComponentUtils.ToComp(new ActorComponent
             {
                 name = session.ActorName,
                 character_sheet_name = "剑士",
                 current_stage = "小镇广场",
             }),
-            ToComp(new CharacterStatsComponent
+            ComponentUtils.ToComp(new CharacterStatsComponent
             {
                 name = session.ActorName,
                 stats = new CharacterStats { hp = 28, max_hp = 30, attack = 8, defense = 5, energy = 3, speed = 4 },
             }),
-            ToComp(new AppearanceComponent
+            ComponentUtils.ToComp(new AppearanceComponent
             {
                 name = session.ActorName,
                 base_body = "身形纤细，银发及腰，眼神清澈而坚定。",
@@ -322,18 +201,18 @@ public class PlayerProfilePanelController : MonoBehaviour
                     ["item"] = new JObject { ["name"] = "雪白连衣裙", ["description"] = "白色蕾丝花边连衣裙，令人心旷神怡。" },
                 },
             },
-            ToComp(new DeckComponent
+            ComponentUtils.ToComp(new DeckComponent
             {
                 name = session.ActorName,
                 keywords = new List<string> { "斩击", "防御姿态", "精准刺击" },
             }),
-            ToComp(new DrawPileComponent
+            ComponentUtils.ToComp(new DrawPileComponent
             {
                 name = session.ActorName,
                 cards = Enumerable.Range(0, 8).Select(_ => new Card()).ToList(),
             }),
-            ToComp(new ExhaustPileComponent { name = session.ActorName }),
-            ToComp(new DiscardPileComponent
+            ComponentUtils.ToComp(new ExhaustPileComponent { name = session.ActorName }),
+            ComponentUtils.ToComp(new DiscardPileComponent
             {
                 name = session.ActorName,
                 cards = Enumerable.Range(0, 2).Select(_ => new Card()).ToList(),
@@ -352,7 +231,7 @@ public class PlayerProfilePanelController : MonoBehaviour
         sb.AppendLine($"── {session.ActorName} ──────────────────────");
         foreach (var comp in mockComponents)
         {
-            var rendered = RenderComponent(comp.name, comp.data);
+            var rendered = ComponentUtils.RenderComponent(comp.name, comp.data);
             if (!string.IsNullOrEmpty(rendered))
             {
                 sb.AppendLine(rendered);
@@ -360,19 +239,6 @@ public class PlayerProfilePanelController : MonoBehaviour
             }
         }
         _text.text = sb.ToString();
-    }
-
-    /// <summary>
-    /// 将组件 DTO 序列化为 ComponentSerialization，供 RenderComponent 统一处理。
-    /// name 由类型名自动推导，无需手动传入。
-    /// </summary>
-    private static ComponentSerialization ToComp<T>(T component) where T : class
-    {
-        return new ComponentSerialization
-        {
-            name = typeof(T).Name,
-            data = JObject.FromObject(component),
-        };
     }
 
     /// <summary>
