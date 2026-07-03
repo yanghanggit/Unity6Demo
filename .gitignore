@@ -86,3 +86,6 @@ package-lock.json
 
 # 自定义服务器文件(可选,如果想提交可以移除此行)
 # webgl-server.js
+
+#忽略server-code/下的所有文件
+/server-code/
