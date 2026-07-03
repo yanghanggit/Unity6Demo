@@ -100,10 +100,14 @@ public class GameManager : MonoBehaviour
 
         // 如果 Inspector 未赋值，尝试从同一 GameObject 上自动获取
         if (_serverClientHolder == null)
+        {
             _serverClientHolder = GetComponent<GameServerClientHolder>();
+        }
 
         Debug.Assert(_serverClientHolder != null, "[GameManager] 未找到 GameServerClientHolder 组件，请在同一 GameObject 上添加该组件。");
         if (_serverClientHolder == null)
+        {
             Debug.LogError("[GameManager] 未找到 GameServerClientHolder 组件，请在同一 GameObject 上添加该组件。");
+        }
     }
 }

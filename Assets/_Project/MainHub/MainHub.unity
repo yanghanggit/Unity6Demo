@@ -2974,6 +2974,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21b37e6aec26b4c0584f46e2cd3c179b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::PlayerProfilePanelController
+  _text: {fileID: 581068191}
 --- !u!1 &2110898351
 GameObject:
   m_ObjectHideFlags: 0
