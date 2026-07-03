@@ -18,8 +18,6 @@ public class TopHUDBarController : MonoBehaviour
         Debug.Assert(_playerProfilePanelController != null, "_playerProfilePanelController is null");
     }
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _resourcesText.text = "资源: 999/999"; // TODO: 待替换为实际资源数据

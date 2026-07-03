@@ -17,18 +17,6 @@ public class PlayerProfilePanelController : MonoBehaviour
         Debug.Assert(_text != null, "_text is null");
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     /// <summary>
     /// 关闭玩家信息面板
     /// </summary>
