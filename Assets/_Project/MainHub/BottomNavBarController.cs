@@ -9,7 +9,7 @@ public class BottomNavBarController : MonoBehaviour
 
     void Awake()
     {
-        Debug.Assert(_navTabButtonTexts != null && _navTabButtonTexts.Length == 5, "_navTabButtonTexts is null or empty");
+        Debug.Assert(_navTabButtonTexts != null && _navTabButtonTexts.Length == (int)MainHubTab.Count, "_navTabButtonTexts is null or empty");
         Debug.Assert(_tabContentPanelController != null, "_tabContentPanelController is null");
     }
 
@@ -22,12 +22,14 @@ public class BottomNavBarController : MonoBehaviour
 
         _tabContentPanelController.HideAllTabPanels(); // 初始隐藏所有Tab内容
 
-        OnNavTabButtonClicked(2);
+        OnNavTabButtonClicked((int)MainHubTab.Home);
     }
 
+    /// <summary>供 Unity 按钮事件回调使用（传入枚举对应的整数下标）。</summary>
     public void OnNavTabButtonClicked(int tabIndex)
     {
         Debug.Log($"导航标签按钮 {tabIndex} 被点击");
-        _tabContentPanelController.ShowTabPanel(tabIndex);
+        _tabContentPanelController.ShowTabPanel((MainHubTab)tabIndex);
     }
+
 }
