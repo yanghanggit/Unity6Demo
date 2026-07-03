@@ -1,7 +1,4 @@
 using UnityEngine;
-// using Cysharp.Threading.Tasks;
-// using UnityEngine;
-// using UnityEngine.SceneManagement;
 using TMPro;
 
 public class TopHUDBarController : MonoBehaviour
@@ -11,10 +8,14 @@ public class TopHUDBarController : MonoBehaviour
     [SerializeField] private TMP_Text _playerAvatarText;
 
 
+    [Header("Player Profile Panel")]
+    [SerializeField] private PlayerProfilePanelController _playerProfilePanelController;
+
     void Awake()
     {
         Debug.Assert(_resourcesText != null, "_resourcesText is null");
         Debug.Assert(_playerAvatarText != null, "_playerAvatarText is null");
+        Debug.Assert(_playerProfilePanelController != null, "_playerProfilePanelController is null");
     }
 
 
@@ -23,10 +24,12 @@ public class TopHUDBarController : MonoBehaviour
     {
         _resourcesText.text = "资源: 999/999"; // TODO: 待替换为实际资源数据
         _playerAvatarText.text = "玩家头像";
+        _playerProfilePanelController.HidePanel(); // 初始化时隐藏玩家信息面板
     }
 
     public void OnClickPlayerAvatar()
     {
         Debug.Log("点击了玩家头像");
+        _playerProfilePanelController.ShowPanel(); // 显示玩家信息面板
     }
 }
