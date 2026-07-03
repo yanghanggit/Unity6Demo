@@ -43,6 +43,7 @@ public sealed class NewGameRequest
 public sealed class NewGameResponse
 {
     public Blueprint blueprint = new();
+    public PlayerSession player_session = new();
 }
 
 // ────────────────────────────────────────────────────────────────────────────────

@@ -13,7 +13,7 @@ public class PlayerLobbyController : MonoBehaviour
     private const string NextSceneName = "MainHub"; // TODO: 待确认目标场景
     private const string MockNextSceneName = "TestLanding";
     private string _randomPlayerId = null;
-    private const string _gameName = "Game1";
+    private const string _fixedNewGameName = "Game1";
 
     void Awake()
     {
@@ -33,7 +33,7 @@ public class PlayerLobbyController : MonoBehaviour
 
         // 显示玩家ID和游戏名在UI上
         _playerIdText.text = $"玩家ID: {_randomPlayerId}";
-        _gameNameText.text = $"游戏名: {_gameName}";
+        _gameNameText.text = $"游戏名: {_fixedNewGameName}";
     }
 
     /// <summary>
@@ -62,15 +62,17 @@ public class PlayerLobbyController : MonoBehaviour
         try
         {
             // 登录
-            await client.LoginAsync(_randomPlayerId, _gameName, ct);
+            await client.LoginAsync(_randomPlayerId, _fixedNewGameName, ct);
 
             // 创建新游戏
-            var newGameResponse = await client.NewGameAsync(_randomPlayerId, _gameName, ct);
+            var newGameResponse = await client.NewGameAsync(_randomPlayerId, _fixedNewGameName, ct);
             Debug.Log($"NewGameResponse blueprint: {newGameResponse.blueprint}");
 
             // 两步均成功后再写入 Session
-            GameManager.Instance.SetSession(_randomPlayerId, _gameName);
-            Debug.Log($"新游戏创建成功，玩家ID: {_randomPlayerId}, 游戏名: {_gameName}");
+            GameManager.Instance.SetSession(newGameResponse.player_session, newGameResponse.blueprint);
+            Debug.Log($"新游戏创建成功，玩家ID: {GameManager.Instance.Session.UserName}, 角色: {GameManager.Instance.Session.ActorName}, 游戏名: {GameManager.Instance.Session.GameName}");
+
+            // 跳转到下一个场景
             await SceneManager.LoadSceneAsync(NextSceneName);
         }
         catch (GameServerClient.ServerException ex)
@@ -90,8 +92,19 @@ public class PlayerLobbyController : MonoBehaviour
     {
         // 模拟新游戏创建成功
         await UniTask.Delay(0); // 模拟网络延迟
-        GameManager.Instance.SetSession(_randomPlayerId, _gameName);
-        Debug.Log($"模拟新游戏创建成功，玩家ID: {_randomPlayerId}, 游戏名: {_gameName}");
+
+        // 创建一个模拟的 PlayerSession
+        var mockPlayerSession = new PlayerSession
+        {
+            name = _randomPlayerId,
+            actor = "mock_actor",
+            game = _fixedNewGameName,
+        };
+
+        GameManager.Instance.SetSession(mockPlayerSession, new Blueprint());
+        Debug.Log($"模拟新游戏创建成功，玩家ID: {GameManager.Instance.Session.UserName}, 角色: {GameManager.Instance.Session.ActorName}, 游戏名: {GameManager.Instance.Session.GameName}");
+
+        // 跳转到下一个场景
         await SceneManager.LoadSceneAsync(MockNextSceneName);
     }
 }

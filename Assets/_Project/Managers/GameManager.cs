@@ -23,24 +23,36 @@ public class GameManager : MonoBehaviour
     // ── 当前登录会话 ──────────────────────────────────────────────────────────
 
     /// <summary>
-    /// 玩家会话数据（不可变）。null 表示未登录。
+    /// 运行时会话状态，对应服务端 tui/session.py GameSession。null 表示未登录。
     /// </summary>
-    public class PlayerSession
+    public class GameSession
     {
-        public string PlayerId { get; }
-        public string GameName { get; }
+        public PlayerSession PlayerSession { get; }
+        public Blueprint Blueprint { get; }
+        public int LastSequenceId { get; set; }
 
-        public PlayerSession(string playerId, string gameName)
+        /// <summary>玩家用户名，来自 PlayerSession.name。</summary>
+        public string UserName => PlayerSession.name;
+
+        /// <summary>游戏名，来自 PlayerSession.game。</summary>
+        public string GameName => PlayerSession.game;
+
+        /// <summary>玩家在游戏中的角色名，来自 PlayerSession.actor。</summary>
+        public string ActorName => PlayerSession.actor;
+
+        public GameSession(PlayerSession playerSession, Blueprint blueprint)
         {
-            PlayerId = playerId;
-            GameName = gameName;
+            PlayerSession = playerSession;
+            Blueprint = blueprint;
+            LastSequenceId = 0;
         }
     }
 
     /// <summary>
-    /// 当前玩家会话数据（不可变）。null 表示未登录。
+    /// 当前游戏会话。null 表示未登录。
     /// </summary>
-    public PlayerSession Session { get; private set; }
+    public GameSession Session { get; private set; }
+
     // ── 游戏启动状态 ──────────────────────────────────────────────────────────
     /// <summary>
     /// 服务器信息。null 表示尚未连通服务器。
@@ -49,15 +61,16 @@ public class GameManager : MonoBehaviour
     public bool IsServerConnected => ServerInfo != null;
 
     /// <summary>
-    /// 设置当前玩家会话数据（不可变）。
+    /// 根据服务端 NewGameResponse 建立会话。
     /// </summary>
-    public void SetSession(string playerId, string gameName)
+    /// 
+    public void SetSession(PlayerSession playerSession, Blueprint blueprint)
     {
-        Session = new PlayerSession(playerId, gameName);
+        Session = new GameSession(playerSession, blueprint);
     }
 
     /// <summary>
-    /// 清除当前玩家会话数据（不可变）。
+    /// 清除当前会话（登出时调用）。
     /// </summary>
     public void ClearSession()
     {
