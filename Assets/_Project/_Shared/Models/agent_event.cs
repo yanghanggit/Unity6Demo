@@ -1,23 +1,23 @@
 // 对应 Python models/agent_event.py
 
-public enum EventHead
+public enum EventType
 {
     NONE = 0,
-    SPEAK_EVENT = 1,
-    WHISPER_EVENT = 2,
-    ANNOUNCE_EVENT = 3,
-    MIND_EVENT = 4,
-    QUERY_EVENT = 5,
-    TRANS_STAGE_EVENT = 6,
-    COMBAT_INITIATION_EVENT = 7,
-    COMBAT_ARBITRATION_EVENT = 8,
-    COMBAT_ARCHIVE_EVENT = 9,
-    APPEARANCE_UPDATE_EVENT = 10,
+    SPEAK = 1,
+    WHISPER = 2,
+    ANNOUNCE = 3,
+    MIND = 4,
+    QUERY = 5,
+    TRANS_STAGE = 6,
+    COMBAT_INITIATION = 7,
+    COMBAT_ARBITRATION = 8,
+    COMBAT_ARCHIVE = 9,
+    APPEARANCE_UPDATE = 10,
 }
 
 public class AgentEvent
 {
-    public int head = (int)EventHead.NONE;
+    public int type = (int)EventType.NONE;
     public string message = "";
 }
 
@@ -48,6 +48,12 @@ public sealed class MindEvent : AgentEvent
     public string content = "";
 }
 
+public sealed class QueryEvent : AgentEvent
+{
+    public string actor = "";
+    public string question = "";
+}
+
 public sealed class TransStageEvent : AgentEvent
 {
     public string actor = "";
@@ -67,9 +73,14 @@ public sealed class CombatArbitrationEvent : AgentEvent
     public string narrative = "";
 }
 
+public sealed class CombatArchiveEvent : AgentEvent
+{
+    public string actor = "";
+    public string summary = "";
+}
+
 public sealed class AppearanceUpdateEvent : AgentEvent
 {
     public string actor = "";
-    public string target = "";
     public string appearance = "";
 }
