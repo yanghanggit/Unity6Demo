@@ -70,7 +70,6 @@ public sealed class NPCComponent
 public sealed class PartyMemberComponent
 {
     public string name = "";
-    public string dungeon_name = "";
 }
 
 public sealed class PartyRosterComponent
@@ -88,7 +87,6 @@ public sealed class HandComponent
 {
     public string name = "";
     public List<Card> cards = new();
-    public int round = 0;
 }
 
 public sealed class RoundStatsComponent
