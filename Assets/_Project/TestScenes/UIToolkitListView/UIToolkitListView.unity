@@ -165,6 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Runtime::InventoryListViewDemo
   _panelRenderer: {fileID: 496240753}
+  _initialItemCount: 100
 --- !u!1931382934 &496240753
 PanelRenderer:
   m_ObjectHideFlags: 0

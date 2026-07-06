@@ -7,7 +7,7 @@
 .root-container {
     width: 100%;
     height: 100%;
-    background-color: rgb(18, 18, 28);
+    background-color: rgb(12, 14, 22);
     padding: 32px 28px 24px 28px;
     align-items: stretch;
 }
@@ -41,32 +41,40 @@
 /* ===== ListView 容器 ===== */
 .inventory-list {
     flex-grow: 1;
-    background-color: rgb(24, 24, 38);
+    background-color: rgb(12, 14, 22);
     border-radius: 8px;
     border-width: 1px;
-    border-color: rgb(55, 55, 75);
+    border-color: rgb(40, 42, 60);
     min-height: 300px;
 }
 
-/* Unity 内置交替行背景 */
+/* item wrapper：设为透明，让 ListView 容器的深色背景透出卡片间隙 */
+.unity-list-view__item {
+    background-color: rgba(0, 0, 0, 0);
+}
 .unity-list-view__item--even {
-    background-color: rgb(30, 30, 44);
+    background-color: rgba(0, 0, 0, 0);
 }
-
 .unity-list-view__item--odd {
-    background-color: rgb(24, 24, 38);
+    background-color: rgba(0, 0, 0, 0);
 }
 
-/* 选中高亮 */
-.unity-list-view__item:checked {
-    background-color: rgb(50, 80, 130);
+/* 选中高亮：outer wrapper 遮住了 item 背景，所以改在 card 上显示选中色 */
+.unity-list-view__item:checked .list-item-card {
+    background-color: rgb(70, 95, 165);
 }
 
-/* ===== 列表项 Label =====
-   makeItem 返回一个 Label 并添加此 class；
-   bindItem 只负责设置 label.text，其余样式全在这里。 */
-.list-item-label {
+/* ===== 列表项卡片容器 ===== */
+/* fixedItemHeight=144：outer.padding(16×2) + card(flex-grow→112px) = 144 */
+.list-item-card {
     flex-grow: 1;
+    background-color: rgb(55, 68, 120);
+    border-radius: 8px;
+    justify-content: center;
+}
+
+/* ===== 列表项文字 ===== */
+.list-item-label {
     color: rgb(220, 220, 220);
     font-size: 28px;
     padding: 0 24px;

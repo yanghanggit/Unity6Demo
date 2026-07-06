@@ -9,10 +9,10 @@
 
         <!-- 核心：ListView，内部就是一个带虚拟化的 ScrollView -->
         <ui:ListView name="inventory-list-view" class="inventory-list"
-                     fixed-item-height="72"
+                     fixed-item-height="144"
                      virtualization-method="FixedHeight"
                      selection-type="Single"
-                     show-alternating-row-backgrounds="ContentOnly"
+                     show-alternating-row-backgrounds="None"
                      show-border="false" />
 
     </ui:VisualElement>

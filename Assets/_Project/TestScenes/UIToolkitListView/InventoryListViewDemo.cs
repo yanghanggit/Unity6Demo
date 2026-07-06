@@ -9,35 +9,47 @@ using UnityEngine.UIElements;
 ///   2. itemsSource 绑定 List&lt;string&gt;
 ///   3. 运行时添加数据 + RefreshItems() 刷新
 /// </summary>
+[ExecuteAlways]
 public class InventoryListViewDemo : MonoBehaviour
 {
     [Header("UI Toolkit")]
     [SerializeField] private PanelRenderer _panelRenderer;
+    [SerializeField] private int _initialItemCount = 100;
 
     // ── 数据：字符串列表，每条是一个物品名 ─────────────────────────────
     private readonly List<string> _allItems = new();
-    private int _nextId = 1;
 
     // ── UI 引用 ─────────────────────────────────────────────────────
     private ListView _listView;
     private Label    _countLabel;
     private Button   _btnAdd;
 
-    // 行高（与 UXML fixed-item-height 及 USS .list-item-label 保持一致）
-    private const float k_FixedItemHeight = 72f;
+    // 行高 = padding-top(16) + card(112) + padding-bottom(16) = 144px
+    private const float k_FixedItemHeight = 144f;
 
     // ────────────────────────────────────────────────────────────────
-    void Start()
+    // OnEnable/OnDisable 在 Edit Mode 和 Play Mode 均可靠触发（含脚本重编译后）
+    // Start/OnDestroy 在 Edit Mode 下行为不稳定，不适合 [ExecuteAlways] 场景
+    void OnEnable()
     {
-        // PanelRenderer 没有公开的 rootVisualElement 属性，正确的公开 API 是 RegisterUIReloadCallback。
-        // 源码显示：若 Panel 已初始化（Awake 完成后），回调会立即同步触发。
-        _panelRenderer.RegisterUIReloadCallback(OnPanelLoaded);
+        if (_panelRenderer != null)
+            _panelRenderer.RegisterUIReloadCallback(OnPanelLoaded);
     }
 
-    void OnDestroy()
+    void OnDisable()
     {
         if (_panelRenderer != null)
             _panelRenderer.UnregisterUIReloadCallback(OnPanelLoaded);
+    }
+
+    // Inspector 修改序列化字段时触发，重建数据并刷新列表
+    void OnValidate()
+    {
+        _allItems.Clear();
+        for (int i = 0; i < _initialItemCount; i++)
+            _allItems.Add($"物品 #{_allItems.Count + 1:000}");
+        if (_listView != null)
+            Refresh();
     }
 
     /// <summary>
@@ -54,8 +66,8 @@ public class InventoryListViewDemo : MonoBehaviour
 
         // 首次加载时生成初始数据（热重载时不重复添加）
         if (_allItems.Count == 0)
-            for (int i = 0; i < 20; i++)
-                _allItems.Add($"物品 #{_nextId++:000}");
+            for (int i = 0; i < _initialItemCount; i++)
+                _allItems.Add($"物品 #{_allItems.Count + 1:000}");
 
         SetupListView();
 
@@ -66,18 +78,31 @@ public class InventoryListViewDemo : MonoBehaviour
 
     void SetupListView()
     {
-        // ① makeItem：为每行创建一个 Label（Unity 会缓存复用，不会无限创建）
+        // ① makeItem：outer wrapper（内联样式保证间距可靠）+ card + label
+        //    outer 的 padding 区域透出深色背景形成间隙；点击事件经 card→outer→item 向上冒泡，选中正常触发
+        //    选中高亮由 USS ".unity-list-view__item:checked .list-item-card" 负责显示在 card 上
         _listView.makeItem = () =>
         {
+            var outer = new VisualElement();
+            outer.style.flexGrow = 1;
+            outer.style.paddingTop    = 16;
+            outer.style.paddingBottom = 16;
+            outer.style.paddingLeft   = 12;
+            outer.style.paddingRight  = 12;
+            outer.style.backgroundColor = new Color(12f / 255f, 14f / 255f, 22f / 255f);
+
+            var card = new VisualElement();
+            card.AddToClassList("list-item-card");
             var label = new Label();
             label.AddToClassList("list-item-label");
-            return label;
+            card.Add(label);
+            outer.Add(card);
+            return outer;
         };
 
-        // ② bindItem：把数据填入元素
-        //    每当一行滚动进入视口就调用，index 是 _allItems 中的下标
+        // ② bindItem：Q<Label>() 从 outer 内部查找 label 填入数据
         _listView.bindItem = (element, index) =>
-            ((Label)element).text = _allItems[index];
+            element.Q<Label>().text = _allItems[index];
 
         // ③ 数据源：ListView 直接引用这个列表，修改后调用 RefreshItems() 即可
         _listView.itemsSource = _allItems;
@@ -87,7 +112,7 @@ public class InventoryListViewDemo : MonoBehaviour
         _listView.fixedItemHeight      = k_FixedItemHeight;
 
         _listView.selectionType = SelectionType.Single;
-        _listView.showAlternatingRowBackgrounds = AlternatingRowBackground.ContentOnly;
+        _listView.showAlternatingRowBackgrounds = AlternatingRowBackground.None;
 
         Refresh();
     }
@@ -96,7 +121,7 @@ public class InventoryListViewDemo : MonoBehaviour
 
     void AddItem()
     {
-        _allItems.Add($"物品 #{_nextId++:000}");
+        _allItems.Add($"物品 #{_allItems.Count + 1:000}");
         Refresh();
     }
 
