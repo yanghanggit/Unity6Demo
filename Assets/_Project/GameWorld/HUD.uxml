@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <ui:Style src="TopHUD.uss" />
+    <ui:Style src="HUD.uss" />
     <ui:VisualElement name="top-root" class="top-hud-root">
         <ui:Button name="btn-top-test" text="顶部HUD测试" class="btn-test" />
     </ui:VisualElement>

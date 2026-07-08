@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[RequireComponent(typeof(PanelRenderer))]
 public class BottomHUDController : MonoBehaviour
 {
     [Header("UI Toolkit")]
@@ -8,6 +9,9 @@ public class BottomHUDController : MonoBehaviour
 
     void OnEnable()
     {
+        if (_panelRenderer == null)
+            _panelRenderer = GetComponent<PanelRenderer>();
+
         if (_panelRenderer != null)
             _panelRenderer.RegisterUIReloadCallback(OnPanelLoaded);
     }

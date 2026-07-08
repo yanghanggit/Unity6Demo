@@ -53,6 +53,9 @@ public class WorldCameraController : MonoBehaviour
 
             Vector3 newPos = _camera.transform.position - worldDelta;
             _camera.transform.position = ClampToWorldBounds(newPos);
+
+            // 打印摄像机位置和世界边界信息，便于调试
+            Debug.Log($"[WorldCameraController] Camera Position: {_camera.transform.position}, World Bounds: {_worldBounds}");
         }
     }
 
