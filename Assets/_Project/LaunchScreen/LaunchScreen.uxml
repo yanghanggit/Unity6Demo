@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="LaunchScreen.uss" />
+    <ui:VisualElement name="root" class="root-container">
+
+        <ui:Label name="status-label" class="status-label" />
+
+        <ui:Button name="btn-start" text="开始" class="btn-start" />
+
+    </ui:VisualElement>
+</ui:UXML>
