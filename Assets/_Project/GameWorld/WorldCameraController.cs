@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// 拖拽平移摄像机：世界比摄像机可视范围大，通过鼠标/触摸拖拽来平移摄像机。
-/// 使用 Pointer.current（Mouse/Touchscreen 的公共基类）统一处理鼠标与触摸输入。
+/// 使用 Pointer.current（Mouse/Touchscreen 的公共基类）统一处理鼠标与触摸输入。100 像素=1 世界单位
 /// </summary>
 [RequireComponent(typeof(Camera))]
 public class WorldCameraController : MonoBehaviour
@@ -53,9 +53,6 @@ public class WorldCameraController : MonoBehaviour
 
             Vector3 newPos = _camera.transform.position - worldDelta;
             _camera.transform.position = ClampToWorldBounds(newPos);
-
-            // 打印摄像机位置和世界边界信息，便于调试
-            Debug.Log($"[WorldCameraController] Camera Position: {_camera.transform.position}, World Bounds: {_worldBounds}");
         }
     }
 
@@ -76,5 +73,33 @@ public class WorldCameraController : MonoBehaviour
         pos.x = minX <= maxX ? Mathf.Clamp(pos.x, minX, maxX) : _worldBounds.center.x;
         pos.y = minY <= maxY ? Mathf.Clamp(pos.y, minY, maxY) : _worldBounds.center.y;
         return pos;
+    }
+
+    /// <summary>
+    /// 在 Scene 视图里画出 _worldBounds 的矩形线框（黄色），方便对齐背景美术资源；
+    /// 同时画出摄像机中心实际可移动的范围（青色，已按半宽高内缩）。
+    /// </summary>
+    void OnDrawGizmos()
+    {
+        Vector3 center = new(_worldBounds.center.x, _worldBounds.center.y, 0);
+        Vector3 size = new(_worldBounds.width, _worldBounds.height, 0);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(center, size);
+
+        var cam = _camera != null ? _camera : GetComponent<Camera>();
+        if (cam == null || !cam.orthographic)
+            return;
+
+        float halfHeight = cam.orthographicSize;
+        float halfWidth = halfHeight * cam.aspect;
+        float innerWidth = _worldBounds.width - halfWidth * 2;
+        float innerHeight = _worldBounds.height - halfHeight * 2;
+
+        if (innerWidth > 0 && innerHeight > 0)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireCube(center, new Vector3(innerWidth, innerHeight, 0));
+        }
     }
 }
