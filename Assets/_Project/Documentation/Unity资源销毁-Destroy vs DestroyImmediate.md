@@ -3,7 +3,7 @@
 ## 核心结论 🎯
 
 | 对象类型 | 运行时推荐 | 编辑器 | 是否需要 `true` 参数 |
-|---------|-----------|-------|---------------------|
+| --------- | ----------- | ------- | --------------------- |
 | **GameObject** | `Destroy()` | `DestroyImmediate()` | ❌ 不需要 |
 | **Component** | `Destroy()` | `DestroyImmediate()` | ❌ 不需要 |
 | **动态 Texture2D** | `DestroyImmediate(texture, true)` | `DestroyImmediate(texture, true)` | ✅ 必须 `true` |
@@ -31,7 +31,7 @@
 ## 2. 关键区别对比
 
 | 特性 | `Destroy()` | `DestroyImmediate()` |
-|-----|------------|---------------------|
+| ----- | ------------ | --------------------- |
 | **销毁时机** | 帧结束时 | 立即 |
 | **场景对象** | ✅ 支持 | ✅ 支持 |
 | **资源文件** | ❌ 不支持 | ✅ 支持（需要 `true`） |
@@ -269,12 +269,12 @@ foreach (Transform child in container.transform)
 ## 9. Unity 官方建议
 
 > **运行时（Runtime）：**
-
+>
 > - GameObject/Component：使用 `Destroy()`
 > - 动态资源：使用 `DestroyImmediate(obj, true)`
 >
 > **编辑器脚本（Editor Scripts）：**
-
+>
 > - 所有情况都可以使用 `DestroyImmediate()`
 > - 资源文件需要添加 `true` 参数
 
