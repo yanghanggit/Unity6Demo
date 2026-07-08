@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="TopHUD.uss" />
+    <ui:VisualElement name="top-root" class="top-hud-root">
+        <ui:Button name="btn-top-test" text="顶部HUD测试" class="btn-test" />
+    </ui:VisualElement>
+    <ui:VisualElement name="bottom-root" class="bottom-hud-root">
+        <ui:Button name="btn-bottom-test" text="底部HUD测试" class="btn-test" />
+    </ui:VisualElement>
+</ui:UXML>

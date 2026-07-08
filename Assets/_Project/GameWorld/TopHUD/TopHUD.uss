@@ -1,0 +1,34 @@
+/* ===================================================================
+   TopHUD.uss
+   顶部 HUD：铺满全屏但自身不拦截点击（picking-mode 由代码设置为 Ignore），
+   仅按钮本身可点击，避免遮挡下方游戏世界的摄像机拖拽。
+   =================================================================== */
+
+.top-hud-root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 40px;
+}
+
+.bottom-hud-root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 40px;
+}
+
+.btn-test {
+    width: 280px;
+    height: 80px;
+    font-size: 28px;
+    -unity-text-align: middle-center;
+}
