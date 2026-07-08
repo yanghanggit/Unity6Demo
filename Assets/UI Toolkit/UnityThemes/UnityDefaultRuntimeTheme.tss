@@ -1,1 +1,13 @@
 @import url("unity-theme://default");
+
+/* 全局默认字体：支持中文（CJK）显示，覆盖运行时构建（含 WebGL）下的中文回退问题。
+   重要：这里必须引用 UI Toolkit 原生的 Font Asset（UnityEngine.TextCore.Text.FontAsset），
+   而不是经典 TextMeshPro 的 TMP_FontAsset —— 两者是不同的类型，
+   -unity-font-definition / FontDefinition.FromSDFFont 只认前者，
+   引用后者会被静默忽略并回退到内置默认字体（不会报错，但中文不会显示）。
+   生成方式：在 Project 窗口选中 NotoSansCJKsc-Regular.otf，
+   右键 Create > UI Toolkit > Text > Font Asset > SDF，
+   Atlas Population Mode 保持 Dynamic（用于任意玩家输入文本，无需预先烘焙）。 */
+:root {
+    -unity-font-definition: url("/Assets/_Project/Assets/Fonts/NotoSansCJKsc-Regular_UITK_SDF.asset");
+}

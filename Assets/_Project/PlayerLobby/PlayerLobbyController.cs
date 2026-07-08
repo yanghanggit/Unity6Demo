@@ -9,15 +9,10 @@ public class PlayerLobbyController : MonoBehaviour
     [SerializeField] private PanelRenderer _panelRenderer;
 
     // 内部数据
-    private const string NextSceneName = "MainHub"; // TODO: 待确认目标场景
+    private const string NextSceneName = "TestLanding";//"MainHub"; // TODO: 待确认目标场景
     private const string MockNextSceneName = "TestLanding";
     private string _randomPlayerId = null;
     private const string _fixedNewGameName = "Game1";
-
-    /// UI 引用（在 OnPanelLoaded 中查询）
-    private Label _playerIdText;
-    private Label _gameNameText;
-    private Button _newGameButton;
 
     // OnEnable/OnDisable 用于注册 Panel 加载回调，比 Start() 更可靠
     // （UXML 是异步加载的，Start() 时刻 Panel 可能还未就绪）
@@ -38,14 +33,14 @@ public class PlayerLobbyController : MonoBehaviour
     /// </summary>
     void OnPanelLoaded(PanelRenderer pr, VisualElement root)
     {
-        _playerIdText = root.Q<Label>("player-id-text");
-        _gameNameText = root.Q<Label>("game-name-text");
-        _newGameButton = root.Q<Button>("btn-new-game");
-        Debug.Assert(_playerIdText != null, "_playerIdText is null");
-        Debug.Assert(_gameNameText != null, "_gameNameText is null");
-        Debug.Assert(_newGameButton != null, "_newGameButton is null");
+        var playerIdText = root.Q<Label>("player-id-text");
+        var gameNameText = root.Q<Label>("game-name-text");
+        var newGameButton = root.Q<Button>("btn-new-game");
+        Debug.Assert(playerIdText != null, "playerIdText is null");
+        Debug.Assert(gameNameText != null, "gameNameText is null");
+        Debug.Assert(newGameButton != null, "newGameButton is null");
 
-        _newGameButton.clicked += OnClickNewGame;
+        newGameButton.clicked += OnClickNewGame;
 
         // 初始化玩家ID并显示在UI上
         if (string.IsNullOrEmpty(_randomPlayerId))
@@ -56,8 +51,8 @@ public class PlayerLobbyController : MonoBehaviour
         }
 
         // 显示玩家ID和游戏名在UI上
-        _playerIdText.text = $"玩家ID: {_randomPlayerId}";
-        _gameNameText.text = $"游戏名: {_fixedNewGameName}";
+        playerIdText.text = $"玩家ID: {_randomPlayerId}";
+        gameNameText.text = $"游戏名: {_fixedNewGameName}";
     }
 
     /// <summary>
