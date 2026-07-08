@@ -1,0 +1,20 @@
+/* ===================================================================
+   TestLanding.uss
+   适配目标：1080 × 1920 竖屏（PanelSettings 参考分辨率请同步设置）
+   =================================================================== */
+
+/* ===== 根容器：全屏、白色背景、内容居中（还原原 uGUI Panel 的视觉效果） ===== */
+.root-container {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(255, 255, 255);
+    justify-content: center;
+    align-items: center;
+}
+
+/* ===== 中间的 Test 文本：通过 TestLandingData 数据绑定驱动 ===== */
+.test-label {
+    color: rgb(0, 0, 0);
+    font-size: 100px;
+    -unity-text-align: middle-center;
+}

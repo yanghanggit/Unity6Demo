@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="TestLanding.uss" />
+    <ui:VisualElement name="root" class="root-container">
+
+        <ui:Label name="test-label" text="Test" class="test-label" data-source="TestLandingData.asset" data-source-path="testText">
+            <Bindings>
+                <ui:DataBinding property="text" binding-mode="ToTarget" />
+            </Bindings>
+        </ui:Label>
+
+    </ui:VisualElement>
+</ui:UXML>
