@@ -1,0 +1,48 @@
+/* ===================================================================
+   PlayerLobby.uss
+   适配目标：1080 × 1920 竖屏（PanelSettings 参考分辨率请同步设置）
+   =================================================================== */
+
+/* ===== 根容器：全屏、深色背景 ===== */
+.root-container {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(12, 14, 22);
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 160px 40px 120px 40px;
+}
+
+/* ===== 玩家信息区域（玩家ID / 游戏名） ===== */
+.info-section {
+    align-items: center;
+}
+
+.info-label {
+    color: rgb(220, 220, 220);
+    font-size: 36px;
+    -unity-text-align: middle-center;
+    margin-bottom: 24px;
+}
+
+/* ===== 新游戏按钮：圆形，绿色主色调（与 LaunchScreen 风格一致） ===== */
+.btn-new-game {
+    width: 320px;
+    height: 320px;
+    border-radius: 160px;
+    border-width: 0;
+    background-color: rgb(38, 120, 60);
+    color: white;
+    -unity-font-style: bold;
+    font-size: 40px;
+    -unity-text-align: middle-center;
+}
+
+.btn-new-game:hover {
+    background-color: rgb(48, 150, 75);
+}
+
+.btn-new-game:disabled {
+    opacity: 0.5;
+}

@@ -1,13 +1,12 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
+using UnityEngine.UIElements;
 
 public class PlayerLobbyController : MonoBehaviour
 {
-    [Header("UI Components")]
-    [SerializeField] private TMP_Text _playerIdText;
-    [SerializeField] private TMP_Text _gameNameText;
+    [Header("UI Toolkit")]
+    [SerializeField] private PanelRenderer _panelRenderer;
 
     // 内部数据
     private const string NextSceneName = "MainHub"; // TODO: 待确认目标场景
@@ -15,14 +14,39 @@ public class PlayerLobbyController : MonoBehaviour
     private string _randomPlayerId = null;
     private const string _fixedNewGameName = "Game1";
 
-    void Awake()
+    /// UI 引用（在 OnPanelLoaded 中查询）
+    private Label _playerIdText;
+    private Label _gameNameText;
+    private Button _newGameButton;
+
+    // OnEnable/OnDisable 用于注册 Panel 加载回调，比 Start() 更可靠
+    // （UXML 是异步加载的，Start() 时刻 Panel 可能还未就绪）
+    void OnEnable()
     {
-        Debug.Assert(_playerIdText != null, "_playerIdText is null");
-        Debug.Assert(_gameNameText != null, "_gameNameText is null");
+        if (_panelRenderer != null)
+            _panelRenderer.RegisterUIReloadCallback(OnPanelLoaded);
     }
 
-    void Start()
+    void OnDisable()
     {
+        if (_panelRenderer != null)
+            _panelRenderer.UnregisterUIReloadCallback(OnPanelLoaded);
+    }
+
+    /// <summary>
+    /// Panel 加载完成回调：查询 UI 元素并初始化显示
+    /// </summary>
+    void OnPanelLoaded(PanelRenderer pr, VisualElement root)
+    {
+        _playerIdText = root.Q<Label>("player-id-text");
+        _gameNameText = root.Q<Label>("game-name-text");
+        _newGameButton = root.Q<Button>("btn-new-game");
+        Debug.Assert(_playerIdText != null, "_playerIdText is null");
+        Debug.Assert(_gameNameText != null, "_gameNameText is null");
+        Debug.Assert(_newGameButton != null, "_newGameButton is null");
+
+        _newGameButton.clicked += OnClickNewGame;
+
         // 初始化玩家ID并显示在UI上
         if (string.IsNullOrEmpty(_randomPlayerId))
         {
@@ -50,6 +74,7 @@ public class PlayerLobbyController : MonoBehaviour
             MockStartNewGameAsync().Forget(); // 模拟新游戏创建成功（用于测试）
         }
     }
+
 
     /// <summary>
     /// 异步启动新游戏

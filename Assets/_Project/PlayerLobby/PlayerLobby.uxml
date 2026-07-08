@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="PlayerLobby.uss" />
+    <ui:VisualElement name="root" class="root-container">
+
+        <ui:VisualElement name="info-section" class="info-section">
+            <ui:Label name="player-id-text" class="info-label" />
+            <ui:Label name="game-name-text" class="info-label" />
+        </ui:VisualElement>
+
+        <ui:Button name="btn-new-game" text="新游戏" class="btn-new-game" />
+
+    </ui:VisualElement>
+</ui:UXML>
