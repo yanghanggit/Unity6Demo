@@ -1,9 +1,27 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const app = express();
 const PORT = 58497;
-const WEBAPP_DIR = 'Web';
+const WEBAPP_DIR = 'Builds/WebGL';
+
+/**
+ * 获取本机所有局域网 IPv4 地址（排除回环地址），方便打印出手机可访问的地址。
+ */
+function getLanIPs() {
+  const results = [];
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        results.push(iface.address);
+      }
+    }
+  }
+  return results;
+}
+
 
 // 为 .gz 文件设置正确的 Content-Encoding 头
 app.use((req, res, next) => {
@@ -48,11 +66,16 @@ if (!fs.existsSync(webappPath)) {
 // 静态文件服务
 app.use(express.static(webappPath));
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
+  const lanIPs = getLanIPs();
   console.log(`Unity WebGL Server running at:`);
-  console.log(`需要查看本机的地址，如果是局域网其他设备访问，请使用局域网IP地址，通过ifconfig或者ipconfig命令查看`);
   console.log(`  http://localhost:${PORT}`);
   console.log(`  http://127.0.0.1:${PORT}`);
-  console.log(`  http://192.168.2.121:${PORT}`);
+  if (lanIPs.length > 0) {
+    console.log(`\n手机/其他局域网设备请访问：`);
+    lanIPs.forEach((ip) => console.log(`  http://${ip}:${PORT}`));
+  } else {
+    console.log(`\n未检测到局域网 IP，请用 ifconfig（Mac/Linux）或 ipconfig（Windows）手动查看`);
+  }
   console.log('\nPress Ctrl+C to stop');
 });

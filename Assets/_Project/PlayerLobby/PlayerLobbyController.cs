@@ -9,7 +9,7 @@ public class PlayerLobbyController : MonoBehaviour
     [SerializeField] private PanelRenderer _panelRenderer;
 
     // 内部数据
-    private const string NextSceneName = "TestLanding";
+    private const string NextSceneName = "GameWorld"; // 正常流程：新游戏创建成功后跳转的场景
     private const string MockNextSceneName = "TestLanding";
     private string _randomPlayerId = null;
     private const string _fixedNewGameName = "Game1";
