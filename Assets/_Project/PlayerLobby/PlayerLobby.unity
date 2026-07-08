@@ -268,7 +268,7 @@ GameObject:
   - component: {fileID: 399892901}
   - component: {fileID: 399892902}
   m_Layer: 0
-  m_Name: Main Object
+  m_Name: Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -359,6 +359,8 @@ PanelRenderer:
   m_WorldSpaceWidth: 1920
   m_WorldSpaceHeight: 1080
   m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_Position: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

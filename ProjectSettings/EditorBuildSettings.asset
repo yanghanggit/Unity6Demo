@@ -15,6 +15,6 @@ EditorBuildSettings:
     path: Assets/_Project/MainHub/MainHub.unity
     guid: faafa1c58ace64de3ae5cb017cc06658
   - enabled: 1
-    path: Assets/_Project/TestLanding/TestLanding.unity
+    path: Assets/_Project/TestScenes/TestLanding/TestLanding.unity
     guid: be4404737df2648e58442cf00e1ce93a
   m_configObjects: {}

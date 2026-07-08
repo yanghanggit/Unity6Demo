@@ -267,7 +267,7 @@ GameObject:
   - component: {fileID: 900000002}
   - component: {fileID: 900000003}
   m_Layer: 0
-  m_Name: MainUI
+  m_Name: Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
