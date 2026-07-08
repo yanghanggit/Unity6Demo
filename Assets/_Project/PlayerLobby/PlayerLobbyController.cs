@@ -9,7 +9,7 @@ public class PlayerLobbyController : MonoBehaviour
     [SerializeField] private PanelRenderer _panelRenderer;
 
     // 内部数据
-    private const string NextSceneName = "TestLanding";//"MainHub"; // TODO: 待确认目标场景
+    private const string NextSceneName = "TestLanding";
     private const string MockNextSceneName = "TestLanding";
     private string _randomPlayerId = null;
     private const string _fixedNewGameName = "Game1";
