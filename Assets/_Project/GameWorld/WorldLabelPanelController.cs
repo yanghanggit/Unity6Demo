@@ -19,6 +19,10 @@ public class WorldLabelPanelController : MonoBehaviour
     [Header("摄像机")]
     [SerializeField] private Camera _camera;
 
+    [Header("调试")]
+    [Tooltip("每隔多少帧打印一次每个 Label 的世界坐标/屏幕坐标/Panel坐标换算过程，0 表示不打印")]
+    [SerializeField] private int _debugLogEveryNFrames = 30;
+
     private VisualElement _labelsRoot;
     private readonly Dictionary<WorldLabel, Label> _labelElements = new();
     private readonly List<WorldLabel> _removalBuffer = new();
@@ -33,6 +37,9 @@ public class WorldLabelPanelController : MonoBehaviour
         Debug.Assert(_panelRenderer != null, "_panelRenderer is null");
         if (_panelRenderer != null)
             _panelRenderer.RegisterUIReloadCallback(OnPanelLoaded);
+
+        Debug.Log($"[WorldLabelPanelController] OnEnable: camera={(_camera != null ? $"{_camera.name} (id={_camera.GetEntityId()})" : "null")}, " +
+                  $"Screen={Screen.width}x{Screen.height}");
     }
 
     void OnDisable()
@@ -57,6 +64,12 @@ public class WorldLabelPanelController : MonoBehaviour
             _labelsRoot.pickingMode = PickingMode.Ignore;
 
         _labelElements.Clear();
+
+        if (_labelsRoot != null)
+        {
+            Debug.Log($"[WorldLabelPanelController] OnPanelLoaded: root.layout={root.layout}, " +
+                      $"world-labels-root.layout={_labelsRoot.layout}, panel={_labelsRoot.panel}");
+        }
     }
 
     void LateUpdate()
@@ -113,10 +126,31 @@ public class WorldLabelPanelController : MonoBehaviour
         bool behindCamera = screenPos.z < 0;
         labelElement.style.display = behindCamera ? DisplayStyle.None : DisplayStyle.Flex;
         if (behindCamera)
+        {
+            //LogDebug(worldLabel, labelElement, worldPos, screenPos, null, "behindCamera");
             return;
+        }
 
-        Vector2 panelPos = RuntimePanelUtils.ScreenToPanel(_labelsRoot.panel, new Vector2(screenPos.x, screenPos.y));
+        // 用官方专门的“世界坐标 -> Panel 坐标”一步式换算，避免我们自己手动拼接
+        // WorldToScreenPoint + ScreenToPanel 时，Screen.width/height 与 Panel 实际渲染尺寸不一致
+        // （比如开着 Device Simulator）导致的固定比例偏差。
+        Vector2 panelPos = RuntimePanelUtils.CameraTransformWorldToPanel(_labelsRoot.panel, worldPos, _camera);
         labelElement.style.left = panelPos.x;
         labelElement.style.top = panelPos.y;
+
+        //LogDebug(worldLabel, labelElement, worldPos, screenPos, panelPos, null);
+    }
+
+    private void LogDebug(WorldLabel worldLabel, Label labelElement, Vector3 worldPos, Vector3 screenPos, Vector2? panelPos, string note)
+    {
+        if (_debugLogEveryNFrames <= 0 || Time.frameCount % _debugLogEveryNFrames != 0)
+            return;
+
+        Debug.Log($"[WorldLabelPanelController] label='{worldLabel.name}' cameraPos={_camera.transform.position} " +
+                  $"spriteTransformPos={worldLabel.transform.position} worldOffset={worldLabel.WorldOffset} worldPos={worldPos} " +
+                  $"screenPos={screenPos} Screen={Screen.width}x{Screen.height} " +
+                  $"panelPos={(panelPos.HasValue ? panelPos.Value.ToString() : "n/a")} " +
+                  $"labelResolvedLayout={labelElement.layout} labelWorldBound={labelElement.worldBound} " +
+                  $"note={note}");
     }
 }
