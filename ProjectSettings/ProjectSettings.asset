@@ -553,7 +553,7 @@ PlayerSettings:
   openGLRequireES31AEP: 0
   openGLRequireES32: 0
   m_TemplateCustomTags:
-    PRODUCT_DESCRIPTION: yanghang3
+    PRODUCT_DESCRIPTION: WebGL Test
   mobileMTRendering:
     Android: 1
     iPhone: 1

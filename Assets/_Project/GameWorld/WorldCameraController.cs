@@ -12,13 +12,19 @@ public class WorldCameraController : MonoBehaviour
     [SerializeField] private Camera _camera;
 
     [Header("世界边界（裁剪摄像机可视范围，防止拖出地图）")]
-    [SerializeField] private Rect _worldBounds = new(-20, -20, 40, 40);
+    [SerializeField] private Rect _worldBounds = new(-20, -20, 40, 40); // 世界为 20 x 20.
 
     private bool _dragging;
     private Vector2 _lastPointerScreenPos;
 
     void Awake()
     {
+        // 确保摄像机引用已设置，如果未设置则尝试从当前对象获取
+        if (_camera == null)
+            _camera = GetComponent<Camera>();
+
+
+        // 确保摄像机引用不为空，如果为空则会在后续使用时报错
         Debug.Assert(_camera != null, "_camera is null");
     }
 

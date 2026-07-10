@@ -12,12 +12,14 @@ public class TopHUDController : MonoBehaviour
         if (_panelRenderer == null)
             _panelRenderer = GetComponent<PanelRenderer>();
 
+        Debug.Assert(_panelRenderer != null, "_panelRenderer is null");
         if (_panelRenderer != null)
             _panelRenderer.RegisterUIReloadCallback(OnPanelLoaded);
     }
 
     void OnDisable()
     {
+        Debug.Assert(_panelRenderer != null, "_panelRenderer is null");
         if (_panelRenderer != null)
             _panelRenderer.UnregisterUIReloadCallback(OnPanelLoaded);
     }
@@ -30,6 +32,7 @@ public class TopHUDController : MonoBehaviour
         // 只将自己的 top-root 容器设为不拦截点击（而不是整个共享 root），
         // 否则它会锤住同一棵树里 bottom-root 邨个全屏容器的点击
         var topRoot = root.Q<VisualElement>("top-root");
+        Debug.Assert(topRoot != null, "top-root is null");
         if (topRoot != null)
             topRoot.pickingMode = PickingMode.Ignore;
 
