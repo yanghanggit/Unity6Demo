@@ -2,15 +2,12 @@ using UnityEngine;
 
 public class GameWorldController : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    /// <summary>
+    /// 当场景中的某个可点击对象被点击时调用，sceneName 对应被点击对象的场景名称。
+    /// </summary>
+    /// <param name="sceneName">被点击对象的场景名称</param>
+    public void OnClickScene(string sceneName)
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        Debug.Log("Scene clicked: " + sceneName);
     }
 }

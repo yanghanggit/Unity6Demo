@@ -222,6 +222,8 @@ GameObject:
   m_Component:
   - component: {fileID: 152823282}
   - component: {fileID: 152823283}
+  - component: {fileID: 152823284}
+  - component: {fileID: 152823285}
   m_Layer: 0
   m_Name: Scene2
   m_TagString: Untagged
@@ -304,6 +306,79 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!61 &152823284
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152823281}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 7.68, y: 13.44}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 7.68, y: 13.44}
+  m_EdgeRadius: 0
+--- !u!114 &152823285
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152823281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 903014e0945de4b9cbafbb1663b35945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::ClickableSprite2D
+  onClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 455473272}
+        m_TargetAssemblyTypeName: GameWorldController, Runtime
+        m_MethodName: OnClickScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: scene2
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &402842656
 GameObject:
   m_ObjectHideFlags: 0
@@ -314,6 +389,8 @@ GameObject:
   m_Component:
   - component: {fileID: 402842657}
   - component: {fileID: 402842658}
+  - component: {fileID: 402842659}
+  - component: {fileID: 402842660}
   m_Layer: 0
   m_Name: Scene1
   m_TagString: Untagged
@@ -396,6 +473,79 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!61 &402842659
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 402842656}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 7.68, y: 13.44}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 7.68, y: 13.44}
+  m_EdgeRadius: 0
+--- !u!114 &402842660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 402842656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 903014e0945de4b9cbafbb1663b35945, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::ClickableSprite2D
+  onClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 455473272}
+        m_TargetAssemblyTypeName: GameWorldController, Runtime
+        m_MethodName: OnClickScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: scene1
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &455473270
 GameObject:
   m_ObjectHideFlags: 0
@@ -406,6 +556,7 @@ GameObject:
   m_Component:
   - component: {fileID: 455473271}
   - component: {fileID: 455473272}
+  - component: {fileID: 455473273}
   m_Layer: 0
   m_Name: GameWorldController
   m_TagString: Untagged
@@ -442,6 +593,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd7087b01f21e4ce399a7e70a023f266, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Runtime::GameWorldController
+--- !u!114 &455473273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 455473270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03e8054b8bd2047b5bb8a0fe5e0fcd49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Runtime::WorldClickDetector
+  _camera: {fileID: 1137438320}
+  _clickMoveThreshold: 8
 --- !u!114 &500000001
 MonoBehaviour:
   m_ObjectHideFlags: 0
