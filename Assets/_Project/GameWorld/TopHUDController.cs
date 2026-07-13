@@ -7,6 +7,8 @@ public class TopHUDController : MonoBehaviour
     [Header("UI Toolkit")]
     [SerializeField] private PanelRenderer _panelRenderer;
 
+    private IPanel _registeredPanel;
+
     void OnEnable()
     {
         if (_panelRenderer == null)
@@ -22,6 +24,12 @@ public class TopHUDController : MonoBehaviour
         Debug.Assert(_panelRenderer != null, "_panelRenderer is null");
         if (_panelRenderer != null)
             _panelRenderer.UnregisterUIReloadCallback(OnPanelLoaded);
+
+        if (_registeredPanel != null)
+        {
+            UIPointerGate.Unregister(_registeredPanel);
+            _registeredPanel = null;
+        }
     }
 
     /// <summary>
@@ -40,6 +48,10 @@ public class TopHUDController : MonoBehaviour
         Debug.Assert(testButton != null, "btn-top-test is null");
 
         testButton.clicked += OnClickTestButton;
+
+        // 把本 Panel 注册进全局点击网关，避免点击本 HUD 按钮时事件穿透到场景世界对象
+        _registeredPanel = root.panel;
+        UIPointerGate.Register(_registeredPanel);
     }
 
     void OnClickTestButton()

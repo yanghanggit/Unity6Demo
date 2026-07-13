@@ -17,6 +17,7 @@ public class WorldClickDetector : MonoBehaviour
     [SerializeField] private float _clickMoveThreshold = 8f;
 
     private Vector2 _pressScreenPos;
+    private bool _pressOverUI;
 
     void Awake()
     {
@@ -35,12 +36,18 @@ public class WorldClickDetector : MonoBehaviour
         if (pointer.press.wasPressedThisFrame)
         {
             _pressScreenPos = pointer.position.ReadValue();
+            _pressOverUI = UIPointerGate.IsPointerOverUI(_pressScreenPos);
         }
         else if (pointer.press.wasReleasedThisFrame)
         {
             Vector2 releaseScreenPos = pointer.position.ReadValue();
             if (Vector2.Distance(_pressScreenPos, releaseScreenPos) > _clickMoveThreshold)
                 return; // 位移过大，判定为拖拽，不触发点击
+
+            // 按下或抬起落在 HUD 等 UI Toolkit 可交互元素上时，视为 UI 操作，场景点击不响应，
+            // 避免 UI 按钮点击穿透到下方的世界对象。
+            if (_pressOverUI || UIPointerGate.IsPointerOverUI(releaseScreenPos))
+                return;
 
             TryClickAt(releaseScreenPos);
         }
