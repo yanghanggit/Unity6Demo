@@ -61,6 +61,12 @@ public class GameManager : MonoBehaviour
     public bool IsServerConnected => ServerInfo != null;
 
     /// <summary>
+    /// 当前已选中/已进入的场景（Stage）名称，由 GameWorldController 在点击时设置，
+    /// 供进入 GameStage 场景后的 GameStageController 读取，以确定要展示哪个场景内的角色。
+    /// </summary>
+    public string CurrentStageName { get; set; } = "";
+
+    /// <summary>
     /// 根据服务端 NewGameResponse 建立会话。
     /// </summary>
     /// 

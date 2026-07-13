@@ -13,6 +13,9 @@ public class GameWorldController : MonoBehaviour
 
     private const string MockNextSceneName = "TestLanding";
 
+    /// <summary>每个可点击对象对应的场景（Stage）名称，索引与 _clickableObjects 对齐。</summary>
+    private List<string> _stageNamesByIndex = new();
+
     void Start()
     {
         Debug.Log("GameWorldController started");
@@ -77,6 +80,7 @@ public class GameWorldController : MonoBehaviour
     private void ApplyStagesStateToLabels(StagesStateResponse response)
     {
         var keys = response.mapping.Keys.ToList();
+        _stageNamesByIndex = keys;
 
         for (int i = 0; i < _clickableObjects.Length; i++)
         {
@@ -101,6 +105,9 @@ public class GameWorldController : MonoBehaviour
     public void OnClick(int index)
     {
         Debug.Log("Scene clicked: " + index);
+
+        // 记录被点击对象对应的场景名称，供进入 GameStage 场景后的 GameStageController 读取。
+        GameManager.Instance.CurrentStageName = index < _stageNamesByIndex.Count ? _stageNamesByIndex[index] : "";
 
         if (GameManager.Instance.IsServerConnected)
         {
