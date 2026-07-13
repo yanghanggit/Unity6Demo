@@ -15,8 +15,8 @@ EditorBuildSettings:
     path: Assets/_Project/GameWorld/GameWorld.unity
     guid: 7a5c65e4908ba4dc485ead5b3769ea88
   - enabled: 1
-    path: Assets/_Project/HomeScene/HomeScene.unity
-    guid: 46b5ee242faa04e478ed5bbf57217113
+    path: Assets/_Project/GameStage/GameStage.unity
+    guid: a49c0e3542a14495fa2ba38c35a372a4
   - enabled: 1
     path: Assets/_Project/TestScenes/TestLanding/TestLanding.unity
     guid: be4404737df2648e58442cf00e1ce93a

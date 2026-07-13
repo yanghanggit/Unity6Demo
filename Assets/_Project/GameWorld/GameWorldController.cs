@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class GameWorldController : MonoBehaviour
 {
-    private const string HomeSceneName = "TestLanding";
+    private const string GameStageSceneName = "GameStage";
 
     private const string MockNextSceneName = "TestLanding";
 
@@ -12,9 +12,9 @@ public class GameWorldController : MonoBehaviour
     /// 当场景中的某个可点击对象被点击时调用，sceneName 对应被点击对象的场景名称。
     /// </summary>
     /// <param name="sceneName">被点击对象的场景名称</param>
-    public void OnClickScene(int sceneIndex)
+    public void OnClick(int index)
     {
-        Debug.Log("Scene clicked: " + sceneIndex);
+        Debug.Log("Scene clicked: " + index);
 
         if (GameManager.Instance.IsServerConnected)
         {
@@ -33,7 +33,7 @@ public class GameWorldController : MonoBehaviour
     private async UniTaskVoid EnterHomeSceneAsync()
     {
         //_button.SetEnabled(false);
-        await SceneManager.LoadSceneAsync(HomeSceneName);
+        await SceneManager.LoadSceneAsync(GameStageSceneName);
     }
 
     /// <summary>

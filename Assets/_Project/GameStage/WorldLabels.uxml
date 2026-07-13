@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="WorldLabels.uss" />
+    <ui:VisualElement name="world-labels-root" class="world-labels-root" />
+</ui:UXML>
