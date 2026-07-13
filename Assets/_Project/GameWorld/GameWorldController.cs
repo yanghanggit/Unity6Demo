@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class GameWorldController : MonoBehaviour
 {
-    private const string HomeSceneName = "HomeScene";
+    private const string HomeSceneName = "TestLanding";
 
     private const string MockNextSceneName = "TestLanding";
 

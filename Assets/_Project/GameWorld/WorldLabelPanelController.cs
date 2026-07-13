@@ -19,9 +19,9 @@ public class WorldLabelPanelController : MonoBehaviour
     [Header("摄像机")]
     [SerializeField] private Camera _camera;
 
-    [Header("调试")]
-    [Tooltip("每隔多少帧打印一次每个 Label 的世界坐标/屏幕坐标/Panel坐标换算过程，0 表示不打印")]
-    [SerializeField] private int _debugLogEveryNFrames = 30;
+    // [Header("调试")]
+    // [Tooltip("每隔多少帧打印一次每个 Label 的世界坐标/屏幕坐标/Panel坐标换算过程，0 表示不打印")]
+    // [SerializeField] private int _debugLogEveryNFrames = 30;
 
     private VisualElement _labelsRoot;
     private readonly Dictionary<WorldLabel, Label> _labelElements = new();
@@ -141,16 +141,16 @@ public class WorldLabelPanelController : MonoBehaviour
         //LogDebug(worldLabel, labelElement, worldPos, screenPos, panelPos, null);
     }
 
-    private void LogDebug(WorldLabel worldLabel, Label labelElement, Vector3 worldPos, Vector3 screenPos, Vector2? panelPos, string note)
-    {
-        if (_debugLogEveryNFrames <= 0 || Time.frameCount % _debugLogEveryNFrames != 0)
-            return;
+    // private void LogDebug(WorldLabel worldLabel, Label labelElement, Vector3 worldPos, Vector3 screenPos, Vector2? panelPos, string note)
+    // {
+    //     if (_debugLogEveryNFrames <= 0 || Time.frameCount % _debugLogEveryNFrames != 0)
+    //         return;
 
-        Debug.Log($"[WorldLabelPanelController] label='{worldLabel.name}' cameraPos={_camera.transform.position} " +
-                  $"spriteTransformPos={worldLabel.transform.position} worldOffset={worldLabel.WorldOffset} worldPos={worldPos} " +
-                  $"screenPos={screenPos} Screen={Screen.width}x{Screen.height} " +
-                  $"panelPos={(panelPos.HasValue ? panelPos.Value.ToString() : "n/a")} " +
-                  $"labelResolvedLayout={labelElement.layout} labelWorldBound={labelElement.worldBound} " +
-                  $"note={note}");
-    }
+    //     Debug.Log($"[WorldLabelPanelController] label='{worldLabel.name}' cameraPos={_camera.transform.position} " +
+    //               $"spriteTransformPos={worldLabel.transform.position} worldOffset={worldLabel.WorldOffset} worldPos={worldPos} " +
+    //               $"screenPos={screenPos} Screen={Screen.width}x{Screen.height} " +
+    //               $"panelPos={(panelPos.HasValue ? panelPos.Value.ToString() : "n/a")} " +
+    //               $"labelResolvedLayout={labelElement.layout} labelWorldBound={labelElement.worldBound} " +
+    //               $"note={note}");
+    // }
 }
