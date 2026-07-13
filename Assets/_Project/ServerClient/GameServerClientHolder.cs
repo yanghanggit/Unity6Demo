@@ -18,16 +18,22 @@ public class GameServerClientHolder : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
+            // 如果已经存在其他实例，销毁当前对象，保证单例唯一性
             Destroy(gameObject);
             return;
         }
+
+        // 设置单例实例
         Instance = this;
+
+        // 设置为常驻对象，切换场景时不会被销毁
         DontDestroyOnLoad(gameObject);
 
         // Inspector 未赋值时从 Resources 自动加载
         if (_config == null)
             _config = Resources.Load<ServerConfig>("ServerConfig");
 
+        Debug.Assert(_config != null, "[GameServerClientHolder] ServerConfig is null after attempting to load from Resources.");
         if (_config == null)
         {
             Debug.LogError("[GameServerClientHolder] 未找到 ServerConfig，请创建 Resources/ServerConfig.asset。");

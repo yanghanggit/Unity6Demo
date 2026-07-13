@@ -51,7 +51,6 @@ public class AnyItemListConverter : JsonConverter<List<Item>>
 public sealed class World
 {
     public int entity_counter = 0;
-    public int home_planning_turn_index = 0;
     public List<EntitySerialization> entities_serialization = new();
     public Dictionary<string, AgentContext> agents_context = new();
     public Dungeon dungeon = new();

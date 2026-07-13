@@ -16,7 +16,12 @@ public class WorldLabel : MonoBehaviour
     [Tooltip("相对自身 Transform 的世界坐标偏移，用于把文本放在对象上方")]
     [SerializeField] private Vector3 _worldOffset = new(0, 0.6f, 0);
 
-    public string Text => _text;
+    public string Text
+    {
+        get => _text;
+        set => _text = value;
+    }
+    
     public Vector3 WorldOffset => _worldOffset;
 
     void OnEnable() => ActiveLabels.Add(this);
