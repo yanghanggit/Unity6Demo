@@ -5,6 +5,6 @@ public sealed class CharacterStats
     public int max_hp = 10;
     public int attack = 5;
     public int defense = 3;
-    public int energy = 1;
+    public int energy = 2;
     public int speed = 0;
 }

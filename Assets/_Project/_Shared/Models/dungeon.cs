@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 
 public class DungeonRoom
 {
-    public string room_type = "base";
+    public string type = "base";
     public Stage stage = new();
     public GeneratedImage image = new();
 }
@@ -16,13 +16,13 @@ public sealed class CombatRoom : DungeonRoom
     public Combat combat = new();
 }
 
-// DungeonRoomUnion 判别联合转换器（discriminator: room_type）
+// DungeonRoomUnion 判别联合转换器（discriminator: type）
 public class DungeonRoomConverter : JsonConverter<DungeonRoom>
 {
     public override DungeonRoom ReadJson(JsonReader reader, Type objectType, DungeonRoom existingValue, bool hasExistingValue, JsonSerializer serializer)
     {
         JObject jo = JObject.Load(reader);
-        string roomType = jo["room_type"]?.ToString();
+        string roomType = jo["type"]?.ToString();
         DungeonRoom room = roomType == "combat" ? new CombatRoom() : new DungeonRoom();
         using (var subReader = jo.CreateReader())
         {

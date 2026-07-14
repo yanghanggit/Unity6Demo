@@ -373,11 +373,6 @@ public sealed class DungeonStateResponse
     public Dungeon dungeon = new();
 }
 
-public sealed class DungeonCombatResponse
-{
-    public Combat combat = new();
-}
-
 public sealed class DungeonRoomResponse
 {
     public CombatRoom room = new();

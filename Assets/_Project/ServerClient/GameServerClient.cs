@@ -249,7 +249,9 @@ public class GameServerClient
         => PostAsync<HomeEnterDungeonResponse>("/api/home/enter_dungeon/v1/",
             new HomeEnterDungeonRequest
             {
-                user_name = userName, game_name = gameName, dungeon_name = dungeonName
+                user_name = userName,
+                game_name = gameName,
+                dungeon_name = dungeonName
             }, ct);
 
     /// <summary>触发地下城生成流程，返回后台任务信息。</summary>
@@ -267,8 +269,10 @@ public class GameServerClient
         => PostAsync<HomePlayerActionResponse>("/api/home/player_action/v1/",
             new HomePlayerActionRequest
             {
-                user_name = userName, game_name = gameName,
-                action = action, arguments = arguments,
+                user_name = userName,
+                game_name = gameName,
+                action = action,
+                arguments = arguments,
             }, ct);
 
     /// <summary>将成员加入远征队。</summary>
@@ -277,7 +281,9 @@ public class GameServerClient
         => PostAsync<HomeRosterAddResponse>("/api/home/roster/add/v1/",
             new HomeRosterAddRequest
             {
-                user_name = userName, game_name = gameName, member_name = memberName
+                user_name = userName,
+                game_name = gameName,
+                member_name = memberName
             }, ct);
 
     /// <summary>将成员从远征队移除。</summary>
@@ -286,7 +292,9 @@ public class GameServerClient
         => PostAsync<HomeRosterRemoveResponse>("/api/home/roster/remove/v1/",
             new HomeRosterRemoveRequest
             {
-                user_name = userName, game_name = gameName, member_name = memberName
+                user_name = userName,
+                game_name = gameName,
+                member_name = memberName
             }, ct);
 
     /// <summary>将道具从储物箱移入随身背包。</summary>
@@ -295,7 +303,9 @@ public class GameServerClient
         => PostAsync<HomeItemMoveToInventoryResponse>("/api/home/item/move_to_inventory/v1/",
             new HomeItemMoveToInventoryRequest
             {
-                user_name = userName, game_name = gameName, item_names = itemNames
+                user_name = userName,
+                game_name = gameName,
+                item_names = itemNames
             }, ct);
 
     /// <summary>将道具从随身背包移入储物箱。</summary>
@@ -304,7 +314,9 @@ public class GameServerClient
         => PostAsync<HomeItemMoveToStorageResponse>("/api/home/item/move_to_storage/v1/",
             new HomeItemMoveToStorageRequest
             {
-                user_name = userName, game_name = gameName, item_names = itemNames
+                user_name = userName,
+                game_name = gameName,
+                item_names = itemNames
             }, ct);
 
     /// <summary>为指定角色穿戴或移除时装，返回后台任务信息。</summary>
@@ -314,8 +326,10 @@ public class GameServerClient
         => PostAsync<HomeWearCostumeResponse>("/api/home/costume/wear/v1/",
             new HomeWearCostumeRequest
             {
-                user_name = userName, game_name = gameName,
-                item_name = itemName, target_name = targetName,
+                user_name = userName,
+                game_name = gameName,
+                item_name = itemName,
+                target_name = targetName,
             }, ct);
 
     /// <summary>从储物箱材料合成消耗品，返回后台任务信息。</summary>
@@ -353,11 +367,6 @@ public class GameServerClient
     public UniTask<DungeonRoomResponse> FetchDungeonRoomAsync(
         string userName, string gameName, CancellationToken ct = default)
         => GetAsync<DungeonRoomResponse>($"/api/dungeons/v1/{userName}/{gameName}/room", ct);
-
-    /// <summary>查询当前地下城战斗状态。</summary>
-    public UniTask<DungeonCombatResponse> FetchDungeonCombatAsync(
-        string userName, string gameName, CancellationToken ct = default)
-        => GetAsync<DungeonCombatResponse>($"/api/dungeons/v1/{userName}/{gameName}/combat", ct);
 
     // ────────────────────────────────────────────────────────────────────────
     // Dungeon (actions)
@@ -399,8 +408,11 @@ public class GameServerClient
         => PostAsync<DungeonCombatPlayCardsResponse>("/api/dungeon/combat/play_cards/v1/",
             new DungeonCombatPlayCardsRequest
             {
-                user_name = userName, game_name = gameName,
-                actor_name = actorName, card_name = cardName, targets = targets,
+                user_name = userName,
+                game_name = gameName,
+                actor_name = actorName,
+                card_name = cardName,
+                targets = targets,
             }, ct);
 
     /// <summary>让指定角色跳过当前回合出牌，返回后台任务信息。</summary>
@@ -409,7 +421,9 @@ public class GameServerClient
         => PostAsync<DungeonCombatPassTurnResponse>("/api/dungeon/combat/pass_turn/v1/",
             new DungeonCombatPassTurnRequest
             {
-                user_name = userName, game_name = gameName, actor_name = actorName
+                user_name = userName,
+                game_name = gameName,
+                actor_name = actorName
             }, ct);
 
     /// <summary>使用背包内消耗品，返回后台任务信息。</summary>
@@ -420,8 +434,10 @@ public class GameServerClient
         => PostAsync<DungeonCombatUseConsumableItemResponse>("/api/dungeon/combat/use_consumable/v1/",
             new DungeonCombatUseConsumableItemRequest
             {
-                user_name = userName, game_name = gameName,
-                item_name = itemName, targets = targets,
+                user_name = userName,
+                game_name = gameName,
+                item_name = itemName,
+                targets = targets,
             }, ct);
 
     /// <summary>使用背包内装备，返回后台任务信息。</summary>
@@ -432,8 +448,10 @@ public class GameServerClient
         => PostAsync<DungeonCombatUseGearItemResponse>("/api/dungeon/combat/use_gear/v1/",
             new DungeonCombatUseGearItemRequest
             {
-                user_name = userName, game_name = gameName,
-                item_name = itemName, targets = targets,
+                user_name = userName,
+                game_name = gameName,
+                item_name = itemName,
+                targets = targets,
             }, ct);
 
     /// <summary>收取战斗战利品，将掉落物转入背包。</summary>

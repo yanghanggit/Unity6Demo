@@ -22,6 +22,7 @@ public sealed class Card
     public List<string> modifiers = new();
     public bool playable = true;
     public bool exhaust = false;
+    public int cost = 1;
     public int damage_dealt = 0;
     public int energy_delta = 0;
     public int hit_count = 1;

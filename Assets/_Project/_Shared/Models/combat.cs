@@ -20,8 +20,8 @@ public enum CombatResult
 public sealed class Round
 {
     public List<string> completed_actors = new();
-    public List<List<string>> actor_order_snapshots = new();
-    public string current_turn_actor_name = null;
+    public List<string> action_order = new();
+    public string current_actor = null;
     public bool is_completed = false;
     public bool draw_completed = false;
     public List<string> cards_combat_log = new();
