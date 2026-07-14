@@ -32,8 +32,6 @@ public sealed class GearItem : Item
     public List<string> equip_affixes = new();
     public List<string> on_hit_affixes = new();
     public List<string> modifiers = new();
-    public int max_durability = 3;
-    public int durability = 3;
     public List<Item> craft_materials = new();
 }
 
