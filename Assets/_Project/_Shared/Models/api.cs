@@ -172,6 +172,20 @@ public sealed class HomeWearCostumeResponse
     public string message = "";
 }
 
+public sealed class HomeRemoveCostumeRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+    public string target_name = "";
+}
+
+public sealed class HomeRemoveCostumeResponse
+{
+    public string task_id = "";
+    public string status = "";
+    public string message = "";
+}
+
 // ────────────────────────────────────────────────────────────────────────────────
 // Home: Craft
 // ────────────────────────────────────────────────────────────────────────────────
@@ -375,7 +389,8 @@ public sealed class DungeonStateResponse
 
 public sealed class DungeonRoomResponse
 {
-    public CombatRoom room = new();
+    [JsonConverter(typeof(DungeonRoomConverter))]
+    public DungeonRoom room = new();
 }
 
 public sealed class StagesStateResponse

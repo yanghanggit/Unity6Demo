@@ -237,11 +237,11 @@ public class GameServerClient
     // Home
     // ────────────────────────────────────────────────────────────────────────
 
-    /// <summary>触发家园推进流程，返回后台任务信息。</summary>
+    /// <summary>触发家园推进流程，为 actors 指定的角色激活行动计划，返回后台任务信息。</summary>
     public UniTask<HomeAdvanceResponse> HomeAdvanceAsync(
-        string userName, string gameName, CancellationToken ct = default)
+        string userName, string gameName, List<string> actors, CancellationToken ct = default)
         => PostAsync<HomeAdvanceResponse>("/api/home/advance/v1/",
-            new HomeAdvanceRequest { user_name = userName, game_name = gameName }, ct);
+            new HomeAdvanceRequest { user_name = userName, game_name = gameName, actors = actors }, ct);
 
     /// <summary>传送玩家进入指定地下城。</summary>
     public UniTask<HomeEnterDungeonResponse> HomeEnterDungeonAsync(
@@ -319,9 +319,9 @@ public class GameServerClient
                 item_names = itemNames
             }, ct);
 
-    /// <summary>为指定角色穿戴或移除时装，返回后台任务信息。</summary>
+    /// <summary>为指定角色穿戴时装，返回后台任务信息。</summary>
     public UniTask<HomeWearCostumeResponse> HomeWearCostumeAsync(
-        string userName, string gameName, string itemName, string targetName = "",
+        string userName, string gameName, string itemName, string targetName,
         CancellationToken ct = default)
         => PostAsync<HomeWearCostumeResponse>("/api/home/costume/wear/v1/",
             new HomeWearCostumeRequest
@@ -329,6 +329,18 @@ public class GameServerClient
                 user_name = userName,
                 game_name = gameName,
                 item_name = itemName,
+                target_name = targetName,
+            }, ct);
+
+    /// <summary>为指定角色脱下当前穿戴的时装，返回后台任务信息。</summary>
+    public UniTask<HomeRemoveCostumeResponse> HomeRemoveCostumeAsync(
+        string userName, string gameName, string targetName,
+        CancellationToken ct = default)
+        => PostAsync<HomeRemoveCostumeResponse>("/api/home/costume/remove/v1/",
+            new HomeRemoveCostumeRequest
+            {
+                user_name = userName,
+                game_name = gameName,
                 target_name = targetName,
             }, ct);
 
@@ -377,6 +389,12 @@ public class GameServerClient
         string userName, string gameName, CancellationToken ct = default)
         => PostAsync<DungeonExitResponse>("/api/dungeon/exit/v1/",
             new DungeonExitRequest { user_name = userName, game_name = gameName }, ct);
+
+    /// <summary>推进地下城到下一关卡（关卡内战斗结束进入 post_combat 后调用）。</summary>
+    public UniTask<DungeonAdvanceStageResponse> DungeonAdvanceStageAsync(
+        string userName, string gameName, CancellationToken ct = default)
+        => PostAsync<DungeonAdvanceStageResponse>("/api/dungeon/progress/advance_stage/v1/",
+            new DungeonAdvanceStageRequest { user_name = userName, game_name = gameName }, ct);
 
     // ────────────────────────────────────────────────────────────────────────
     // Dungeon: Combat

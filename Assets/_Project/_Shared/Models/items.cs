@@ -28,7 +28,7 @@ public class Item
 public sealed class GearItem : Item
 {
     public CharacterStats stat_bonuses = new();
-    public TargetType target_type = TargetType.ALLY_SINGLE;
+    public int cost = 1;
     public List<string> equip_affixes = new();
     public List<string> on_hit_affixes = new();
     public List<string> modifiers = new();

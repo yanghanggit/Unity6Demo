@@ -36,7 +36,6 @@ public sealed class StageDescriptionComponent
 
 public sealed class PlayerComponent
 {
-    public string name = "";
     public string player_name = "";
 }
 
@@ -173,7 +172,7 @@ public sealed class CombatLootComponent
     public List<Item> items = new();
 }
 
-public sealed class CostumeComponent
+public sealed class WornCostumeComponent
 {
     public string name = "";
     public CostumeItem item = null;

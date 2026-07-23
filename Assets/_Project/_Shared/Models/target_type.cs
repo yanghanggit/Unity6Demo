@@ -8,9 +8,8 @@ public enum TargetType
 {
     [EnumMember(Value = "enemy_single")] ENEMY_SINGLE,
     [EnumMember(Value = "enemy_all")] ENEMY_ALL,
-    [EnumMember(Value = "enemy_random_multi")] ENEMY_RANDOM_MULTI,
+    [EnumMember(Value = "enemy_spread")] ENEMY_SPREAD,
     [EnumMember(Value = "ally_single")] ALLY_SINGLE,
     [EnumMember(Value = "ally_all")] ALLY_ALL,
     [EnumMember(Value = "self_only")] SELF_ONLY,
-    [EnumMember(Value = "card")] CARD,
 }

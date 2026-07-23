@@ -73,7 +73,7 @@ public static class ComponentUtils
                     }
                     break;
                 }
-            case nameof(CostumeComponent):
+            case nameof(WornCostumeComponent):
                 {
                     if (data["item"] is not JObject item)
                     {
@@ -129,7 +129,7 @@ public static class ComponentUtils
     /// <summary>
     /// 将组件 DTO 序列化为 ComponentSerialization，供 RenderComponent 统一处理。
     /// name 由类型名自动推导，无需手动传入。
-    /// 注意：含 Item 子类字段（InventoryComponent、CostumeComponent）因 AnyItemConverter
+    /// 注意：含 Item 子类字段（InventoryComponent、WornCostumeComponent）因 AnyItemConverter
     /// 的类型级属性会导致递归溢出，须手动构建 JObject，不可使用本方法。
     /// </summary>
     public static ComponentSerialization ToComp<T>(T component) where T : class
