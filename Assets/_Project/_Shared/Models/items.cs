@@ -87,3 +87,26 @@ public class AnyItemConverter : JsonConverter<Item>
         jo.WriteTo(writer);
     }
 }
+
+// List<Item> (AnyItem) 转换器（处理列表中的多态元素）
+public class AnyItemListConverter : JsonConverter<List<Item>>
+{
+    private static readonly AnyItemConverter _itemConverter = new();
+
+    public override List<Item> ReadJson(JsonReader reader, Type objectType, List<Item> existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        var array = JArray.Load(reader);
+        var list = new List<Item>();
+        foreach (var token in array)
+        {
+            using var tokenReader = token.CreateReader();
+            list.Add(_itemConverter.ReadJson(tokenReader, typeof(Item), null, false, serializer));
+        }
+        return list;
+    }
+
+    public override void WriteJson(JsonWriter writer, List<Item> value, JsonSerializer serializer)
+    {
+        serializer.Serialize(writer, value);
+    }
+}
