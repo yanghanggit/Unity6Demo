@@ -49,7 +49,7 @@ public sealed class Dungeon
     [JsonConverter(typeof(DungeonRoomListConverter))]
     public List<DungeonRoom> rooms = new();
     public string name = "";
-    public string ecology = "";
+    public string premise = "";
     public string created_at = "";
     public int current_room_index = -1;
     public bool setup_entities = false;
