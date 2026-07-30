@@ -26,7 +26,7 @@ public sealed class Card
     public int damage_dealt = 0;
     public int energy_delta = 0;
     public int hit_count = 1;
-    public TargetType target_type = TargetType.ENEMY_SINGLE;
+    public TargetType target_type = TargetType.SINGLE;
     public string source = "";
     public string uuid = "";
     public Card original_data = null; // Optional[Card]

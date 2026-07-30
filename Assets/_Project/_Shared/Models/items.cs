@@ -42,7 +42,7 @@ public sealed class CostumeItem : Item
 
 public sealed class ConsumableItem : Item
 {
-    public TargetType target_type = TargetType.SELF_ONLY;
+    public TargetType target_type = TargetType.SELF;
     public List<string> affixes = new();
     public List<string> modifiers = new();
     public List<Item> craft_materials = new();
