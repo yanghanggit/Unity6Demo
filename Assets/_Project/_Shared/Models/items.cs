@@ -31,7 +31,6 @@ public sealed class GearItem : Item
     public int cost = 1;
     public List<string> equip_affixes = new();
     public List<string> on_hit_affixes = new();
-    public List<string> modifiers = new();
     public List<Item> craft_materials = new();
 }
 
@@ -44,7 +43,6 @@ public sealed class ConsumableItem : Item
 {
     public TargetType target_type = TargetType.SELF;
     public List<string> affixes = new();
-    public List<string> modifiers = new();
     public List<Item> craft_materials = new();
 }
 

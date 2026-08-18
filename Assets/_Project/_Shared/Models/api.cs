@@ -379,6 +379,23 @@ public sealed class DungeonCombatUseGearItemResponse
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Dungeon: Entry Init
+// ────────────────────────────────────────────────────────────────────────────────
+
+public sealed class DungeonEntryInitRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+}
+
+public sealed class DungeonEntryInitResponse
+{
+    public string task_id = "";
+    public string status = "";
+    public string message = "";
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
 // Query Responses
 // ────────────────────────────────────────────────────────────────────────────────
 
@@ -400,7 +417,7 @@ public sealed class StagesStateResponse
 
 public sealed class EntitiesDetailsResponse
 {
-    public List<EntitySerialization> entities_serialization = new();
+    public List<EntitySerialization> entities = new();
 }
 
 public sealed class SessionMessageResponse

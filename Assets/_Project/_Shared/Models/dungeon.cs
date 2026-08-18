@@ -13,7 +13,13 @@ public class DungeonRoom
 
 public sealed class CombatRoom : DungeonRoom
 {
+    public CombatRoom() { type = "combat"; }
     public Combat combat = new();
+}
+
+public sealed class EntryRoom : DungeonRoom
+{
+    public EntryRoom() { type = "entry"; }
 }
 
 // DungeonRoomUnion 判别联合转换器（discriminator: type）
@@ -23,7 +29,12 @@ public class DungeonRoomConverter : JsonConverter<DungeonRoom>
     {
         JObject jo = JObject.Load(reader);
         string roomType = jo["type"]?.ToString();
-        DungeonRoom room = roomType == "combat" ? new CombatRoom() : new DungeonRoom();
+        DungeonRoom room = roomType switch
+        {
+            "combat" => new CombatRoom(),
+            "entry" => new EntryRoom(),
+            _ => new DungeonRoom()
+        };
         using (var subReader = jo.CreateReader())
         {
             var subSerializer = new JsonSerializer();

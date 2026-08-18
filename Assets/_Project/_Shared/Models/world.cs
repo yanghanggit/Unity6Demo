@@ -12,7 +12,7 @@ public sealed class AgentContext
 public sealed class World
 {
     public int entity_counter = 0;
-    public List<EntitySerialization> entities_serialization = new();
+    public List<EntitySerialization> entities = new();
     public Dictionary<string, AgentContext> agents_context = new();
     public Dungeon dungeon = new();
     public Blueprint blueprint = new();

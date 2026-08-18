@@ -55,7 +55,7 @@ public class GameStageController : MonoBehaviour
             {
                 var detailsResponse = await GameManager.Instance.ServerClient.FetchEntitiesDetailsAsync(
                     session.UserName, session.GameName, actorNames);
-                Debug.Log($"[GameStageController] FetchEntitiesDetailsAsync ok, got {detailsResponse.entities_serialization.Count} entities.");
+                Debug.Log($"[GameStageController] FetchEntitiesDetailsAsync ok, got {detailsResponse.entities.Count} entities.");
             }
 
             ApplyActorsToLabels(actorNames);

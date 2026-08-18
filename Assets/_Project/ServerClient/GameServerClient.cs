@@ -1,6 +1,8 @@
 // 对应 Python tui/server_client.py
 // WebGL 兼容：使用 UnityWebRequest + UniTask，无 SSE 流。
-// WatchTaskUntilDoneAsync 以轮询 /api/tasks/v1/status 代替 Python 端的 SSE watch。
+// 当前主要面向 Web（WebGL）平台，因此暂不实现 SSE，统一以轮询（poll）为准：
+//   - stream_session_messages → 以 FetchSessionMessagesAsync 轮询 /since 为准
+//   - watch_task_until_done   → 以 WatchTaskUntilDoneAsync 轮询 /api/tasks/v1/status 为准
 
 using System;
 using System.Collections.Generic;
@@ -233,6 +235,20 @@ public class GameServerClient
             $"/api/entities/v1/{userName}/{gameName}/details{qs}", ct);
     }
 
+    /// <summary>按组件条件分组查询实体（all_of=必须包含 / any_of=任意包含 / none_of=不得包含）。</summary>
+    public UniTask<EntitiesDetailsResponse> FetchEntitiesGroupAsync(
+        string userName, string gameName,
+        IEnumerable<string> allOf, IEnumerable<string> anyOf, IEnumerable<string> noneOf,
+        CancellationToken ct = default)
+    {
+        var pairs = new List<(string, string)>();
+        if (allOf != null) foreach (var c in allOf) pairs.Add(("all_of", c));
+        if (anyOf != null) foreach (var c in anyOf) pairs.Add(("any_of", c));
+        if (noneOf != null) foreach (var c in noneOf) pairs.Add(("none_of", c));
+        return GetAsync<EntitiesDetailsResponse>(
+            $"/api/entities/v1/{userName}/{gameName}/group{Q(pairs)}", ct);
+    }
+
     // ────────────────────────────────────────────────────────────────────────
     // Home
     // ────────────────────────────────────────────────────────────────────────
@@ -395,6 +411,12 @@ public class GameServerClient
         string userName, string gameName, CancellationToken ct = default)
         => PostAsync<DungeonAdvanceStageResponse>("/api/dungeon/progress/advance_stage/v1/",
             new DungeonAdvanceStageRequest { user_name = userName, game_name = gameName }, ct);
+
+    /// <summary>触发入口房间初始化（叙事 + 牌库生成），返回后台任务信息。</summary>
+    public UniTask<DungeonEntryInitResponse> DungeonEntryInitAsync(
+        string userName, string gameName, CancellationToken ct = default)
+        => PostAsync<DungeonEntryInitResponse>("/api/dungeon/entry/init/v1/",
+            new DungeonEntryInitRequest { user_name = userName, game_name = gameName }, ct);
 
     // ────────────────────────────────────────────────────────────────────────
     // Dungeon: Combat

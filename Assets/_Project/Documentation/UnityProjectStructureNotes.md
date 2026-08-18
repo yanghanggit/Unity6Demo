@@ -7,7 +7,7 @@
 ## 一、Assets/ 目录的三类资源归属
 
 | 来源 | 推荐位置 | 说明 |
-|------|----------|------|
+| ------ | ---------- | ------ |
 | **项目自身资源** | `Assets/AIRPG/` | 自由组织 |
 | **Unity 官方包**（TextMesh Pro、URP 等） | `Packages/`（通过 Package Manager） | 不应手动放在 Assets/；旧式导入才在 `Assets/TextMesh Pro/` |
 | **第三方/外部包**（WebGLSupport 等） | `Assets/ThirdParty/` 或 `Assets/Plugins/` | 隔离存放，不修改内部结构 |
@@ -17,7 +17,7 @@
 ## 二、`Plugins/` 与 `ThirdParty/` 的本质区别
 
 | | `Plugins/` | `ThirdParty/`（自定义名称） |
-|--|------------|--------------------------|
+| ------ | ------------ | -------------------------- |
 | **性质** | Unity 引擎保留的**特殊目录** | 团队自定义的**约定目录** |
 | **用途** | 存放 Native 二进制插件：`.dll`、`.so`、`.dylib`、`.aar`、`.jslib` | 存放纯 C# 的第三方资源包 |
 | **编译顺序** | 第一轮编译（先于普通脚本） | 普通顺序 |
@@ -31,14 +31,14 @@
 
 **核心规则：Unity 特殊文件夹按名称在任意层级生效，不必放在根目录。**
 
-```
+```text
 Assets/AIRPG/Editor/          ← 生效 ✅
 Assets/ThirdParty/Foo/Editor/ ← 同样生效 ✅
 ```
 
 ### 推荐做法：特殊文件夹跟随各自包
 
-```
+```text
 Assets/
 ├── AIRPG/
 │   ├── Editor/          ← 项目的 Editor 脚本
@@ -54,7 +54,7 @@ Assets/
 
 ### `Tests/` 必须配合 `.asmdef`
 
-```
+```text
 AIRPG/
 └── Tests/
     ├── EditMode/
@@ -70,7 +70,7 @@ AIRPG/
 ## 四、命名规范速查
 
 | 资产类型 | 风格 | 示例 |
-|----------|------|------|
+| ---------- | ------ | ------ |
 | **Scene** | PascalCase | `BattleStage_Forest.unity` |
 | **MonoBehaviour** | PascalCase，无冗余后缀 | `PlayerController.cs` |
 | **ScriptableObject 类** | PascalCase + 语义后缀 | `CharacterData.cs`、`WeaponConfig.cs` |
@@ -86,7 +86,7 @@ AIRPG/
 
 ### 旧方式（按类型）—— 不推荐用于中大型项目
 
-```
+```text
 AIRPG/
 ├── Scripts/   ← 所有脚本堆在一起
 ├── Scenes/    ← 所有场景
@@ -95,7 +95,7 @@ AIRPG/
 
 ### 新方式（按功能）—— 现代 Unity 推荐
 
-```
+```text
 AIRPG/
 ├── Battle/                  ← 战斗模块（Scene + Script + Prefab + Sprite 聚合）
 │   ├── BattleScene.unity
@@ -126,12 +126,11 @@ Unity 官方示例（Boss Room、Dragon Crashers）均采用按功能分组方�
 ## 六、本项目对照检查
 
 | 当前状态 | 建议 |
-|----------|------|
+| ---------- | ------ |
 | `Assets/TextMesh Pro/`（旧式导入） | 条件允许时改为 Package Manager 引用 |
 | `Assets/WebGLSupport/` | 移至 `Assets/ThirdParty/WebGLSupport/`（若含 `.jslib` 则内部建 `Plugins/WebGL/`） |
 | `Assets/AIRPG/Scripts/UI/ActionOrderObject.cs` | 按功能重组后可移至 `Assets/AIRPG/Battle/UI/ActionOrderObject.cs` |
 | `Assets/Editor/`、`Assets/Resources/` 若存在 | 评估是否真正全局共享，否则下沉到各功能模块 |
-
 
 ## 补充
 
@@ -165,5 +164,3 @@ AIRPG/
     ├── ScriptableObjects/
     │   └── CharacterData.asset
     └── Prefabs/
-
-
