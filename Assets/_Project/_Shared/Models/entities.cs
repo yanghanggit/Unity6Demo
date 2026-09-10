@@ -34,7 +34,6 @@ public sealed class Actor
 public sealed class Stage
 {
     public string name = "";
-    public string code_name = "";
     public StageType type;
     public string profile = "";
     public string system_message = "";

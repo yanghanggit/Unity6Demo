@@ -18,7 +18,6 @@ public sealed class WorldComponent
 public sealed class StageComponent
 {
     public string name = "";
-    public string code_name = "";
 }
 
 public sealed class ActorComponent

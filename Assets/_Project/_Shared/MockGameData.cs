@@ -46,7 +46,7 @@ public static class MockGameData
             components = new List<ComponentSerialization>
             {
                 ComponentUtils.ToComp(new IdentityComponent { name = s.Name }),
-                ComponentUtils.ToComp(new StageComponent { name = s.Name, code_name = s.CodeName }),
+                ComponentUtils.ToComp(new StageComponent { name = s.Name }),
                 ComponentUtils.ToComp(new StageDescriptionComponent { name = s.Name, narrative = s.Narrative }),
                 ComponentUtils.ToComp(new HomeComponent { name = s.Name }),
             },
@@ -78,16 +78,15 @@ public static class MockGameData
     private sealed class StageDef
     {
         public string Name;      // 完整实体名，如 "场景.村口"
-        public string CodeName;  // 英文代号，用于后续图片映射
         public string Narrative;
         public string[] Actors;  // 该 stage 内的 actor 完整实体名
     }
 
     private static readonly StageDef[] StageDefs =
     {
-        new StageDef { Name = "场景.村口", CodeName = "village_hall", Narrative = "村庄入口，来往行人的必经之地。", Actors = new[] { "角色.旅行者", "角色.村长" } },
-        new StageDef { Name = "场景.训练场", CodeName = "training_ground", Narrative = "村民习武练兵的空地。", Actors = new[] { "角色.铁匠", "角色.教官" } },
-        new StageDef { Name = "场景.猎人小屋", CodeName = "hunter_storage", Narrative = "猎人的居所，堆放着猎物与工具。", Actors = new[] { "角色.猎人", "角色.药师" } },
-        new StageDef { Name = "场景.史家宅", CodeName = "shi_family_house", Narrative = "史家宅院，门庭森严。", Actors = new[] { "角色.史员外" } },
+        new StageDef { Name = "场景.村口", Narrative = "村庄入口，来往行人的必经之地。", Actors = new[] { "角色.旅行者", "角色.村长" } },
+        new StageDef { Name = "场景.训练场", Narrative = "村民习武练兵的空地。", Actors = new[] { "角色.铁匠", "角色.教官" } },
+        new StageDef { Name = "场景.猎人小屋", Narrative = "猎人的居所，堆放着猎物与工具。", Actors = new[] { "角色.猎人", "角色.药师" } },
+        new StageDef { Name = "场景.史家宅", Narrative = "史家宅院，门庭森严。", Actors = new[] { "角色.史员外" } },
     };
 }
