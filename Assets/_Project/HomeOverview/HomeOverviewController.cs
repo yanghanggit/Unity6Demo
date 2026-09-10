@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 /// <summary>
@@ -13,6 +15,8 @@ public class HomeOverviewController : MonoBehaviour
     [SerializeField] private VisualTreeAsset _cardTemplate;
 
     private ScrollView _stageScroll;
+
+    private const string HomeStageSceneName = "HomeStage";
 
     // mock 数据（占位）：后续替换为后端返回的 home stage 实体名
     private static readonly string[] MockStageNames =
@@ -59,9 +63,16 @@ public class HomeOverviewController : MonoBehaviour
         return card;
     }
 
-    /// <summary>点击某张卡片（home stage）。占位：只打日志，后续跳转 HomeStage。</summary>
+    /// <summary>点击某张卡片（home stage）：记录 stage 名并切入 HomeStage 场景。</summary>
     private void OnStageClicked(string stageName)
     {
-        Debug.Log($"[HomeOverview] 点击 home stage: {stageName}");
+        GameManager.Instance.CurrentStageName = stageName;
+        EnterHomeStageAsync(stageName).Forget();
+    }
+
+    private async UniTaskVoid EnterHomeStageAsync(string stageName)
+    {
+        Debug.Log($"[HomeOverview] 进入 home stage: {stageName}");
+        await SceneManager.LoadSceneAsync(HomeStageSceneName);
     }
 }

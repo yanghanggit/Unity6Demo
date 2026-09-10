@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="HomeStage.uss" />
+    <ui:VisualElement name="root" class="root-container">
+
+        <!-- 顶部预留区：标题（显示当前 stage 名） -->
+        <ui:VisualElement name="top-area" class="top-area">
+            <ui:Label name="title" text="场景" class="title-label" />
+        </ui:VisualElement>
+
+        <!-- 卡片横向滚动容器：Actor 卡片由控制器动态生成 -->
+        <ui:ScrollView name="actor-scroll" class="actor-scroll" mode="Horizontal" />
+
+    </ui:VisualElement>
+</ui:UXML>
