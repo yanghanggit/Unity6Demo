@@ -3,6 +3,7 @@
         <ui:VisualElement name="card-bg" class="stage-card__bg" />
         <ui:VisualElement name="card-name-bar" class="stage-card__name-bar">
             <ui:Label name="card-name" class="stage-card__name" />
+            <ui:Label name="card-actors" class="stage-card__actors" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

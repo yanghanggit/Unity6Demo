@@ -10,5 +10,8 @@
         <!-- 卡片横向滚动容器：home stage 卡片由控制器动态生成 -->
         <ui:ScrollView name="stage-scroll" class="stage-scroll" mode="Horizontal" />
 
+        <!-- 返回大厅按钮（左上角）：登出 + 跳转 PlayerLobby -->
+        <ui:Button name="btn-back" text="← 返回大厅" class="btn-back" />
+
     </ui:VisualElement>
 </ui:UXML>

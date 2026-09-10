@@ -5,8 +5,8 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// 家园场景（HomeStage）控制器：进入某个 home stage 后展示其中的角色（Actor）。
-/// 占位阶段：用 mock 数据生成 Actor 卡片，点击只打日志。
-/// 后续接入：改用 FetchEntitiesGroupAsync / FetchStagesStateAsync 取该 stage 内真实角色。
+/// 占位阶段：用 MockGameData（正式 ECS 结构）取当前 stage 的 Actor 实体生成卡片。
+/// 后续接入：把 MockGameData 换成 GameServerClient.FetchStagesStateAsync / FetchEntitiesDetailsAsync。
 /// </summary>
 public class HomeStageController : MonoBehaviour
 {
@@ -19,13 +19,6 @@ public class HomeStageController : MonoBehaviour
     private Button _backButton;
 
     private const string HomeOverviewSceneName = "HomeOverview";
-
-    // mock 数据（占位）：后续替换为当前 stage 内真实 Actor 名单
-    private static readonly string[] MockActorNames =
-    {
-        "旅行者", "铁匠", "村长", "药师",
-        "猎人", "史官", "商人", "村民",
-    };
 
     void OnEnable()
     {
@@ -51,38 +44,51 @@ public class HomeStageController : MonoBehaviour
         _backButton.clicked += OnBackClicked;
 
         ApplyTitle();
-        PopulateMockCards();
+        PopulateCards();
     }
 
-    /// <summary>标题显示当前 stage 名（进入前由 HomeOverview 写入 GameManager.CurrentStageName）。</summary>
+    /// <summary>标题显示当前 stage 显示名（进入前由 HomeOverview 写入 GameManager.CurrentStageName）。</summary>
     private void ApplyTitle()
     {
         var stageName = GameManager.Instance.CurrentStageName;
         if (_titleLabel != null)
-            _titleLabel.text = string.IsNullOrEmpty(stageName) ? "场景" : stageName;
+            _titleLabel.text = string.IsNullOrEmpty(stageName) ? "场景" : EntityNameUtils.GetDisplayName(stageName);
     }
 
-    /// <summary>用 mock 数据重建 Actor 卡片列表。</summary>
-    private void PopulateMockCards()
+    /// <summary>取当前 stage 的 Actor 实体，生成卡片。</summary>
+    private void PopulateCards()
     {
         _actorScroll.Clear();
-        foreach (var name in MockActorNames)
-            _actorScroll.Add(BuildCard(name));
+
+        var stageName = GameManager.Instance.CurrentStageName;
+        if (string.IsNullOrEmpty(stageName))
+            return;
+
+        var state = MockGameData.BuildStagesState();
+        if (!state.mapping.TryGetValue(stageName, out var actorNames))
+        {
+            Debug.LogWarning($"[HomeStage] 未找到 stage '{stageName}' 的 actor 列表");
+            return;
+        }
+
+        var details = MockGameData.BuildEntitiesDetails(actorNames);
+        foreach (var entity in details.entities)
+            _actorScroll.Add(BuildCard(entity));
     }
 
-    /// <summary>根据模板克隆一张卡片，填入 Actor 名并绑定点击。</summary>
-    private VisualElement BuildCard(string actorName)
+    /// <summary>根据 Actor 实体克隆一张卡片，填入显示名并绑定点击。</summary>
+    private VisualElement BuildCard(EntitySerialization entity)
     {
         var card = _cardTemplate.CloneTree();
-        card.Q<Label>("card-name").text = actorName;
-        card.RegisterCallback<ClickEvent>(_ => OnActorClicked(actorName));
+        card.Q<Label>("card-name").text = EntityNameUtils.GetDisplayName(entity.name);
+        card.RegisterCallback<ClickEvent>(_ => OnActorClicked(entity.name));
         return card;
     }
 
     /// <summary>点击某张卡片（Actor）。占位：只打日志，后续接入对话/详情等交互。</summary>
     private void OnActorClicked(string actorName)
     {
-        Debug.Log($"[HomeStage] 点击 Actor: {actorName}");
+        Debug.Log($"[HomeStage] 点击 Actor: {EntityNameUtils.GetDisplayName(actorName)} ({actorName})");
     }
 
     /// <summary>返回按钮：清空当前 stage 并切回 HomeOverview 场景。</summary>

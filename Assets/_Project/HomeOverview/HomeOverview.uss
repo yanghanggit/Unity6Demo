@@ -61,10 +61,11 @@
     background-color: rgb(40, 48, 68);
 }
 
-/* 卡片底部名称栏 */
+/* 卡片底部名称栏（stage 名 + actor 名单） */
 .stage-card__name-bar {
-    height: 56px;
+    height: 96px;
     flex-shrink: 0;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.55);
@@ -75,4 +76,32 @@
     font-size: 22px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
+    margin-bottom: 4px;
+}
+
+.stage-card__actors {
+    color: rgb(170, 170, 185);
+    font-size: 15px;
+    -unity-text-align: middle-center;
+}
+
+/* ===== 返回大厅按钮（左上角） ===== */
+.btn-back {
+    position: absolute;
+    top: 42px;
+    left: 40px;
+    height: 56px;
+    padding-left: 26px;
+    padding-right: 26px;
+    border-radius: 28px;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    color: white;
+    font-size: 24px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.btn-back:hover {
+    background-color: rgba(90, 180, 120, 0.8);
 }
