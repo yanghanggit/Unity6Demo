@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="card" class="stage-card">
+        <ui:VisualElement name="card-bg" class="stage-card__bg" />
+        <ui:VisualElement name="card-name-bar" class="stage-card__name-bar">
+            <ui:Label name="card-name" class="stage-card__name" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

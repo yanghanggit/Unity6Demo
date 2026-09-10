@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="HomeOverview.uss" />
+    <ui:VisualElement name="root" class="root-container">
+
+        <!-- 顶部预留区：标题 / HUD / 状态栏 -->
+        <ui:VisualElement name="top-area" class="top-area">
+            <ui:Label name="title" text="家园" class="title-label" />
+        </ui:VisualElement>
+
+        <!-- 卡片横向滚动容器：home stage 卡片由控制器动态生成 -->
+        <ui:ScrollView name="stage-scroll" class="stage-scroll" mode="Horizontal" />
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,78 @@
+/* ===================================================================
+   HomeOverview.uss
+   适配目标：1920 × 1080 横屏（PanelSettings 参考分辨率请同步设置）
+   =================================================================== */
+
+/* ===== 根容器：全屏、纵向布局（透明，让背景 Sprite 透出） ===== */
+.root-container {
+    flex-grow: 1;
+    flex-direction: column;
+    /* 不设置 background-color：保持透明，避免遮住场景里的背景 Sprite */
+}
+
+/* ===== 顶部预留区（标题 / HUD / 状态栏） ===== */
+.top-area {
+    height: 140px;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.title-label {
+    color: rgb(230, 230, 230);
+    font-size: 40px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* ===== 卡片横向滚动容器（居中偏下） ===== */
+.stage-scroll {
+    flex-grow: 1;
+}
+
+/* ScrollView 内容容器：横向排列 + 水平居中 + 垂直居中 */
+.stage-scroll .unity-scroll-view__content-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+
+/* ===== 单张 home stage 卡片 ===== */
+.stage-card {
+    width: 260px;
+    height: 340px;
+    margin-left: 16px;
+    margin-right: 16px;
+    border-radius: 16px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.15);
+    background-color: rgb(30, 36, 52);
+    overflow: hidden;
+}
+
+.stage-card:hover {
+    border-color: rgb(90, 180, 120);
+}
+
+/* 卡片背景层（占位用纯色，后续换成 stage 图） */
+.stage-card__bg {
+    flex-grow: 1;
+    background-color: rgb(40, 48, 68);
+}
+
+/* 卡片底部名称栏 */
+.stage-card__name-bar {
+    height: 56px;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.stage-card__name {
+    color: rgb(235, 235, 235);
+    font-size: 22px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
