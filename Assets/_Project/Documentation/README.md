@@ -10,6 +10,7 @@
 | [UnityProjectStructureNotes.md](UnityProjectStructureNotes.md) | 目录归属与命名规范 |
 | [Unity工程结构与渲染配置说明.md](Unity工程结构与渲染配置说明.md) | URP 渲染配置、Settings 重要性、误删恢复 |
 | [WebGL部署指南.md](WebGL部署指南.md) | WebGL gzip 部署（webgl-server.js） |
+| [WebGL文本输入与中文输入法IME限制.md](WebGL文本输入与中文输入法IME限制.md) | WebGL 桌面浏览器中文输入法(IME)失效：根因、决策、替代方案 |
 | [VSCode查看Unity日志配置说明.md](VSCode查看Unity日志配置说明.md) | .vscode/tasks.json 日志监控 |
 | [Unity资源销毁-Destroy vs DestroyImmediate.md](Unity资源销毁-Destroy vs DestroyImmediate.md) | Destroy / DestroyImmediate 用法对照 |
 

@@ -1,0 +1,67 @@
+/* ===================================================================
+   TestTextInputField.uss
+   适配目标：1920 × 1080 横屏（PanelSettings 参考分辨率请同步设置）
+   =================================================================== */
+
+/* ===== 根容器：纵向居中 ===== */
+.root-container {
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(12, 14, 22);
+}
+
+/* ===== 标题 ===== */
+.title-label {
+    color: rgb(230, 230, 230);
+    font-size: 40px;
+    -unity-font-style: bold;
+    margin-bottom: 48px;
+}
+
+/* ===== 输入框上方标签 ===== */
+.input-label {
+    width: 640px;
+    color: rgb(190, 190, 205);
+    font-size: 20px;
+    margin-bottom: 8px;
+    -unity-text-align: middle-left;
+}
+
+/* ===== 输入框 ===== */
+.input-field {
+    width: 640px;
+}
+
+/* 输入文本本体（Unity 内置类名）：白底 → 深色文字 */
+.input-field .unity-base-text-field__input {
+    color: rgb(30, 30, 30);
+    font-size: 26px;
+}
+
+/* ===== 确认按钮 ===== */
+.btn-confirm {
+    width: 640px;
+    height: 64px;
+    margin-top: 36px;
+    border-radius: 10px;
+    border-width: 0;
+    background-color: rgb(38, 120, 60);
+    color: white;
+    font-size: 28px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.btn-confirm:hover {
+    background-color: rgb(48, 150, 75);
+}
+
+/* ===== 结果展示 ===== */
+.result-label {
+    margin-top: 40px;
+    color: rgb(120, 220, 160);
+    font-size: 30px;
+    -unity-text-align: middle-center;
+}

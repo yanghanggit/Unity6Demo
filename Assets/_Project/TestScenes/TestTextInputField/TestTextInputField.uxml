@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:Style src="TestTextInputField.uss" />
+    <ui:VisualElement name="root" class="root-container">
+
+        <ui:Label name="title" text="TextInputField 测试" class="title-label" />
+
+        <!-- 输入框上方标签（独立 Label，便于控制颜色） -->
+        <ui:Label name="input-label" text="输入内容" class="input-label" />
+
+        <!-- 单行文本输入框 -->
+        <ui:TextField name="input-field" value="" max-length="64" class="input-field" />
+
+        <!-- 确认按钮 -->
+        <ui:Button name="btn-confirm" text="确认" class="btn-confirm" />
+
+        <!-- 确认结果展示 -->
+        <ui:Label name="result-label" text="（尚未确认）" class="result-label" />
+
+    </ui:VisualElement>
+</ui:UXML>
