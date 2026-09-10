@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 /// <summary>
@@ -14,6 +16,9 @@ public class HomeStageController : MonoBehaviour
 
     private ScrollView _actorScroll;
     private Label _titleLabel;
+    private Button _backButton;
+
+    private const string HomeOverviewSceneName = "HomeOverview";
 
     // mock 数据（占位）：后续替换为当前 stage 内真实 Actor 名单
     private static readonly string[] MockActorNames =
@@ -38,8 +43,12 @@ public class HomeStageController : MonoBehaviour
     {
         _actorScroll = root.Q<ScrollView>("actor-scroll");
         _titleLabel = root.Q<Label>("title");
+        _backButton = root.Q<Button>("btn-back");
         Debug.Assert(_actorScroll != null, "[HomeStage] 未找到 actor-scroll，请检查 HomeStage.uxml");
+        Debug.Assert(_backButton != null, "[HomeStage] 未找到 btn-back，请检查 HomeStage.uxml");
         Debug.Assert(_cardTemplate != null, "[HomeStage] _cardTemplate 未赋值，请在 Inspector 拖入 ActorCard.uxml");
+
+        _backButton.clicked += OnBackClicked;
 
         ApplyTitle();
         PopulateMockCards();
@@ -74,5 +83,17 @@ public class HomeStageController : MonoBehaviour
     private void OnActorClicked(string actorName)
     {
         Debug.Log($"[HomeStage] 点击 Actor: {actorName}");
+    }
+
+    /// <summary>返回按钮：清空当前 stage 并切回 HomeOverview 场景。</summary>
+    private void OnBackClicked()
+    {
+        GameManager.Instance.CurrentStageName = "";
+        LoadHomeOverviewAsync().Forget();
+    }
+
+    private async UniTaskVoid LoadHomeOverviewAsync()
+    {
+        await SceneManager.LoadSceneAsync(HomeOverviewSceneName);
     }
 }

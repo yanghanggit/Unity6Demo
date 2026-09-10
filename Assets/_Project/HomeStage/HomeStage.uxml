@@ -10,5 +10,8 @@
         <!-- 卡片横向滚动容器：Actor 卡片由控制器动态生成 -->
         <ui:ScrollView name="actor-scroll" class="actor-scroll" mode="Horizontal" />
 
+        <!-- 返回家园总览按钮（左上角） -->
+        <ui:Button name="btn-back" text="← 返回" class="btn-back" />
+
     </ui:VisualElement>
 </ui:UXML>
