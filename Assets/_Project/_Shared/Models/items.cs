@@ -19,7 +19,7 @@ public enum ItemType
 public class Item
 {
     public string name = "";
-    public string uuid = "";
+    public string uuid = System.Guid.NewGuid().ToString();
     public string description = "";
     public ItemType type;
     public int count = 1;
@@ -27,27 +27,30 @@ public class Item
 
 public sealed class GearItem : Item
 {
-    public CharacterStats stat_bonuses = new();
-    public int cost = 1;
-    public List<string> equip_affixes = new();
-    public List<string> on_hit_affixes = new();
-    public List<Item> craft_materials = new();
+    public GearItem() { type = ItemType.GEAR_ITEM; }
+    [JsonConverter(typeof(AnyItemListConverter))]
+    public List<Item> resources = new(); // 合成时消耗的原料列表
+    public List<Card> cards = new();     // 可转化为手牌的卡牌列表
 }
 
 public sealed class CostumeItem : Item
 {
-    public List<Item> craft_materials = new();
+    public CostumeItem() { type = ItemType.COSTUME_ITEM; }
+    [JsonConverter(typeof(AnyItemListConverter))]
+    public List<Item> resources = new(); // 合成时消耗的原料列表
 }
 
 public sealed class ConsumableItem : Item
 {
-    public TargetType target_type = TargetType.SELF;
-    public List<string> affixes = new();
-    public List<Item> craft_materials = new();
+    public ConsumableItem() { type = ItemType.CONSUMABLE_ITEM; }
+    public List<string> on_use_prompt = new(); // 使用效果提示词列表
+    [JsonConverter(typeof(AnyItemListConverter))]
+    public List<Item> resources = new();       // 合成时消耗的原料列表
 }
 
 public sealed class MaterialItem : Item
 {
+    public MaterialItem() { type = ItemType.MATERIAL_ITEM; }
 }
 
 // AnyItem 判别联合类型转换器（对应 Python AnyItem = Union[GearItem, CostumeItem, ConsumableItem, MaterialItem] discriminator="type"）

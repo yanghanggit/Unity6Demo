@@ -17,9 +17,10 @@ public sealed class CombatRoom : DungeonRoom
     public Combat combat = new();
 }
 
-public sealed class EntryRoom : DungeonRoom
+public sealed class OpeningRoom : DungeonRoom
 {
-    public EntryRoom() { type = "entry"; }
+    public OpeningRoom() { type = "opening"; }
+    public bool initialized = false;
 }
 
 // DungeonRoomUnion 判别联合转换器（discriminator: type）
@@ -32,7 +33,7 @@ public class DungeonRoomConverter : JsonConverter<DungeonRoom>
         DungeonRoom room = roomType switch
         {
             "combat" => new CombatRoom(),
-            "entry" => new EntryRoom(),
+            "opening" => new OpeningRoom(),
             _ => new DungeonRoom()
         };
         using (var subReader = jo.CreateReader())
@@ -60,7 +61,7 @@ public sealed class Dungeon
     [JsonConverter(typeof(DungeonRoomListConverter))]
     public List<DungeonRoom> rooms = new();
     public string name = "";
-    public string premise = "";
+    public string profile = "";
     public string created_at = "";
     public int current_room_index = -1;
     public bool setup_entities = false;

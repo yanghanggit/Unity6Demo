@@ -18,13 +18,12 @@ public sealed class WorldComponent
 public sealed class StageComponent
 {
     public string name = "";
-    public string character_sheet_name = "";
+    public string code_name = "";
 }
 
 public sealed class ActorComponent
 {
     public string name = "";
-    public string character_sheet_name = "";
     public string current_stage = "";
 }
 
@@ -105,13 +104,7 @@ public sealed class CharacterStatsComponent
     public CharacterStats stats = new();
 }
 
-public sealed class StatusEffectsComponent
-{
-    public string name = "";
-    public List<StatusEffect> status_effects = new();
-}
-
-public sealed class PlayerActionAuditComponent
+public sealed class PlayerAuditComponent
 {
     public string name = "";
 }
@@ -121,7 +114,43 @@ public sealed class DungeonGenerationComponent
     public string name = "";
 }
 
-public sealed class WorkshopComponent
+public sealed class GearWorkshopComponent
+{
+    public string name = "";
+}
+
+public sealed class ConsumableWorkshopComponent
+{
+    public string name = "";
+}
+
+public sealed class CostumeWorkshopComponent
+{
+    public string name = "";
+}
+
+public sealed class ConsumableComponent
+{
+    public string name = "";
+}
+
+public sealed class ArtifactComponent
+{
+    public string name = "";
+}
+
+public sealed class ReliquaryComponent
+{
+    public string name = "";
+    public List<Artifact> artifacts = new();
+}
+
+public sealed class DungeonDirectorComponent
+{
+    public string name = "";
+}
+
+public sealed class WorldDirectorComponent
 {
     public string name = "";
 }
@@ -130,6 +159,7 @@ public sealed class DrawPileComponent
 {
     public string name = "";
     public List<Card> cards = new();
+    public List<Card> retained_cards = new();
 }
 
 public sealed class ExhaustPileComponent
@@ -148,7 +178,12 @@ public sealed class DeckComponent
 {
     public string name = "";
     public List<Card> cards = new();
-    public List<string> keywords = new();
+}
+
+public sealed class SpoilsComponent
+{
+    public string name = "";
+    public List<Card> cards = new();
 }
 
 public sealed class InventoryComponent
@@ -165,7 +200,7 @@ public sealed class StorageComponent
     public List<Item> items = new();
 }
 
-public sealed class CombatLootComponent
+public sealed class LootComponent
 {
     public string name = "";
     [JsonConverter(typeof(AnyItemListConverter))]
@@ -181,5 +216,5 @@ public sealed class WornCostumeComponent
 public sealed class EquippedGearComponent
 {
     public string name = "";
-    public GearItem item = null;
+    public List<GearItem> items = new();
 }

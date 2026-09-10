@@ -4,21 +4,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
 
-public sealed class CharacterSheet
-{
-    public string name = "";
-    public string type = "";
-    public string profile = "";
-    public string base_body = "";
-}
-
-public sealed class StageProfile
-{
-    public string name = "";
-    public string type = "";
-    public string profile = "";
-}
-
 [JsonConverter(typeof(StringEnumConverter))]
 public enum ActorType
 {
@@ -38,22 +23,26 @@ public enum StageType
 public sealed class Actor
 {
     public string name = "";
-    public CharacterSheet character_sheet = new();
+    public ActorType type;
+    public string profile = "";
+    public string base_body = "";
     public string system_message = "";
     public CharacterStats character_stats = new();
-    public CostumeItem custom_item = null; // Optional[CostumeItem]
-    public List<string> keywords = new();
+    public List<ComponentSerialization> components = new();
 }
 
 public sealed class Stage
 {
     public string name = "";
-    public StageProfile stage_profile = new();
+    public string code_name = "";
+    public StageType type;
+    public string profile = "";
     public string system_message = "";
     public List<Actor> actors = new();
+    public List<ComponentSerialization> components = new();
 }
 
-public sealed class WorldSystem
+public sealed class World
 {
     public string name = "";
     public string system_message = "";

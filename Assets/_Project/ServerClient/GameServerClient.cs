@@ -169,14 +169,14 @@ public class GameServerClient
 
     /// <summary>批量查询后台任务状态。</summary>
     public UniTask<TasksStatusResponse> FetchTasksStatusAsync(
-        IEnumerable<string> taskIds, CancellationToken ct = default)
+        IEnumerable<string> jobIds, CancellationToken ct = default)
     {
-        string qs = Q(taskIds.Select(id => ("task_ids", id)));
+        string qs = Q(jobIds.Select(id => ("job_ids", id)));
         return GetAsync<TasksStatusResponse>($"/api/tasks/v1/status{qs}", ct);
     }
 
     /// <summary>
-    /// 轮询等待后台任务完成，返回终态 TaskRecord。
+    /// 轮询等待后台任务完成，返回终态 TaskStatusView。
     /// 替代 Python 端基于 SSE 的 watch_task_until_done（WebGL 不支持流式读取）。
     /// </summary>
     /// <param name="taskId">要监听的任务 ID</param>
@@ -184,7 +184,7 @@ public class GameServerClient
     /// <param name="pollIntervalMs">两次轮询之间的间隔（毫秒）</param>
     /// <exception cref="TaskFailedException">任务失败</exception>
     /// <exception cref="TimeoutException">等待超时</exception>
-    public async UniTask<TaskRecord> WatchTaskUntilDoneAsync(
+    public async UniTask<TaskStatusView> WatchTaskUntilDoneAsync(
         string taskId,
         int timeoutSeconds = 120,
         int pollIntervalMs = 1500,
@@ -197,13 +197,13 @@ public class GameServerClient
             ct.ThrowIfCancellationRequested();
 
             var resp = await FetchTasksStatusAsync(new[] { taskId }, ct);
-            var record = resp.tasks.FirstOrDefault(t => t.task_id == taskId);
+            var record = resp.tasks.FirstOrDefault(t => t.job_id == taskId);
 
             if (record != null)
             {
-                if (record.status == TaskStatus.FAILED)
+                if (record.status == BackgroundTaskStatus.FAILED)
                     throw new TaskFailedException(record.error ?? "未知错误");
-                if (record.status == TaskStatus.COMPLETED)
+                if (record.status == BackgroundTaskStatus.COMPLETED)
                     return record;
             }
 
@@ -412,11 +412,30 @@ public class GameServerClient
         => PostAsync<DungeonAdvanceStageResponse>("/api/dungeon/progress/advance_stage/v1/",
             new DungeonAdvanceStageRequest { user_name = userName, game_name = gameName }, ct);
 
-    /// <summary>触发入口房间初始化（叙事 + 牌库生成），返回后台任务信息。</summary>
-    public UniTask<DungeonEntryInitResponse> DungeonEntryInitAsync(
+    /// <summary>触发开场房间初始化（叙事 + 牌库初始化），返回后台任务信息。</summary>
+    public UniTask<DungeonOpeningInitResponse> DungeonOpeningInitAsync(
         string userName, string gameName, CancellationToken ct = default)
-        => PostAsync<DungeonEntryInitResponse>("/api/dungeon/entry/init/v1/",
-            new DungeonEntryInitRequest { user_name = userName, game_name = gameName }, ct);
+        => PostAsync<DungeonOpeningInitResponse>("/api/dungeon/opening/init/v1/",
+            new DungeonOpeningInitRequest { user_name = userName, game_name = gameName }, ct);
+
+    /// <summary>触发开场房间卡池生成，返回后台任务信息。</summary>
+    public UniTask<DungeonOpeningGenerateCardPoolResponse> DungeonOpeningGenerateCardPoolAsync(
+        string userName, string gameName, CancellationToken ct = default)
+        => PostAsync<DungeonOpeningGenerateCardPoolResponse>("/api/dungeon/opening/generate_card_pool/v1/",
+            new DungeonOpeningGenerateCardPoolRequest { user_name = userName, game_name = gameName }, ct);
+
+    /// <summary>触发开场房间挑卡，返回后台任务信息。</summary>
+    public UniTask<DungeonOpeningPickCardFromPoolResponse> DungeonOpeningPickCardFromPoolAsync(
+        string userName, string gameName, string actorName, string cardName,
+        CancellationToken ct = default)
+        => PostAsync<DungeonOpeningPickCardFromPoolResponse>("/api/dungeon/opening/pick_card_from_pool/v1/",
+            new DungeonOpeningPickCardFromPoolRequest
+            {
+                user_name = userName,
+                game_name = gameName,
+                actor_name = actorName,
+                card_name = cardName,
+            }, ct);
 
     // ────────────────────────────────────────────────────────────────────────
     // Dungeon: Combat
@@ -481,17 +500,15 @@ public class GameServerClient
             }, ct);
 
     /// <summary>使用背包内装备，返回后台任务信息。</summary>
-    public UniTask<DungeonCombatUseGearItemResponse> DungeonCombatUseGearAsync(
-        string userName, string gameName,
-        string itemName, List<string> targets,
+    public UniTask<DungeonCombatEquipGearItemResponse> DungeonCombatEquipGearAsync(
+        string userName, string gameName, string itemName,
         CancellationToken ct = default)
-        => PostAsync<DungeonCombatUseGearItemResponse>("/api/dungeon/combat/use_gear/v1/",
-            new DungeonCombatUseGearItemRequest
+        => PostAsync<DungeonCombatEquipGearItemResponse>("/api/dungeon/combat/equip_gear/v1/",
+            new DungeonCombatEquipGearItemRequest
             {
                 user_name = userName,
                 game_name = gameName,
                 item_name = itemName,
-                targets = targets,
             }, ct);
 
     /// <summary>收取战斗战利品，将掉落物转入背包。</summary>
@@ -499,4 +516,19 @@ public class GameServerClient
         string userName, string gameName, CancellationToken ct = default)
         => PostAsync<DungeonCombatCollectLootResponse>("/api/dungeon/combat/collect_loot/v1/",
             new DungeonCombatCollectLootRequest { user_name = userName, game_name = gameName }, ct);
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Compact Context
+    // ────────────────────────────────────────────────────────────────────────
+
+    /// <summary>手动压缩指定实体的 LLM 记忆，返回后台任务信息。</summary>
+    public UniTask<CompactContextResponse> CompactContextAsync(
+        string userName, string gameName, string targetName, CancellationToken ct = default)
+        => PostAsync<CompactContextResponse>("/api/compact_context/v1/",
+            new CompactContextRequest
+            {
+                user_name = userName,
+                game_name = gameName,
+                target_name = targetName,
+            }, ct);
 }

@@ -4,18 +4,16 @@ using Newtonsoft.Json.Converters;
 using System.Runtime.Serialization;
 
 [JsonConverter(typeof(StringEnumConverter))]
-public enum TaskStatus
+public enum BackgroundTaskStatus
 {
     [EnumMember(Value = "running")] RUNNING,
     [EnumMember(Value = "completed")] COMPLETED,
     [EnumMember(Value = "failed")] FAILED,
 }
 
-public sealed class TaskRecord
+public sealed class TaskStatusView
 {
-    public string task_id = "";
-    public TaskStatus status = TaskStatus.RUNNING;
-    public string start_time = "";
-    public string end_time = null;
+    public string job_id = "";
+    public BackgroundTaskStatus status = BackgroundTaskStatus.RUNNING;
     public string error = null;
 }

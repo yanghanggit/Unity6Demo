@@ -9,5 +9,4 @@ public enum TargetType
     [EnumMember(Value = "single")] SINGLE,
     [EnumMember(Value = "all")] ALL,
     [EnumMember(Value = "spread")] SPREAD,
-    [EnumMember(Value = "self")] SELF,
 }

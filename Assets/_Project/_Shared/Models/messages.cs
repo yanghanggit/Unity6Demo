@@ -70,7 +70,7 @@ public class AnyContextMessageConverter : JsonConverter<BaseMessage>
     }
 }
 
-// List<BaseMessage> (ContextMessage) 列表转换器（处理列表中的多态元素，用于 AgentContext.context）
+// List<BaseMessage> (ChatMessage) 列表转换器（处理列表中的多态元素，用于 AgentMemory.messages）
 public class AnyContextMessageListConverter : JsonConverter<List<BaseMessage>>
 {
     private static readonly AnyContextMessageConverter _messageConverter = new();

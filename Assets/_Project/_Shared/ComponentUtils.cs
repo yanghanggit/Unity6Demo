@@ -17,10 +17,7 @@ public static class ComponentUtils
         {
             case nameof(ActorComponent):
                 {
-                    var sheetName = data["character_sheet_name"]?.ToString();
                     var stage = data["current_stage"]?.ToString();
-                    if (!string.IsNullOrEmpty(sheetName))
-                        lines.Add($"    职业模板：{sheetName}");
                     if (!string.IsNullOrEmpty(stage))
                         lines.Add($"    当前场景：{stage}");
                     break;
@@ -48,9 +45,7 @@ public static class ComponentUtils
                     if (data["stats"] is JObject stats)
                         lines.Add($"    HP {stats["hp"]} / {stats["max_hp"]}" +
                                   $"   攻击 {stats["attack"]}" +
-                                  $"   防御 {stats["defense"]}" +
-                                  $"   行动 {stats["energy"]}" +
-                                  $"   速度 {stats["speed"]}");
+                                  $"   防御 {stats["defense"]}");
                     break;
                 }
             case nameof(InventoryComponent):
@@ -88,9 +83,8 @@ public static class ComponentUtils
                 }
             case nameof(DeckComponent):
                 {
-                    if (data["keywords"] is JArray keywords)
-                        for (int i = 0; i < keywords.Count; i++)
-                            lines.Add($"    {i + 1}. {keywords[i]}");
+                    var cards = data["cards"] as JArray;
+                    lines.Add(cards == null || cards.Count == 0 ? "    （空）" : $"    共 {cards.Count} 张");
                     break;
                 }
             case nameof(DrawPileComponent):

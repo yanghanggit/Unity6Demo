@@ -59,7 +59,7 @@ public sealed class HomeAdvanceRequest
 
 public sealed class HomeAdvanceResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
@@ -92,7 +92,7 @@ public sealed class HomeGenerateDungeonRequest
 
 public sealed class HomeGenerateDungeonResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
@@ -167,7 +167,7 @@ public sealed class HomeWearCostumeRequest
 
 public sealed class HomeWearCostumeResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
@@ -181,7 +181,7 @@ public sealed class HomeRemoveCostumeRequest
 
 public sealed class HomeRemoveCostumeResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
@@ -199,8 +199,36 @@ public sealed class HomeCraftItemRequest
 
 public sealed class HomeCraftItemResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
+    public string message = "";
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Dungeon: Exit / Loot
+// ────────────────────────────────────────────────────────────────────────────────
+
+public sealed class DungeonExitRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+}
+
+public sealed class DungeonExitResponse
+{
+    public string job_id = "";
+    public string status = "";
+    public string message = "";
+}
+
+public sealed class DungeonCombatCollectLootRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+}
+
+public sealed class DungeonCombatCollectLootResponse
+{
     public string message = "";
 }
 
@@ -225,39 +253,13 @@ public sealed class HomePlayerActionRequest
 
 public sealed class HomePlayerActionResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-// Dungeon: Exit / Loot
-// ────────────────────────────────────────────────────────────────────────────────
-
-public sealed class DungeonExitRequest
-{
-    public string user_name = "";
-    public string game_name = "";
-}
-
-public sealed class DungeonExitResponse
-{
-    public string message = "";
-}
-
-public sealed class DungeonCombatCollectLootRequest
-{
-    public string user_name = "";
-    public string game_name = "";
-}
-
-public sealed class DungeonCombatCollectLootResponse
-{
-    public string message = "";
-}
-
-// ────────────────────────────────────────────────────────────────────────────────
-// Dungeon: Combat – Retreat / Init / Draw Cards
+// Dungeon: Combat – Retreat
 // ────────────────────────────────────────────────────────────────────────────────
 
 public sealed class DungeonCombatRetreatRequest
@@ -268,10 +270,14 @@ public sealed class DungeonCombatRetreatRequest
 
 public sealed class DungeonCombatRetreatResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Dungeon: Advance Stage
+// ────────────────────────────────────────────────────────────────────────────────
 
 public sealed class DungeonAdvanceStageRequest
 {
@@ -284,6 +290,10 @@ public sealed class DungeonAdvanceStageResponse
     public string message = "";
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+// Dungeon: Combat – Init
+// ────────────────────────────────────────────────────────────────────────────────
+
 public sealed class DungeonCombatInitRequest
 {
     public string user_name = "";
@@ -292,20 +302,7 @@ public sealed class DungeonCombatInitRequest
 
 public sealed class DungeonCombatInitResponse
 {
-    public string task_id = "";
-    public string status = "";
-    public string message = "";
-}
-
-public sealed class DungeonCombatDrawCardsRequest
-{
-    public string user_name = "";
-    public string game_name = "";
-}
-
-public sealed class DungeonCombatDrawCardsResponse
-{
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
@@ -325,7 +322,7 @@ public sealed class DungeonCombatPlayCardsRequest
 
 public sealed class DungeonCombatPlayCardsResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
@@ -339,13 +336,13 @@ public sealed class DungeonCombatPassTurnRequest
 
 public sealed class DungeonCombatPassTurnResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-// Dungeon: Combat – Use Consumable / Gear
+// Dungeon: Combat – Use Consumable / Equip Gear
 // ────────────────────────────────────────────────────────────────────────────────
 
 public sealed class DungeonCombatUseConsumableItemRequest
@@ -358,39 +355,83 @@ public sealed class DungeonCombatUseConsumableItemRequest
 
 public sealed class DungeonCombatUseConsumableItemResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
 
-public sealed class DungeonCombatUseGearItemRequest
+public sealed class DungeonCombatEquipGearItemRequest
 {
     public string user_name = "";
     public string game_name = "";
     public string item_name = "";
-    public List<string> targets = new();
 }
 
-public sealed class DungeonCombatUseGearItemResponse
+public sealed class DungeonCombatEquipGearItemResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-// Dungeon: Entry Init
+// Dungeon: Opening
 // ────────────────────────────────────────────────────────────────────────────────
 
-public sealed class DungeonEntryInitRequest
+public sealed class DungeonOpeningInitRequest
 {
     public string user_name = "";
     public string game_name = "";
 }
 
-public sealed class DungeonEntryInitResponse
+public sealed class DungeonOpeningInitResponse
 {
-    public string task_id = "";
+    public string job_id = "";
+    public string status = "";
+    public string message = "";
+}
+
+public sealed class DungeonOpeningGenerateCardPoolRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+}
+
+public sealed class DungeonOpeningGenerateCardPoolResponse
+{
+    public string job_id = "";
+    public string status = "";
+    public string message = "";
+}
+
+public sealed class DungeonOpeningPickCardFromPoolRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+    public string actor_name = "";
+    public string card_name = "";
+}
+
+public sealed class DungeonOpeningPickCardFromPoolResponse
+{
+    public string job_id = "";
+    public string status = "";
+    public string message = "";
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Dungeon: Combat – Draw Cards
+// ────────────────────────────────────────────────────────────────────────────────
+
+public sealed class DungeonCombatDrawCardsRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+}
+
+public sealed class DungeonCombatDrawCardsResponse
+{
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
@@ -427,14 +468,14 @@ public sealed class SessionMessageResponse
 
 public sealed class TaskTriggerResponse
 {
-    public string task_id = "";
+    public string job_id = "";
     public string status = "";
     public string message = "";
 }
 
 public sealed class TasksStatusResponse
 {
-    public List<TaskRecord> tasks = new();
+    public List<TaskStatusView> tasks = new();
 }
 
 public sealed class BlueprintListResponse
@@ -445,4 +486,22 @@ public sealed class BlueprintListResponse
 public sealed class DungeonListResponse
 {
     public List<Dungeon> dungeons = new();
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Compact Context
+// ────────────────────────────────────────────────────────────────────────────────
+
+public sealed class CompactContextRequest
+{
+    public string user_name = "";
+    public string game_name = "";
+    public string target_name = "";
+}
+
+public sealed class CompactContextResponse
+{
+    public string job_id = "";
+    public string status = "";
+    public string message = "";
 }
