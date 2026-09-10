@@ -7,8 +7,8 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// 家园总览（HomeOverview）控制器。
-/// 占位阶段：用 MockGameData（正式 ECS 结构）生成 home stage 卡片，每张卡显示 stage 名及其 actor 名单。
-/// 后续接入：把 MockGameData 换成 GameServerClient.FetchStagesStateAsync / FetchEntitiesDetailsAsync。
+/// 从服务器拉取 stages state（stage → actor 名单）生成卡片；不缓存，每次现拉。
+/// 联网+已登录走真实 API，否则用 MockGameData 离线调试。
 /// </summary>
 public class HomeOverviewController : MonoBehaviour
 {
@@ -44,13 +44,44 @@ public class HomeOverviewController : MonoBehaviour
 
         _backButton.clicked += OnBackClicked;
 
-        PopulateCards();
+        PopulateCardsAsync().Forget();
     }
 
-    /// <summary>用 mock 数据重建 home stage 卡片列表。</summary>
-    private void PopulateCards()
+    /// <summary>拉取 stages state 并重建卡片列表（不缓存，每次现拉）。联网+已登录走真实 API，否则用 MockGameData 离线调试。</summary>
+    private async UniTaskVoid PopulateCardsAsync()
     {
         _stageScroll.Clear();
+
+        if (GameManager.Instance.IsServerConnected && GameManager.Instance.Session != null)
+        {
+            await FetchStagesFromServerAsync();
+        }
+        else
+        {
+            PopulateMockCards();
+        }
+    }
+
+    private async UniTask FetchStagesFromServerAsync()
+    {
+        var session = GameManager.Instance.Session;
+        try
+        {
+            var state = await GameManager.Instance.ServerClient.FetchStagesStateAsync(session.UserName, session.GameName);
+            foreach (var kv in state.mapping)
+                _stageScroll.Add(BuildCard(kv.Key, kv.Value));
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[HomeOverview] 拉取 stages state 失败: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 使用 MockGameData 构建并显示卡片列表（离线调试用）。
+    /// </summary>
+    private void PopulateMockCards()
+    {
         var state = MockGameData.BuildStagesState();
         foreach (var kv in state.mapping)
             _stageScroll.Add(BuildCard(kv.Key, kv.Value));
@@ -73,6 +104,11 @@ public class HomeOverviewController : MonoBehaviour
         EnterHomeStageAsync(stageName).Forget();
     }
 
+    /// <summary>
+    /// 进入指定的 home stage 场景。
+    /// </summary>
+    /// <param name="stageName"></param>
+    /// <returns></returns>
     private async UniTaskVoid EnterHomeStageAsync(string stageName)
     {
         Debug.Log($"[HomeOverview] 进入 home stage: {EntityNameUtils.GetDisplayName(stageName)}");
@@ -86,6 +122,10 @@ public class HomeOverviewController : MonoBehaviour
         LogoutAndBackToLobbyAsync().Forget();
     }
 
+    /// <summary>
+    /// 登出当前用户（若有登录态）并切回 PlayerLobby 场景。
+    /// </summary>
+    /// <returns></returns>
     private async UniTaskVoid LogoutAndBackToLobbyAsync()
     {
         var session = GameManager.Instance.Session;

@@ -5,8 +5,7 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// 家园场景（HomeStage）控制器：进入某个 home stage 后展示其中的角色（Actor）。
-/// 占位阶段：用 MockGameData（正式 ECS 结构）取当前 stage 的 Actor 实体生成卡片。
-/// 后续接入：把 MockGameData 换成 GameServerClient.FetchStagesStateAsync / FetchEntitiesDetailsAsync。
+/// 联网+已登录走真实 API，否则用 MockGameData 离线调试；不缓存，每次现拉。
 /// </summary>
 public class HomeStageController : MonoBehaviour
 {
@@ -44,7 +43,7 @@ public class HomeStageController : MonoBehaviour
         _backButton.clicked += OnBackClicked;
 
         ApplyTitle();
-        PopulateCards();
+        PopulateCardsAsync().Forget();
     }
 
     /// <summary>标题显示当前 stage 显示名（进入前由 HomeOverview 写入 GameManager.CurrentStageName）。</summary>
@@ -55,8 +54,8 @@ public class HomeStageController : MonoBehaviour
             _titleLabel.text = string.IsNullOrEmpty(stageName) ? "场景" : EntityNameUtils.GetDisplayName(stageName);
     }
 
-    /// <summary>取当前 stage 的 Actor 实体，生成卡片。</summary>
-    private void PopulateCards()
+    /// <summary>取当前 stage 的 Actor 列表并生成卡片。联网+已登录走真实 API，否则用 MockGameData 离线调试。</summary>
+    private async UniTaskVoid PopulateCardsAsync()
     {
         _actorScroll.Clear();
 
@@ -64,10 +63,44 @@ public class HomeStageController : MonoBehaviour
         if (string.IsNullOrEmpty(stageName))
             return;
 
+        if (GameManager.Instance.IsServerConnected && GameManager.Instance.Session != null)
+        {
+            await FetchActorsFromServerAsync(stageName);
+        }
+        else
+        {
+            PopulateMockActors(stageName);
+        }
+    }
+
+    private async UniTask FetchActorsFromServerAsync(string stageName)
+    {
+        var session = GameManager.Instance.Session;
+        try
+        {
+            var state = await GameManager.Instance.ServerClient.FetchStagesStateAsync(session.UserName, session.GameName);
+            if (!state.mapping.TryGetValue(stageName, out var actorNames))
+            {
+                Debug.LogWarning($"[HomeStage] 服务器未返回 stage '{stageName}' 的 actor 列表");
+                return;
+            }
+
+            var details = await GameManager.Instance.ServerClient.FetchEntitiesDetailsAsync(session.UserName, session.GameName, actorNames);
+            foreach (var entity in details.entities)
+                _actorScroll.Add(BuildCard(entity));
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[HomeStage] 拉取 actor 失败: {e.Message}");
+        }
+    }
+
+    private void PopulateMockActors(string stageName)
+    {
         var state = MockGameData.BuildStagesState();
         if (!state.mapping.TryGetValue(stageName, out var actorNames))
         {
-            Debug.LogWarning($"[HomeStage] 未找到 stage '{stageName}' 的 actor 列表");
+            Debug.LogWarning($"[HomeStage] mock 未找到 stage '{stageName}' 的 actor 列表");
             return;
         }
 
