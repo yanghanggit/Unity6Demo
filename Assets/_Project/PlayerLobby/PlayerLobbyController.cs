@@ -10,7 +10,7 @@ public class PlayerLobbyController : MonoBehaviour
 
     // 内部数据
     private const string NextSceneName = "HomeOverview"; // 正常流程：新游戏创建成功后跳转的场景
-    private const string MockNextSceneName = "TestLanding";
+    //private const string MockNextSceneName = "TestLanding";
     private string _randomPlayerId = null;
     private const string _fixedNewGameName = "Game1";
 
@@ -125,7 +125,7 @@ public class PlayerLobbyController : MonoBehaviour
         Debug.Log($"模拟新游戏创建成功，玩家ID: {GameManager.Instance.Session.UserName}, 角色: {GameManager.Instance.Session.ActorName}, 游戏名: {GameManager.Instance.Session.GameName}");
 
         // 跳转到下一个场景
-        await SceneManager.LoadSceneAsync(MockNextSceneName);
+        //await SceneManager.LoadSceneAsync(MockNextSceneName);
     }
 }
 
